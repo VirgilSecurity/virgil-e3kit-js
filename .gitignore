@@ -1,0 +1,15 @@
+.DS_Store
+
+.idea
+.vscode
+
+node_modules
+package-lock.json
+*.log
+
+.env
+
+.rpt2_cache
+.virgil_key_entries
+coverage
+dist
