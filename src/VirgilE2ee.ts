@@ -2,18 +2,18 @@ import KeyknoxLoader from './KeyknoxLoader';
 import VirgilToolbox from './virgilToolbox';
 import { Jwt, CachingJwtProvider } from 'virgil-sdk';
 import { VirgilPublicKey, VirgilPrivateKey } from 'virgil-crypto/dist/virgil-crypto-pythia.cjs';
-import { BootstrapRequiredError } from './errors';
+import { BootstrapRequiredError, PrivateKeyNotFoundError, PasswordRequiredError } from './errors';
 
-export default class VirgilE2ee {
+export default class EThree {
     identity: string;
+    toolbox: VirgilToolbox;
     private keyLoader: KeyknoxLoader;
-    private toolbox: VirgilToolbox;
 
     static async init(getToken: () => Promise<string>) {
         const provider = new CachingJwtProvider(getToken);
         const token = await provider.getToken({ operation: 'get' });
         const identity = token.identity();
-        return new VirgilE2ee(identity, provider);
+        return new EThree(identity, provider);
     }
 
     constructor(identity: string, provider: CachingJwtProvider) {
@@ -23,33 +23,39 @@ export default class VirgilE2ee {
     }
 
     async bootstrap(password?: string) {
-        let [privateKey, publicKeys] = await Promise.all([
-            this.keyLoader.loadPrivateKey(password),
-            this.toolbox.getPublicKeys(this.identity),
-        ]);
-        console.log('this.identity', this.identity, privateKey);
-        let publicKey: VirgilPublicKey;
-
-        if (privateKey) {
-            if (publicKeys.length > 0) {
-                return;
+        const publicKeys = await this.getPublicKeys(this.identity);
+        const privateKey = await this.localBootstrap(publicKeys);
+        console.log('privateKey', privateKey, publicKeys.length);
+        if (privateKey) return;
+        if (publicKeys.length > 0) {
+            console.log('password', password);
+            if (!password) {
+                console.log('throw');
+                throw new PasswordRequiredError();
             } else {
-                publicKey = this.toolbox.virgilCrypto.extractPublicKey(privateKey);
-                await this.toolbox.createCard({ privateKey, publicKey });
+                await this.keyLoader.loadRemotePrivateKey(password);
                 return;
             }
         } else {
-            if (publicKeys.length > 0) {
-                throw new Error('private key not found');
-            } else {
-                const keyPair = this.toolbox.virgilCrypto.generateKeys();
-                publicKey = keyPair.publicKey;
-                privateKey = keyPair.privateKey;
-                await this.toolbox.createCard({ privateKey, publicKey });
-                await this.keyLoader.savePrivateKey(privateKey, password!);
-            }
+            const keyPair = this.toolbox.virgilCrypto.generateKeys();
+            if (password) await this.keyLoader.savePrivateKeyRemote(keyPair.privateKey, password);
+            else await this.keyLoader.savePrivateKeyLocal(keyPair.privateKey);
+            await this.toolbox.createCard(keyPair);
             return;
         }
+    }
+
+    async localBootstrap(publicKeys: VirgilPublicKey[]) {
+        const privateKey = await this.keyLoader.loadLocalPrivateKey();
+        if (!privateKey) return null;
+        if (publicKeys.length > 0) return privateKey;
+        const publicKey = this.toolbox.virgilCrypto.extractPublicKey(privateKey);
+        await this.toolbox.createCard({ privateKey, publicKey });
+        return privateKey;
+    }
+
+    async logout() {
+        this.keyLoader.deleteKeys();
     }
 
     async encrypt(message: string, publicKeys: VirgilPublicKey[]) {

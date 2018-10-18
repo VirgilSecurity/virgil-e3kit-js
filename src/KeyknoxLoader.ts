@@ -13,6 +13,7 @@ import {
 } from 'virgil-crypto/dist/virgil-crypto-pythia.cjs';
 import VirgilToolbox from './VirgilToolbox';
 import { KeyEntryStorage } from 'virgil-sdk';
+import { PasswordRequiredError } from './errors';
 
 export interface IBrainKey {
     generateKeyPair(
@@ -27,6 +28,11 @@ export interface IBrainKey {
 export interface IKeyknoxLoaderParams {
     dbName: string;
 }
+
+type SavePrivateKeysParams = {
+    isPublished?: boolean;
+    id?: string;
+};
 
 export interface PrivateKeyEntry {
     privateKey: VirgilPrivateKey;
@@ -57,24 +63,35 @@ export default class KeyknoxLoader {
     async loadPrivateKey(password?: string, id?: string) {
         const privateKey = await this.loadLocalPrivateKey();
         if (privateKey) return privateKey;
-        if (!password) throw new Error('Private key not found, password required');
+        if (!password) throw new PasswordRequiredError();
         return this.loadRemotePrivateKey(password, id);
     }
 
-    async savePrivateKey(privateKey: VirgilPrivateKey, password: string, id?: string) {
+    async savePrivateKeyRemote(privateKey: VirgilPrivateKey, password: string, id?: string) {
         if (!this.syncStorage) this.syncStorage = this.createSyncStorage(password, id);
         const storage = await this.syncStorage;
         await storage.storeEntry(
             this.identity,
             this.toolbox.virgilCrypto.exportPrivateKey(privateKey),
-            { isPublished: 'false' },
         );
+    }
+
+    async savePrivateKeyLocal(privateKey: VirgilPrivateKey) {
+        this.localStorage.save({
+            name: this.identity,
+            value: this.toolbox.virgilCrypto.exportPrivateKey(privateKey),
+        });
     }
 
     async loadLocalPrivateKey() {
         const privateKeyData = await this.localStorage.load(this.identity);
         if (!privateKeyData) return null;
         return this.toolbox.virgilCrypto.importPrivateKey(privateKeyData.value) as VirgilPrivateKey;
+    }
+
+    async deleteKeys() {
+        this.localStorage.remove(this.identity);
+        if (this.syncStorage) this.syncStorage = undefined;
     }
 
     async loadRemotePrivateKey(password: string, id?: string) {
