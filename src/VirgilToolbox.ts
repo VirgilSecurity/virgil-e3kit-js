@@ -40,7 +40,11 @@ export default class VirgilToolbox {
 
     getPublicKeys = async (identity: string) => {
         const cards = await this.cardManager.searchCards(identity);
-        const publicKeys = cards.map(card => card.publicKey as VirgilPublicKey);
-        return publicKeys;
+        try {
+            const publicKeys = cards.map(card => card.publicKey as VirgilPublicKey);
+            return publicKeys;
+        } catch (e) {
+            return e;
+        }
     };
 }

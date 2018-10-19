@@ -5,15 +5,12 @@ import {
     CardManager,
     VirgilCardVerifier,
     GeneratorJwtProvider,
-    CachingJwtProvider,
     IKeyEntry,
 } from 'virgil-sdk';
 import {
     VirgilCrypto,
     VirgilAccessTokenSigner,
     VirgilCardCrypto,
-    VirgilPublicKey,
-    VirgilPrivateKey,
 } from 'virgil-crypto/dist/virgil-crypto-pythia.cjs';
 import { WrongKeyknoxPasswordError } from '../errors';
 
@@ -51,12 +48,44 @@ describe('VirgilE2ee', () => {
         done();
     });
 
+    it('should lookup keys', async done => {
+        const sdk = await EThree.init(fetchToken);
+        const identity1 = 'virgiltestlookup1' + Date.now();
+        const identity2 = 'virgiltestlookup2' + Date.now();
+        const identity3 = 'virgiltestlookup3' + Date.now();
+        const keypair1 = virgilCrypto.generateKeys();
+        const keypair2 = virgilCrypto.generateKeys();
+        const keypair3 = virgilCrypto.generateKeys();
+
+        const cards = await Promise.all([
+            cardManager.publishCard({ identity: identity1, ...keypair1 }),
+            cardManager.publishCard({ identity: identity2, ...keypair2 }),
+            cardManager.publishCard({ identity: identity3, ...keypair3 }),
+        ]);
+        const publicKeys = await sdk.lookupKeys([identity1, identity2, identity3]);
+
+        expect(publicKeys.length).toBe(3);
+        expect(virgilCrypto.exportPublicKey(publicKeys[0]).toString('base64')).toEqual(
+            virgilCrypto.exportPublicKey(keypair1.publicKey).toString('base64'),
+        );
+        expect(virgilCrypto.exportPublicKey(publicKeys[1]).toString('base64')).toEqual(
+            virgilCrypto.exportPublicKey(keypair2.publicKey).toString('base64'),
+        );
+        expect(virgilCrypto.exportPublicKey(publicKeys[2]).toString('base64')).toEqual(
+            virgilCrypto.exportPublicKey(keypair3.publicKey).toString('base64'),
+        );
+        done();
+    });
+
     it('should encrypt decrypt', async done => {
         const sdk = await EThree.init(fetchToken);
-        await sdk.bootstrap('secure_password');
+        const [senderPublicKey] = await Promise.all([
+            sdk.lookupKeys([identity]),
+            sdk.bootstrap('secure_password'),
+        ]);
         const receiver = virgilCrypto.generateKeys();
         const message = await sdk.encrypt('privet, neznakomets', [receiver.publicKey]);
-        const decrypted = await sdk.decrypt(message);
+        const decrypted = await sdk.decrypt(message, senderPublicKey);
         expect(decrypted).toBe('privet, neznakomets');
         done();
     });
@@ -176,7 +205,17 @@ describe('remote bootstrap (with password)', () => {
     });
 });
 
-describe('bootstrap exceptions', () => {
-    const identity = 'virgiltestbootstrapfail' + Date.now();
-    const fetchToken = () => Promise.resolve(generator.generateToken(identity).toString());
+describe('logout()', () => {
+    it('should delete key on logout', async done => {
+        const identity = 'virgiltestlogout' + Date.now();
+        const fetchToken = () => Promise.resolve(generator.generateToken(identity).toString());
+
+        const sdk = await EThree.init(fetchToken);
+        await sdk.bootstrap('secure_password');
+        const isDeleted = await sdk.logout();
+        const privateKey = await keyStorage.load(identity);
+        expect(privateKey).toEqual(null);
+        expect(isDeleted).toBe(true);
+        done();
+    });
 });

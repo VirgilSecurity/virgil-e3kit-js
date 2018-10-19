@@ -85,8 +85,8 @@ export default class PrivateKeyLoader {
     }
 
     async deleteKeys() {
-        this.localStorage.remove(this.identity);
         if (this.syncStorage) this.syncStorage = undefined;
+        return await this.localStorage.remove(this.identity);
     }
 
     async loadRemotePrivateKey(password: string, id?: string) {

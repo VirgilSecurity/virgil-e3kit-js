@@ -13,7 +13,7 @@ module.exports = {
         "/node_modules/",
         "/dist/"
     ],
-    "testRegex": "(/__tests__/.*|(\\.|/)(test|spec))\\.ts$",
+    "testRegex": "(/__tests__/.*(test|spec))\\.ts$",
     "transform": {
         "^.+\\.es\\.js$": "babel-jest",
         "^.+\\.ts$": "ts-jest",

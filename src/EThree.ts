@@ -23,7 +23,7 @@ export default class EThree {
     }
 
     async bootstrap(password?: string) {
-        const publicKeys = await this.getPublicKeys(this.identity);
+        const publicKeys = await this.toolbox.getPublicKeys(this.identity);
         const privateKey = await this.localBootstrap(publicKeys);
         if (privateKey) return;
         if (publicKeys.length > 0) {
@@ -52,7 +52,7 @@ export default class EThree {
     }
 
     async logout() {
-        this.keyLoader.deleteKeys();
+        return await this.keyLoader.deleteKeys();
     }
 
     async encrypt(message: string, publicKeys: VirgilPublicKey[]) {
@@ -60,19 +60,21 @@ export default class EThree {
         if (!privateKey) throw new BootstrapRequiredError();
         const publicKey = this.toolbox.virgilCrypto.extractPublicKey(privateKey);
         return this.toolbox.virgilCrypto
-            .encrypt(message, [publicKey, ...publicKeys] as VirgilPublicKey[])
+            .signThenEncrypt(message, privateKey, [publicKey, ...publicKeys] as VirgilPublicKey[])
             .toString('base64');
     }
 
-    async decrypt(message: string) {
+    async decrypt(message: string, publicKeys: VirgilPublicKey[]) {
         const privateKey = await this.keyLoader.loadLocalPrivateKey();
         if (!privateKey) throw new BootstrapRequiredError();
         return this.toolbox.virgilCrypto
-            .decrypt(message, privateKey as VirgilPrivateKey)
+            .decryptThenVerify(message, privateKey as VirgilPrivateKey, publicKeys)
             .toString('utf8');
     }
 
-    getPublicKeys(username: string) {
-        return this.toolbox.getPublicKeys(username);
+    async lookupKeys(identities: string[]) {
+        const keysArr = await Promise.all(identities.map(this.toolbox.getPublicKeys));
+        // TODO handle multiple public keys
+        return keysArr.map(arr => (arr.length === 1 ? arr[0] : arr[arr.length - 1]));
     }
 }
