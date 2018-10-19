@@ -1,4 +1,4 @@
-import EThree from '../VirgilE2ee';
+import EThree from '../EThree';
 import {
     JwtGenerator,
     KeyEntryStorage,
@@ -70,7 +70,7 @@ describe('VirgilE2ee', () => {
 describe('local bootstrap (without password)', () => {
     const identity = 'virgiltestlocal' + Date.now();
 
-    it('has key, has no card', async done => {
+    it('has local key, has no card', async done => {
         const fetchToken = () => Promise.resolve(generator.generateToken(identity).toString());
         const keyPair = virgilCrypto.generateKeys();
         await keyStorage.save({
@@ -84,7 +84,7 @@ describe('local bootstrap (without password)', () => {
         done();
     });
 
-    it('has key, has card', async done => {
+    it('has local key, has card', async done => {
         const key = await keyStorage.load(identity);
         expect(key).not.toBe(null);
         const fetchToken = () => Promise.resolve(generator.generateToken(identity).toString());
@@ -97,7 +97,7 @@ describe('local bootstrap (without password)', () => {
         done();
     });
 
-    it('has no key, has card', async done => {
+    it('has no local key, has card', async done => {
         await keyStorage.remove(identity);
         const fetchToken = () => Promise.resolve(generator.generateToken(identity).toString());
         const sdk = await EThree.init(fetchToken);
@@ -112,7 +112,7 @@ describe('local bootstrap (without password)', () => {
         done('should throw error');
     });
 
-    it('has no key, has no card', async done => {
+    it('has no local key, has no card', async done => {
         const identity = 'virgiltestlocalnokeynocard' + Date.now();
         const fetchToken = () => Promise.resolve(generator.generateToken(identity).toString());
         const prevCards = await cardManager.searchCards(identity);

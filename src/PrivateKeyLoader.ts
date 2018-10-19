@@ -25,14 +25,9 @@ export interface IBrainKey {
     }>;
 }
 
-export interface IKeyknoxLoaderParams {
+export interface IPrivateKeyLoaderParams {
     dbName: string;
 }
-
-type SavePrivateKeysParams = {
-    isPublished?: boolean;
-    id?: string;
-};
 
 export interface PrivateKeyEntry {
     privateKey: VirgilPrivateKey;
@@ -41,7 +36,7 @@ export interface PrivateKeyEntry {
     };
 }
 
-export default class KeyknoxLoader {
+export default class PrivateKeyLoader {
     private pythiaCrypto = new VirgilPythiaCrypto();
     private brainKey: IBrainKey;
     private syncStorage?: Promise<SyncKeyStorage>;
@@ -50,7 +45,7 @@ export default class KeyknoxLoader {
     constructor(
         private identity: string,
         public toolbox: VirgilToolbox,
-        { dbName }: IKeyknoxLoaderParams = { dbName: 'keyknox-storage' },
+        { dbName }: IPrivateKeyLoaderParams = { dbName: 'keyknox-storage' },
     ) {
         this.brainKey = createBrainKey({
             virgilCrypto: this.toolbox.virgilCrypto,

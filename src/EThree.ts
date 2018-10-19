@@ -1,13 +1,13 @@
-import KeyknoxLoader from './KeyknoxLoader';
+import PrivateKeyLoader from './PrivateKeyLoader';
 import VirgilToolbox from './virgilToolbox';
-import { Jwt, CachingJwtProvider } from 'virgil-sdk';
+import { CachingJwtProvider } from 'virgil-sdk';
 import { VirgilPublicKey, VirgilPrivateKey } from 'virgil-crypto/dist/virgil-crypto-pythia.cjs';
-import { BootstrapRequiredError, PrivateKeyNotFoundError, PasswordRequiredError } from './errors';
+import { BootstrapRequiredError, PasswordRequiredError } from './errors';
 
 export default class EThree {
     identity: string;
     toolbox: VirgilToolbox;
-    private keyLoader: KeyknoxLoader;
+    private keyLoader: PrivateKeyLoader;
 
     static async init(getToken: () => Promise<string>) {
         const provider = new CachingJwtProvider(getToken);
@@ -19,18 +19,16 @@ export default class EThree {
     constructor(identity: string, provider: CachingJwtProvider) {
         this.identity = identity;
         this.toolbox = new VirgilToolbox(provider);
-        this.keyLoader = new KeyknoxLoader(identity, this.toolbox);
+        this.keyLoader = new PrivateKeyLoader(identity, this.toolbox);
     }
 
     async bootstrap(password?: string) {
         const publicKeys = await this.getPublicKeys(this.identity);
         const privateKey = await this.localBootstrap(publicKeys);
-        console.log('privateKey', privateKey, publicKeys.length);
+
         if (privateKey) return;
         if (publicKeys.length > 0) {
-            console.log('password', password);
             if (!password) {
-                console.log('throw');
                 throw new PasswordRequiredError();
             } else {
                 await this.keyLoader.loadRemotePrivateKey(password);

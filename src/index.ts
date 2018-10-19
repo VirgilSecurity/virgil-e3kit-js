@@ -1,1 +1,1 @@
-export { default as VirgilE2ee } from './VirgilE2ee';
+export { default as VirgilE2ee } from './EThree';
