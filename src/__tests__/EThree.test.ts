@@ -15,6 +15,7 @@ import {
     VirgilPublicKey,
     VirgilPrivateKey,
 } from 'virgil-crypto/dist/virgil-crypto-pythia.cjs';
+import { WrongKeyknoxPasswordError } from '../errors';
 
 const virgilCrypto = new VirgilCrypto();
 const cardCrypto = new VirgilCardCrypto(virgilCrypto);
@@ -41,12 +42,6 @@ const keyStorage = new KeyEntryStorage({ name: 'keyknox-storage' });
 describe('VirgilE2ee', () => {
     const identity = 'virgiltest' + Date.now();
     const fetchToken = () => Promise.resolve(generator.generateToken(identity).toString());
-
-    it('should init', async done => {
-        const sdk = await EThree.init(fetchToken);
-        expect(sdk.identity).toBe(identity);
-        done();
-    });
 
     it('should bootstrap', async done => {
         const sdk = await EThree.init(fetchToken);
@@ -164,15 +159,24 @@ describe('remote bootstrap (with password)', () => {
         expect(key!.value).toMatchObject(prevKey.value);
         done();
     });
+
+    it('wrong password', async done => {
+        await keyStorage.clear();
+        const fetchToken = () => Promise.resolve(generator.generateToken(identity).toString());
+        const prevCards = await cardManager.searchCards(identity);
+        expect(prevCards.length).toBe(1);
+        const sdk = await EThree.init(fetchToken);
+        try {
+            await sdk.bootstrap('not_secret_password');
+        } catch (e) {
+            expect(e).toBeInstanceOf(WrongKeyknoxPasswordError);
+            return done();
+        }
+        done('should throw error');
+    });
 });
 
 describe('bootstrap exceptions', () => {
     const identity = 'virgiltestbootstrapfail' + Date.now();
     const fetchToken = () => Promise.resolve(generator.generateToken(identity).toString());
-
-    it('should continue create card if card not published in first time ', async done => {
-        const sdk = new EThree(identity, new CachingJwtProvider(fetchToken));
-        sdk.bootstrap('secret_password');
-        done();
-    });
 });

@@ -27,3 +27,9 @@ export class BootstrapRequiredError extends SdkError {
         super('Bootstrap required', 'BootstrapRequiredError');
     }
 }
+
+export class WrongKeyknoxPasswordError extends SdkError {
+    constructor() {
+        super('Password from remote private key storage is invalid', 'WrongKeyknoxPasswordError');
+    }
+}

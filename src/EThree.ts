@@ -5,8 +5,8 @@ import { VirgilPublicKey, VirgilPrivateKey } from 'virgil-crypto/dist/virgil-cry
 import { BootstrapRequiredError, PasswordRequiredError } from './errors';
 
 export default class EThree {
-    identity: string;
-    toolbox: VirgilToolbox;
+    private identity: string;
+    private toolbox: VirgilToolbox;
     private keyLoader: PrivateKeyLoader;
 
     static async init(getToken: () => Promise<string>) {
@@ -25,7 +25,6 @@ export default class EThree {
     async bootstrap(password?: string) {
         const publicKeys = await this.getPublicKeys(this.identity);
         const privateKey = await this.localBootstrap(publicKeys);
-
         if (privateKey) return;
         if (publicKeys.length > 0) {
             if (!password) {

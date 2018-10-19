@@ -13,7 +13,7 @@ import {
 } from 'virgil-crypto/dist/virgil-crypto-pythia.cjs';
 import VirgilToolbox from './VirgilToolbox';
 import { KeyEntryStorage } from 'virgil-sdk';
-import { PasswordRequiredError } from './errors';
+import { PasswordRequiredError, WrongKeyknoxPasswordError } from './errors';
 
 export interface IBrainKey {
     generateKeyPair(
@@ -91,14 +91,14 @@ export default class PrivateKeyLoader {
 
     async loadRemotePrivateKey(password: string, id?: string) {
         if (!this.syncStorage) this.syncStorage = this.createSyncStorage(password, id);
-        const storage = await this.syncStorage;
-        const key = await storage.retrieveEntry(this.identity).catch(e => {
-            if (e instanceof KeyEntryDoesntExistError) {
-                return null;
-            }
-            throw e;
-        });
-        if (!key) return null;
+        let storage;
+        try {
+            storage = await this.syncStorage;
+        } catch (e) {
+            throw new WrongKeyknoxPasswordError();
+        }
+
+        const key = await storage.retrieveEntry(this.identity);
         return this.toolbox.virgilCrypto.importPrivateKey(key.value) as VirgilPrivateKey;
     }
 
