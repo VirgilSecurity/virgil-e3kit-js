@@ -12,7 +12,7 @@ import {
     VirgilAccessTokenSigner,
     VirgilCardCrypto,
 } from 'virgil-crypto/dist/virgil-crypto-pythia.cjs';
-import { WrongKeyknoxPasswordError } from '../errors';
+import { WrongKeyknoxPasswordError, EmptyArrayError, BootstrapRequiredError } from '../errors';
 
 const virgilCrypto = new VirgilCrypto();
 const cardCrypto = new VirgilCardCrypto(virgilCrypto);
@@ -45,35 +45,6 @@ describe('VirgilE2ee', () => {
         await sdk.bootstrap('secure_password');
         const privateKey = await keyStorage.load(identity);
         expect(privateKey).not.toEqual(null);
-        done();
-    });
-
-    it('should lookup keys', async done => {
-        const sdk = await EThree.init(fetchToken);
-        const identity1 = 'virgiltestlookup1' + Date.now();
-        const identity2 = 'virgiltestlookup2' + Date.now();
-        const identity3 = 'virgiltestlookup3' + Date.now();
-        const keypair1 = virgilCrypto.generateKeys();
-        const keypair2 = virgilCrypto.generateKeys();
-        const keypair3 = virgilCrypto.generateKeys();
-
-        const cards = await Promise.all([
-            cardManager.publishCard({ identity: identity1, ...keypair1 }),
-            cardManager.publishCard({ identity: identity2, ...keypair2 }),
-            cardManager.publishCard({ identity: identity3, ...keypair3 }),
-        ]);
-        const publicKeys = await sdk.lookupKeys([identity1, identity2, identity3]);
-
-        expect(publicKeys.length).toBe(3);
-        expect(virgilCrypto.exportPublicKey(publicKeys[0]).toString('base64')).toEqual(
-            virgilCrypto.exportPublicKey(keypair1.publicKey).toString('base64'),
-        );
-        expect(virgilCrypto.exportPublicKey(publicKeys[1]).toString('base64')).toEqual(
-            virgilCrypto.exportPublicKey(keypair2.publicKey).toString('base64'),
-        );
-        expect(virgilCrypto.exportPublicKey(publicKeys[2]).toString('base64')).toEqual(
-            virgilCrypto.exportPublicKey(keypair3.publicKey).toString('base64'),
-        );
         done();
     });
 
@@ -202,6 +173,191 @@ describe('remote bootstrap (with password)', () => {
             return done();
         }
         done('should throw error');
+    });
+});
+
+describe('lookupKeys', () => {
+    const identity = 'virgiltestlookup' + Date.now();
+    const fetchToken = () => Promise.resolve(generator.generateToken(identity).toString());
+
+    it('STE-1 lookupKeys success', async done => {
+        const sdk = await EThree.init(fetchToken);
+        const identity1 = 'virgiltestlookup1' + Date.now();
+        const identity2 = 'virgiltestlookup2' + Date.now();
+        const identity3 = 'virgiltestlookup3' + Date.now();
+        const keypair1 = virgilCrypto.generateKeys();
+        const keypair2 = virgilCrypto.generateKeys();
+        const keypair3 = virgilCrypto.generateKeys();
+
+        await Promise.all([
+            cardManager.publishCard({ identity: identity1, ...keypair1 }),
+            cardManager.publishCard({ identity: identity2, ...keypair2 }),
+            cardManager.publishCard({ identity: identity3, ...keypair3 }),
+        ]);
+        const publicKeys = await sdk.lookupKeys([identity1, identity2, identity3]);
+
+        expect(publicKeys.length).toBe(3);
+        expect(virgilCrypto.exportPublicKey(publicKeys[0]).toString('base64')).toEqual(
+            virgilCrypto.exportPublicKey(keypair1.publicKey).toString('base64'),
+        );
+        expect(virgilCrypto.exportPublicKey(publicKeys[1]).toString('base64')).toEqual(
+            virgilCrypto.exportPublicKey(keypair2.publicKey).toString('base64'),
+        );
+        expect(virgilCrypto.exportPublicKey(publicKeys[2]).toString('base64')).toEqual(
+            virgilCrypto.exportPublicKey(keypair3.publicKey).toString('base64'),
+        );
+        done();
+    });
+
+    it('lookupKeys nonexistent identity', async done => {
+        const sdk = await EThree.init(fetchToken);
+        const identity1 = 'virgiltestlookupnonexist' + Date.now();
+        const identity2 = 'virgiltestlookupnonexist' + Date.now();
+
+        const publicKeys = await sdk.lookupKeys([identity1, identity2]);
+
+        expect(publicKeys.length).toBe(2);
+        expect(publicKeys[0]).toEqual(null);
+        expect(publicKeys[1]).toEqual(null);
+
+        done();
+    });
+
+    it.skip('lookupKeys with error', () => {});
+    //     const identity1 = 'virgiltestlookuperror1' + Date.now();
+    //     const identity2 = 'virgiltestlookuperror2' + Date.now();
+    //     const keypair1 = virgilCrypto.generateKeys();
+    //     const keypair2 = virgilCrypto.generateKeys();
+    //     const sdk = await EThree.init(fetchToken);
+
+    //     await Promise.all([
+    //         cardManager.publishCard({ identity: identity1, ...keypair1 }),
+    //         cardManager.publishCard({ identity: identity2, ...keypair2 }),
+    //     ]);
+    //     const publicKeys = await sdk.lookupKeys([identity1, identity2]);
+
+    //     expect(publicKeys.length).toBe(2);
+    //     expect(publicKeys[0]).toBeInstanceOf(Error);
+    //     expect(virgilCrypto.exportPublicKey(publicKeys[1]).toString('base64')).toEqual(
+    //         virgilCrypto.exportPublicKey(keypair2.publicKey).toString('base64'),
+    //     );
+
+    //     done();
+    // });
+
+    it('STE-2 lookupKeys with empty array of identities', async done => {
+        const sdk = await EThree.init(fetchToken);
+        try {
+            await sdk.lookupKeys([]);
+        } catch (e) {
+            expect(e).toBeInstanceOf(EmptyArrayError);
+            return done();
+        }
+        done('should throw');
+    });
+});
+
+describe('encrypt and decrypt', () => {
+    const identity = 'virgiltestencrypt' + Date.now();
+    const fetchToken = () => Promise.resolve(generator.generateToken(identity).toString());
+
+    it('STE-3 ', async done => {
+        const identity1 = 'virgiltestencrypt1' + Date.now();
+        const identity2 = 'virgiltestencrypt2' + Date.now();
+
+        const fetchToken1 = () => Promise.resolve(generator.generateToken(identity1).toString());
+        const fetchToken2 = () => Promise.resolve(generator.generateToken(identity2).toString());
+
+        const [sdk1, sdk2] = await Promise.all([
+            EThree.init(fetchToken1),
+            EThree.init(fetchToken2),
+        ]);
+
+        const unusedKeypair = virgilCrypto.generateKeys();
+
+        await Promise.all([sdk1.bootstrap(), sdk2.bootstrap()]);
+        const message = 'encrypt, decrypt, repeat';
+        const sdk1PublicKeys = await sdk1.lookupKeys([identity1]);
+        const sdk2PublicKeys = await sdk2.lookupKeys([identity2]);
+        const encryptedMessage = await sdk1.encrypt(message, sdk2PublicKeys);
+        try {
+            await sdk2.decrypt(encryptedMessage, [unusedKeypair.publicKey]);
+        } catch (e) {
+            expect(e).toBeInstanceOf(Error);
+        }
+        const decryptedMessage = await sdk2.decrypt(encryptedMessage, sdk1PublicKeys);
+        expect(decryptedMessage).toEqual(message);
+        done();
+    });
+
+    it('STE-4 encrypt for empty public keys', async done => {
+        const sdk = await EThree.init(fetchToken);
+        await sdk.bootstrap();
+        try {
+            await sdk.encrypt('privet', []);
+        } catch (e) {
+            expect(e).toBeInstanceOf(EmptyArrayError);
+            return done();
+        }
+        done('should throw');
+    });
+
+    it('STE-5 decrypt for empty public keys', async done => {
+        const sdk = await EThree.init(fetchToken);
+        await sdk.bootstrap();
+        const keyPair = virgilCrypto.generateKeys();
+        const message = await sdk.encrypt('privet', [keyPair.publicKey]);
+        try {
+            await sdk.decrypt(message, []);
+        } catch (e) {
+            expect(e).toBeInstanceOf(EmptyArrayError);
+            return done();
+        }
+        done('should throw');
+    });
+
+    it('STE-6 encrypt and decrypt without public keys', async done => {
+        const sdk = await EThree.init(fetchToken);
+        await sdk.bootstrap();
+        const message = 'secret message';
+        const encryptedMessage = await sdk.encrypt(message);
+        const decryptedMessage = await sdk.decrypt(encryptedMessage);
+        expect(decryptedMessage).toEqual(message);
+        done();
+    });
+
+    it('STE-7 decrypt message without sign', async done => {
+        const sdk = await EThree.init(fetchToken);
+        await sdk.bootstrap();
+        const receiverPublicKey = await sdk.lookupKeys([identity]);
+        const { publicKey: senderPublicKey } = virgilCrypto.generateKeys();
+        const message = 'encrypted, but not signed :)';
+        const encryptedMessage = await virgilCrypto
+            .encrypt(message, receiverPublicKey)
+            .toString('base64');
+        try {
+            await sdk.decrypt(encryptedMessage, [senderPublicKey]);
+        } catch (e) {
+            expect(e).toBeDefined();
+            return done();
+        }
+        done('should throw');
+    });
+
+    it('STE-8 no decrypt/encrypt before bootstrap', async done => {
+        await keyStorage.clear();
+        const sdk = await EThree.init(fetchToken);
+        try {
+            await sdk.encrypt('message');
+        } catch (e) {
+            expect(e).toBeInstanceOf(BootstrapRequiredError);
+        }
+        try {
+            await sdk.decrypt('message');
+        } catch (e) {
+            expect(e).toBeInstanceOf(BootstrapRequiredError);
+        }
+        done();
     });
 });
 

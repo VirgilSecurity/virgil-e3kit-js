@@ -33,3 +33,9 @@ export class WrongKeyknoxPasswordError extends SdkError {
         super('Password from remote private key storage is invalid', 'WrongKeyknoxPasswordError');
     }
 }
+
+export class EmptyArrayError extends SdkError {
+    constructor(method: string) {
+        super(`Array must be non empty in ${method} method`);
+    }
+}
