@@ -13,15 +13,14 @@ import {
 import VirgilToolbox from './VirgilToolbox';
 import { KeyEntryStorage } from 'virgil-sdk';
 import { PasswordRequiredError, WrongKeyknoxPasswordError } from './errors';
+import { queueWithThrottling } from './utils/promises';
 
+type KeyPair = {
+    privateKey: VirgilPrivateKey;
+    publicKey: VirgilPublicKey;
+};
 export interface IBrainKey {
-    generateKeyPair(
-        password: string,
-        id?: string,
-    ): Promise<{
-        privateKey: VirgilPrivateKey;
-        publicKey: VirgilPublicKey;
-    }>;
+    generateKeyPair(password: string, id?: string): Promise<KeyPair>;
 }
 
 export interface IPrivateKeyLoaderParams {
@@ -40,6 +39,7 @@ export default class PrivateKeyLoader {
     private brainKey: IBrainKey;
     private syncStorage?: Promise<SyncKeyStorage>;
     private localStorage: KeyEntryStorage;
+    private generateBrainPair: (password: string) => Promise<KeyPair>;
 
     constructor(
         private identity: string,
@@ -52,6 +52,7 @@ export default class PrivateKeyLoader {
             accessTokenProvider: this.toolbox.jwtProvider,
         });
         this.localStorage = new KeyEntryStorage({ name: dbName });
+        this.generateBrainPair = queueWithThrottling(this._generateBrainPair, 2000);
     }
 
     async loadPrivateKey(password?: string, id?: string) {
@@ -62,7 +63,7 @@ export default class PrivateKeyLoader {
     }
 
     async savePrivateKeyRemote(privateKey: VirgilPrivateKey, password: string, id?: string) {
-        if (!this.syncStorage) this.syncStorage = this.createSyncStorage(password, id);
+        if (!this.syncStorage) this.syncStorage = this.createSyncStorage(password);
         const storage = await this.syncStorage;
         await storage.storeEntry(
             this.identity,
@@ -89,7 +90,7 @@ export default class PrivateKeyLoader {
     }
 
     async loadRemotePrivateKey(password: string, id?: string) {
-        if (!this.syncStorage) this.syncStorage = this.createSyncStorage(password, id);
+        if (!this.syncStorage) this.syncStorage = this.createSyncStorage(password);
         let storage;
         try {
             storage = await this.syncStorage;
@@ -101,8 +102,12 @@ export default class PrivateKeyLoader {
         return this.toolbox.virgilCrypto.importPrivateKey(key.value) as VirgilPrivateKey;
     }
 
-    private async createSyncStorage(password: string, id?: string) {
-        const { privateKey, publicKey } = await this.brainKey.generateKeyPair(password, id);
+    async backupKey(oldPassword: string, newPassword: string) {
+        if (!this.syncStorage) this.syncStorage = this.createSyncStorage(oldPassword);
+    }
+
+    private async createSyncStorage(password: string) {
+        const { privateKey, publicKey } = await this.generateBrainPair(password);
         const storage = new SyncKeyStorage(
             new CloudKeyStorage(
                 new KeyknoxManager(
@@ -120,4 +125,6 @@ export default class PrivateKeyLoader {
 
         return storage;
     }
+
+    private _generateBrainPair = (password: string) => this.brainKey.generateKeyPair(password);
 }
