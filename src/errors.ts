@@ -1,8 +1,5 @@
-import { VirgilPublicKey } from "virgil-crypto";
+import { VirgilPublicKey } from 'virgil-crypto';
 
-/**
- * Custom error class for errors specific to Virgil SDK.
- */
 export class SdkError extends Error {
     name: string;
     constructor(m: string, name: string = 'SdkError') {

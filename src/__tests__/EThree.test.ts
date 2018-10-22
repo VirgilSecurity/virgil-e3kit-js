@@ -13,7 +13,13 @@ import {
     VirgilAccessTokenSigner,
     VirgilCardCrypto,
 } from 'virgil-crypto/dist/virgil-crypto-pythia.cjs';
-import { WrongKeyknoxPasswordError, EmptyArrayError, BootstrapRequiredError, LookupError, LookupNotFoundError } from '../errors';
+import {
+    WrongKeyknoxPasswordError,
+    EmptyArrayError,
+    BootstrapRequiredError,
+    LookupError,
+    LookupNotFoundError,
+} from '../errors';
 import VirgilToolbox from '../VirgilToolbox';
 
 const virgilCrypto = new VirgilCrypto();
@@ -204,11 +210,11 @@ describe('lookupKeys', () => {
         const identity2 = 'virgiltestlookupnonexist' + Date.now();
         try {
             await sdk.lookupKeys([identity1, identity2]);
-        } catch(e) {
+        } catch (e) {
             expect(e.rejected.length).toBe(2);
             expect(e.rejected[0]).toBeInstanceOf(LookupNotFoundError);
             expect(e.rejected[1]).toBeInstanceOf(LookupNotFoundError);
-            return done()
+            return done();
         }
 
         return done('should throw');
@@ -222,15 +228,13 @@ describe('lookupKeys', () => {
             .fn()
             .mockResolvedValueOnce({ publicKey: keypair1.publicKey })
             .mockRejectedValueOnce(new Error('something happens'))
-            .mockRejectedValueOnce(new LookupNotFoundError('not exists'))
+            .mockRejectedValueOnce(new LookupNotFoundError('not exists'));
 
         const provider = new CachingJwtProvider(fetchToken);
 
         const sdk = new EThree(identity, provider, new VirgilToolbox(provider));
 
-        await Promise.all([
-            cardManager.publishCard({ identity: identity1, ...keypair1 }),
-        ]);
+        await Promise.all([cardManager.publishCard({ identity: identity1, ...keypair1 })]);
 
         try {
             await sdk.lookupKeys([identity1, 'not exists', 'with error']);

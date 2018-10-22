@@ -4,7 +4,6 @@ import {
     CloudKeyStorage,
     KeyknoxManager,
     KeyknoxCrypto,
-    KeyEntryDoesntExistError,
 } from '@virgilsecurity/keyknox';
 import {
     VirgilPythiaCrypto,
