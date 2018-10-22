@@ -40,7 +40,7 @@ export class EmptyArrayError extends SdkError {
 }
 
 const isError = (arg: any): arg is Error => arg instanceof Error;
-const isPublicKey = (arg: any): arg is VirgilPublicKey => arg instanceof VirgilPublicKey;
+const isPublicKey = (arg: any): arg is VirgilPublicKey => !(arg instanceof Error);
 
 export class LookupError extends SdkError {
     result: Array<VirgilPublicKey | Error>;

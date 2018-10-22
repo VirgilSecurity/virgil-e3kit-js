@@ -12,6 +12,7 @@ import {
     VirgilCrypto,
     VirgilAccessTokenSigner,
     VirgilCardCrypto,
+    VirgilPublicKey,
 } from 'virgil-crypto/dist/virgil-crypto-pythia.cjs';
 import {
     WrongKeyknoxPasswordError,
@@ -226,7 +227,7 @@ describe('lookupKeys', () => {
 
         VirgilToolbox.prototype.getPublicKey = jest
             .fn()
-            .mockResolvedValueOnce({ publicKey: keypair1.publicKey })
+            .mockResolvedValueOnce(keypair1.publicKey as VirgilPublicKey)
             .mockRejectedValueOnce(new Error('something happens'))
             .mockRejectedValueOnce(new LookupNotFoundError('not exists'));
 
@@ -237,7 +238,8 @@ describe('lookupKeys', () => {
         await Promise.all([cardManager.publishCard({ identity: identity1, ...keypair1 })]);
 
         try {
-            await sdk.lookupKeys([identity1, 'not exists', 'with error']);
+            const res = await sdk.lookupKeys([identity1, 'not exists', 'with error']);
+            expect(res).not.toBeDefined();
         } catch (e) {
             expect(e).toBeInstanceOf(LookupError);
             expect(e.resolved.length).toBe(1);

@@ -9,8 +9,9 @@ import {
     LookupError,
 } from './errors';
 
-const isWithoutErrors = <T>(arr: Array<T | Error>): arr is Array<T> =>
-    arr.some((r: any) => !(r instanceof Error));
+const isWithoutErrors = <T>(arr: Array<T | Error>): arr is Array<T> => {
+    return !arr.some((el: any) => el instanceof Error);
+};
 
 export default class EThree {
     private identity: string;
