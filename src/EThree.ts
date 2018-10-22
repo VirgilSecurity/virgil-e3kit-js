@@ -2,7 +2,15 @@ import PrivateKeyLoader from './PrivateKeyLoader';
 import VirgilToolbox from './virgilToolbox';
 import { CachingJwtProvider } from 'virgil-sdk';
 import { VirgilPublicKey, VirgilPrivateKey } from 'virgil-crypto/dist/virgil-crypto-pythia.cjs';
-import { BootstrapRequiredError, PasswordRequiredError, EmptyArrayError } from './errors';
+import {
+    BootstrapRequiredError,
+    PasswordRequiredError,
+    EmptyArrayError,
+    LookupError,
+} from './errors';
+
+const isWithoutErrors = <T>(arr: Array<T | Error>): arr is Array<T> =>
+    arr.some((r: any) => !(r instanceof Error));
 
 export default class EThree {
     private identity: string;
@@ -16,17 +24,18 @@ export default class EThree {
         return new EThree(identity, provider);
     }
 
-    constructor(identity: string, provider: CachingJwtProvider) {
+    constructor(identity: string, provider: CachingJwtProvider, toolbox?: VirgilToolbox) {
         this.identity = identity;
-        this.toolbox = new VirgilToolbox(provider);
+        this.toolbox = toolbox || new VirgilToolbox(provider);
         this.keyLoader = new PrivateKeyLoader(identity, this.toolbox);
     }
 
     async bootstrap(password?: string) {
-        const publicKeys = await this.toolbox.getPublicKeys(this.identity);
-        const privateKey = await this.localBootstrap(publicKeys);
+        const cards = await this.toolbox.cardManager.searchCards(this.identity);
+        const hasCard = cards.length > 0;
+        const privateKey = await this.localBootstrap(hasCard);
         if (privateKey) return;
-        if (publicKeys.length > 0) {
+        if (hasCard) {
             if (!password) {
                 throw new PasswordRequiredError();
             } else {
@@ -37,7 +46,7 @@ export default class EThree {
             const keyPair = this.toolbox.virgilCrypto.generateKeys();
             if (password) await this.keyLoader.savePrivateKeyRemote(keyPair.privateKey, password);
             else await this.keyLoader.savePrivateKeyLocal(keyPair.privateKey);
-            await this.toolbox.createCard(keyPair);
+            await this.toolbox.publishCard(keyPair);
             return;
         }
     }
@@ -68,21 +77,26 @@ export default class EThree {
             .toString('utf8');
     }
 
-    async lookupKeys(identities: string[]) {
+    async lookupKeys(identities: string[]): Promise<VirgilPublicKey[]> {
         if (identities.length === 0) throw new EmptyArrayError('lookupKeys');
-        const keysArr = await Promise.all(identities.map(this.toolbox.getPublicKeys));
-        // TODO handle multiple public keys:
-        return keysArr
-            .map(arr => (arr.length === 1 ? arr[0] : arr[arr.length - 1]))
-            .map(k => (k === undefined ? null : k));
+
+        const responses = await Promise.all(
+            identities.map(i =>
+                this.toolbox.getPublicKey(i).catch(e => (e instanceof Error ? e : new Error(e))),
+            ),
+        );
+
+        if (isWithoutErrors(responses)) return responses;
+
+        return Promise.reject(new LookupError(responses));
     }
 
-    private async localBootstrap(publicKeys: VirgilPublicKey[]) {
+    private async localBootstrap(hasCard: boolean) {
         const privateKey = await this.keyLoader.loadLocalPrivateKey();
         if (!privateKey) return null;
-        if (publicKeys.length > 0) return privateKey;
+        if (hasCard) return privateKey;
         const publicKey = this.toolbox.virgilCrypto.extractPublicKey(privateKey);
-        await this.toolbox.createCard({ privateKey, publicKey });
+        await this.toolbox.publishCard({ privateKey, publicKey });
         return privateKey;
     }
 }

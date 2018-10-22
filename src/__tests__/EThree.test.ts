@@ -6,13 +6,15 @@ import {
     VirgilCardVerifier,
     GeneratorJwtProvider,
     IKeyEntry,
+    CachingJwtProvider,
 } from 'virgil-sdk';
 import {
     VirgilCrypto,
     VirgilAccessTokenSigner,
     VirgilCardCrypto,
 } from 'virgil-crypto/dist/virgil-crypto-pythia.cjs';
-import { WrongKeyknoxPasswordError, EmptyArrayError, BootstrapRequiredError } from '../errors';
+import { WrongKeyknoxPasswordError, EmptyArrayError, BootstrapRequiredError, LookupError, LookupNotFoundError } from '../errors';
+import VirgilToolbox from '../VirgilToolbox';
 
 const virgilCrypto = new VirgilCrypto();
 const cardCrypto = new VirgilCardCrypto(virgilCrypto);
@@ -45,19 +47,6 @@ describe('VirgilE2ee', () => {
         await sdk.bootstrap('secure_password');
         const privateKey = await keyStorage.load(identity);
         expect(privateKey).not.toEqual(null);
-        done();
-    });
-
-    it('should encrypt decrypt', async done => {
-        const sdk = await EThree.init(fetchToken);
-        const [senderPublicKey] = await Promise.all([
-            sdk.lookupKeys([identity]),
-            sdk.bootstrap('secure_password'),
-        ]);
-        const receiver = virgilCrypto.generateKeys();
-        const message = await sdk.encrypt('privet, neznakomets', [receiver.publicKey]);
-        const decrypted = await sdk.decrypt(message, senderPublicKey);
-        expect(decrypted).toBe('privet, neznakomets');
         done();
     });
 });
@@ -107,7 +96,7 @@ describe('local bootstrap (without password)', () => {
         done('should throw error');
     });
 
-    it('has no local key, has no card', async done => {
+    it('STA-1 has no local key, has no card', async done => {
         const identity = 'virgiltestlocalnokeynocard' + Date.now();
         const fetchToken = () => Promise.resolve(generator.generateToken(identity).toString());
         const prevCards = await cardManager.searchCards(identity);
@@ -213,37 +202,48 @@ describe('lookupKeys', () => {
         const sdk = await EThree.init(fetchToken);
         const identity1 = 'virgiltestlookupnonexist' + Date.now();
         const identity2 = 'virgiltestlookupnonexist' + Date.now();
+        try {
+            await sdk.lookupKeys([identity1, identity2]);
+        } catch(e) {
+            expect(e.rejected.length).toBe(2);
+            expect(e.rejected[0]).toBeInstanceOf(LookupNotFoundError);
+            expect(e.rejected[1]).toBeInstanceOf(LookupNotFoundError);
+            return done()
+        }
 
-        const publicKeys = await sdk.lookupKeys([identity1, identity2]);
-
-        expect(publicKeys.length).toBe(2);
-        expect(publicKeys[0]).toEqual(null);
-        expect(publicKeys[1]).toEqual(null);
-
-        done();
+        return done('should throw');
     });
 
-    it.skip('lookupKeys with error', () => {});
-    //     const identity1 = 'virgiltestlookuperror1' + Date.now();
-    //     const identity2 = 'virgiltestlookuperror2' + Date.now();
-    //     const keypair1 = virgilCrypto.generateKeys();
-    //     const keypair2 = virgilCrypto.generateKeys();
-    //     const sdk = await EThree.init(fetchToken);
+    it('lookupKeys with error', async done => {
+        const identity1 = 'virgiltestlookuperror1' + Date.now();
+        const keypair1 = virgilCrypto.generateKeys();
 
-    //     await Promise.all([
-    //         cardManager.publishCard({ identity: identity1, ...keypair1 }),
-    //         cardManager.publishCard({ identity: identity2, ...keypair2 }),
-    //     ]);
-    //     const publicKeys = await sdk.lookupKeys([identity1, identity2]);
+        VirgilToolbox.prototype.getPublicKey = jest
+            .fn()
+            .mockResolvedValueOnce({ publicKey: keypair1.publicKey })
+            .mockRejectedValueOnce(new Error('something happens'))
+            .mockRejectedValueOnce(new LookupNotFoundError('not exists'))
 
-    //     expect(publicKeys.length).toBe(2);
-    //     expect(publicKeys[0]).toBeInstanceOf(Error);
-    //     expect(virgilCrypto.exportPublicKey(publicKeys[1]).toString('base64')).toEqual(
-    //         virgilCrypto.exportPublicKey(keypair2.publicKey).toString('base64'),
-    //     );
+        const provider = new CachingJwtProvider(fetchToken);
 
-    //     done();
-    // });
+        const sdk = new EThree(identity, provider, new VirgilToolbox(provider));
+
+        await Promise.all([
+            cardManager.publishCard({ identity: identity1, ...keypair1 }),
+        ]);
+
+        try {
+            await sdk.lookupKeys([identity1, 'not exists', 'with error']);
+        } catch (e) {
+            expect(e).toBeInstanceOf(LookupError);
+            expect(e.resolved.length).toBe(1);
+            expect(e.rejected.length).toBe(2);
+            expect(e.rejected[0]).toBeInstanceOf(Error);
+            expect(e.rejected[1]).toBeInstanceOf(LookupNotFoundError);
+            return done();
+        }
+        done('should throw');
+    });
 
     it('STE-2 lookupKeys with empty array of identities', async done => {
         const sdk = await EThree.init(fetchToken);

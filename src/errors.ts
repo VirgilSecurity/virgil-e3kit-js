@@ -1,3 +1,5 @@
+import { VirgilPublicKey } from "virgil-crypto";
+
 /**
  * Custom error class for errors specific to Virgil SDK.
  */
@@ -37,5 +39,33 @@ export class WrongKeyknoxPasswordError extends SdkError {
 export class EmptyArrayError extends SdkError {
     constructor(method: string) {
         super(`Array must be non empty in ${method} method`);
+    }
+}
+
+const isError = (arg: any): arg is Error => arg instanceof Error;
+const isPublicKey = (arg: any): arg is VirgilPublicKey => arg instanceof VirgilPublicKey;
+
+export class LookupError extends SdkError {
+    result: Array<VirgilPublicKey | Error>;
+
+    get rejected(): Error[] {
+        return this.result.filter(isError);
+    }
+    get resolved(): VirgilPublicKey[] {
+        return this.result.filter(isPublicKey);
+    }
+
+    constructor(result: Array<VirgilPublicKey | Error>) {
+        super(
+            'Some promises got rejected. Use err.rejected for unhandled results, .resolved for handled and .result for all responses',
+            'LookupError',
+        );
+        this.result = result;
+    }
+}
+
+export class LookupNotFoundError extends SdkError {
+    constructor(public identity: string) {
+        super(`${identity} not found`, 'LookupNotFoundError');
     }
 }

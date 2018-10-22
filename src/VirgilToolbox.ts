@@ -5,6 +5,7 @@ import {
 } from 'virgil-crypto/dist/virgil-crypto-pythia.cjs';
 import { VirgilPublicKey, VirgilPrivateKeyExporter } from 'virgil-crypto';
 import { VirgilCardVerifier, CachingJwtProvider, CardManager } from 'virgil-sdk';
+import { LookupNotFoundError } from './errors';
 
 export interface IKeyPair {
     privateKey: VirgilPrivateKey;
@@ -27,9 +28,11 @@ export default class VirgilToolbox {
             accessTokenProvider: this.jwtProvider,
             retryOnUnauthorized: true,
         });
+
+        this.getPublicKey = this.getPublicKey.bind(this);
     }
 
-    async createCard(keyPair: IKeyPair) {
+    async publishCard(keyPair: IKeyPair) {
         await this.cardManager.publishCard({
             privateKey: keyPair.privateKey,
             publicKey: keyPair.publicKey,
@@ -38,13 +41,14 @@ export default class VirgilToolbox {
         return keyPair;
     }
 
-    getPublicKeys = async (identity: string) => {
+    async getPublicKey(identity: string): Promise<VirgilPublicKey> {
         const cards = await this.cardManager.searchCards(identity);
-        try {
-            const publicKeys = cards.map(card => card.publicKey as VirgilPublicKey);
-            return publicKeys;
-        } catch (e) {
-            return e;
+        if (!cards.length) throw new LookupNotFoundError(identity);
+        const publicKeys = cards.map(card => card.publicKey as VirgilPublicKey);
+        if (publicKeys.length > 1) {
+            console.warn('This identity has two public keys. This sdk do not support multiple public keys for one identity. Used last published public key');
+            return publicKeys[publicKeys.length - 1] as VirgilPublicKey;
         }
-    };
+        return publicKeys[0] as VirgilPublicKey;
+    }
 }
