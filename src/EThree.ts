@@ -71,7 +71,7 @@ export default class EThree {
         if (!privateKey) throw new BootstrapRequiredError();
         const publicKey = this.toolbox.virgilCrypto.extractPublicKey(privateKey);
         const publicKeyArray = publicKeys ? [publicKey, ...publicKeys] : [publicKey];
-        let res: string | Buffer = this.toolbox.virgilCrypto.signThenEncrypt(
+        let res: Data = this.toolbox.virgilCrypto.signThenEncrypt(
             message,
             privateKey,
             publicKeyArray,
@@ -87,12 +87,12 @@ export default class EThree {
         if (!privateKey) throw new BootstrapRequiredError();
         const publicKey = this.toolbox.virgilCrypto.extractPublicKey(privateKey);
         const publicKeyArray = publicKeys ? [publicKey, ...publicKeys] : [publicKey];
-        let res: string | Buffer = this.toolbox.virgilCrypto.decryptThenVerify(
+        let res: Data = this.toolbox.virgilCrypto.decryptThenVerify(
             message,
             privateKey,
             publicKeyArray,
         );
-        if (isString) res = res.toString('base64');
+        if (isString) res = res.toString('utf8');
         return res;
     }
 

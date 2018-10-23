@@ -89,7 +89,7 @@ describe('local bootstrap (without password)', () => {
     });
 
     it('has no local key, has card', async done => {
-        await keyStorage.remove(identity);
+        await keyStorage.clear();
         const fetchToken = () => Promise.resolve(generator.generateToken(identity).toString());
         const sdk = await EThree.init(fetchToken);
         const cards = await cardManager.searchCards(identity);
@@ -428,6 +428,9 @@ describe('encrypt and decrypt', () => {
     });
 
     it('should return buffer', async done => {
+        const identity = 'virgiltestencryptbuffer' + Date.now();
+        const fetchToken = () => Promise.resolve(generator.generateToken(identity).toString());
+
         const buf = new Buffer('123');
 
         const recipient = virgilCrypto.generateKeys();
