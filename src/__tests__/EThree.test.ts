@@ -165,6 +165,7 @@ describe('remote bootstrap (with password)', () => {
         try {
             await sdk.bootstrap('not_secret_password');
         } catch (e) {
+            console.log(e, typeof e, e.prototype);
             expect(e).toBeInstanceOf(WrongKeyknoxPasswordError);
             return done();
         }
@@ -260,6 +261,57 @@ describe('lookupKeys', () => {
             return done();
         }
         done('should throw');
+    });
+});
+
+describe('change password', () => {
+    it('should change password', async done => {
+        const identity = 'virgiltest' + Date.now();
+        const fetchToken = () => Promise.resolve(generator.generateToken(identity).toString());
+        try {
+            console.time('init');
+            const sdk = await EThree.init(fetchToken);
+            console.timeEnd('init');
+            console.time('changePrivateKeyPassword');
+            await sdk.changePrivateKeyPassword('old_password', 'new_password');
+            console.timeEnd('changePrivateKeyPassword');
+            console.time('logout');
+            await sdk.logout();
+            console.timeEnd('logout');
+            console.time('bootstrap');
+            await sdk.bootstrap('new_password');
+            console.timeEnd('bootstrap');
+        } catch (e) {
+            expect(e).not.toBeDefined();
+            return done(e);
+        }
+        done();
+    });
+
+    it('should change password faster if already bootstraped', async done => {
+        const identity = 'virgiltest' + Date.now();
+        const fetchToken = () => Promise.resolve(generator.generateToken(identity).toString());
+        try {
+            console.time('init');
+            const sdk = await EThree.init(fetchToken);
+            console.timeEnd('init');
+            console.time('bootstrap');
+            await sdk.bootstrap('old_password');
+            console.timeEnd('bootstrap');
+            console.time('changePrivateKeyPassword');
+            await sdk.changePrivateKeyPassword('old_password', 'new_password');
+            console.timeEnd('changePrivateKeyPassword');
+            console.time('logout');
+            await sdk.logout();
+            console.timeEnd('logout');
+            console.time('bootstrap');
+            await sdk.bootstrap('new_password');
+            console.timeEnd('bootstrap');
+        } catch (e) {
+            expect(e).not.toBeDefined();
+            return done(e);
+        }
+        done();
     });
 });
 

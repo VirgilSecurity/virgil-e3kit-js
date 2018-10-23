@@ -17,7 +17,7 @@
     "license": "BSD-3-Clause",
     "scripts": {
         "test": "jest",
-        "test:dev": "jest --onlyChanged",
+        "test:dev": "jest --watch",
         "debug:test": "node --inspect-brk node_modules/.bin/jest --runInBand",
         "clean": "rimraf .rpt2_cache .virgil_key_entries coverage dist",
         "build:node:cjs": "cross-env ENV=node FORMAT=cjs rollup -c",

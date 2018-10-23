@@ -1,6 +1,6 @@
 import PrivateKeyLoader from './PrivateKeyLoader';
 import VirgilToolbox from './virgilToolbox';
-import { CachingJwtProvider } from 'virgil-sdk';
+import { CachingJwtProvider, ConstAccessTokenProvider } from 'virgil-sdk';
 import { VirgilPublicKey, VirgilPrivateKey } from 'virgil-crypto/dist/virgil-crypto-pythia.cjs';
 import {
     BootstrapRequiredError,
@@ -90,6 +90,11 @@ export default class EThree {
         if (isWithoutErrors(responses)) return responses;
 
         return Promise.reject(new LookupError(responses));
+    }
+
+    async changePrivateKeyPassword(oldPassword: string, newPassword: string) {
+        await this.bootstrap(oldPassword);
+        return await this.keyLoader.changePassword(newPassword);
     }
 
     private async localBootstrap(hasCard: boolean) {

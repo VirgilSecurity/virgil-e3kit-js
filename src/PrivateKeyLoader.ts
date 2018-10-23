@@ -12,8 +12,7 @@ import {
 } from 'virgil-crypto/dist/virgil-crypto-pythia.cjs';
 import VirgilToolbox from './VirgilToolbox';
 import { KeyEntryStorage } from 'virgil-sdk';
-import { PasswordRequiredError, WrongKeyknoxPasswordError } from './errors';
-import { queueWithThrottling } from './utils/promises';
+import { PasswordRequiredError, WrongKeyknoxPasswordError, BootstrapRequiredError } from './errors';
 
 type KeyPair = {
     privateKey: VirgilPrivateKey;
@@ -39,7 +38,6 @@ export default class PrivateKeyLoader {
     private brainKey: IBrainKey;
     private syncStorage?: Promise<SyncKeyStorage>;
     private localStorage: KeyEntryStorage;
-    private generateBrainPair: (password: string) => Promise<KeyPair>;
 
     constructor(
         private identity: string,
@@ -52,7 +50,6 @@ export default class PrivateKeyLoader {
             accessTokenProvider: this.toolbox.jwtProvider,
         });
         this.localStorage = new KeyEntryStorage({ name: dbName });
-        this.generateBrainPair = queueWithThrottling(this._generateBrainPair, 2000);
     }
 
     async loadPrivateKey(password?: string, id?: string) {
@@ -63,8 +60,7 @@ export default class PrivateKeyLoader {
     }
 
     async savePrivateKeyRemote(privateKey: VirgilPrivateKey, password: string, id?: string) {
-        if (!this.syncStorage) this.syncStorage = this.createSyncStorage(password);
-        const storage = await this.syncStorage;
+        const storage = await this.initStorage(password);
         await storage.storeEntry(
             this.identity,
             this.toolbox.virgilCrypto.exportPrivateKey(privateKey),
@@ -90,20 +86,22 @@ export default class PrivateKeyLoader {
     }
 
     async loadRemotePrivateKey(password: string, id?: string) {
-        if (!this.syncStorage) this.syncStorage = this.createSyncStorage(password);
-        let storage;
-        try {
-            storage = await this.syncStorage;
-        } catch (e) {
-            throw new WrongKeyknoxPasswordError();
-        }
+        const storage = await this.initStorage(password);
 
         const key = await storage.retrieveEntry(this.identity);
         return this.toolbox.virgilCrypto.importPrivateKey(key.value) as VirgilPrivateKey;
     }
 
-    async backupKey(oldPassword: string, newPassword: string) {
-        if (!this.syncStorage) this.syncStorage = this.createSyncStorage(oldPassword);
+    async changePassword(newPassword: string) {
+        if (!this.syncStorage) throw new BootstrapRequiredError();
+        const storage = await this.syncStorage;
+        const keyPair = await this.generateBrainPair(newPassword);
+
+        const update = await storage.updateRecipients({
+            newPrivateKey: keyPair.privateKey,
+            newPublicKeys: [keyPair.publicKey],
+        });
+        return update;
     }
 
     private async createSyncStorage(password: string) {
@@ -120,11 +118,41 @@ export default class PrivateKeyLoader {
             ),
             this.localStorage,
         );
-
-        await storage.sync();
+        try {
+            await storage.sync();
+        } catch (e) {
+            throw new WrongKeyknoxPasswordError();
+        }
 
         return storage;
     }
 
-    private _generateBrainPair = (password: string) => this.brainKey.generateKeyPair(password);
+    private async initStorage(password: string) {
+        if (!this.syncStorage) this.syncStorage = this.createSyncStorage(password);
+        try {
+            await this.syncStorage;
+        } catch (e) {
+            this.syncStorage = undefined;
+            throw e;
+        }
+        return this.syncStorage;
+    }
+
+    private generateBrainPair = (password: string) =>
+        this.brainKey.generateKeyPair(password).catch(e => {
+            if (typeof e === 'object' && e.code === 60007) {
+                const promise = new Promise((resolve, reject) => {
+                    setTimeout(
+                        () =>
+                            this.brainKey
+                                .generateKeyPair(password)
+                                .then(resolve)
+                                .catch(reject),
+                        2000,
+                    );
+                });
+                return promise as Promise<KeyPair>;
+            }
+            throw e;
+        });
 }
