@@ -12,7 +12,7 @@ import {
 } from 'virgil-crypto/dist/virgil-crypto-pythia.cjs';
 import VirgilToolbox from './VirgilToolbox';
 import { KeyEntryStorage } from 'virgil-sdk';
-import { PasswordRequiredError, WrongKeyknoxPasswordError, BootstrapRequiredError } from './errors';
+import { WrongKeyknoxPasswordError, BootstrapRequiredError } from './errors';
 
 type KeyPair = {
     privateKey: VirgilPrivateKey;
@@ -48,23 +48,16 @@ export default class PrivateKeyLoader {
         this.localStorage = new KeyEntryStorage({ name: 'local-storage' });
     }
 
-    async loadPrivateKey(password?: string, id?: string) {
-        const privateKey = await this.loadLocalPrivateKey();
-        if (privateKey) return privateKey;
-        if (!password) throw new PasswordRequiredError();
-        return this.loadRemotePrivateKey(password, id);
-    }
-
     async savePrivateKeyRemote(privateKey: VirgilPrivateKey, password: string, id?: string) {
         const storage = await this.initStorage(password);
-        await storage.storeEntry(
+        return await storage.storeEntry(
             this.identity,
             this.toolbox.virgilCrypto.exportPrivateKey(privateKey),
         );
     }
 
     async savePrivateKeyLocal(privateKey: VirgilPrivateKey) {
-        this.localStorage.save({
+        return await this.localStorage.save({
             name: this.identity,
             value: this.toolbox.virgilCrypto.exportPrivateKey(privateKey),
         });
@@ -77,21 +70,20 @@ export default class PrivateKeyLoader {
     }
 
     async resetLocalPrivateKey() {
+        this.syncStorage = undefined;
         return await this.localStorage.remove(this.identity);
     }
 
-    async resetBackupPrivateKey() {
-        if (!this.syncStorage) throw new BootstrapRequiredError();
-        const storage = await this.syncStorage;
+    async resetBackupPrivateKey(password: string) {
+        const storage = await this.initStorage(password);
 
         return await storage.deleteEntry(this.identity);
     }
 
     async loadRemotePrivateKey(password: string, id?: string) {
         const storage = await this.initStorage(password);
-
         const rawKey = await storage.retrieveEntry(this.identity);
-        this.localStorage.save({ name: this.identity, value: rawKey.value });
+        await this.localStorage.save({ name: this.identity, value: rawKey.value });
         return this.toolbox.virgilCrypto.importPrivateKey(rawKey.value);
     }
 
@@ -145,14 +137,12 @@ export default class PrivateKeyLoader {
         this.brainKey.generateKeyPair(password).catch(e => {
             if (typeof e === 'object' && e.code === 60007) {
                 const promise = new Promise((resolve, reject) => {
-                    setTimeout(
-                        () =>
-                            this.brainKey
-                                .generateKeyPair(password)
-                                .then(resolve)
-                                .catch(reject),
-                        2000,
-                    );
+                    const repeat = () =>
+                        this.brainKey
+                            .generateKeyPair(password)
+                            .then(resolve)
+                            .catch(reject);
+                    setTimeout(repeat, 2000);
                 });
                 return promise as Promise<KeyPair>;
             }

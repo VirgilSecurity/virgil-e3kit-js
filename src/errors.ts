@@ -1,4 +1,4 @@
-import { VirgilPublicKey } from 'virgil-crypto';
+import { VirgilPublicKey } from 'virgil-crypto/dist/virgil-crypto-pythia.cjs';
 
 export class SdkError extends Error {
     name: string;

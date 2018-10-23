@@ -56,12 +56,12 @@ export default class EThree {
         }
     }
 
-    async logout() {
+    async cleanup() {
         return await this.keyLoader.resetLocalPrivateKey();
     }
 
-    async resetBackupPrivateKey() {
-        return this.keyLoader.resetBackupPrivateKey();
+    async rollbackPrivateKey(password: string) {
+        return this.keyLoader.resetBackupPrivateKey(password);
     }
 
     async encrypt(message: Data, publicKeys?: VirgilPublicKey[]): Promise<Data> {
@@ -96,7 +96,7 @@ export default class EThree {
         return res;
     }
 
-    async lookupKeys(identities: string[]): Promise<VirgilPublicKey[]> {
+    async lookupPublicKeys(identities: string[]): Promise<VirgilPublicKey[]> {
         if (identities.length === 0) throw new EmptyArrayError('lookupKeys');
 
         const responses = await Promise.all(
@@ -110,7 +110,7 @@ export default class EThree {
         return Promise.reject(new LookupError(responses));
     }
 
-    async changePrivateKeyPassword(oldPassword: string, newPassword: string) {
+    async changePassword(oldPassword: string, newPassword: string) {
         await this.bootstrap(oldPassword);
         return await this.keyLoader.changePassword(newPassword);
     }
