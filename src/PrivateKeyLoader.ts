@@ -39,17 +39,13 @@ export default class PrivateKeyLoader {
     private syncStorage?: Promise<SyncKeyStorage>;
     private localStorage: KeyEntryStorage;
 
-    constructor(
-        private identity: string,
-        public toolbox: VirgilToolbox,
-        { dbName }: IPrivateKeyLoaderParams = { dbName: 'keyknox-storage' },
-    ) {
+    constructor(private identity: string, public toolbox: VirgilToolbox) {
         this.brainKey = createBrainKey({
             virgilCrypto: this.toolbox.virgilCrypto,
             virgilPythiaCrypto: this.pythiaCrypto,
             accessTokenProvider: this.toolbox.jwtProvider,
         });
-        this.localStorage = new KeyEntryStorage({ name: dbName });
+        this.localStorage = new KeyEntryStorage({ name: 'local-storage' });
     }
 
     async loadPrivateKey(password?: string, id?: string) {
@@ -80,16 +76,23 @@ export default class PrivateKeyLoader {
         return this.toolbox.virgilCrypto.importPrivateKey(privateKeyData.value) as VirgilPrivateKey;
     }
 
-    async deleteKeys() {
-        if (this.syncStorage) this.syncStorage = undefined;
+    async resetLocalPrivateKey() {
         return await this.localStorage.remove(this.identity);
+    }
+
+    async resetBackupPrivateKey() {
+        if (!this.syncStorage) throw new BootstrapRequiredError();
+        const storage = await this.syncStorage;
+
+        return await storage.deleteEntry(this.identity);
     }
 
     async loadRemotePrivateKey(password: string, id?: string) {
         const storage = await this.initStorage(password);
 
-        const key = await storage.retrieveEntry(this.identity);
-        return this.toolbox.virgilCrypto.importPrivateKey(key.value) as VirgilPrivateKey;
+        const rawKey = await storage.retrieveEntry(this.identity);
+        this.localStorage.save({ name: this.identity, value: rawKey.value });
+        return this.toolbox.virgilCrypto.importPrivateKey(rawKey.value);
     }
 
     async changePassword(newPassword: string) {
@@ -116,7 +119,7 @@ export default class PrivateKeyLoader {
                     new KeyknoxCrypto(this.toolbox.virgilCrypto),
                 ),
             ),
-            this.localStorage,
+            new KeyEntryStorage('keyknox-storage'),
         );
         try {
             await storage.sync();

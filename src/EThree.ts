@@ -46,14 +46,18 @@ export default class EThree {
         } else {
             const keyPair = this.toolbox.virgilCrypto.generateKeys();
             if (password) await this.keyLoader.savePrivateKeyRemote(keyPair.privateKey, password);
-            else await this.keyLoader.savePrivateKeyLocal(keyPair.privateKey);
+            await this.keyLoader.savePrivateKeyLocal(keyPair.privateKey);
             await this.toolbox.publishCard(keyPair);
             return;
         }
     }
 
     async logout() {
-        return await this.keyLoader.deleteKeys();
+        return await this.keyLoader.resetLocalPrivateKey();
+    }
+
+    async resetBackupPrivateKey() {
+        return this.keyLoader.resetBackupPrivateKey();
     }
 
     async encrypt(message: string, publicKeys?: VirgilPublicKey[]) {

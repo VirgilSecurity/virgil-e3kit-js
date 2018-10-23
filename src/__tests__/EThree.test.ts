@@ -43,7 +43,7 @@ const cardManager = new CardManager({
     retryOnUnauthorized: true,
 });
 
-const keyStorage = new KeyEntryStorage({ name: 'keyknox-storage' });
+const keyStorage = new KeyEntryStorage({ name: 'local-storage' });
 
 describe('VirgilE2ee', () => {
     const identity = 'virgiltest' + Date.now();
@@ -165,7 +165,6 @@ describe('remote bootstrap (with password)', () => {
         try {
             await sdk.bootstrap('not_secret_password');
         } catch (e) {
-            console.log(e, typeof e, e.prototype);
             expect(e).toBeInstanceOf(WrongKeyknoxPasswordError);
             return done();
         }
@@ -318,7 +317,6 @@ describe('backupPrivateKeyCloud', () => {
             await sdk.bootstrap('secret_pass');
             await sdk.backupPrivateKey('secret_pass');
         } catch (e) {
-            console.log(e);
             expect(e).toBeDefined();
             return done();
         }
@@ -442,5 +440,23 @@ describe('logout()', () => {
         expect(privateKey).toEqual(null);
         expect(isDeleted).toBe(true);
         done();
+    });
+
+    it('reset backup private key', async done => {
+        const identity = 'virgiltestlogout' + Date.now();
+        const fetchToken = () => Promise.resolve(generator.generateToken(identity).toString());
+
+        const sdk = await EThree.init(fetchToken);
+        await sdk.bootstrap('secure_password');
+        const privateKeyData = await keyStorage.load(identity);
+        const privateKey = virgilCrypto.importPrivateKey(privateKeyData!.value);
+        await sdk.resetBackupPrivateKey();
+        try {
+            await sdk.backupPrivateKey('secure_password');
+        } catch (e) {
+            expect(e).not.toBeDefined();
+        }
+
+        return done();
     });
 });
