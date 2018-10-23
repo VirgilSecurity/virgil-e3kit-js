@@ -269,18 +269,10 @@ describe('change password', () => {
         const identity = 'virgiltest' + Date.now();
         const fetchToken = () => Promise.resolve(generator.generateToken(identity).toString());
         try {
-            console.time('init');
             const sdk = await EThree.init(fetchToken);
-            console.timeEnd('init');
-            console.time('changePrivateKeyPassword');
             await sdk.changePrivateKeyPassword('old_password', 'new_password');
-            console.timeEnd('changePrivateKeyPassword');
-            console.time('logout');
             await sdk.logout();
-            console.timeEnd('logout');
-            console.time('bootstrap');
             await sdk.bootstrap('new_password');
-            console.timeEnd('bootstrap');
         } catch (e) {
             expect(e).not.toBeDefined();
             return done(e);
@@ -292,26 +284,45 @@ describe('change password', () => {
         const identity = 'virgiltest' + Date.now();
         const fetchToken = () => Promise.resolve(generator.generateToken(identity).toString());
         try {
-            console.time('init');
             const sdk = await EThree.init(fetchToken);
-            console.timeEnd('init');
-            console.time('bootstrap');
             await sdk.bootstrap('old_password');
-            console.timeEnd('bootstrap');
-            console.time('changePrivateKeyPassword');
             await sdk.changePrivateKeyPassword('old_password', 'new_password');
-            console.timeEnd('changePrivateKeyPassword');
-            console.time('logout');
             await sdk.logout();
-            console.timeEnd('logout');
-            console.time('bootstrap');
             await sdk.bootstrap('new_password');
-            console.timeEnd('bootstrap');
         } catch (e) {
             expect(e).not.toBeDefined();
             return done(e);
         }
         done();
+    });
+});
+
+describe('backupPrivateKeyCloud', () => {
+    const identity = 'virgiltestbackup' + Date.now();
+    const fetchToken = () => Promise.resolve(generator.generateToken(identity).toString());
+
+    it('success', async done => {
+        const sdk = await EThree.init(fetchToken);
+        try {
+            await sdk.bootstrap();
+            await sdk.backupPrivateKey('secret_pass');
+        } catch (e) {
+            expect(e).not.toBeDefined();
+        }
+        done();
+    });
+
+    it('fail', async done => {
+        const sdk = await EThree.init(fetchToken);
+        try {
+            await sdk.bootstrap('secret_pass');
+            await sdk.backupPrivateKey('secret_pass');
+        } catch (e) {
+            console.log(e);
+            expect(e).toBeDefined();
+            return done();
+        }
+        return done('should throw');
     });
 });
 

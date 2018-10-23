@@ -97,6 +97,12 @@ export default class EThree {
         return await this.keyLoader.changePassword(newPassword);
     }
 
+    async backupPrivateKey(password: string) {
+        const privateKey = await this.keyLoader.loadLocalPrivateKey();
+        if (!privateKey) throw new BootstrapRequiredError();
+        return await this.keyLoader.savePrivateKeyRemote(privateKey, password);
+    }
+
     private async localBootstrap(hasCard: boolean) {
         const privateKey = await this.keyLoader.loadLocalPrivateKey();
         if (!privateKey) return null;
