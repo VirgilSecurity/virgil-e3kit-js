@@ -1,7 +1,11 @@
 import PrivateKeyLoader from './PrivateKeyLoader';
 import VirgilToolbox from './virgilToolbox';
 import { CachingJwtProvider, ConstAccessTokenProvider } from 'virgil-sdk';
-import { VirgilPublicKey, VirgilPrivateKey } from 'virgil-crypto/dist/virgil-crypto-pythia.cjs';
+import {
+    VirgilPublicKey,
+    VirgilPrivateKey,
+    Data,
+} from 'virgil-crypto/dist/virgil-crypto-pythia.cjs';
 import {
     BootstrapRequiredError,
     PasswordRequiredError,
@@ -60,26 +64,36 @@ export default class EThree {
         return this.keyLoader.resetBackupPrivateKey();
     }
 
-    async encrypt(message: string, publicKeys?: VirgilPublicKey[]) {
+    async encrypt(message: Data, publicKeys?: VirgilPublicKey[]): Promise<Data> {
+        const isString = typeof message === 'string';
         if (publicKeys && publicKeys.length === 0) throw new EmptyArrayError('encrypt');
         const privateKey = await this.keyLoader.loadLocalPrivateKey();
         if (!privateKey) throw new BootstrapRequiredError();
         const publicKey = this.toolbox.virgilCrypto.extractPublicKey(privateKey);
         const publicKeyArray = publicKeys ? [publicKey, ...publicKeys] : [publicKey];
-        return this.toolbox.virgilCrypto
-            .signThenEncrypt(message, privateKey, publicKeyArray)
-            .toString('base64');
+        let res: string | Buffer = this.toolbox.virgilCrypto.signThenEncrypt(
+            message,
+            privateKey,
+            publicKeyArray,
+        );
+        if (isString) res = res.toString('base64');
+        return res;
     }
 
-    async decrypt(message: string, publicKeys?: VirgilPublicKey[]) {
+    async decrypt(message: Data, publicKeys?: VirgilPublicKey[]): Promise<Data> {
+        const isString = typeof message === 'string';
         if (publicKeys && publicKeys.length === 0) throw new EmptyArrayError('decrypt');
         const privateKey = await this.keyLoader.loadLocalPrivateKey();
         if (!privateKey) throw new BootstrapRequiredError();
         const publicKey = this.toolbox.virgilCrypto.extractPublicKey(privateKey);
         const publicKeyArray = publicKeys ? [publicKey, ...publicKeys] : [publicKey];
-        return this.toolbox.virgilCrypto
-            .decryptThenVerify(message, privateKey, publicKeyArray)
-            .toString('utf8');
+        let res: string | Buffer = this.toolbox.virgilCrypto.decryptThenVerify(
+            message,
+            privateKey,
+            publicKeyArray,
+        );
+        if (isString) res = res.toString('base64');
+        return res;
     }
 
     async lookupKeys(identities: string[]): Promise<VirgilPublicKey[]> {

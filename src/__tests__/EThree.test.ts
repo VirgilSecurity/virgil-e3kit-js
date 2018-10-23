@@ -426,6 +426,21 @@ describe('encrypt and decrypt', () => {
         }
         done();
     });
+
+    it('should return buffer', async done => {
+        const buf = new Buffer('123');
+
+        const recipient = virgilCrypto.generateKeys();
+        const sdk = await EThree.init(fetchToken);
+        await sdk.bootstrap();
+        const publicKeys = await sdk.lookupKeys([identity]);
+        const encryptedMessage = await sdk.encrypt(buf, [recipient.publicKey]);
+        expect(encryptedMessage).toBeInstanceOf(Buffer);
+
+        const resp = await sdk.decrypt(encryptedMessage, publicKeys);
+        expect(resp).toBeInstanceOf(Buffer);
+        done();
+    });
 });
 
 describe('logout()', () => {
