@@ -1,11 +1,7 @@
 import PrivateKeyLoader from './PrivateKeyLoader';
 import VirgilToolbox from './virgilToolbox';
-import { CachingJwtProvider, ConstAccessTokenProvider } from 'virgil-sdk';
-import {
-    VirgilPublicKey,
-    VirgilPrivateKey,
-    Data,
-} from 'virgil-crypto/dist/virgil-crypto-pythia.cjs';
+import { CachingJwtProvider } from 'virgil-sdk';
+import { VirgilPublicKey, Data } from 'virgil-crypto';
 import {
     BootstrapRequiredError,
     PasswordRequiredError,

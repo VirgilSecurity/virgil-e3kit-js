@@ -5,11 +5,15 @@ const nodeGlobals = require('rollup-plugin-node-globals');
 const resolve = require('rollup-plugin-node-resolve');
 const typescript = require('rollup-plugin-typescript2');
 const { uglify } = require('rollup-plugin-uglify');
+const sourcemap = require('rollup-plugin-sourcemaps');
+const noPythiaCryptoPath = require.resolve('virgil-crypto');
+const pythiaCryptoPath = path.resolve(noPythiaCryptoPath, '../virgil-crypto-pythia.cjs.js');
+const pythiaCryptoBrowserPath = path.resolve(noPythiaCryptoPath, '../virgil-crypto-pythia.browser.cjs.js');
 
 const packageJson = require('./package.json');
 
 const NAME = 'e3kit';
-const UMD_NAME = 'e3kit';
+const UMD_NAME = 'E3kit';
 
 const env = process.env.ENV;
 const format = process.env.FORMAT;
@@ -52,6 +56,17 @@ function getFileName(name, environment, format, isMinified) {
   return parts.join('.');
 }
 
+function resolveVirgilCrypto (isBrowser) {
+    return {
+        name: 'resolve-virgil-crypto',
+        resolveId (importee, importer) {
+            if (importee === 'virgil-crypto') {
+                return isBrowser ? pythiaCryptoBrowserPath : pythiaCryptoPath;
+            }
+        }
+    }
+}
+
 module.exports = {
   external,
   input: path.join(__dirname, 'src', 'index.ts'),
@@ -59,9 +74,12 @@ module.exports = {
     format,
     file: getFileName(NAME, env, format, minify),
     dir: path.join(__dirname, 'dist'),
+    sourceMap: true,
     name: UMD_NAME
-  },
+},
   plugins: [
+      sourcemap(),
+    resolveVirgilCrypto({ browser: format === umd }),
     resolve({ browser: format === umd }),
     commonjs(),
     typescript({

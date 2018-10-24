@@ -5,11 +5,7 @@ import {
     KeyknoxManager,
     KeyknoxCrypto,
 } from '@virgilsecurity/keyknox';
-import {
-    VirgilPythiaCrypto,
-    VirgilPublicKey,
-    VirgilPrivateKey,
-} from 'virgil-crypto/dist/virgil-crypto-pythia.cjs';
+import { VirgilPythiaCrypto, VirgilPublicKey, VirgilPrivateKey } from 'virgil-crypto';
 import VirgilToolbox from './VirgilToolbox';
 import { KeyEntryStorage } from 'virgil-sdk';
 import { WrongKeyknoxPasswordError, BootstrapRequiredError } from './errors';

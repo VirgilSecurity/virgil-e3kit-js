@@ -1,8 +1,4 @@
-import {
-    VirgilCrypto,
-    VirgilCardCrypto,
-    VirgilPrivateKey,
-} from 'virgil-crypto/dist/virgil-crypto-pythia.cjs';
+import { VirgilCrypto, VirgilCardCrypto, VirgilPrivateKey } from 'virgil-crypto';
 import { VirgilPublicKey } from 'virgil-crypto';
 import { VirgilCardVerifier, CachingJwtProvider, CardManager } from 'virgil-sdk';
 import { LookupNotFoundError } from './errors';

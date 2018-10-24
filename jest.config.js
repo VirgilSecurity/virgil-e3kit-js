@@ -17,5 +17,13 @@ module.exports = {
     "transform": {
         "^.+\\.es\\.js$": "babel-jest",
         "^.+\\.ts$": "ts-jest",
+    },
+    globals: {
+        'ts-jest': {
+			tsConfig: 'tsconfig.test.json'
+		}
+    },
+    moduleNameMapper: {
+        "virgil-crypto": "<rootDir>/node_modules/virgil-crypto/dist/virgil-crypto-pythia.cjs.js"
     }
 }

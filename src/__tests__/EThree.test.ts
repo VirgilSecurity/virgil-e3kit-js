@@ -14,7 +14,7 @@ import {
     VirgilCardCrypto,
     VirgilPublicKey,
     VirgilPythiaCrypto,
-} from 'virgil-crypto/dist/virgil-crypto-pythia.cjs';
+} from 'virgil-crypto';
 import {
     WrongKeyknoxPasswordError,
     EmptyArrayError,
