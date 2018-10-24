@@ -52,6 +52,7 @@ const cardManager = new CardManager({
 });
 
 const keyStorage = new KeyEntryStorage({ name: 'local-storage' });
+const keyknoxStorage = new KeyEntryStorage({ name: 'keyknox-storage' });
 
 const createSyncStorage = async (identity: string, password: string) => {
     const fetchToken = () => Promise.resolve(generator.generateToken(identity).toString());
@@ -73,7 +74,7 @@ const createSyncStorage = async (identity: string, password: string) => {
                 new KeyknoxCrypto(virgilCrypto),
             ),
         ),
-        new KeyEntryStorage(),
+        keyknoxStorage,
     );
 
     await storage.sync();
@@ -81,13 +82,14 @@ const createSyncStorage = async (identity: string, password: string) => {
 };
 
 describe('VirgilE2ee', () => {
+    beforeAll(done => keyStorage.clear().then(() => done()));
     const identity = 'virgiltest' + Date.now();
     const fetchToken = () => Promise.resolve(generator.generateToken(identity).toString());
+
     it('full integration test', async done => {
-        keyStorage.clear();
+        const sdk = await EThree.init(fetchToken);
         const password = 'secret_password';
         const cloudStorage = await createSyncStorage(identity, password);
-        const sdk = await EThree.init(fetchToken);
         await sdk.bootstrap();
         const privateKey = await keyStorage.load(identity);
         expect(privateKey).not.toEqual(null);
@@ -515,7 +517,7 @@ describe('encrypt and decrypt', () => {
     });
 });
 
-describe('logout()', () => {
+describe('cleanup()', () => {
     it('should delete key on logout', async done => {
         const identity = 'virgiltestlogout' + Date.now();
         const fetchToken = () => Promise.resolve(generator.generateToken(identity).toString());
@@ -523,8 +525,10 @@ describe('logout()', () => {
         const sdk = await EThree.init(fetchToken);
         await sdk.bootstrap('secure_password');
         const isDeleted = await sdk.cleanup();
-        const privateKey = await keyStorage.load(identity);
-        expect(privateKey).toEqual(null);
+        const privateKeyFromLocalStorage = await keyStorage.load(identity);
+        const privateKeyFromKeyknox = await keyknoxStorage.load(identity);
+        expect(privateKeyFromLocalStorage).toEqual(null);
+        expect(privateKeyFromKeyknox).toEqual(null);
         expect(isDeleted).toBe(true);
         done();
     });

@@ -15,7 +15,7 @@
             .then(res => res.json())
             .then(data =>  data.token);
 
-        let client;
+        let sdk;
 
         E3kit.EThree.init(getToken)
             .then(client => sdk = client)
@@ -23,6 +23,7 @@
             .then(() => sdk.encrypt('success!'))
             .then((encryptedMessage) => sdk.decrypt(encryptedMessage))
             .then((message) => console.log('message', message))
+            .then(() => sdk.cleanup())
             .catch(console.error);
     </script>
 </body>

@@ -34,6 +34,7 @@ export default class PrivateKeyLoader {
     private brainKey: IBrainKey;
     private syncStorage?: Promise<SyncKeyStorage>;
     private localStorage: KeyEntryStorage;
+    private keyknoxStorage: KeyEntryStorage;
 
     constructor(private identity: string, public toolbox: VirgilToolbox) {
         this.brainKey = createBrainKey({
@@ -42,6 +43,7 @@ export default class PrivateKeyLoader {
             accessTokenProvider: this.toolbox.jwtProvider,
         });
         this.localStorage = new KeyEntryStorage({ name: 'local-storage' });
+        this.keyknoxStorage = new KeyEntryStorage({ name: 'keyknox-storage' });
     }
 
     async savePrivateKeyRemote(privateKey: VirgilPrivateKey, password: string, id?: string) {
@@ -67,7 +69,11 @@ export default class PrivateKeyLoader {
 
     async resetLocalPrivateKey() {
         this.syncStorage = undefined;
-        return await this.localStorage.remove(this.identity);
+        await Promise.all([
+            this.localStorage.remove(this.identity),
+            this.keyknoxStorage.remove(this.identity),
+        ]);
+        return true;
     }
 
     async resetBackupPrivateKey(password: string) {
