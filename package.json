@@ -1,12 +1,12 @@
 {
     "name": "@virgilsecurity/e3kit",
     "version": "0.1.0",
-    "description": "TODO",
-    "main": "./dist/e3kit.node.cjs.js",
-    "module": "./dist/e3kit.node.es.js",
+    "description": "End-to-end encryption with multiple device support powered by Virgil Security",
+    "main": "./dist/e3kit.browser.umd.js",
+    "module": "./dist/e3kit.browser.umd.js",
     "browser": {
-        "./dist/e3kit.node.cjs.js": "./dist/e3kit.browser.cjs.js",
-        "./dist/e3kit.node.es.js": "./dist/e3kit.browser.es.js"
+        "./dist/e3kit.browser.umd.js": "./dist/e3kit.browser.umd.js",
+        "./dist/e3kit.browser.umd.min.js": "./dist/e3kit.browser.umd.min.js"
     },
     "typings": "./dist/types/index.d.ts",
     "files": [
@@ -20,15 +20,9 @@
         "test:dev": "jest --watch",
         "debug:test": "node --inspect-brk node_modules/.bin/jest --runInBand",
         "clean": "rimraf .rpt2_cache .virgil_key_entries coverage dist",
-        "build:node:cjs": "cross-env ENV=node FORMAT=cjs rollup -c",
-        "build:node:es": "cross-env ENV=node FORMAT=es rollup -c",
-        "build:node": "npm run build:node:cjs && npm run build:node:es",
-        "build:browser:cjs": "cross-env ENV=browser FORMAT=cjs rollup -c",
-        "build:browser:es": "cross-env ENV=browser FORMAT=es rollup -c",
         "build:browser:umd": "cross-env ENV=browser FORMAT=umd rollup -c",
         "build:browser:umd:min": "cross-env ENV=browser FORMAT=umd MINIFY=true rollup -c",
-        "build:browser": "npm run build:browser:cjs && npm run build:browser:es && npm run build:browser:umd && npm run build:browser:umd:min",
-        "build": "npm run build:node && npm run build:browser",
+        "build": "npm run build:browser:umd && npm run build:browser:umd:min",
         "prepare": "npm run clean && npm run build",
         "lint": "tslint --project tsconfig.json",
         "prettier": "prettier 'src/**/*.ts' --write",
@@ -76,5 +70,6 @@
         "typescript": "^3.0.1",
         "virgil-crypto": "^3.0.0",
         "virgil-sdk": "^5.0.0"
-    }
+    },
+    "sideEffects": false
 }

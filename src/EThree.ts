@@ -56,7 +56,7 @@ export default class EThree {
         return await this.keyLoader.resetLocalPrivateKey();
     }
 
-    async rollbackPrivateKey(password: string) {
+    async resetPrivateKeyBackup(password: string) {
         return this.keyLoader.resetBackupPrivateKey(password);
     }
 

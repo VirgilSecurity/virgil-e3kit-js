@@ -104,7 +104,7 @@ describe('VirgilE2ee', () => {
             expect(e).toBeInstanceOf(Error);
         }
 
-        await sdk.rollbackPrivateKey(password);
+        await sdk.resetPrivateKeyBackup(password);
         try {
             await cloudStorage.sync();
             const cloudKey = await cloudStorage.retrieveEntry(identity);
@@ -355,7 +355,7 @@ describe('change password', () => {
     });
 });
 
-describe('backupPrivateKeyCloud', () => {
+describe('backupPrivateKey', () => {
     const identity = 'virgiltestbackup' + Date.now();
     const fetchToken = () => Promise.resolve(generator.generateToken(identity).toString());
 
@@ -537,7 +537,7 @@ describe('logout()', () => {
         await sdk.bootstrap('secure_password');
         const privateKeyData = await keyStorage.load(identity);
         const privateKey = virgilCrypto.importPrivateKey(privateKeyData!.value);
-        await sdk.rollbackPrivateKey('secure_password');
+        await sdk.resetPrivateKeyBackup('secure_password');
         try {
             await sdk.backupPrivateKey('secure_password');
         } catch (e) {

@@ -1,1 +1,1 @@
-export { default as ETree } from './EThree';
+export { default as EThree } from './EThree';
