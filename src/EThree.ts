@@ -1,5 +1,5 @@
 import PrivateKeyLoader from './PrivateKeyLoader';
-import VirgilToolbox from './virgilToolbox';
+import VirgilToolbox from './VirgilToolbox';
 import { CachingJwtProvider } from 'virgil-sdk';
 import { VirgilPublicKey, Data } from 'virgil-crypto';
 import {

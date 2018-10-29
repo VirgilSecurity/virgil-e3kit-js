@@ -35,6 +35,8 @@
         ]
     },
     "dependencies": {
+        "virgil-crypto": "^3.0.2",
+        "virgil-sdk": "^5.1.0",
         "@virgilsecurity/keyknox": "^0.1.2",
         "virgil-pythia": "^0.2.3"
     },
@@ -65,9 +67,7 @@
         "tslint-config-airbnb": "^5.9.2",
         "tslint-config-prettier": "^1.14.0",
         "tslint-plugin-prettier": "^1.3.0",
-        "typescript": "^3.0.1",
-        "virgil-crypto": "^3.0.2",
-        "virgil-sdk": "^5.1.0"
+        "typescript": "^3.0.1"
     },
     "sideEffects": false
 }

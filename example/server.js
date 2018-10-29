@@ -26,8 +26,3 @@ app.get('/get-virgil-jwt', (_req, res) => {
 });
 
 app.listen(3000, () => console.log(`Example app listening on port http://localhost:3000!`))
-
-// This HTTPS endpoint can only be accessed by your Firebase Users.
-// Requests need to be authorized by providing an `Authorization` HTTP header
-// with value `Bearer <Firebase ID Token>`.
-// exports.api = functions.https.onRequest(app);
