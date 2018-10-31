@@ -24,6 +24,6 @@ export class HelloIonicPage {
       .then((encryptedMessage) => sdk.decrypt(encryptedMessage))
       .then((message) => this.result = message)
       .then(() => sdk.cleanup())
-      .catch((error) => this.result = error);
+      .catch((error) => this.result = 'error: ' + error);
   }
 }
