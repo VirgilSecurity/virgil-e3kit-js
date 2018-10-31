@@ -285,7 +285,7 @@ describe('lookupKeys', () => {
     it('lookupKeys with error', async done => {
         const identity1 = 'virgiltestlookuperror1' + Date.now();
         const keypair1 = virgilCrypto.generateKeys();
-
+        const fnStore = VirgilToolbox.prototype.getPublicKey;
         VirgilToolbox.prototype.getPublicKey = jest
             .fn()
             .mockResolvedValueOnce(keypair1.publicKey as VirgilPublicKey)
@@ -307,8 +307,10 @@ describe('lookupKeys', () => {
             expect(e.rejected.length).toBe(2);
             expect(e.rejected[0]).toBeInstanceOf(Error);
             expect(e.rejected[1]).toBeInstanceOf(LookupNotFoundError);
+            VirgilToolbox.prototype.getPublicKey = fnStore;
             return done();
         }
+        VirgilToolbox.prototype.getPublicKey = fnStore;
         done('should throw');
     });
 

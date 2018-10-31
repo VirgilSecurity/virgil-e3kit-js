@@ -97,7 +97,9 @@ export default class EThree {
 
         const responses = await Promise.all(
             identities.map(i =>
-                this.toolbox.getPublicKey(i).catch(e => (e instanceof Error ? e : new Error(e))),
+                this.toolbox
+                    .getPublicKey(i)
+                    .catch(e => Promise.resolve(e instanceof Error ? e : new Error(e))),
             ),
         );
 
@@ -111,10 +113,11 @@ export default class EThree {
         return await this.keyLoader.changePassword(newPassword);
     }
 
-    async backupPrivateKey(password: string) {
+    async backupPrivateKey(password: string): Promise<void> {
         const privateKey = await this.keyLoader.loadLocalPrivateKey();
         if (!privateKey) throw new BootstrapRequiredError();
-        return await this.keyLoader.savePrivateKeyRemote(privateKey, password);
+        await this.keyLoader.savePrivateKeyRemote(privateKey, password);
+        return;
     }
 
     private async localBootstrap(hasCard: boolean) {
