@@ -17,7 +17,7 @@
     "license": "BSD-3-Clause",
     "scripts": {
         "test": "jest",
-        "test:dev": "jest --watch",
+        "test:dev": "jest --watch --verbose false",
         "debug:test": "node --inspect-brk node_modules/.bin/jest --runInBand",
         "clean": "rimraf .rpt2_cache .virgil_key_entries coverage dist",
         "build:browser:umd": "cross-env ENV=browser FORMAT=umd rollup -c",

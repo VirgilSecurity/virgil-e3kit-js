@@ -54,8 +54,11 @@ const cardManager = new CardManager({
 const keyStorage = new KeyEntryStorage({ name: 'local-storage' });
 const keyknoxStorage = new KeyEntryStorage({ name: 'keyknox-storage' });
 
+const createFetchToken = (identity: string) => () =>
+    Promise.resolve(generator.generateToken(identity).toString());
+
 const createSyncStorage = async (identity: string, password: string) => {
-    const fetchToken = () => Promise.resolve(generator.generateToken(identity).toString());
+    const fetchToken = createFetchToken(identity);
     const brainKey = createBrainKey({
         virgilCrypto: virgilCrypto,
         virgilPythiaCrypto: new VirgilPythiaCrypto(),
@@ -120,15 +123,19 @@ describe('VirgilE2ee', () => {
 });
 
 describe('local bootstrap (without password)', () => {
-    const identity = 'virgiltestlocal' + Date.now();
+    it('AUTH-1 has no local key, has no card', async done => {
+        const identity = 'virgiltestlocal1' + Date.now();
+        const fetchToken = createFetchToken(identity);
+        const sdk = await EThree.init(fetchToken);
+        await sdk.bootstrap();
+        const cards = await cardManager.searchCards(identity);
+        expect(cards.length).toEqual(1);
+        done();
+    });
 
     it('has local key, has no card', async done => {
-        const fetchToken = () => Promise.resolve(generator.generateToken(identity).toString());
-        const keyPair = virgilCrypto.generateKeys();
-        await keyStorage.save({
-            name: identity,
-            value: virgilCrypto.exportPrivateKey(keyPair.privateKey),
-        });
+        const identity = 'virgiltestlocal2' + Date.now();
+        const fetchToken = createFetchToken(identity);
         const sdk = await EThree.init(fetchToken);
         await sdk.bootstrap();
         const cards = await cardManager.searchCards(identity);
@@ -137,24 +144,37 @@ describe('local bootstrap (without password)', () => {
     });
 
     it('has local key, has card', async done => {
-        const key = await keyStorage.load(identity);
-        expect(key).not.toBe(null);
-        const fetchToken = () => Promise.resolve(generator.generateToken(identity).toString());
+        const identity = 'virgiltestlocal3' + Date.now();
+        const keyPair = virgilCrypto.generateKeys();
+        await cardManager.publishCard({ identity: identity, ...keyPair });
+        await keyStorage.save({
+            name: identity,
+            value: virgilCrypto.exportPrivateKey(keyPair.privateKey),
+        });
+        const fetchToken = createFetchToken(identity);
         const prevCards = await cardManager.searchCards(identity);
+
         expect(prevCards.length).toEqual(1);
+
         const sdk = await EThree.init(fetchToken);
         await sdk.bootstrap();
         const cards = await cardManager.searchCards(identity);
+
         expect(cards.length).toEqual(1);
         done();
     });
 
     it('has no local key, has card', async done => {
         await keyStorage.clear();
-        const fetchToken = () => Promise.resolve(generator.generateToken(identity).toString());
+        const identity = 'virgiltestlocal4' + Date.now();
+        const keyPair = virgilCrypto.generateKeys();
+        await cardManager.publishCard({ identity: identity, ...keyPair });
+        const fetchToken = createFetchToken(identity);
         const sdk = await EThree.init(fetchToken);
         const cards = await cardManager.searchCards(identity);
+
         expect(cards.length).toEqual(1);
+
         try {
             await sdk.bootstrap();
         } catch (e) {
@@ -166,7 +186,7 @@ describe('local bootstrap (without password)', () => {
 
     it('STA-1 has no local key, has no card', async done => {
         const identity = 'virgiltestlocalnokeynocard' + Date.now();
-        const fetchToken = () => Promise.resolve(generator.generateToken(identity).toString());
+        const fetchToken = createFetchToken(identity);
         const prevCards = await cardManager.searchCards(identity);
         expect(prevCards.length).toBe(0);
         const sdk = await EThree.init(fetchToken);
@@ -182,12 +202,13 @@ describe('local bootstrap (without password)', () => {
 });
 
 describe('remote bootstrap (with password)', () => {
-    const identity = 'virgiltestremote' + Date.now();
-    let prevKey: IKeyEntry;
-    it('has no local key, has no card', async done => {
-        const fetchToken = () => Promise.resolve(generator.generateToken(identity).toString());
+    it('AUTH-2 has no local key, has no card', async done => {
+        const identity = 'virgiltestremote1' + Date.now();
+        const fetchToken = createFetchToken(identity);
         const prevCards = await cardManager.searchCards(identity);
+
         expect(prevCards.length).toBe(0);
+
         const sdk = await EThree.init(fetchToken);
         await sdk.bootstrap('secure_password');
         const [cards, key] = await Promise.all([
@@ -196,14 +217,17 @@ describe('remote bootstrap (with password)', () => {
         ]);
         expect(cards.length).toBe(1);
         expect(key).not.toBe(null);
-        prevKey = key!;
         done();
     });
 
     it('has no local key, has card', async done => {
-        await keyStorage.clear();
-        const fetchToken = () => Promise.resolve(generator.generateToken(identity).toString());
+        const identity = 'virgiltestremote2' + Date.now();
+        const keyPair = virgilCrypto.generateKeys();
+        await cardManager.publishCard({ identity: identity, ...keyPair });
+        const fetchToken = createFetchToken(identity);
         const prevCards = await cardManager.searchCards(identity);
+        const cloudStorage = await createSyncStorage(identity, 'secret_password');
+        await cloudStorage.storeEntry(identity, virgilCrypto.exportPrivateKey(keyPair.privateKey));
         expect(prevCards.length).toBe(1);
         const sdk = await EThree.init(fetchToken);
         await sdk.bootstrap('secure_password');
@@ -213,14 +237,22 @@ describe('remote bootstrap (with password)', () => {
         ]);
         expect(cards.length).toBe(1);
         expect(key).not.toBe(null);
-        expect(key!.value).toMatchObject(prevKey.value);
+        expect(virgilCrypto.importPrivateKey(key!.value)).toMatchObject(keyPair.privateKey);
         done();
     });
 
     it('wrong password', async done => {
-        await keyStorage.clear();
-        const fetchToken = () => Promise.resolve(generator.generateToken(identity).toString());
+        const identity = 'virgiltestremote3' + Date.now();
+        const fetchToken = createFetchToken(identity);
+        const keyPair = virgilCrypto.generateKeys();
+        const cloudStorage = await createSyncStorage(identity, 'secret_password');
+        await Promise.all([
+            cardManager.publishCard({ identity: identity, ...keyPair }),
+            cloudStorage.storeEntry(identity, virgilCrypto.exportPrivateKey(keyPair.privateKey)),
+        ]);
         const prevCards = await cardManager.searchCards(identity);
+        await keyknoxStorage.remove(identity);
+        await keyStorage.remove(identity);
         expect(prevCards.length).toBe(1);
         const sdk = await EThree.init(fetchToken);
         try {
@@ -541,8 +573,6 @@ describe('cleanup()', () => {
 
         const sdk = await EThree.init(fetchToken);
         await sdk.bootstrap('secure_password');
-        const privateKeyData = await keyStorage.load(identity);
-        const privateKey = virgilCrypto.importPrivateKey(privateKeyData!.value);
         await sdk.resetPrivateKeyBackup('secure_password');
         try {
             await sdk.backupPrivateKey('secure_password');
