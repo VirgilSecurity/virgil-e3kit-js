@@ -35,7 +35,7 @@ You will need to add `@virgilsecurity/e3kit` script.
 
 ## Usage Example
 
-### Initialize & bootstrap
+### Initialize & Bootstrap
 
 ```
 import { EThree } from '@virgilsecurity/e3kit-js'
@@ -61,8 +61,8 @@ const [receiverPublicKeys, senderPublicKeys] = await Promise.all([
 ]);
 
 const encryptedMsg = await eThree.encrypt('Send you my sensitive information!', receiversPublicKeys);
-const decryptedMsg = await eThree.decrypt(encryptedMsg, senderPublicKeys;
-// we decrypt the message and check that it really sent by "alex@myapp.com"
+const decryptedMsg = await eThree.decrypt(encryptedMsg, senderPublicKeys);
+// we decrypt the message and check that it is sent by "alex@myapp.com"
 
 ```
 You can find more examples [in examples folder](example) and https://e3kit.readme.io.
