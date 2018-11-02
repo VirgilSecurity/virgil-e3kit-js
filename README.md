@@ -65,7 +65,7 @@ const decryptedMsg = await eThree.decrypt(encryptedMsg, senderPublicKeys);
 // we decrypt the message and check that it is sent by "alex@myapp.com"
 
 ```
-You can find more examples [in examples folder](example) and https://e3kit.readme.io.
+You can find more examples in [examples folder](example) and on https://e3kit.readme.io.
 
 ## Docs
 Virgil Security has a powerful set of APIs, and the documentation below can get you started today.
