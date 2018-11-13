@@ -14,8 +14,8 @@ const isWithoutErrors = <T>(arr: Array<T | Error>): arr is Array<T> => {
 };
 
 export default class EThree {
-    private identity: string;
-    private toolbox: VirgilToolbox;
+    identity: string;
+    toolbox: VirgilToolbox;
     private keyLoader: PrivateKeyLoader;
 
     static async init(getToken: () => Promise<string>) {
