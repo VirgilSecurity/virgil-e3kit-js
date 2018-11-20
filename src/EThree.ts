@@ -8,7 +8,7 @@ import {
     EmptyArrayError,
     LookupError,
 } from './errors';
-import { isWithoutErrors, isArray } from './utils/typeguards';
+import { isWithoutErrors, isArray, isString } from './utils/typeguards';
 
 export default class EThree {
     identity: string;
@@ -58,9 +58,9 @@ export default class EThree {
     }
 
     async encrypt(message: string, publicKeys?: VirgilPublicKey[]): Promise<string>;
-    async encrypt(message: ArrayBuffer, publicKey?: VirgilPublicKey[]): Promise<ArrayBuffer>;
     async encrypt(message: Buffer, publicKey?: VirgilPublicKey[]): Promise<Buffer>;
-    async encrypt(message: Data, publicKeys?: VirgilPublicKey[]): Promise<Data> {
+    async encrypt(message: ArrayBuffer, publicKey?: VirgilPublicKey[]): Promise<Buffer>;
+    async encrypt(message: Data, publicKeys?: VirgilPublicKey[]): Promise<Buffer | string> {
         const isString = typeof message === 'string';
         if (publicKeys && publicKeys.length === 0) throw new EmptyArrayError('encrypt');
         const privateKey = await this.keyLoader.loadLocalPrivateKey();
@@ -77,16 +77,16 @@ export default class EThree {
     }
 
     async decrypt(message: string, publicKey?: VirgilPublicKey): Promise<string>;
-    async decrypt(message: ArrayBuffer, publicKey?: VirgilPublicKey): Promise<ArrayBuffer>;
     async decrypt(message: Buffer, publicKey?: VirgilPublicKey): Promise<Buffer>;
-    async decrypt(message: Data, publicKey?: VirgilPublicKey): Promise<Data> {
-        const isString = typeof message === 'string';
+    async decrypt(message: ArrayBuffer, publicKey?: VirgilPublicKey): Promise<Buffer>;
+    async decrypt(message: Data, publicKey?: VirgilPublicKey): Promise<Buffer | string> {
+        const isMessageString = isString(message);
         const privateKey = await this.keyLoader.loadLocalPrivateKey();
         if (!privateKey) throw new BootstrapRequiredError();
         if (!publicKey) publicKey = this.toolbox.virgilCrypto.extractPublicKey(privateKey);
         let res: Data = this.toolbox.virgilCrypto.decryptThenVerify(message, privateKey, publicKey);
-        if (isString) res = res.toString('utf8');
-        return res;
+        if (isMessageString) return res.toString('utf8') as string;
+        return res as Buffer;
     }
 
     async lookupPublicKeys(identities: string): Promise<VirgilPublicKey>;
