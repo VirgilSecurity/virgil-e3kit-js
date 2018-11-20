@@ -45,7 +45,7 @@ const getToken = () => fetch('http://localhost:3000/get-virgil-jwt/')
     .then(data =>  data.token);
 
 // get your unique identity from backend
-const sdk = await EThree.init(getToken)
+const sdk = await EThree.initialize(getToken);
 // create private key and upload it to our protected cloud service
 await sdk.bootstrap('secret_password');
 ```
