@@ -1,7 +1,8 @@
 # Changelog
 
-## 2018-11-20 0.1.3
+## 2018-11-20 0.2.0
 * Rename EThree.init method to EThree.initialize
+* EThree.decrypt method now accept sender public key instead of array
 
 ## 2018-11-06 0.1.2
 

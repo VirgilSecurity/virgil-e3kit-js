@@ -58,6 +58,6 @@ firebase.auth().signInAnonymously()
         const encryptedMsg = eThree.encrypt('Hack me!', chatRoomParticipants);
         return { encryptedMsg, senderPublicKeys }
     })
-    .then(({ encryptedMsg, senderPublicKeys }) => eThree.decrypt(encryptedMsg, senderPublicKeys))
+    .then(({ encryptedMsg, senderPublicKeys }) => eThree.decrypt(encryptedMsg, senderPublicKeys[0]))
     .catch(err => console.log(err.result))
 
