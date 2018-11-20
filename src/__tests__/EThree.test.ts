@@ -5,7 +5,6 @@ import {
     CardManager,
     VirgilCardVerifier,
     GeneratorJwtProvider,
-    IKeyEntry,
     CachingJwtProvider,
 } from 'virgil-sdk';
 import {
@@ -269,6 +268,21 @@ describe('lookupKeys', () => {
     const identity = 'virgiltestlookup' + Date.now();
     const fetchToken = () => Promise.resolve(generator.generateToken(identity).toString());
 
+    it('lookupKeys for one identity success', async done => {
+        const sdk = await EThree.initialize(fetchToken);
+        const identity = 'virgiltestlookup' + Date.now();
+        const keypair = virgilCrypto.generateKeys();
+
+        await cardManager.publishCard({ identity: identity, ...keypair });
+        const publicKey = await sdk.lookupPublicKeys(identity);
+
+        expect(Array.isArray(publicKey)).not.toBeTruthy();
+        expect(virgilCrypto.exportPublicKey(publicKey).toString('base64')).toEqual(
+            virgilCrypto.exportPublicKey(keypair.publicKey).toString('base64'),
+        );
+        done();
+    });
+
     it('STE-1 lookupKeys success', async done => {
         const sdk = await EThree.initialize(fetchToken);
         const identity1 = 'virgiltestlookup1' + Date.now();
@@ -444,8 +458,6 @@ describe('encrypt and decrypt', () => {
             EThree.initialize(fetchToken1),
             EThree.initialize(fetchToken2),
         ]);
-
-        const unusedKeypair = virgilCrypto.generateKeys();
 
         await Promise.all([sdk1.bootstrap(), sdk2.bootstrap()]);
         const message = 'encrypt, decrypt, repeat';
