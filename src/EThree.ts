@@ -10,6 +10,8 @@ import {
 } from './errors';
 import { isWithoutErrors, isArray, isString } from './utils/typeguards';
 
+type EncryptVirgilPublicKeyArg = VirgilPublicKey[] | VirgilPublicKey;
+
 export default class EThree {
     identity: string;
     toolbox: VirgilToolbox;
@@ -57,21 +59,28 @@ export default class EThree {
         return this.keyLoader.resetBackupPrivateKey(password);
     }
 
-    async encrypt(message: string, publicKeys?: VirgilPublicKey[]): Promise<string>;
-    async encrypt(message: Buffer, publicKey?: VirgilPublicKey[]): Promise<Buffer>;
-    async encrypt(message: ArrayBuffer, publicKey?: VirgilPublicKey[]): Promise<Buffer>;
-    async encrypt(message: Data, publicKeys?: VirgilPublicKey[]): Promise<Buffer | string> {
+    async encrypt(message: string, publicKeys?: EncryptVirgilPublicKeyArg): Promise<string>;
+    async encrypt(message: Buffer, publicKey?: EncryptVirgilPublicKeyArg): Promise<Buffer>;
+    async encrypt(message: ArrayBuffer, publicKey?: EncryptVirgilPublicKeyArg): Promise<Buffer>;
+    async encrypt(message: Data, publicKeys?: EncryptVirgilPublicKeyArg): Promise<Buffer | string> {
         const isString = typeof message === 'string';
-        if (publicKeys && publicKeys.length === 0) throw new EmptyArrayError('encrypt');
+
+        if (publicKeys && isArray(publicKeys) && publicKeys.length === 0) {
+            throw new EmptyArrayError('encrypt');
+        }
+
+        let argument: VirgilPublicKey[];
+
+        if (publicKeys == null) argument = [];
+        else if (isArray(publicKeys)) argument = publicKeys;
+        else argument = [publicKeys];
+
         const privateKey = await this.keyLoader.loadLocalPrivateKey();
         if (!privateKey) throw new BootstrapRequiredError();
-        const publicKey = this.toolbox.virgilCrypto.extractPublicKey(privateKey);
-        const publicKeyArray = publicKeys ? [publicKey, ...publicKeys] : [publicKey];
-        let res: Data = this.toolbox.virgilCrypto.signThenEncrypt(
-            message,
-            privateKey,
-            publicKeyArray,
-        );
+
+        argument.push(this.toolbox.virgilCrypto.extractPublicKey(privateKey));
+
+        let res: Data = this.toolbox.virgilCrypto.signThenEncrypt(message, privateKey, argument);
         if (isString) res = res.toString('base64');
         return res;
     }
