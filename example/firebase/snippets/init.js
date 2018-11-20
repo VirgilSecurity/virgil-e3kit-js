@@ -24,7 +24,7 @@ firebase.auth().onAuthStateChanged(user => {
         // Fetch Virgil JWT token from Firebase function
         const getToken = () => user.getIdToken().then(fetchToken);
         // Initialize EThree SDK with JWT token from Firebase Function
-        EThree.init(getToken);
+        EThree.initialize(getToken);
     }
 });
 

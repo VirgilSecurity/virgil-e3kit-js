@@ -18,7 +18,7 @@ export default class EThree {
     toolbox: VirgilToolbox;
     private keyLoader: PrivateKeyLoader;
 
-    static async init(getToken: () => Promise<string>) {
+    static async initialize(getToken: () => Promise<string>) {
         const provider = new CachingJwtProvider(getToken);
         const token = await provider.getToken({ operation: 'get' });
         const identity = token.identity();
