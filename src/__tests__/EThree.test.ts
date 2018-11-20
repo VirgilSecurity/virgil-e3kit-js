@@ -453,11 +453,11 @@ describe('encrypt and decrypt', () => {
         const sdk2PublicKeys = await sdk2.lookupPublicKeys([identity2]);
         const encryptedMessage = await sdk1.encrypt(message, sdk2PublicKeys);
         try {
-            await sdk2.decrypt(encryptedMessage, [unusedKeypair.publicKey]);
+            await sdk2.decrypt(encryptedMessage);
         } catch (e) {
             expect(e).toBeInstanceOf(Error);
         }
-        const decryptedMessage = await sdk2.decrypt(encryptedMessage, sdk1PublicKeys);
+        const decryptedMessage = await sdk2.decrypt(encryptedMessage, sdk1PublicKeys[0]);
         expect(decryptedMessage).toEqual(message);
         done();
     });
@@ -467,20 +467,6 @@ describe('encrypt and decrypt', () => {
         await sdk.bootstrap();
         try {
             await sdk.encrypt('privet', []);
-        } catch (e) {
-            expect(e).toBeInstanceOf(EmptyArrayError);
-            return done();
-        }
-        done('should throw');
-    });
-
-    it('STE-5 decrypt for empty public keys', async done => {
-        const sdk = await EThree.initialize(fetchToken);
-        await sdk.bootstrap();
-        const keyPair = virgilCrypto.generateKeys();
-        const message = await sdk.encrypt('privet', [keyPair.publicKey]);
-        try {
-            await sdk.decrypt(message, []);
         } catch (e) {
             expect(e).toBeInstanceOf(EmptyArrayError);
             return done();
@@ -508,7 +494,7 @@ describe('encrypt and decrypt', () => {
             .encrypt(message, receiverPublicKey)
             .toString('base64');
         try {
-            await sdk.decrypt(encryptedMessage, [senderPublicKey]);
+            await sdk.decrypt(encryptedMessage, senderPublicKey);
         } catch (e) {
             expect(e).toBeDefined();
             return done();
@@ -541,11 +527,11 @@ describe('encrypt and decrypt', () => {
         const recipient = virgilCrypto.generateKeys();
         const sdk = await EThree.initialize(fetchToken);
         await sdk.bootstrap();
-        const publicKeys = await sdk.lookupPublicKeys([identity]);
+        const publicKey = (await sdk.lookupPublicKeys([identity]))[0];
         const encryptedMessage = await sdk.encrypt(buf, [recipient.publicKey]);
         expect(encryptedMessage).toBeInstanceOf(Buffer);
 
-        const resp = await sdk.decrypt(encryptedMessage, publicKeys);
+        const resp = await sdk.decrypt(encryptedMessage, publicKey);
         expect(resp).toBeInstanceOf(Buffer);
         done();
     });

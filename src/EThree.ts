@@ -76,18 +76,12 @@ export default class EThree {
         return res;
     }
 
-    async decrypt(message: Data, publicKeys?: VirgilPublicKey[]): Promise<Data> {
+    async decrypt(message: Data, publicKey?: VirgilPublicKey): Promise<Data> {
         const isString = typeof message === 'string';
-        if (publicKeys && publicKeys.length === 0) throw new EmptyArrayError('decrypt');
         const privateKey = await this.keyLoader.loadLocalPrivateKey();
         if (!privateKey) throw new BootstrapRequiredError();
-        const publicKey = this.toolbox.virgilCrypto.extractPublicKey(privateKey);
-        const publicKeyArray = publicKeys ? [publicKey, ...publicKeys] : [publicKey];
-        let res: Data = this.toolbox.virgilCrypto.decryptThenVerify(
-            message,
-            privateKey,
-            publicKeyArray,
-        );
+        if (!publicKey) publicKey = this.toolbox.virgilCrypto.extractPublicKey(privateKey);
+        let res: Data = this.toolbox.virgilCrypto.decryptThenVerify(message, privateKey, publicKey);
         if (isString) res = res.toString('utf8');
         return res;
     }
