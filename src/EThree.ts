@@ -8,17 +8,16 @@ import {
     EmptyArrayError,
     LookupError,
 } from './errors';
+import { isWithoutErrors, isArray, isString } from './utils/typeguards';
 
-const isWithoutErrors = <T>(arr: Array<T | Error>): arr is Array<T> => {
-    return !arr.some((el: any) => el instanceof Error);
-};
+type EncryptVirgilPublicKeyArg = VirgilPublicKey[] | VirgilPublicKey;
 
 export default class EThree {
     identity: string;
     toolbox: VirgilToolbox;
     private keyLoader: PrivateKeyLoader;
 
-    static async init(getToken: () => Promise<string>) {
+    static async initialize(getToken: () => Promise<string>) {
         const provider = new CachingJwtProvider(getToken);
         const token = await provider.getToken({ operation: 'get' });
         const identity = token.identity();
@@ -60,50 +59,63 @@ export default class EThree {
         return this.keyLoader.resetBackupPrivateKey(password);
     }
 
-    async encrypt(message: Data, publicKeys?: VirgilPublicKey[]): Promise<Data> {
+    async encrypt(message: string, publicKeys?: EncryptVirgilPublicKeyArg): Promise<string>;
+    async encrypt(message: Buffer, publicKey?: EncryptVirgilPublicKeyArg): Promise<Buffer>;
+    async encrypt(message: ArrayBuffer, publicKey?: EncryptVirgilPublicKeyArg): Promise<Buffer>;
+    async encrypt(message: Data, publicKeys?: EncryptVirgilPublicKeyArg): Promise<Buffer | string> {
         const isString = typeof message === 'string';
-        if (publicKeys && publicKeys.length === 0) throw new EmptyArrayError('encrypt');
+
+        if (publicKeys && isArray(publicKeys) && publicKeys.length === 0) {
+            throw new EmptyArrayError('encrypt');
+        }
+
+        let argument: VirgilPublicKey[];
+
+        if (publicKeys == null) argument = [];
+        else if (isArray(publicKeys)) argument = publicKeys;
+        else argument = [publicKeys];
+
         const privateKey = await this.keyLoader.loadLocalPrivateKey();
         if (!privateKey) throw new BootstrapRequiredError();
-        const publicKey = this.toolbox.virgilCrypto.extractPublicKey(privateKey);
-        const publicKeyArray = publicKeys ? [publicKey, ...publicKeys] : [publicKey];
-        let res: Data = this.toolbox.virgilCrypto.signThenEncrypt(
-            message,
-            privateKey,
-            publicKeyArray,
-        );
+
+        argument.push(this.toolbox.virgilCrypto.extractPublicKey(privateKey));
+
+        let res: Data = this.toolbox.virgilCrypto.signThenEncrypt(message, privateKey, argument);
         if (isString) res = res.toString('base64');
         return res;
     }
 
-    async decrypt(message: Data, publicKeys?: VirgilPublicKey[]): Promise<Data> {
-        const isString = typeof message === 'string';
-        if (publicKeys && publicKeys.length === 0) throw new EmptyArrayError('decrypt');
+    async decrypt(message: string, publicKey?: VirgilPublicKey): Promise<string>;
+    async decrypt(message: Buffer, publicKey?: VirgilPublicKey): Promise<Buffer>;
+    async decrypt(message: ArrayBuffer, publicKey?: VirgilPublicKey): Promise<Buffer>;
+    async decrypt(message: Data, publicKey?: VirgilPublicKey): Promise<Buffer | string> {
+        const isMessageString = isString(message);
         const privateKey = await this.keyLoader.loadLocalPrivateKey();
         if (!privateKey) throw new BootstrapRequiredError();
-        const publicKey = this.toolbox.virgilCrypto.extractPublicKey(privateKey);
-        const publicKeyArray = publicKeys ? [publicKey, ...publicKeys] : [publicKey];
-        let res: Data = this.toolbox.virgilCrypto.decryptThenVerify(
-            message,
-            privateKey,
-            publicKeyArray,
-        );
-        if (isString) res = res.toString('utf8');
-        return res;
+        if (!publicKey) publicKey = this.toolbox.virgilCrypto.extractPublicKey(privateKey);
+        let res: Data = this.toolbox.virgilCrypto.decryptThenVerify(message, privateKey, publicKey);
+        if (isMessageString) return res.toString('utf8') as string;
+        return res as Buffer;
     }
 
-    async lookupPublicKeys(identities: string[]): Promise<VirgilPublicKey[]> {
-        if (identities.length === 0) throw new EmptyArrayError('lookupKeys');
+    async lookupPublicKeys(identities: string): Promise<VirgilPublicKey>;
+    async lookupPublicKeys(identities: string[]): Promise<VirgilPublicKey[]>;
+    async lookupPublicKeys(
+        identities: string[] | string,
+    ): Promise<VirgilPublicKey[] | VirgilPublicKey> {
+        const argument = isArray(identities) ? identities : [identities];
+
+        if (argument.length === 0) throw new EmptyArrayError('lookupPublicKeys');
 
         const responses = await Promise.all(
-            identities.map(i =>
+            argument.map(i =>
                 this.toolbox
                     .getPublicKey(i)
                     .catch(e => Promise.resolve(e instanceof Error ? e : new Error(e))),
             ),
         );
 
-        if (isWithoutErrors(responses)) return responses;
+        if (isWithoutErrors(responses)) return isArray(identities) ? responses : responses[0];
 
         return Promise.reject(new LookupError(responses));
     }

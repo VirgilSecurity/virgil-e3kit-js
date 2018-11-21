@@ -24,7 +24,7 @@ let eThreePromise = new Promise((resolve, reject) => {
             // Async func to fetch Virgil JWT token from the Virgil-Firebase function
             const getToken = () => user.getIdToken().then(fetchToken);
             // Initialize e3kit - see full sample in EThree.init page
-            eThreePromise = EThree.init(getToken);
+            eThreePromise = EThree.initialize(getToken);
             eThreePromise.then(resolve).catch(reject);
         } else {
             // Delete the user's private key from device when user is logout
@@ -58,6 +58,6 @@ firebase.auth().signInAnonymously()
         const encryptedMsg = eThree.encrypt('Hack me!', chatRoomParticipants);
         return { encryptedMsg, senderPublicKeys }
     })
-    .then(({ encryptedMsg, senderPublicKeys }) => eThree.decrypt(encryptedMsg, senderPublicKeys))
+    .then(({ encryptedMsg, senderPublicKeys }) => eThree.decrypt(encryptedMsg, senderPublicKeys[0]))
     .catch(err => console.log(err.result))
 

@@ -45,7 +45,7 @@ const getToken = () => fetch('http://localhost:3000/get-virgil-jwt/')
     .then(data =>  data.token);
 
 // get your unique identity from backend
-const sdk = await EThree.init(getToken)
+const sdk = await EThree.initialize(getToken);
 // create private key and upload it to our protected cloud service
 await sdk.bootstrap('secret_password');
 ```
@@ -54,14 +54,14 @@ await sdk.bootstrap('secret_password');
 
 ```
 const usersToEncryptTo = ["alice@myapp.com", "bob@myapp.com", 'sofia@myapp.com'];
-const userThatEncrypts = ["alex@myapp.com"];
-const [receiverPublicKeys, senderPublicKeys] = await Promise.all([
+const userThatEncrypts = "alex@myapp.com";
+const [receiverPublicKeys, senderPublicKey] = await Promise.all([
     eThree.lookupPublicKeys(usersToEncryptTo),
-    eThree.lookupPublicKeys(userThatEncrypt)
+    eThree.lookupPublicKeys(userThatEncrypts)
 ]);
 
 const encryptedMsg = await eThree.encrypt('Send you my sensitive information!', receiversPublicKeys);
-const decryptedMsg = await eThree.decrypt(encryptedMsg, senderPublicKeys);
+const decryptedMsg = await eThree.decrypt(encryptedMsg, senderPublicKey);
 // we decrypt the message and check that it is sent by "alex@myapp.com"
 
 ```

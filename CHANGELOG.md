@@ -1,5 +1,12 @@
 # Changelog
 
+## 2018-11-20 0.2.0
+
+* Rename EThree.init method to EThree.initialize
+* EThree.encrypt method now can accept single public key
+* EThree.decrypt method now accept sender public key instead of array
+* ЕThree.lookupPrivateKey now can lookup for one identity and return one public key.
+
 ## 2018-11-06 0.1.2
 
 * Make `identity` property of EThree class public
