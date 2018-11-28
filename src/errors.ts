@@ -15,6 +15,15 @@ export class PasswordRequiredError extends SdkError {
     }
 }
 
+export class IdentityAlreadyExistsError extends SdkError {
+    constructor() {
+        super(
+            'This identity already registered on Virgil Cloud. Please load private key using EThree.restorePrivateKey or EThree.rotatePrivateKey',
+            'IdentityAlreadyExistsError',
+        );
+    }
+}
+
 export class PrivateKeyNotFoundError extends SdkError {
     constructor() {
         super('Private key not found', 'PrivateKeyNotFoundError');

@@ -15,7 +15,6 @@ import {
     VirgilPythiaCrypto,
 } from 'virgil-crypto';
 import {
-    WrongKeyknoxPasswordError,
     EmptyArrayError,
     BootstrapRequiredError,
     LookupError,
@@ -92,7 +91,7 @@ describe('VirgilE2ee', () => {
         const sdk = await EThree.initialize(fetchToken);
         const password = 'secret_password';
         const cloudStorage = await createSyncStorage(identity, password);
-        await sdk.bootstrap();
+        await sdk.register();
         const privateKey = await keyStorage.load(identity);
         expect(privateKey).not.toEqual(null);
         await sdk.backupPrivateKey(password);
@@ -100,7 +99,6 @@ describe('VirgilE2ee', () => {
         await sdk.cleanup();
         const key = await keyStorage.load(identity);
         expect(key).toBeNull();
-        await sdk.bootstrap(password);
 
         try {
             await sdk.decrypt(encrypted!);
@@ -121,22 +119,12 @@ describe('VirgilE2ee', () => {
     });
 });
 
-describe('local bootstrap (without password)', () => {
-    it('AUTH-1 has no local key, has no card', async done => {
-        const identity = 'virgiltestlocal1' + Date.now();
-        const fetchToken = createFetchToken(identity);
-        const sdk = await EThree.initialize(fetchToken);
-        await sdk.bootstrap();
-        const cards = await cardManager.searchCards(identity);
-        expect(cards.length).toEqual(1);
-        done();
-    });
-
+describe('EThree.register (without password)', () => {
     it('has local key, has no card', async done => {
         const identity = 'virgiltestlocal2' + Date.now();
         const fetchToken = createFetchToken(identity);
         const sdk = await EThree.initialize(fetchToken);
-        await sdk.bootstrap();
+        await sdk.register();
         const cards = await cardManager.searchCards(identity);
         expect(cards.length).toEqual(1);
         done();
@@ -156,7 +144,7 @@ describe('local bootstrap (without password)', () => {
         expect(prevCards.length).toEqual(1);
 
         const sdk = await EThree.initialize(fetchToken);
-        await sdk.bootstrap();
+        await sdk.register();
         const cards = await cardManager.searchCards(identity);
 
         expect(cards.length).toEqual(1);
@@ -175,7 +163,7 @@ describe('local bootstrap (without password)', () => {
         expect(cards.length).toEqual(1);
 
         try {
-            await sdk.bootstrap();
+            await sdk.register();
         } catch (e) {
             expect(e).toBeDefined();
             return done();
@@ -189,7 +177,7 @@ describe('local bootstrap (without password)', () => {
         const prevCards = await cardManager.searchCards(identity);
         expect(prevCards.length).toBe(0);
         const sdk = await EThree.initialize(fetchToken);
-        await sdk.bootstrap();
+        await sdk.register();
         const [cards, key] = await Promise.all([
             cardManager.searchCards(identity),
             keyStorage.load(identity),
@@ -197,70 +185,6 @@ describe('local bootstrap (without password)', () => {
         expect(cards.length).toBe(1);
         expect(key).not.toBe(null);
         done();
-    });
-});
-
-describe('remote bootstrap (with password)', () => {
-    it('AUTH-2 has no local key, has no card', async done => {
-        const identity = 'virgiltestremote1' + Date.now();
-        const fetchToken = createFetchToken(identity);
-        const prevCards = await cardManager.searchCards(identity);
-
-        expect(prevCards.length).toBe(0);
-
-        const sdk = await EThree.initialize(fetchToken);
-        await sdk.bootstrap('secure_password');
-        const [cards, key] = await Promise.all([
-            cardManager.searchCards(identity),
-            keyStorage.load(identity),
-        ]);
-        expect(cards.length).toBe(1);
-        expect(key).not.toBe(null);
-        done();
-    });
-
-    it('has no local key, has card', async done => {
-        const identity = 'virgiltestremote2' + Date.now();
-        const keyPair = virgilCrypto.generateKeys();
-        await cardManager.publishCard({ identity: identity, ...keyPair });
-        const fetchToken = createFetchToken(identity);
-        const prevCards = await cardManager.searchCards(identity);
-        const cloudStorage = await createSyncStorage(identity, 'secret_password');
-        await cloudStorage.storeEntry(identity, virgilCrypto.exportPrivateKey(keyPair.privateKey));
-        expect(prevCards.length).toBe(1);
-        const sdk = await EThree.initialize(fetchToken);
-        await sdk.bootstrap('secure_password');
-        const [cards, key] = await Promise.all([
-            cardManager.searchCards(identity),
-            keyStorage.load(identity),
-        ]);
-        expect(cards.length).toBe(1);
-        expect(key).not.toBe(null);
-        expect(virgilCrypto.importPrivateKey(key!.value)).toMatchObject(keyPair.privateKey);
-        done();
-    });
-
-    it('wrong password', async done => {
-        const identity = 'virgiltestremote3' + Date.now();
-        const fetchToken = createFetchToken(identity);
-        const keyPair = virgilCrypto.generateKeys();
-        const cloudStorage = await createSyncStorage(identity, 'secret_password');
-        await Promise.all([
-            cardManager.publishCard({ identity: identity, ...keyPair }),
-            cloudStorage.storeEntry(identity, virgilCrypto.exportPrivateKey(keyPair.privateKey)),
-        ]);
-        const prevCards = await cardManager.searchCards(identity);
-        await keyknoxStorage.remove(identity);
-        await keyStorage.remove(identity);
-        expect(prevCards.length).toBe(1);
-        const sdk = await EThree.initialize(fetchToken);
-        try {
-            await sdk.bootstrap('not_secret_password');
-        } catch (e) {
-            expect(e).toBeInstanceOf(WrongKeyknoxPasswordError);
-            return done();
-        }
-        done('should throw error');
     });
 });
 
@@ -340,7 +264,7 @@ describe('lookupKeys', () => {
 
         const provider = new CachingJwtProvider(fetchToken);
 
-        const sdk = new EThree(identity, provider, new VirgilToolbox(provider));
+        const sdk = new EThree(identity, { provider, hasPrivateKey: false, card: null });
 
         await Promise.all([cardManager.publishCard({ identity: identity1, ...keypair1 })]);
 
@@ -380,7 +304,6 @@ describe('change password', () => {
             const sdk = await EThree.initialize(fetchToken);
             await sdk.changePassword('old_password', 'new_password');
             await sdk.cleanup();
-            await sdk.bootstrap('new_password');
         } catch (e) {
             expect(e).not.toBeDefined();
             return done(e);
@@ -393,10 +316,8 @@ describe('change password', () => {
         const fetchToken = () => Promise.resolve(generator.generateToken(identity).toString());
         try {
             const sdk = await EThree.initialize(fetchToken);
-            await sdk.bootstrap('old_password');
             await sdk.changePassword('old_password', 'new_password');
             await sdk.cleanup();
-            await sdk.bootstrap('new_password');
         } catch (e) {
             expect(e).not.toBeDefined();
             return done(e);
@@ -420,7 +341,7 @@ describe('backupPrivateKey', () => {
         }
 
         try {
-            await sdk.bootstrap();
+            await sdk.register();
             await sdk.backupPrivateKey('secret_password');
         } catch (e) {
             expect(e).not.toBeDefined();
@@ -433,7 +354,6 @@ describe('backupPrivateKey', () => {
     it('fail', async done => {
         const sdk = await EThree.initialize(fetchToken);
         try {
-            await sdk.bootstrap('secret_pass');
             await sdk.backupPrivateKey('secret_pass');
         } catch (e) {
             expect(e).toBeDefined();
@@ -459,7 +379,7 @@ describe('encrypt and decrypt', () => {
             EThree.initialize(fetchToken2),
         ]);
 
-        await Promise.all([sdk1.bootstrap(), sdk2.bootstrap()]);
+        await Promise.all([sdk1.register(), sdk2.register()]);
         const message = 'encrypt, decrypt, repeat';
         const sdk1PublicKeys = await sdk1.lookupPublicKeys([identity1]);
         const sdk2PublicKeys = await sdk2.lookupPublicKeys([identity2]);
@@ -476,7 +396,7 @@ describe('encrypt and decrypt', () => {
 
     it('STE-4 encrypt for empty public keys', async done => {
         const sdk = await EThree.initialize(fetchToken);
-        await sdk.bootstrap();
+        await sdk.register();
         try {
             await sdk.encrypt('privet', []);
         } catch (e) {
@@ -488,7 +408,7 @@ describe('encrypt and decrypt', () => {
 
     it('STE-6 encrypt and decrypt without public keys', async done => {
         const sdk = await EThree.initialize(fetchToken);
-        await sdk.bootstrap();
+        await sdk.register();
         const message = 'secret message';
         const encryptedMessage = await sdk.encrypt(message);
         const decryptedMessage = await sdk.decrypt(encryptedMessage);
@@ -498,7 +418,7 @@ describe('encrypt and decrypt', () => {
 
     it('STE-7 decrypt message without sign', async done => {
         const sdk = await EThree.initialize(fetchToken);
-        await sdk.bootstrap();
+        await sdk.register();
         const receiverPublicKey = await sdk.lookupPublicKeys([identity]);
         const { publicKey: senderPublicKey } = virgilCrypto.generateKeys();
         const message = 'encrypted, but not signed :)';
@@ -538,7 +458,7 @@ describe('encrypt and decrypt', () => {
 
         const recipient = virgilCrypto.generateKeys();
         const sdk = await EThree.initialize(fetchToken);
-        await sdk.bootstrap();
+        await sdk.register();
         const publicKey = (await sdk.lookupPublicKeys([identity]))[0];
         const encryptedMessage = await sdk.encrypt(buf, [recipient.publicKey]);
         expect(encryptedMessage).toBeInstanceOf(Buffer);
@@ -555,7 +475,7 @@ describe('cleanup()', () => {
         const fetchToken = () => Promise.resolve(generator.generateToken(identity).toString());
 
         const sdk = await EThree.initialize(fetchToken);
-        await sdk.bootstrap('secure_password');
+        await sdk.register();
         const isDeleted = await sdk.cleanup();
         const privateKeyFromLocalStorage = await keyStorage.load(identity);
         const privateKeyFromKeyknox = await keyknoxStorage.load(identity);
@@ -570,7 +490,7 @@ describe('cleanup()', () => {
         const fetchToken = () => Promise.resolve(generator.generateToken(identity).toString());
 
         const sdk = await EThree.initialize(fetchToken);
-        await sdk.bootstrap('secure_password');
+        await sdk.register();
         await sdk.resetPrivateKeyBackup('secure_password');
         try {
             await sdk.backupPrivateKey('secure_password');

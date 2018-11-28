@@ -42,11 +42,11 @@ export default class PrivateKeyLoader {
             virgilPythiaCrypto: this.pythiaCrypto,
             accessTokenProvider: this.toolbox.jwtProvider,
         });
-        this.localStorage = new KeyEntryStorage({ name: 'local-storage' });
-        this.keyknoxStorage = new KeyEntryStorage({ name: 'keyknox-storage' });
+        this.localStorage = new KeyEntryStorage({ name: '.virgil-local-storage' });
+        this.keyknoxStorage = new KeyEntryStorage({ name: '.virgil-keyknox-storage' });
     }
 
-    async savePrivateKeyRemote(privateKey: VirgilPrivateKey, password: string, id?: string) {
+    async savePrivateKeyRemote(privateKey: VirgilPrivateKey, password: string) {
         const storage = await this.initStorage(password);
         return await storage.storeEntry(
             this.identity,
@@ -54,10 +54,13 @@ export default class PrivateKeyLoader {
         );
     }
 
-    async savePrivateKeyLocal(privateKey: VirgilPrivateKey) {
+    async savePrivateKeyLocal(privateKey: VirgilPrivateKey, isPublished?: boolean) {
         return await this.localStorage.save({
             name: this.identity,
             value: this.toolbox.virgilCrypto.exportPrivateKey(privateKey),
+            meta: {
+                isPublished: String(isPublished),
+            },
         });
     }
 
@@ -113,7 +116,7 @@ export default class PrivateKeyLoader {
                     new KeyknoxCrypto(this.toolbox.virgilCrypto),
                 ),
             ),
-            new KeyEntryStorage('keyknox-storage'),
+            this.keyknoxStorage,
         );
         try {
             await storage.sync();

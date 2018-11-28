@@ -4,51 +4,68 @@ import { CachingJwtProvider } from 'virgil-sdk';
 import { VirgilPublicKey, Data } from 'virgil-crypto';
 import {
     BootstrapRequiredError,
-    PasswordRequiredError,
     EmptyArrayError,
     LookupError,
+    IdentityAlreadyExistsError,
 } from './errors';
 import { isWithoutErrors, isArray, isString } from './utils/typeguards';
+import { ICard } from 'virgil-sdk/dist/types/Cards/ICard';
 
 type EncryptVirgilPublicKeyArg = VirgilPublicKey[] | VirgilPublicKey;
 
+interface IEThreeOptions {
+    provider: CachingJwtProvider;
+    toolbox?: VirgilToolbox;
+    keyLoader?: PrivateKeyLoader;
+    card: ICard | null;
+    hasPrivateKey: boolean;
+}
+
 export default class EThree {
     identity: string;
+    card: ICard | null;
     toolbox: VirgilToolbox;
+    hasPrivateKey: boolean = false;
     private keyLoader: PrivateKeyLoader;
 
     static async initialize(getToken: () => Promise<string>) {
         const provider = new CachingJwtProvider(getToken);
         const token = await provider.getToken({ operation: 'get' });
         const identity = token.identity();
-        return new EThree(identity, provider);
+        const toolbox = new VirgilToolbox(provider);
+        const keyLoader = new PrivateKeyLoader(identity, toolbox);
+
+        const [cards, privateKey] = await Promise.all([
+            toolbox.cardManager.searchCards(identity),
+            keyLoader.loadLocalPrivateKey(),
+        ]);
+
+        const card = cards.length > 0 ? cards[cards.length - 1] : null;
+        const hasPrivateKey = Boolean(privateKey);
+
+        return new EThree(identity, { provider, toolbox, keyLoader, card, hasPrivateKey });
     }
 
-    constructor(identity: string, provider: CachingJwtProvider, toolbox?: VirgilToolbox) {
+    constructor(identity: string, options: IEThreeOptions) {
         this.identity = identity;
-        this.toolbox = toolbox || new VirgilToolbox(provider);
-        this.keyLoader = new PrivateKeyLoader(identity, this.toolbox);
+        this.toolbox = options.toolbox || new VirgilToolbox(options.provider);
+        this.keyLoader = options.keyLoader || new PrivateKeyLoader(this.identity, this.toolbox);
+        this.card = options.card;
+        this.hasPrivateKey = options.hasPrivateKey;
     }
 
-    async bootstrap(password?: string) {
-        const cards = await this.toolbox.cardManager.searchCards(this.identity);
-        const hasCard = cards.length > 0;
-        const privateKey = await this.localBootstrap(hasCard);
+    get isRegistered(): boolean {
+        return Boolean(this.card);
+    }
+
+    async register() {
+        const privateKey = await this.keyLoader.loadLocalPrivateKey();
         if (privateKey) return;
-        if (hasCard) {
-            if (!password) {
-                throw new PasswordRequiredError();
-            } else {
-                await this.keyLoader.loadRemotePrivateKey(password);
-                return;
-            }
-        } else {
-            const keyPair = this.toolbox.virgilCrypto.generateKeys();
-            if (password) await this.keyLoader.savePrivateKeyRemote(keyPair.privateKey, password);
-            await this.keyLoader.savePrivateKeyLocal(keyPair.privateKey);
-            await this.toolbox.publishCard(keyPair);
-            return;
-        }
+        if (!privateKey && this.card) throw new IdentityAlreadyExistsError();
+        const keyPair = this.toolbox.virgilCrypto.generateKeys();
+        await this.toolbox.publishCard(keyPair);
+        await this.keyLoader.savePrivateKeyLocal(keyPair.privateKey);
+        return privateKey;
     }
 
     async cleanup() {
@@ -121,7 +138,6 @@ export default class EThree {
     }
 
     async changePassword(oldPassword: string, newPassword: string) {
-        await this.bootstrap(oldPassword);
         return await this.keyLoader.changePassword(newPassword);
     }
 
@@ -130,14 +146,5 @@ export default class EThree {
         if (!privateKey) throw new BootstrapRequiredError();
         await this.keyLoader.savePrivateKeyRemote(privateKey, password);
         return;
-    }
-
-    private async localBootstrap(hasCard: boolean) {
-        const privateKey = await this.keyLoader.loadLocalPrivateKey();
-        if (!privateKey) return null;
-        if (hasCard) return privateKey;
-        const publicKey = this.toolbox.virgilCrypto.extractPublicKey(privateKey);
-        await this.toolbox.publishCard({ privateKey, publicKey });
-        return privateKey;
     }
 }
