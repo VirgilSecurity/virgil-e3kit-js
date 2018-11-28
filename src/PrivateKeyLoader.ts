@@ -42,8 +42,8 @@ export default class PrivateKeyLoader {
             virgilPythiaCrypto: this.pythiaCrypto,
             accessTokenProvider: this.toolbox.jwtProvider,
         });
-        this.localStorage = new KeyEntryStorage({ name: '.virgil-local-storage' });
-        this.keyknoxStorage = new KeyEntryStorage({ name: '.virgil-keyknox-storage' });
+        this.localStorage = new KeyEntryStorage('.virgil-local-storage');
+        this.keyknoxStorage = new KeyEntryStorage('.virgil-keyknox-storage');
     }
 
     async savePrivateKeyRemote(privateKey: VirgilPrivateKey, password: string) {

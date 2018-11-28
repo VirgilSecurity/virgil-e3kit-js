@@ -48,6 +48,15 @@ export class MultithreadError extends SdkError {
     }
 }
 
+export class PrivateKeyAlreadyExistsError extends SdkError {
+    constructor() {
+        super(
+            'You already have a private key. Use EThree.cleanup() to delete it. If you delete last copy of private key, you will not able to decrypt any information encrypted for this private key',
+            'PrivateKeyAlreadyExistsError',
+        );
+    }
+}
+
 const isError = (arg: any): arg is Error => arg instanceof Error;
 const isPublicKey = (arg: any): arg is VirgilPublicKey => !(arg instanceof Error);
 

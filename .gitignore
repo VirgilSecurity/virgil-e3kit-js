@@ -11,6 +11,7 @@ package-lock.json
 
 .rpt2_cache
 .virgil_key_entries
-keyknox-storage
+.virgil-keyknox-storage
+.virgil-local-storage
 coverage
 dist

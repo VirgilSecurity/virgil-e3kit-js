@@ -1,6 +1,6 @@
 import PrivateKeyLoader from './PrivateKeyLoader';
 import VirgilToolbox from './VirgilToolbox';
-import { CachingJwtProvider } from 'virgil-sdk';
+import { CachingJwtProvider, KeyEntryAlreadyExistsError } from 'virgil-sdk';
 import { VirgilPublicKey, Data } from 'virgil-crypto';
 import {
     RegisterRequiredError,
@@ -8,6 +8,7 @@ import {
     LookupError,
     IdentityAlreadyExistsError,
     MultithreadError,
+    PrivateKeyAlreadyExistsError,
 } from './errors';
 import { isWithoutErrors, isArray, isString } from './utils/typeguards';
 import { ICard } from 'virgil-sdk/dist/types/Cards/ICard';
@@ -87,6 +88,17 @@ export default class EThree {
         this.inProcess = false;
     }
 
+    async restorePrivateKey(pwd: string): Promise<void> {
+        try {
+            await this.keyLoader.loadRemotePrivateKey(pwd);
+        } catch (e) {
+            if (e instanceof KeyEntryAlreadyExistsError) {
+                throw new PrivateKeyAlreadyExistsError();
+            }
+            throw e;
+        }
+    }
+
     async cleanup() {
         return await this.keyLoader.resetLocalPrivateKey();
     }
@@ -156,14 +168,14 @@ export default class EThree {
         return Promise.reject(new LookupError(responses));
     }
 
-    async changePassword(oldPassword: string, newPassword: string) {
-        return await this.keyLoader.changePassword(newPassword);
+    async changePassword(oldPwd: string, newPwd: string) {
+        return await this.keyLoader.changePassword(newPwd);
     }
 
-    async backupPrivateKey(password: string): Promise<void> {
+    async backupPrivateKey(pwd: string): Promise<void> {
         const privateKey = await this.keyLoader.loadLocalPrivateKey();
         if (!privateKey) throw new RegisterRequiredError();
-        await this.keyLoader.savePrivateKeyRemote(privateKey, password);
+        await this.keyLoader.savePrivateKeyRemote(privateKey, pwd);
         return;
     }
 }

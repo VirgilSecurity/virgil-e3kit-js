@@ -6,6 +6,7 @@ import {
     VirgilCardVerifier,
     GeneratorJwtProvider,
     CachingJwtProvider,
+    IKeyEntry,
 } from 'virgil-sdk';
 import {
     VirgilCrypto,
@@ -20,6 +21,7 @@ import {
     LookupError,
     LookupNotFoundError,
     MultithreadError,
+    PrivateKeyAlreadyExistsError,
 } from '../errors';
 import VirgilToolbox from '../VirgilToolbox';
 import { createBrainKey } from 'virgil-pythia';
@@ -50,8 +52,8 @@ const cardManager = new CardManager({
     retryOnUnauthorized: true,
 });
 
-const keyStorage = new KeyEntryStorage({ name: 'local-storage' });
-const keyknoxStorage = new KeyEntryStorage({ name: 'keyknox-storage' });
+const keyStorage = new KeyEntryStorage('.virgil-local-storage');
+const keyknoxStorage = new KeyEntryStorage('.virgil-keyknox-storage');
 
 const createFetchToken = (identity: string) => () =>
     Promise.resolve(generator.generateToken(identity).toString());
@@ -189,7 +191,7 @@ describe('EThree.register (without password)', () => {
     });
 });
 
-describe.only('EThree.rotatePrivateKey', () => {
+describe('EThree.rotatePrivateKey', () => {
     it('has card', async done => {
         const identity = 'virgiltestrotate1' + Date.now();
         const fetchToken = createFetchToken(identity);
@@ -421,6 +423,72 @@ describe('backupPrivateKey', () => {
             return done();
         }
         return done('should throw');
+    });
+});
+
+describe('restorePrivateKey', () => {
+    it('has no private key', async done => {
+        const pwd = 'secret_password';
+        const identity = 'virgiltestrestore1' + Date.now();
+        const fetchToken = () => Promise.resolve(generator.generateToken(identity).toString());
+
+        const sdk = await EThree.initialize(fetchToken);
+        const storage = await createSyncStorage(identity, pwd);
+
+        try {
+            await storage.retrieveEntry(identity);
+        } catch (e) {
+            expect(e).toBeInstanceOf(Error);
+        }
+        let privateKey: IKeyEntry | null;
+        try {
+            await sdk.register();
+            privateKey = await keyStorage.load(identity);
+            await sdk.backupPrivateKey(pwd);
+            await sdk.cleanup();
+        } catch (e) {
+            expect(e).not.toBeDefined();
+        }
+        const noPrivateKey = await keyStorage.load(identity);
+        expect(noPrivateKey).toBeFalsy();
+        await sdk.restorePrivateKey(pwd);
+        const restoredPrivateKey = await keyStorage.load(identity);
+        expect(restoredPrivateKey!.value.toString('base64')).toEqual(
+            privateKey!.value.toString('base64'),
+        );
+
+        done();
+    });
+
+    it('has private key', async done => {
+        const pwd = 'secret_password';
+        const identity = 'virgiltestrestore1' + Date.now();
+        const fetchToken = () => Promise.resolve(generator.generateToken(identity).toString());
+
+        const sdk = await EThree.initialize(fetchToken);
+        const storage = await createSyncStorage(identity, pwd);
+
+        try {
+            await storage.retrieveEntry(identity);
+        } catch (e) {
+            expect(e).toBeInstanceOf(Error);
+        }
+        try {
+            await sdk.register();
+            await sdk.backupPrivateKey(pwd);
+        } catch (e) {
+            expect(e).not.toBeDefined();
+        }
+
+        const noPrivateKey = await keyStorage.load(identity);
+        expect(noPrivateKey).toBeTruthy();
+        try {
+            await sdk.restorePrivateKey(pwd);
+        } catch (e) {
+            expect(e).toBeInstanceOf(PrivateKeyAlreadyExistsError);
+            return done();
+        }
+        done('should throw');
     });
 });
 
