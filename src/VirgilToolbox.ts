@@ -28,13 +28,14 @@ export default class VirgilToolbox {
         this.getPublicKey = this.getPublicKey.bind(this);
     }
 
-    async publishCard(keyPair: IKeyPair) {
-        await this.cardManager.publishCard({
+    async publishCard(keyPair: IKeyPair, previousCardId?: string) {
+        const card = await this.cardManager.publishCard({
             privateKey: keyPair.privateKey,
             publicKey: keyPair.publicKey,
+            previousCardId,
         });
 
-        return keyPair;
+        return { keyPair, card };
     }
 
     async getPublicKey(identity: string): Promise<VirgilPublicKey> {

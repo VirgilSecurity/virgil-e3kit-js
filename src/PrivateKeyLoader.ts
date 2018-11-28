@@ -8,7 +8,7 @@ import {
 import { VirgilPythiaCrypto, VirgilPublicKey, VirgilPrivateKey } from 'virgil-crypto';
 import VirgilToolbox from './VirgilToolbox';
 import { KeyEntryStorage } from 'virgil-sdk';
-import { WrongKeyknoxPasswordError, BootstrapRequiredError } from './errors';
+import { WrongKeyknoxPasswordError, RegisterRequiredError } from './errors';
 
 type KeyPair = {
     privateKey: VirgilPrivateKey;
@@ -93,7 +93,7 @@ export default class PrivateKeyLoader {
     }
 
     async changePassword(newPassword: string) {
-        if (!this.syncStorage) throw new BootstrapRequiredError();
+        if (!this.syncStorage) throw new RegisterRequiredError();
         const storage = await this.syncStorage;
         const keyPair = await this.generateBrainPair(newPassword);
 

@@ -16,9 +16,10 @@ import {
 } from 'virgil-crypto';
 import {
     EmptyArrayError,
-    BootstrapRequiredError,
+    RegisterRequiredError,
     LookupError,
     LookupNotFoundError,
+    MultithreadError,
 } from '../errors';
 import VirgilToolbox from '../VirgilToolbox';
 import { createBrainKey } from 'virgil-pythia';
@@ -184,6 +185,66 @@ describe('EThree.register (without password)', () => {
         ]);
         expect(cards.length).toBe(1);
         expect(key).not.toBe(null);
+        done();
+    });
+});
+
+describe.only('EThree.rotatePrivateKey', () => {
+    it('has card', async done => {
+        const identity = 'virgiltestrotate1' + Date.now();
+        const fetchToken = createFetchToken(identity);
+        const sdk = await EThree.initialize(fetchToken);
+        await sdk.register();
+        const cards = await cardManager.searchCards(identity);
+        expect(cards.length).toEqual(1);
+        const privateKeyData = await keyStorage.load(identity);
+        expect(privateKeyData).not.toBeFalsy();
+        await sdk.rotatePrivateKey();
+        const previousPrivateKey = privateKeyData!.value.toString('base64');
+        const newPrivateKeyData = await keyStorage.load(identity);
+        expect(newPrivateKeyData).not.toBeFalsy();
+        const newPrivateKey = newPrivateKeyData!.value.toString('base64');
+        expect(previousPrivateKey).not.toEqual(newPrivateKey);
+        const newCards = await cardManager.searchCards(identity);
+        expect(newCards.length).toBe(1);
+        expect(newCards[0].previousCardId).toBe(cards[0].id);
+        done();
+    });
+
+    it('has no card', async done => {
+        const identity = 'virgiltestrotate2' + Date.now();
+        const fetchToken = createFetchToken(identity);
+        const sdk = await EThree.initialize(fetchToken);
+        const cards = await cardManager.searchCards(identity);
+        expect(cards.length).toEqual(0);
+        try {
+            await sdk.rotatePrivateKey();
+        } catch (e) {
+            expect(e).toBeInstanceOf(RegisterRequiredError);
+            return done();
+        }
+        done('should throw');
+    });
+
+    it('rotate 2 times', async done => {
+        const identity = 'virgiltestrotate3' + Date.now();
+        const fetchToken = createFetchToken(identity);
+        const sdk = await EThree.initialize(fetchToken);
+        await sdk.register();
+        const cards = await cardManager.searchCards(identity);
+        expect(cards.length).toEqual(1);
+        const privateKeyData = await keyStorage.load(identity);
+        expect(privateKeyData).not.toBeFalsy();
+        const promise = sdk.rotatePrivateKey();
+        try {
+            await sdk.rotatePrivateKey();
+        } catch (e) {
+            expect(e).toBeInstanceOf(MultithreadError);
+        }
+        await promise;
+        const newCards = await cardManager.searchCards(identity);
+        expect(newCards.length).toBe(1);
+        expect(newCards[0].previousCardId).toBe(cards[0].id);
         done();
     });
 });
@@ -440,12 +501,12 @@ describe('encrypt and decrypt', () => {
         try {
             await sdk.encrypt('message');
         } catch (e) {
-            expect(e).toBeInstanceOf(BootstrapRequiredError);
+            expect(e).toBeInstanceOf(RegisterRequiredError);
         }
         try {
             await sdk.decrypt('message');
         } catch (e) {
-            expect(e).toBeInstanceOf(BootstrapRequiredError);
+            expect(e).toBeInstanceOf(RegisterRequiredError);
         }
         done();
     });

@@ -9,12 +9,6 @@ export class SdkError extends Error {
     }
 }
 
-export class PasswordRequiredError extends SdkError {
-    constructor() {
-        super('Password required', 'PasswordRequiredError');
-    }
-}
-
 export class IdentityAlreadyExistsError extends SdkError {
     constructor() {
         super(
@@ -30,9 +24,9 @@ export class PrivateKeyNotFoundError extends SdkError {
     }
 }
 
-export class BootstrapRequiredError extends SdkError {
+export class RegisterRequiredError extends SdkError {
     constructor() {
-        super('Bootstrap required', 'BootstrapRequiredError');
+        super('This identity is not registered', 'RegisterRequiredError');
     }
 }
 
@@ -45,6 +39,12 @@ export class WrongKeyknoxPasswordError extends SdkError {
 export class EmptyArrayError extends SdkError {
     constructor(method: string) {
         super(`Array must be non empty in ${method} method`);
+    }
+}
+
+export class MultithreadError extends SdkError {
+    constructor(method: string) {
+        super(`${method} method was called two or more times in a row.`);
     }
 }
 

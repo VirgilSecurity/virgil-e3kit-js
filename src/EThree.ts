@@ -3,10 +3,11 @@ import VirgilToolbox from './VirgilToolbox';
 import { CachingJwtProvider } from 'virgil-sdk';
 import { VirgilPublicKey, Data } from 'virgil-crypto';
 import {
-    BootstrapRequiredError,
+    RegisterRequiredError,
     EmptyArrayError,
     LookupError,
     IdentityAlreadyExistsError,
+    MultithreadError,
 } from './errors';
 import { isWithoutErrors, isArray, isString } from './utils/typeguards';
 import { ICard } from 'virgil-sdk/dist/types/Cards/ICard';
@@ -27,6 +28,7 @@ export default class EThree {
     toolbox: VirgilToolbox;
     hasPrivateKey: boolean = false;
     private keyLoader: PrivateKeyLoader;
+    private inProcess: boolean = false;
 
     static async initialize(getToken: () => Promise<string>) {
         const provider = new CachingJwtProvider(getToken);
@@ -59,13 +61,30 @@ export default class EThree {
     }
 
     async register() {
+        if (this.inProcess) throw new MultithreadError(this.register.name);
+        this.inProcess = true;
         const privateKey = await this.keyLoader.loadLocalPrivateKey();
         if (privateKey) return;
         if (!privateKey && this.card) throw new IdentityAlreadyExistsError();
         const keyPair = this.toolbox.virgilCrypto.generateKeys();
-        await this.toolbox.publishCard(keyPair);
+        const { card } = await this.toolbox.publishCard(keyPair);
+        this.card = card;
+        this.hasPrivateKey = true;
         await this.keyLoader.savePrivateKeyLocal(keyPair.privateKey);
+        this.inProcess = false;
         return privateKey;
+    }
+
+    async rotatePrivateKey(): Promise<void> {
+        if (this.inProcess) throw new MultithreadError(this.register.name);
+        this.inProcess = true;
+        if (!this.card) throw new RegisterRequiredError();
+        if (this.hasPrivateKey) await this.keyLoader.resetLocalPrivateKey();
+        const keyPair = this.toolbox.virgilCrypto.generateKeys();
+        const { card } = await this.toolbox.publishCard(keyPair, this.card.id);
+        this.card = card;
+        await this.keyLoader.savePrivateKeyLocal(keyPair.privateKey);
+        this.inProcess = false;
     }
 
     async cleanup() {
@@ -93,7 +112,7 @@ export default class EThree {
         else argument = [publicKeys];
 
         const privateKey = await this.keyLoader.loadLocalPrivateKey();
-        if (!privateKey) throw new BootstrapRequiredError();
+        if (!privateKey) throw new RegisterRequiredError();
 
         argument.push(this.toolbox.virgilCrypto.extractPublicKey(privateKey));
 
@@ -108,7 +127,7 @@ export default class EThree {
     async decrypt(message: Data, publicKey?: VirgilPublicKey): Promise<Buffer | string> {
         const isMessageString = isString(message);
         const privateKey = await this.keyLoader.loadLocalPrivateKey();
-        if (!privateKey) throw new BootstrapRequiredError();
+        if (!privateKey) throw new RegisterRequiredError();
         if (!publicKey) publicKey = this.toolbox.virgilCrypto.extractPublicKey(privateKey);
         let res: Data = this.toolbox.virgilCrypto.decryptThenVerify(message, privateKey, publicKey);
         if (isMessageString) return res.toString('utf8') as string;
@@ -143,7 +162,7 @@ export default class EThree {
 
     async backupPrivateKey(password: string): Promise<void> {
         const privateKey = await this.keyLoader.loadLocalPrivateKey();
-        if (!privateKey) throw new BootstrapRequiredError();
+        if (!privateKey) throw new RegisterRequiredError();
         await this.keyLoader.savePrivateKeyRemote(privateKey, password);
         return;
     }
