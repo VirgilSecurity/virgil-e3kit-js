@@ -12,7 +12,7 @@ export class SdkError extends Error {
 export class IdentityAlreadyExistsError extends SdkError {
     constructor() {
         super(
-            'This identity already registered on Virgil Cloud. Please load private key using EThree.restorePrivateKey or EThree.rotatePrivateKey',
+            'This identity already registered on Virgil Cloud. To load private key use EThree.restorePrivateKey or EThree.rotatePrivateKey',
             'IdentityAlreadyExistsError',
         );
     }
@@ -53,6 +53,21 @@ export class PrivateKeyAlreadyExistsError extends SdkError {
         super(
             'You already have a private key. Use EThree.cleanup() to delete it. If you delete last copy of private key, you will not able to decrypt any information encrypted for this private key',
             'PrivateKeyAlreadyExistsError',
+        );
+    }
+}
+
+export class PrivateKeyNoBackupError extends SdkError {
+    constructor() {
+        super("Backup private key doesn't exist", 'PrivateKeyNoBackupError');
+    }
+}
+
+export class MultipleCardsError extends SdkError {
+    constructor(identity: string) {
+        super(
+            `There are several public keys registered with ${identity}, which is not supported.`,
+            'MultipleCardsError',
         );
     }
 }

@@ -4,11 +4,12 @@ import {
     CloudKeyStorage,
     KeyknoxManager,
     KeyknoxCrypto,
+    CloudEntryDoesntExistError,
 } from '@virgilsecurity/keyknox';
 import { VirgilPythiaCrypto, VirgilPublicKey, VirgilPrivateKey } from 'virgil-crypto';
 import VirgilToolbox from './VirgilToolbox';
 import { KeyEntryStorage } from 'virgil-sdk';
-import { WrongKeyknoxPasswordError, RegisterRequiredError } from './errors';
+import { WrongKeyknoxPasswordError, PrivateKeyNoBackupError } from './errors';
 
 type KeyPair = {
     privateKey: VirgilPrivateKey;
@@ -73,7 +74,7 @@ export default class PrivateKeyLoader {
     async resetLocalPrivateKey() {
         this.syncStorage = undefined;
         await Promise.all([
-            this.localStorage.remove(this.identity),
+            this.localStorage.remove(this.identity).catch(this.handleResetError),
             this.keyknoxStorage.remove(this.identity),
         ]);
         return true;
@@ -81,8 +82,7 @@ export default class PrivateKeyLoader {
 
     async resetBackupPrivateKey(password: string) {
         const storage = await this.initStorage(password);
-
-        return await storage.deleteEntry(this.identity);
+        await storage.deleteEntry(this.identity).catch(this.handleResetError);
     }
 
     async loadRemotePrivateKey(password: string, id?: string) {
@@ -92,10 +92,9 @@ export default class PrivateKeyLoader {
         return this.toolbox.virgilCrypto.importPrivateKey(rawKey.value);
     }
 
-    async changePassword(newPassword: string) {
-        if (!this.syncStorage) throw new RegisterRequiredError();
-        const storage = await this.syncStorage;
-        const keyPair = await this.generateBrainPair(newPassword);
+    async changePassword(oldPwd: string, newPwd: string) {
+        const storage = await this.initStorage(oldPwd);
+        const keyPair = await this.generateBrainPair(newPwd);
 
         const update = await storage.updateRecipients({
             newPrivateKey: keyPair.privateKey,
@@ -153,4 +152,11 @@ export default class PrivateKeyLoader {
             }
             throw e;
         });
+
+    private handleResetError = (e: Error) => {
+        if (e instanceof CloudEntryDoesntExistError) {
+            throw new PrivateKeyNoBackupError();
+        }
+        throw e;
+    };
 }
