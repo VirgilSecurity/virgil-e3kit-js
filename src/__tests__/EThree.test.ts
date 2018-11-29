@@ -276,9 +276,9 @@ describe('lookupKeys', () => {
         try {
             await sdk.lookupPublicKeys([identity1, identity2]);
         } catch (e) {
-            expect(e.rejected.length).toBe(2);
-            expect(e.rejected[0]).toBeInstanceOf(LookupNotFoundError);
-            expect(e.rejected[1]).toBeInstanceOf(LookupNotFoundError);
+            expect(e.rejected().length).toBe(2);
+            expect(e.rejected()[0]).toBeInstanceOf(LookupNotFoundError);
+            expect(e.rejected()[1]).toBeInstanceOf(LookupNotFoundError);
             return done();
         }
 
@@ -306,10 +306,10 @@ describe('lookupKeys', () => {
             expect(res).not.toBeDefined();
         } catch (e) {
             expect(e).toBeInstanceOf(LookupError);
-            expect(e.resolved.length).toBe(1);
-            expect(e.rejected.length).toBe(2);
-            expect(e.rejected[0]).toBeInstanceOf(Error);
-            expect(e.rejected[1]).toBeInstanceOf(LookupNotFoundError);
+            expect(e.resolved().length).toBe(1);
+            expect(e.rejected().length).toBe(2);
+            expect(e.rejected()[0]).toBeInstanceOf(Error);
+            expect(e.rejected()[1]).toBeInstanceOf(LookupNotFoundError);
             VirgilToolbox.prototype.getPublicKey = fnStore;
             return done();
         }

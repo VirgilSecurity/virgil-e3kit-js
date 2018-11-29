@@ -11,22 +11,9 @@ import {
     PrivateKeyAlreadyExistsError,
     MultipleCardsError,
 } from './errors';
-import { isWithoutErrors, isArray, isString, isArrayOfInstance } from './utils/typeguards';
+import { isWithoutErrors, isArray, isString } from './utils/typeguards';
 
-type LookupResultSuccess = {
-    identity: string;
-    publicKey: VirgilPublicKey;
-    error: null;
-};
-type LookupResultError = {
-    identity: string;
-    publicKey: null;
-    error: Error;
-};
-
-type LookupResult = LookupResultSuccess | LookupResultError;
-type EncryptVirgilPublicKeyArg = VirgilPublicKey[] | VirgilPublicKey | LookupResult[];
-type DecryptVirgilPublicKeyArg = VirgilPublicKey | LookupResult;
+type EncryptVirgilPublicKeyArg = VirgilPublicKey[] | VirgilPublicKey;
 
 interface IEThreeOptions {
     provider: CachingJwtProvider;
@@ -118,13 +105,8 @@ export default class EThree {
         let argument: VirgilPublicKey[];
 
         if (publicKeys == null) argument = [];
-        else if (isArray(publicKeys)) {
-            if (isArrayOfInstance(publicKeys, VirgilPublicKey)) {
-                argument = publicKeys;
-            } else {
-                const;
-            }
-        } else argument = [publicKeys];
+        else if (isArray(publicKeys)) argument = publicKeys;
+        else argument = [publicKeys];
 
         const privateKey = await this.keyLoader.loadLocalPrivateKey();
         if (!privateKey) throw new RegisterRequiredError();
@@ -136,31 +118,24 @@ export default class EThree {
         return res;
     }
 
-    async decrypt(message: string, publicKey?: DecryptVirgilPublicKeyArg): Promise<string>;
-    async decrypt(message: Buffer, publicKey?: DecryptVirgilPublicKeyArg): Promise<Buffer>;
-    async decrypt(message: ArrayBuffer, publicKey?: DecryptVirgilPublicKeyArg): Promise<Buffer>;
-    async decrypt(message: Data, publicKey?: DecryptVirgilPublicKeyArg): Promise<Buffer | string> {
+    async decrypt(message: string, publicKey?: VirgilPublicKey): Promise<string>;
+    async decrypt(message: Buffer, publicKey?: VirgilPublicKey): Promise<Buffer>;
+    async decrypt(message: ArrayBuffer, publicKey?: VirgilPublicKey): Promise<Buffer>;
+    async decrypt(message: Data, publicKey?: VirgilPublicKey): Promise<Buffer | string> {
         const isMessageString = isString(message);
         const privateKey = await this.keyLoader.loadLocalPrivateKey();
         if (!privateKey) throw new RegisterRequiredError();
-
-        let argument: VirgilPublicKey;
-
-        if (!publicKey) argument = this.toolbox.virgilCrypto.extractPublicKey(privateKey);
-        else if (publicKey instanceof VirgilPublicKey) argument = publicKey;
-        else if (publicKey.error) throw publicKey.error;
-        else if (publicKey.publicKey) argument = publicKey.publicKey;
-        else throw new Error(); // TODO
-        let res: Data = this.toolbox.virgilCrypto.decryptThenVerify(message, privateKey, argument);
+        if (!publicKey) publicKey = this.toolbox.virgilCrypto.extractPublicKey(privateKey);
+        let res: Data = this.toolbox.virgilCrypto.decryptThenVerify(message, privateKey, publicKey);
         if (isMessageString) return res.toString('utf8') as string;
         return res as Buffer;
     }
 
     async lookupPublicKeys(identities: string): Promise<VirgilPublicKey>;
-    async lookupPublicKeys(identities: string[]): Promise<Array<LookupResult | LookupResultError>>;
+    async lookupPublicKeys(identities: string[]): Promise<VirgilPublicKey[]>;
     async lookupPublicKeys(
         identities: string[] | string,
-    ): Promise<Array<LookupResult | LookupResultError> | VirgilPublicKey> {
+    ): Promise<VirgilPublicKey[] | VirgilPublicKey> {
         const argument = isArray(identities) ? identities : [identities];
 
         if (argument.length === 0) throw new EmptyArrayError('lookupPublicKeys');
@@ -172,12 +147,10 @@ export default class EThree {
                     .catch(e => Promise.resolve(e instanceof Error ? e : new Error(e))),
             ),
         );
-        if (isArray(identities)) {
-            return this.transformLookup(responses, argument);
-        }
 
-        if (isWithoutErrors(responses)) return responses[0];
-        throw responses[0];
+        if (isWithoutErrors(responses)) return isArray(identities) ? responses : responses[0];
+
+        return Promise.reject(new LookupError(responses));
     }
 
     async changePassword(oldPwd: string, newPwd: string) {
@@ -190,21 +163,4 @@ export default class EThree {
         await this.keyLoader.savePrivateKeyRemote(privateKey, pwd);
         return;
     }
-
-    private transformLookup = (responses: (VirgilPublicKey | Error)[], identities: string[]) =>
-        responses.map((resp, i) => {
-            if (resp instanceof Error) {
-                return {
-                    identity: identities[i],
-                    publicKey: null,
-                    error: resp,
-                };
-            }
-
-            return {
-                identity: identities[i],
-                publicKey: resp,
-                error: null,
-            };
-        });
 }

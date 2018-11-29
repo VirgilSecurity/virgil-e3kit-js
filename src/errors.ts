@@ -78,19 +78,24 @@ const isPublicKey = (arg: any): arg is VirgilPublicKey => !(arg instanceof Error
 export class LookupError extends SdkError {
     result: Array<VirgilPublicKey | Error>;
 
-    get rejected(): Error[] {
+    rejected(): Error[] {
         return this.result.filter(isError);
     }
-    get resolved(): VirgilPublicKey[] {
+    resolved(): VirgilPublicKey[] {
         return this.result.filter(isPublicKey);
     }
 
     constructor(result: Array<VirgilPublicKey | Error>) {
         super(
-            'Some promises got rejected. Use err.rejected for unhandled results, .resolved for handled and .result for all responses',
+            `Failed some public keys lookups. You can see the results by error.resolved() and error.rejected() methods of this error instance`,
             'LookupError',
         );
         this.result = result;
+        console.error(
+            this.rejected()
+                .map(error => (error.message ? error.message : error))
+                .join('\n'),
+        );
     }
 }
 
