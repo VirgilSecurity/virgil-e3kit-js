@@ -32,23 +32,16 @@ export interface PrivateKeyEntry {
 
 export default class PrivateKeyLoader {
     private pythiaCrypto = new VirgilPythiaCrypto();
-    private brainKey: IBrainKey;
-    private syncStorage?: Promise<SyncKeyStorage>;
     private localStorage: KeyEntryStorage;
     private keyknoxStorage: KeyEntryStorage;
 
     constructor(private identity: string, public toolbox: VirgilToolbox) {
-        this.brainKey = createBrainKey({
-            virgilCrypto: this.toolbox.virgilCrypto,
-            virgilPythiaCrypto: this.pythiaCrypto,
-            accessTokenProvider: this.toolbox.jwtProvider,
-        });
         this.localStorage = new KeyEntryStorage('.virgil-local-storage');
         this.keyknoxStorage = new KeyEntryStorage('.virgil-keyknox-storage');
     }
 
     async savePrivateKeyRemote(privateKey: VirgilPrivateKey, password: string) {
-        const storage = await this.initStorage(password);
+        const storage = await this.getStorage(password);
         return await storage.storeEntry(
             this.identity,
             this.toolbox.virgilCrypto.exportPrivateKey(privateKey),
@@ -72,7 +65,6 @@ export default class PrivateKeyLoader {
     }
 
     async resetLocalPrivateKey() {
-        this.syncStorage = undefined;
         await Promise.all([
             this.localStorage.remove(this.identity).catch(this.handleResetError),
             this.keyknoxStorage.remove(this.identity),
@@ -81,21 +73,20 @@ export default class PrivateKeyLoader {
     }
 
     async resetBackupPrivateKey(password: string) {
-        const storage = await this.initStorage(password);
+        const storage = await this.getStorage(password);
         await storage.deleteEntry(this.identity).catch(this.handleResetError);
     }
 
     async loadRemotePrivateKey(password: string, id?: string) {
-        const storage = await this.initStorage(password);
+        const storage = await this.getStorage(password);
         const rawKey = await storage.retrieveEntry(this.identity);
         await this.localStorage.save({ name: this.identity, value: rawKey.value });
         return this.toolbox.virgilCrypto.importPrivateKey(rawKey.value);
     }
 
     async changePassword(oldPwd: string, newPwd: string) {
-        const storage = await this.initStorage(oldPwd);
+        const storage = await this.getStorage(oldPwd);
         const keyPair = await this.generateBrainPair(newPwd);
-
         const update = await storage.updateRecipients({
             newPrivateKey: keyPair.privateKey,
             newPublicKeys: [keyPair.publicKey],
@@ -103,14 +94,45 @@ export default class PrivateKeyLoader {
         return update;
     }
 
-    private async createSyncStorage(password: string) {
-        const { privateKey, publicKey } = await this.generateBrainPair(password);
+    private handleResetError = (e: Error) => {
+        if (e instanceof CloudEntryDoesntExistError) {
+            throw new PrivateKeyNoBackupError();
+        }
+        throw e;
+    };
+
+    private async generateBrainPair(pwd: string) {
+        const brainKey = createBrainKey({
+            virgilCrypto: this.toolbox.virgilCrypto,
+            virgilPythiaCrypto: this.pythiaCrypto,
+            accessTokenProvider: this.toolbox.jwtProvider,
+        });
+
+        return await brainKey.generateKeyPair(pwd).catch((e: Error & { code?: number }) => {
+            if (typeof e === 'object' && e.code === 60007) {
+                const promise = new Promise((resolve, reject) => {
+                    const repeat = () =>
+                        brainKey
+                            .generateKeyPair(pwd)
+                            .then(resolve)
+                            .catch(reject);
+                    setTimeout(repeat, 2000);
+                });
+                return promise as Promise<KeyPair>;
+            }
+            throw e;
+        });
+    }
+
+    private async getStorage(pwd: string) {
+        const keyPair = await this.generateBrainPair(pwd);
+
         const storage = new SyncKeyStorage(
             new CloudKeyStorage(
                 new KeyknoxManager(
                     this.toolbox.jwtProvider,
-                    privateKey,
-                    publicKey,
+                    keyPair.privateKey,
+                    keyPair.publicKey,
                     undefined,
                     new KeyknoxCrypto(this.toolbox.virgilCrypto),
                 ),
@@ -122,41 +144,6 @@ export default class PrivateKeyLoader {
         } catch (e) {
             throw new WrongKeyknoxPasswordError();
         }
-
         return storage;
     }
-
-    private async initStorage(password: string) {
-        if (!this.syncStorage) this.syncStorage = this.createSyncStorage(password);
-        try {
-            await this.syncStorage;
-        } catch (e) {
-            this.syncStorage = undefined;
-            throw e;
-        }
-        return this.syncStorage;
-    }
-
-    private generateBrainPair = (password: string) =>
-        this.brainKey.generateKeyPair(password).catch(e => {
-            if (typeof e === 'object' && e.code === 60007) {
-                const promise = new Promise((resolve, reject) => {
-                    const repeat = () =>
-                        this.brainKey
-                            .generateKeyPair(password)
-                            .then(resolve)
-                            .catch(reject);
-                    setTimeout(repeat, 2000);
-                });
-                return promise as Promise<KeyPair>;
-            }
-            throw e;
-        });
-
-    private handleResetError = (e: Error) => {
-        if (e instanceof CloudEntryDoesntExistError) {
-            throw new PrivateKeyNoBackupError();
-        }
-        throw e;
-    };
 }

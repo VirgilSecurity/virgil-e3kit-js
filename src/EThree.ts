@@ -54,7 +54,7 @@ export default class EThree {
         await this.toolbox.publishCard(keyPair);
         await this.keyLoader.savePrivateKeyLocal(keyPair.privateKey);
         this.inProcess = false;
-        return privateKey;
+        return;
     }
 
     async rotatePrivateKey(): Promise<void> {
