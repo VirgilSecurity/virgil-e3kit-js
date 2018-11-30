@@ -94,6 +94,10 @@ export default class PrivateKeyLoader {
         return update;
     }
 
+    async hasPrivateKey() {
+        return await this.localStorage.exists(this.identity);
+    }
+
     private handleResetError = (e: Error) => {
         if (e instanceof CloudEntryDoesntExistError) {
             throw new PrivateKeyNoBackupError();

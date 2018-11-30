@@ -85,7 +85,7 @@ export default class EThree {
     }
 
     async cleanup() {
-        return await this.keyLoader.resetLocalPrivateKey();
+        await this.keyLoader.resetLocalPrivateKey();
     }
 
     async resetPrivateKeyBackup(password: string) {
@@ -162,5 +162,9 @@ export default class EThree {
         if (!privateKey) throw new RegisterRequiredError();
         await this.keyLoader.savePrivateKeyRemote(privateKey, pwd);
         return;
+    }
+
+    async hasPrivateKey(): Promise<Boolean> {
+        return this.keyLoader.hasPrivateKey();
     }
 }
