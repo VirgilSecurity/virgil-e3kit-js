@@ -13,12 +13,7 @@ import {
     CachingJwtProvider,
 } from 'virgil-sdk';
 import { createBrainKey } from 'virgil-pythia';
-import {
-    SyncKeyStorage,
-    CloudKeyStorage,
-    KeyknoxManager,
-    KeyknoxCrypto,
-} from '@virgilsecurity/keyknox';
+import { CloudKeyStorage, KeyknoxManager, KeyknoxCrypto } from '@virgilsecurity/keyknox';
 
 export const virgilCrypto = new VirgilCrypto();
 const cardCrypto = new VirgilCardCrypto(virgilCrypto);
@@ -56,20 +51,17 @@ export const createSyncStorage = async (identity: string, password: string) => {
 
     const keyPair = await brainKey.generateKeyPair(password);
 
-    const storage = new SyncKeyStorage(
-        new CloudKeyStorage(
-            new KeyknoxManager(
-                new CachingJwtProvider(fetchToken),
-                keyPair.privateKey,
-                keyPair.publicKey,
-                undefined,
-                new KeyknoxCrypto(virgilCrypto),
-            ),
+    const storage = new CloudKeyStorage(
+        new KeyknoxManager(
+            new CachingJwtProvider(fetchToken),
+            keyPair.privateKey,
+            keyPair.publicKey,
+            undefined,
+            new KeyknoxCrypto(virgilCrypto),
         ),
-        keyknoxStorage,
     );
 
-    await storage.sync();
+    await storage.retrieveCloudEntries();
     return storage;
 };
 

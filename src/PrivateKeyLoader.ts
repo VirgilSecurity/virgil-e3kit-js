@@ -1,6 +1,5 @@
 import { createBrainKey } from 'virgil-pythia';
 import {
-    SyncKeyStorage,
     CloudKeyStorage,
     KeyknoxManager,
     KeyknoxCrypto,
@@ -33,11 +32,9 @@ export interface PrivateKeyEntry {
 export default class PrivateKeyLoader {
     private pythiaCrypto = new VirgilPythiaCrypto();
     private localStorage: KeyEntryStorage;
-    private keyknoxStorage: KeyEntryStorage;
 
     constructor(private identity: string, public toolbox: VirgilToolbox) {
         this.localStorage = new KeyEntryStorage('.virgil-local-storage');
-        this.keyknoxStorage = new KeyEntryStorage('.virgil-keyknox-storage');
     }
 
     async savePrivateKeyRemote(privateKey: VirgilPrivateKey, password: string) {
@@ -65,10 +62,7 @@ export default class PrivateKeyLoader {
     }
 
     async resetLocalPrivateKey() {
-        await Promise.all([
-            this.localStorage.remove(this.identity).catch(this.handleResetError),
-            this.keyknoxStorage.remove(this.identity),
-        ]);
+        await Promise.all([this.localStorage.remove(this.identity).catch(this.handleResetError)]);
         return true;
     }
 
@@ -80,8 +74,8 @@ export default class PrivateKeyLoader {
     async loadRemotePrivateKey(password: string, id?: string) {
         const storage = await this.getStorage(password);
         const rawKey = await storage.retrieveEntry(this.identity);
-        await this.localStorage.save({ name: this.identity, value: rawKey.value });
-        return this.toolbox.virgilCrypto.importPrivateKey(rawKey.value);
+        await this.localStorage.save({ name: this.identity, value: rawKey.data });
+        return this.toolbox.virgilCrypto.importPrivateKey(rawKey.data);
     }
 
     async changePassword(oldPwd: string, newPwd: string) {
@@ -131,20 +125,17 @@ export default class PrivateKeyLoader {
     private async getStorage(pwd: string) {
         const keyPair = await this.generateBrainPair(pwd);
 
-        const storage = new SyncKeyStorage(
-            new CloudKeyStorage(
-                new KeyknoxManager(
-                    this.toolbox.jwtProvider,
-                    keyPair.privateKey,
-                    keyPair.publicKey,
-                    undefined,
-                    new KeyknoxCrypto(this.toolbox.virgilCrypto),
-                ),
+        const storage = new CloudKeyStorage(
+            new KeyknoxManager(
+                this.toolbox.jwtProvider,
+                keyPair.privateKey,
+                keyPair.publicKey,
+                undefined,
+                new KeyknoxCrypto(this.toolbox.virgilCrypto),
             ),
-            this.keyknoxStorage,
         );
         try {
-            await storage.sync();
+            await storage.retrieveCloudEntries();
         } catch (e) {
             throw new WrongKeyknoxPasswordError();
         }
