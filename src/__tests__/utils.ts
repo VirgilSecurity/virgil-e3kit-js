@@ -36,7 +36,6 @@ export const cardManager = new CardManager({
 });
 
 export const keyStorage = new KeyEntryStorage('.virgil-local-storage');
-export const keyknoxStorage = new KeyEntryStorage('.virgil-keyknox-storage');
 
 export const createFetchToken = (identity: string) => () =>
     Promise.resolve(generator.generateToken(identity).toString());
@@ -65,5 +64,4 @@ export const createSyncStorage = async (identity: string, password: string) => {
     return storage;
 };
 
-export const clear = () =>
-    beforeAll(done => Promise.all([keyStorage.clear(), keyknoxStorage.clear()]).then(() => done()));
+export const clear = () => beforeAll(done => Promise.all([keyStorage.clear()]).then(() => done()));
