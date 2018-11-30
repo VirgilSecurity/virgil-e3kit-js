@@ -35,7 +35,7 @@ You will need to add `@virgilsecurity/e3kit` script.
 
 ## Usage Example
 
-### Initialize & Bootstrap
+### Initialize & Register
 
 ```
 import { EThree } from '@virgilsecurity/e3kit-js'
@@ -47,7 +47,8 @@ const getToken = () => fetch('http://localhost:3000/get-virgil-jwt/')
 // get your unique identity from backend
 const sdk = await EThree.initialize(getToken);
 // create private key and upload it to our protected cloud service
-await sdk.bootstrap('secret_password');
+await sdk.register();
+await sdk.backupPrivateKey('encryption_pwd');
 ```
 
 ### Encrypt & Decrypt

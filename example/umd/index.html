@@ -17,9 +17,9 @@
 
         let sdk;
 
-        E3kit.EThree.init(getToken)
+        E3kit.EThree.initialize(getToken)
             .then(client => sdk = client)
-            .then(() => sdk.bootstrap('secret_password'))
+            .then(() => sdk.register())
             .then(() => sdk.encrypt('success!'))
             .then((encryptedMessage) => sdk.decrypt(encryptedMessage))
             .then((message) => console.log('message', message))

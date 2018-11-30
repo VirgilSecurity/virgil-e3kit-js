@@ -38,10 +38,9 @@ let eThree;
 firebase.auth().signInAnonymously()
     // Once Firebase user authenticated, we waiting for eThree client initialization
     .then(() => eThreePromise)
-    // Bootstrap user (i.e. load user's private key)
     .then(client => {
         eThree = client;
-        eThree.bootstrap('password');
+        eThree.register();
         return eThree;
     })
     // Lookup destination user public keys

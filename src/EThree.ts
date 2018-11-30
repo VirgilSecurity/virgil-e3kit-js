@@ -7,7 +7,6 @@ import {
     EmptyArrayError,
     LookupError,
     IdentityAlreadyExistsError,
-    MultithreadError,
     PrivateKeyAlreadyExistsError,
     MultipleCardsError,
 } from './errors';
@@ -20,6 +19,10 @@ interface IEThreeOptions {
     toolbox?: VirgilToolbox;
     keyLoader?: PrivateKeyLoader;
 }
+
+const throwMultithreadError = (method: string) => {
+    throw new Error(`Calling ${method} two or more times in a row is not allowed.`);
+};
 
 export default class EThree {
     identity: string;
@@ -41,36 +44,42 @@ export default class EThree {
     }
 
     async register() {
-        if (this.inProcess) throw new MultithreadError(this.register.name);
+        if (this.inProcess) throwMultithreadError(this.register.name);
         this.inProcess = true;
-        const [cards, privateKey] = await Promise.all([
-            this.toolbox.cardManager.searchCards(this.identity),
-            this.keyLoader.loadLocalPrivateKey(),
-        ]);
-        if (cards.length > 1) throw new MultipleCardsError(this.identity);
-        if (cards.length > 0) throw new IdentityAlreadyExistsError();
-        if (privateKey && cards.length === 0) await this.keyLoader.resetLocalPrivateKey();
-        const keyPair = this.toolbox.virgilCrypto.generateKeys();
-        await this.toolbox.publishCard(keyPair);
-        await this.keyLoader.savePrivateKeyLocal(keyPair.privateKey);
-        this.inProcess = false;
+        try {
+            const [cards, privateKey] = await Promise.all([
+                this.toolbox.cardManager.searchCards(this.identity),
+                this.keyLoader.loadLocalPrivateKey(),
+            ]);
+            if (cards.length > 1) throw new MultipleCardsError(this.identity);
+            if (cards.length > 0) throw new IdentityAlreadyExistsError();
+            if (privateKey && cards.length === 0) await this.keyLoader.resetLocalPrivateKey();
+            const keyPair = this.toolbox.virgilCrypto.generateKeys();
+            await this.toolbox.publishCard(keyPair);
+            await this.keyLoader.savePrivateKeyLocal(keyPair.privateKey);
+        } finally {
+            this.inProcess = false;
+        }
         return;
     }
 
     async rotatePrivateKey(): Promise<void> {
-        if (this.inProcess) throw new MultithreadError(this.register.name);
+        if (this.inProcess) throwMultithreadError(this.rotatePrivateKey.name);
         this.inProcess = true;
-        const [cards, privateKey] = await Promise.all([
-            this.toolbox.cardManager.searchCards(this.identity),
-            this.keyLoader.loadLocalPrivateKey(),
-        ]);
-        if (cards.length === 0) throw new RegisterRequiredError();
-        if (cards.length > 1) throw new MultipleCardsError(this.identity);
-        if (privateKey) throw new PrivateKeyAlreadyExistsError();
-        const keyPair = this.toolbox.virgilCrypto.generateKeys();
-        await this.toolbox.publishCard(keyPair, cards[0].id);
-        await this.keyLoader.savePrivateKeyLocal(keyPair.privateKey);
-        this.inProcess = false;
+        try {
+            const [cards, privateKey] = await Promise.all([
+                this.toolbox.cardManager.searchCards(this.identity),
+                this.keyLoader.loadLocalPrivateKey(),
+            ]);
+            if (cards.length === 0) throw new RegisterRequiredError();
+            if (cards.length > 1) throw new MultipleCardsError(this.identity);
+            if (privateKey) throw new PrivateKeyAlreadyExistsError();
+            const keyPair = this.toolbox.virgilCrypto.generateKeys();
+            await this.toolbox.publishCard(keyPair, cards[0].id);
+            await this.keyLoader.savePrivateKeyLocal(keyPair.privateKey);
+        } finally {
+            this.inProcess = false;
+        }
     }
 
     async restorePrivateKey(pwd: string): Promise<void> {
@@ -95,7 +104,7 @@ export default class EThree {
     async encrypt(message: string, publicKeys?: EncryptVirgilPublicKeyArg): Promise<string>;
     async encrypt(message: Buffer, publicKey?: EncryptVirgilPublicKeyArg): Promise<Buffer>;
     async encrypt(message: ArrayBuffer, publicKey?: EncryptVirgilPublicKeyArg): Promise<Buffer>;
-    async encrypt(message: Data, publicKeys?: EncryptVirgilPublicKeyArg): Promise<Buffer | string> {
+    async encrypt(message: Data, publicKeys?: EncryptVirgilPublicKeyArg): Promise<Data> {
         const isString = typeof message === 'string';
 
         if (publicKeys && isArray(publicKeys) && publicKeys.length === 0) {
@@ -121,7 +130,7 @@ export default class EThree {
     async decrypt(message: string, publicKey?: VirgilPublicKey): Promise<string>;
     async decrypt(message: Buffer, publicKey?: VirgilPublicKey): Promise<Buffer>;
     async decrypt(message: ArrayBuffer, publicKey?: VirgilPublicKey): Promise<Buffer>;
-    async decrypt(message: Data, publicKey?: VirgilPublicKey): Promise<Buffer | string> {
+    async decrypt(message: Data, publicKey?: VirgilPublicKey): Promise<Data> {
         const isMessageString = isString(message);
         const privateKey = await this.keyLoader.loadLocalPrivateKey();
         if (!privateKey) throw new RegisterRequiredError();
@@ -164,7 +173,7 @@ export default class EThree {
         return;
     }
 
-    hasPrivateKey(): Promise<Boolean> {
+    hasLocalPrivateKey(): Promise<Boolean> {
         return this.keyLoader.hasPrivateKey();
     }
 }

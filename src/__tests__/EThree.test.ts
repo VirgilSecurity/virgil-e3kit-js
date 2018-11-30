@@ -3,7 +3,6 @@ import {
     EmptyArrayError,
     RegisterRequiredError,
     LookupNotFoundError,
-    MultithreadError,
     PrivateKeyAlreadyExistsError,
     PrivateKeyNoBackupError,
     IdentityAlreadyExistsError,
@@ -125,7 +124,7 @@ describe('EThree.register()', () => {
         try {
             await sdk.register();
         } catch (e) {
-            expect(e).toBeInstanceOf(MultithreadError);
+            expect(e).toBeInstanceOf(Error);
         }
         await promise;
         const [cards, key] = await Promise.all([
@@ -181,7 +180,7 @@ describe('EThree.rotatePrivateKey', () => {
         try {
             await sdk.rotatePrivateKey();
         } catch (e) {
-            expect(e).toBeInstanceOf(MultithreadError);
+            expect(e).toBeInstanceOf(Error);
         }
         await promise;
         const newCards = await cardManager.searchCards(identity);
@@ -651,7 +650,7 @@ describe('hasPrivateKey()', () => {
         const fetchToken = () => Promise.resolve(generator.generateToken(identity).toString());
         const sdk = await EThree.initialize(fetchToken);
         await sdk.register();
-        const hasPrivateKey = await sdk.hasPrivateKey();
+        const hasPrivateKey = await sdk.hasLocalPrivateKey();
         expect(hasPrivateKey).toEqual(true);
         return done();
     });
@@ -660,7 +659,7 @@ describe('hasPrivateKey()', () => {
         const identity = 'virgiltesthasprivatekey2' + Date.now();
         const fetchToken = () => Promise.resolve(generator.generateToken(identity).toString());
         const sdk = await EThree.initialize(fetchToken);
-        const hasPrivateKey = await sdk.hasPrivateKey();
+        const hasPrivateKey = await sdk.hasLocalPrivateKey();
         expect(hasPrivateKey).toEqual(false);
         return done();
     });

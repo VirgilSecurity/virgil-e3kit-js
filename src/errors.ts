@@ -12,7 +12,7 @@ export class SdkError extends Error {
 export class IdentityAlreadyExistsError extends SdkError {
     constructor() {
         super(
-            'This identity already registered on Virgil Cloud. To load private key use EThree.restorePrivateKey or EThree.rotatePrivateKey',
+            'This identity is already registered on Virgil Cloud. To load private key use EThree.restorePrivateKey or EThree.rotatePrivateKey',
             'IdentityAlreadyExistsError',
         );
     }
@@ -33,12 +33,6 @@ export class WrongKeyknoxPasswordError extends SdkError {
 export class EmptyArrayError extends SdkError {
     constructor(method: string) {
         super(`Array must be non empty in ${method} method`);
-    }
-}
-
-export class MultithreadError extends SdkError {
-    constructor(method: string) {
-        super(`${method} method was called two or more times in a row.`);
     }
 }
 
