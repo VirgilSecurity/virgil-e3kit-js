@@ -71,29 +71,51 @@ export class MultipleCardsError extends SdkError {
         );
     }
 }
-
-const isError = (arg: any): arg is Error => arg instanceof Error;
-const isPublicKey = (arg: any): arg is VirgilPublicKey => !(arg instanceof Error);
+type LookupRejected = { identity: string; error: Error };
+type LookupResolved = { identity: string; publicKey: VirgilPublicKey };
 
 export class LookupError extends SdkError {
     result: Array<VirgilPublicKey | Error>;
+    identities: Array<string>;
 
-    rejected(): Error[] {
-        return this.result.filter(isError);
-    }
-    resolved(): VirgilPublicKey[] {
-        return this.result.filter(isPublicKey);
+    rejected(): LookupRejected[] {
+        const result: LookupRejected[] = [];
+        for (let i = 0; i < this.identities.length; i++) {
+            const value = this.result[i];
+            if (value instanceof Error) {
+                result.push({
+                    identity: this.identities[i],
+                    error: value,
+                });
+            }
+        }
+        return result;
     }
 
-    constructor(result: Array<VirgilPublicKey | Error>) {
+    resolved(): LookupResolved[] {
+        const result: LookupResolved[] = [];
+        for (let i = 0; i < this.identities.length; i++) {
+            const value = this.result[i];
+            if (value instanceof VirgilPublicKey) {
+                result.push({
+                    identity: this.identities[i],
+                    publicKey: value,
+                });
+            }
+        }
+        return result;
+    }
+
+    constructor(identities: string[], result: Array<VirgilPublicKey | Error>) {
         super(
             `Failed some public keys lookups. You can see the results by error.resolved() and error.rejected() methods of this error instance`,
             'LookupError',
         );
         this.result = result;
+        this.identities = identities;
         console.error(
             this.rejected()
-                .map(error => (error.message ? error.message : error))
+                .map(obj => obj.error.toString())
                 .join('\n'),
         );
     }

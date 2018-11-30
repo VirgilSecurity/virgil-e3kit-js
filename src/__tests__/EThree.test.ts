@@ -1,17 +1,15 @@
 import EThree from '../EThree';
-import { VirgilPublicKey } from 'virgil-crypto';
 import {
     EmptyArrayError,
     RegisterRequiredError,
-    LookupError,
     LookupNotFoundError,
     MultithreadError,
     PrivateKeyAlreadyExistsError,
     PrivateKeyNoBackupError,
     IdentityAlreadyExistsError,
     WrongKeyknoxPasswordError,
+    LookupError,
 } from '../errors';
-import VirgilToolbox from '../VirgilToolbox';
 import {
     generator,
     clear,
@@ -22,7 +20,9 @@ import {
     createFetchToken,
     virgilCrypto,
 } from './utils';
-import { CachingJwtProvider, IKeyEntry } from 'virgil-sdk';
+import { IKeyEntry, CachingJwtProvider } from 'virgil-sdk';
+import VirgilToolbox from '../VirgilToolbox';
+import { VirgilPublicKey } from 'virgil-crypto';
 
 describe('VirgilE2ee', () => {
     const identity = 'virgiltest' + Date.now();
@@ -245,9 +245,12 @@ describe('lookupPublicKeys', () => {
         try {
             await sdk.lookupPublicKeys([identity1, identity2]);
         } catch (e) {
-            expect(e.rejected().length).toBe(2);
-            expect(e.rejected()[0]).toBeInstanceOf(LookupNotFoundError);
-            expect(e.rejected()[1]).toBeInstanceOf(LookupNotFoundError);
+            expect(e).toBeInstanceOf(LookupError);
+            if (e instanceof LookupError) {
+                expect(e.rejected().length).toBe(2);
+                expect(e.rejected()[0].error).toBeInstanceOf(LookupNotFoundError);
+                expect(e.rejected()[1].error).toBeInstanceOf(LookupNotFoundError);
+            }
             return done();
         }
 
@@ -277,12 +280,15 @@ describe('lookupPublicKeys', () => {
             const res = await sdk.lookupPublicKeys([identity1, 'not exists', 'with error']);
             expect(res).not.toBeDefined();
         } catch (e) {
-            expect(e).toBeInstanceOf(LookupError);
-            expect(e.resolved().length).toBe(1);
-            expect(e.rejected().length).toBe(2);
-            expect(e.rejected()[0]).toBeInstanceOf(Error);
-            expect(e.rejected()[1]).toBeInstanceOf(LookupNotFoundError);
             VirgilToolbox.prototype.getPublicKey = fnStore;
+            expect(e).toBeInstanceOf(LookupError);
+            if (e instanceof LookupError) {
+                expect(e.resolved().length).toBe(1);
+                expect(e.resolved()[0].publicKey).toBeDefined();
+                expect(e.rejected().length).toBe(2);
+                expect(e.rejected()[0].error).toBeInstanceOf(Error);
+                expect(e.rejected()[1].error).toBeInstanceOf(LookupNotFoundError);
+            }
             return done();
         }
         VirgilToolbox.prototype.getPublicKey = fnStore;

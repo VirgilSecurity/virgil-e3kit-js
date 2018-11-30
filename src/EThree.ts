@@ -150,7 +150,7 @@ export default class EThree {
 
         if (isWithoutErrors(responses)) return isArray(identities) ? responses : responses[0];
 
-        return Promise.reject(new LookupError(responses));
+        return Promise.reject(new LookupError(argument, responses));
     }
 
     async changePassword(oldPwd: string, newPwd: string) {
