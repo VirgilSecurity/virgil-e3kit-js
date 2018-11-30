@@ -13,7 +13,6 @@ import {
 import {
     generator,
     clear,
-    keyknoxStorage,
     createSyncStorage,
     keyStorage,
     cardManager,
@@ -599,9 +598,7 @@ describe('cleanup()', () => {
         await sdk.register();
         await sdk.cleanup();
         const privateKeyFromLocalStorage = await keyStorage.load(identity);
-        const privateKeyFromKeyknox = await keyknoxStorage.load(identity);
         expect(privateKeyFromLocalStorage).toEqual(null);
-        expect(privateKeyFromKeyknox).toEqual(null);
         done();
     });
 });
@@ -645,5 +642,26 @@ describe('resetPrivateKeyBackup(pwd)', () => {
             return done();
         }
         done('should throw');
+    });
+});
+
+describe('hasPrivateKey()', () => {
+    it('has private key', async done => {
+        const identity = 'virgiltesthasprivatekey1' + Date.now();
+        const fetchToken = () => Promise.resolve(generator.generateToken(identity).toString());
+        const sdk = await EThree.initialize(fetchToken);
+        await sdk.register();
+        const hasPrivateKey = await sdk.hasPrivateKey();
+        expect(hasPrivateKey).toEqual(true);
+        return done();
+    });
+
+    it('has no private key', async done => {
+        const identity = 'virgiltesthasprivatekey2' + Date.now();
+        const fetchToken = () => Promise.resolve(generator.generateToken(identity).toString());
+        const sdk = await EThree.initialize(fetchToken);
+        const hasPrivateKey = await sdk.hasPrivateKey();
+        expect(hasPrivateKey).toEqual(false);
+        return done();
     });
 });

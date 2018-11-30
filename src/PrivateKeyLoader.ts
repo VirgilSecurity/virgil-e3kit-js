@@ -70,8 +70,8 @@ export default class PrivateKeyLoader {
         return update;
     }
 
-    async hasPrivateKey() {
-        return await this.localStorage.exists(this.identity);
+    hasPrivateKey() {
+        return this.localStorage.exists(this.identity);
     }
 
     private handleResetError = (e: Error) => {

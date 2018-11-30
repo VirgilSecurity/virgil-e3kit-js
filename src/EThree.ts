@@ -164,7 +164,7 @@ export default class EThree {
         return;
     }
 
-    async hasPrivateKey(): Promise<Boolean> {
+    hasPrivateKey(): Promise<Boolean> {
         return this.keyLoader.hasPrivateKey();
     }
 }
