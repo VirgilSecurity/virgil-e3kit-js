@@ -75,7 +75,7 @@ export default class EThree {
 
     async restorePrivateKey(pwd: string): Promise<void> {
         try {
-            await this.keyLoader.loadRemotePrivateKey(pwd);
+            await this.keyLoader.restorePrivateKey(pwd);
         } catch (e) {
             if (e instanceof KeyEntryAlreadyExistsError) {
                 throw new PrivateKeyAlreadyExistsError();

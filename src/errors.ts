@@ -18,12 +18,6 @@ export class IdentityAlreadyExistsError extends SdkError {
     }
 }
 
-export class PrivateKeyNotFoundError extends SdkError {
-    constructor() {
-        super('Private key not found', 'PrivateKeyNotFoundError');
-    }
-}
-
 export class RegisterRequiredError extends SdkError {
     constructor() {
         super('This identity is not registered', 'RegisterRequiredError');

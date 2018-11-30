@@ -1,7 +1,7 @@
 import { VirgilCrypto, VirgilCardCrypto, VirgilPrivateKey } from 'virgil-crypto';
 import { VirgilPublicKey } from 'virgil-crypto';
 import { VirgilCardVerifier, CachingJwtProvider, CardManager } from 'virgil-sdk';
-import { LookupNotFoundError } from './errors';
+import { LookupNotFoundError, MultipleCardsError } from './errors';
 
 export interface IKeyPair {
     privateKey: VirgilPrivateKey;
@@ -43,10 +43,7 @@ export default class VirgilToolbox {
         if (!cards.length) throw new LookupNotFoundError(identity);
         const publicKeys = cards.map(card => card.publicKey as VirgilPublicKey);
         if (publicKeys.length > 1) {
-            console.warn(
-                'This identity has two public keys. This sdk do not support multiple public keys for one identity. Used last published public key',
-            );
-            return publicKeys[publicKeys.length - 1] as VirgilPublicKey;
+            throw new MultipleCardsError(identity);
         }
         return publicKeys[0] as VirgilPublicKey;
     }

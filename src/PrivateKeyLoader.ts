@@ -14,20 +14,6 @@ type KeyPair = {
     privateKey: VirgilPrivateKey;
     publicKey: VirgilPublicKey;
 };
-export interface IBrainKey {
-    generateKeyPair(password: string, id?: string): Promise<KeyPair>;
-}
-
-export interface IPrivateKeyLoaderParams {
-    dbName: string;
-}
-
-export interface PrivateKeyEntry {
-    privateKey: VirgilPrivateKey;
-    meta: {
-        isPublished: boolean;
-    };
-}
 
 export default class PrivateKeyLoader {
     private pythiaCrypto = new VirgilPythiaCrypto();
@@ -49,9 +35,6 @@ export default class PrivateKeyLoader {
         return await this.localStorage.save({
             name: this.identity,
             value: this.toolbox.virgilCrypto.exportPrivateKey(privateKey),
-            meta: {
-                isPublished: String(isPublished),
-            },
         });
     }
 
@@ -62,8 +45,7 @@ export default class PrivateKeyLoader {
     }
 
     async resetLocalPrivateKey() {
-        await Promise.all([this.localStorage.remove(this.identity).catch(this.handleResetError)]);
-        return true;
+        await this.localStorage.remove(this.identity).catch(this.handleResetError);
     }
 
     async resetBackupPrivateKey(password: string) {
@@ -71,7 +53,7 @@ export default class PrivateKeyLoader {
         await storage.deleteEntry(this.identity).catch(this.handleResetError);
     }
 
-    async loadRemotePrivateKey(password: string, id?: string) {
+    async restorePrivateKey(password: string, id?: string) {
         const storage = await this.getStorage(password);
         const rawKey = await storage.retrieveEntry(this.identity);
         await this.localStorage.save({ name: this.identity, value: rawKey.data });
