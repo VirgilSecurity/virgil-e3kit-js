@@ -1,5 +1,13 @@
 # Changelog
 
+## 2018-11-30 0.3.0
+
+* Removed method EThree.boostrap(pwd)
+* Method EThree.bootstrap() renamed to EThree.register()
+* New method EThree.rotatePrivateKey() - used in case you lost your private key
+* New method EThree.restorePrivateKey(pwd) - used to fetch private key from Virgil Cloud
+* New method EThree.hasLocalPrivateKey() - used to check for private key existence on a device
+
 ## 2018-11-20 0.2.0
 
 * Rename EThree.init method to EThree.initialize

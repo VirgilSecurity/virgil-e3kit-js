@@ -4,13 +4,13 @@
 .vscode
 
 node_modules
-package-lock.json
 *.log
 
 .env
 
 .rpt2_cache
 .virgil_key_entries
-keyknox-storage
+.virgil-keyknox-storage
+.virgil-local-storage
 coverage
 dist

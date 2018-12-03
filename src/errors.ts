@@ -9,21 +9,18 @@ export class SdkError extends Error {
     }
 }
 
-export class PasswordRequiredError extends SdkError {
+export class IdentityAlreadyExistsError extends SdkError {
     constructor() {
-        super('Password required', 'PasswordRequiredError');
+        super(
+            'This identity is already registered on Virgil Cloud. To load private key use EThree.restorePrivateKey or EThree.rotatePrivateKey',
+            'IdentityAlreadyExistsError',
+        );
     }
 }
 
-export class PrivateKeyNotFoundError extends SdkError {
+export class RegisterRequiredError extends SdkError {
     constructor() {
-        super('Private key not found', 'PrivateKeyNotFoundError');
-    }
-}
-
-export class BootstrapRequiredError extends SdkError {
-    constructor() {
-        super('Bootstrap required', 'BootstrapRequiredError');
+        super('This identity is not registered', 'RegisterRequiredError');
     }
 }
 
@@ -39,25 +36,76 @@ export class EmptyArrayError extends SdkError {
     }
 }
 
-const isError = (arg: any): arg is Error => arg instanceof Error;
-const isPublicKey = (arg: any): arg is VirgilPublicKey => !(arg instanceof Error);
+export class PrivateKeyAlreadyExistsError extends SdkError {
+    constructor() {
+        super(
+            'You already have a private key. Use EThree.cleanup() to delete it. If you delete the last copy of the private key, you will not be able to decrypt any information encrypted for this private key',
+            'PrivateKeyAlreadyExistsError',
+        );
+    }
+}
+
+export class PrivateKeyNoBackupError extends SdkError {
+    constructor() {
+        super("Backup copy of private key doesn't exist", 'PrivateKeyNoBackupError');
+    }
+}
+
+export class MultipleCardsError extends SdkError {
+    constructor(identity: string) {
+        super(
+            `There are several public keys registered with ${identity}, which is not supported.`,
+            'MultipleCardsError',
+        );
+    }
+}
+type LookupRejected = { identity: string; error: Error };
+type LookupResolved = { identity: string; publicKey: VirgilPublicKey };
 
 export class LookupError extends SdkError {
     result: Array<VirgilPublicKey | Error>;
+    identities: Array<string>;
 
-    get rejected(): Error[] {
-        return this.result.filter(isError);
-    }
-    get resolved(): VirgilPublicKey[] {
-        return this.result.filter(isPublicKey);
+    rejected(): LookupRejected[] {
+        const result: LookupRejected[] = [];
+        for (let i = 0; i < this.identities.length; i++) {
+            const value = this.result[i];
+            if (value instanceof Error) {
+                result.push({
+                    identity: this.identities[i],
+                    error: value,
+                });
+            }
+        }
+        return result;
     }
 
-    constructor(result: Array<VirgilPublicKey | Error>) {
+    resolved(): LookupResolved[] {
+        const result: LookupResolved[] = [];
+        for (let i = 0; i < this.identities.length; i++) {
+            const value = this.result[i];
+            if (value instanceof VirgilPublicKey) {
+                result.push({
+                    identity: this.identities[i],
+                    publicKey: value,
+                });
+            }
+        }
+        return result;
+    }
+
+    constructor(identities: string[], result: Array<VirgilPublicKey | Error>) {
         super(
-            'Some promises got rejected. Use err.rejected for unhandled results, .resolved for handled and .result for all responses',
+            `Failed some public keys lookups. You can see the results by calling error.resolved() and error.rejected() methods of this error instance`,
             'LookupError',
         );
         this.result = result;
+        this.identities = identities;
+        console.error(
+            this.rejected()
+                .map(obj => obj.error.toString())
+                .join('\n'),
+        );
     }
 }
 

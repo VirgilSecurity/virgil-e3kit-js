@@ -19,7 +19,7 @@ export class HelloIonicPage {
     this.fetch = fetch.toString();
     EThree.initalize(getToken)
       .then(client => sdk = client)
-      .then(() => sdk.bootstrap('secret_password'))
+      .then(() => sdk.register())
       .then(() => sdk.encrypt('success!'))
       .then((encryptedMessage) => sdk.decrypt(encryptedMessage))
       .then((message) => this.result = message)
