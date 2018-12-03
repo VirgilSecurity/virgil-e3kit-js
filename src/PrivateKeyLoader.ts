@@ -9,7 +9,6 @@ import { VirgilPythiaCrypto, VirgilPublicKey, VirgilPrivateKey } from 'virgil-cr
 import VirgilToolbox from './VirgilToolbox';
 import { KeyEntryStorage } from 'virgil-sdk';
 import { WrongKeyknoxPasswordError, PrivateKeyNoBackupError } from './errors';
-import { VirgilCryptoError } from 'virgil-crypto/dist/types/common';
 
 const BRAIN_KEY_RATE_LIMIT_DELAY = 2000;
 const BRAIN_KEY_THROTTLING_ERROR_CODE = 60007;
@@ -123,7 +122,7 @@ export default class PrivateKeyLoader {
         try {
             await storage.retrieveCloudEntries();
         } catch (e) {
-            if (e instanceof VirgilCryptoError) throw new WrongKeyknoxPasswordError();
+            if (e.name === 'VirgilCryptoError') throw new WrongKeyknoxPasswordError();
             throw e;
         }
         return storage;
