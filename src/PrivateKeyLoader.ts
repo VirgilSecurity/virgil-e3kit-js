@@ -9,6 +9,10 @@ import { VirgilPythiaCrypto, VirgilPublicKey, VirgilPrivateKey } from 'virgil-cr
 import VirgilToolbox from './VirgilToolbox';
 import { KeyEntryStorage } from 'virgil-sdk';
 import { WrongKeyknoxPasswordError, PrivateKeyNoBackupError } from './errors';
+import { VirgilCryptoError } from 'virgil-crypto/dist/types/common';
+
+const BRAIN_KEY_RATE_LIMIT_DELAY = 2000;
+const BRAIN_KEY_THROTTLING_ERROR_CODE = 60007;
 
 type KeyPair = {
     privateKey: VirgilPrivateKey;
@@ -31,7 +35,7 @@ export default class PrivateKeyLoader {
         );
     }
 
-    async savePrivateKeyLocal(privateKey: VirgilPrivateKey, isPublished?: boolean) {
+    async savePrivateKeyLocal(privateKey: VirgilPrivateKey) {
         return await this.localStorage.save({
             name: this.identity,
             value: this.toolbox.virgilCrypto.exportPrivateKey(privateKey),
@@ -53,7 +57,7 @@ export default class PrivateKeyLoader {
         await storage.deleteEntry(this.identity).catch(this.handleResetError);
     }
 
-    async restorePrivateKey(password: string, id?: string) {
+    async restorePrivateKey(password: string) {
         const storage = await this.getStorage(password);
         const rawKey = await storage.retrieveEntry(this.identity);
         await this.localStorage.save({ name: this.identity, value: rawKey.data });
@@ -89,14 +93,14 @@ export default class PrivateKeyLoader {
         });
 
         return await brainKey.generateKeyPair(pwd).catch((e: Error & { code?: number }) => {
-            if (typeof e === 'object' && e.code === 60007) {
+            if (typeof e === 'object' && e.code === BRAIN_KEY_THROTTLING_ERROR_CODE) {
                 const promise = new Promise((resolve, reject) => {
                     const repeat = () =>
                         brainKey
                             .generateKeyPair(pwd)
                             .then(resolve)
                             .catch(reject);
-                    setTimeout(repeat, 2000);
+                    setTimeout(repeat, BRAIN_KEY_RATE_LIMIT_DELAY);
                 });
                 return promise as Promise<KeyPair>;
             }
@@ -119,7 +123,8 @@ export default class PrivateKeyLoader {
         try {
             await storage.retrieveCloudEntries();
         } catch (e) {
-            throw new WrongKeyknoxPasswordError();
+            if (e instanceof VirgilCryptoError) throw new WrongKeyknoxPasswordError();
+            throw e;
         }
         return storage;
     }

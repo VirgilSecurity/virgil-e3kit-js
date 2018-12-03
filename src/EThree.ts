@@ -44,7 +44,7 @@ export default class EThree {
     }
 
     async register() {
-        if (this.inProcess) throwMultithreadError(this.register.name);
+        if (this.inProcess) throwIllegalInvocationError('register');
         this.inProcess = true;
         try {
             const [cards, privateKey] = await Promise.all([
@@ -64,7 +64,7 @@ export default class EThree {
     }
 
     async rotatePrivateKey(): Promise<void> {
-        if (this.inProcess) throwMultithreadError(this.rotatePrivateKey.name);
+        if (this.inProcess) throwIllegalInvocationError('rotatePrivateKey');
         this.inProcess = true;
         try {
             const [cards, privateKey] = await Promise.all([
