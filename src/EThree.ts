@@ -20,7 +20,7 @@ interface IEThreeOptions {
     keyLoader?: PrivateKeyLoader;
 }
 
-const throwMultithreadError = (method: string) => {
+const throwIllegalInvocationError = (method: string) => {
     throw new Error(`Calling ${method} two or more times in a row is not allowed.`);
 };
 

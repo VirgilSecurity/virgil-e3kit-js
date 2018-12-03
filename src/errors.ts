@@ -39,7 +39,7 @@ export class EmptyArrayError extends SdkError {
 export class PrivateKeyAlreadyExistsError extends SdkError {
     constructor() {
         super(
-            'You already have a private key. Use EThree.cleanup() to delete it. If you delete last copy of private key, you will not able to decrypt any information encrypted for this private key',
+            'You already have a private key. Use EThree.cleanup() to delete it. If you delete the last copy of the private key, you will not be able to decrypt any information encrypted for this private key',
             'PrivateKeyAlreadyExistsError',
         );
     }
@@ -47,7 +47,7 @@ export class PrivateKeyAlreadyExistsError extends SdkError {
 
 export class PrivateKeyNoBackupError extends SdkError {
     constructor() {
-        super("Backup private key doesn't exist", 'PrivateKeyNoBackupError');
+        super("Backup copy of private key doesn't exist", 'PrivateKeyNoBackupError');
     }
 }
 
@@ -96,7 +96,7 @@ export class LookupError extends SdkError {
 
     constructor(identities: string[], result: Array<VirgilPublicKey | Error>) {
         super(
-            `Failed some public keys lookups. You can see the results by error.resolved() and error.rejected() methods of this error instance`,
+            `Failed some public keys lookups. You can see the results by calling error.resolved() and error.rejected() methods of this error instance`,
             'LookupError',
         );
         this.result = result;
