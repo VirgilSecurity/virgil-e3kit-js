@@ -25,8 +25,6 @@ import {
 import { isArray, isString } from './utils/typeguards';
 import { hasDuplicates } from './utils/array';
 
-type EncryptVirgilPublicKeyArg = VirgilPublicKey[] | VirgilPublicKey;
-
 interface IEThreeOptions {
     provider: CachingJwtProvider;
     keyLoader?: PrivateKeyLoader;
@@ -48,6 +46,8 @@ export type LookupResult = {
 export type LookupResultWithErrors = {
     [identity: string]: VirgilPublicKey | Error;
 };
+
+type EncryptVirgilPublicKeyArg = LookupResult | VirgilPublicKey;
 
 const _inProcess = Symbol('inProccess');
 const _keyLoader = Symbol('keyLoader');
@@ -151,15 +151,11 @@ export default class EThree {
     async encrypt(message: Data, publicKeys?: EncryptVirgilPublicKeyArg): Promise<Data> {
         const isString = typeof message === 'string';
 
-        if (publicKeys && isArray(publicKeys) && publicKeys.length === 0) {
-            throw new EmptyArrayError('encrypt');
-        }
-
         let argument: VirgilPublicKey[];
 
         if (publicKeys == null) argument = [];
-        else if (isArray(publicKeys)) argument = publicKeys;
-        else argument = [publicKeys];
+        else if (publicKeys instanceof VirgilPublicKey) argument = [publicKeys];
+        else argument = Object.values(publicKeys) as VirgilPublicKey[];
 
         const privateKey = await this[_keyLoader].loadLocalPrivateKey();
         if (!privateKey) throw new RegisterRequiredError();
