@@ -4,10 +4,11 @@ import {
     RegisterRequiredError,
     LookupNotFoundError,
     PrivateKeyAlreadyExistsError,
-    // PrivateKeyNoBackupError,
     IdentityAlreadyExistsError,
     WrongKeyknoxPasswordError,
     LookupError,
+    DUPLICATE_IDENTITES,
+    PrivateKeyNoBackupError,
 } from '../errors';
 import {
     generator,
@@ -201,7 +202,7 @@ describe.only('lookupPublicKeys', () => {
         const lookupResult = await sdk.lookupPublicKeys(identity2);
 
         expect(Array.isArray(lookupResult)).not.toBeTruthy();
-        expect(virgilCrypto.exportPublicKey(lookupResult.publicKey).toString('base64')).toEqual(
+        expect(virgilCrypto.exportPublicKey(lookupResult).toString('base64')).toEqual(
             virgilCrypto.exportPublicKey(keypair.publicKey).toString('base64'),
         );
         done();
@@ -222,11 +223,11 @@ describe.only('lookupPublicKeys', () => {
         ]);
         const publicKeys = await sdk.lookupPublicKeys([identity1, identity2]);
 
-        expect(publicKeys.length).toBe(2);
-        expect(virgilCrypto.exportPublicKey(publicKeys[0].publicKey).toString('base64')).toEqual(
+        expect(Object.values(publicKeys).length).toBe(2);
+        expect(virgilCrypto.exportPublicKey(publicKeys[identity1]).toString('base64')).toEqual(
             virgilCrypto.exportPublicKey(keypair1.publicKey).toString('base64'),
         );
-        expect(virgilCrypto.exportPublicKey(publicKeys[1].publicKey).toString('base64')).toEqual(
+        expect(virgilCrypto.exportPublicKey(publicKeys[identity2]).toString('base64')).toEqual(
             virgilCrypto.exportPublicKey(keypair2.publicKey).toString('base64'),
         );
         done();
@@ -236,16 +237,15 @@ describe.only('lookupPublicKeys', () => {
         const identity = 'virgiltestlookup' + Date.now();
         const fetchToken = createFetchToken(identity);
         const sdk = await EThree.initialize(fetchToken);
-        const identity1 = 'virgiltestlookupnonexist' + Date.now();
-        const identity2 = 'virgiltestlookupnonexist' + Date.now();
+        const identity1 = 'virgiltestlookupnonexist1' + Date.now();
+        const identity2 = 'virgiltestlookupnonexist2' + Date.now();
         try {
             await sdk.lookupPublicKeys([identity1, identity2]);
         } catch (e) {
             expect(e).toBeInstanceOf(LookupError);
             if (e instanceof LookupError) {
-                expect(e.rejected.length).toBe(2);
-                expect(e.rejected[0]).toBeInstanceOf(LookupNotFoundError);
-                expect(e.rejected[1]).toBeInstanceOf(LookupNotFoundError);
+                expect(e.lookupResult[identity1]).toBeInstanceOf(LookupNotFoundError);
+                expect(e.lookupResult[identity2]).toBeInstanceOf(LookupNotFoundError);
             }
             return done();
         }
@@ -262,6 +262,21 @@ describe.only('lookupPublicKeys', () => {
             await sdk.lookupPublicKeys([]);
         } catch (e) {
             expect(e).toBeInstanceOf(EmptyArrayError);
+            return done();
+        }
+        done('should throw');
+    });
+
+    it('lookupKeys with duplicate identites', async done => {
+        const identity = 'virgiltestlookup' + Date.now();
+        const fetchToken = createFetchToken(identity);
+
+        const sdk = await EThree.initialize(fetchToken);
+        try {
+            await sdk.lookupPublicKeys([identity, identity, 'random']);
+        } catch (e) {
+            expect(e).toBeInstanceOf(Error);
+            expect(e.message).toEqual(DUPLICATE_IDENTITES);
             return done();
         }
         done('should throw');

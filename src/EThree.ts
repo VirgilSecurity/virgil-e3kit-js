@@ -20,8 +20,10 @@ import {
     MultipleCardsError,
     LookupNotFoundError,
     LookupError,
+    DUPLICATE_IDENTITES,
 } from './errors';
 import { isArray, isString } from './utils/typeguards';
+import { hasDuplicates } from './utils/array';
 
 type EncryptVirgilPublicKeyArg = VirgilPublicKey[] | VirgilPublicKey;
 
@@ -40,8 +42,11 @@ export type KeyPair = {
 };
 
 export type LookupResult = {
-    identity: string;
-    publicKey: VirgilPublicKey;
+    [identity: string]: VirgilPublicKey;
+};
+
+export type LookupResultWithErrors = {
+    [identity: string]: VirgilPublicKey | Error;
 };
 
 const _inProcess = Symbol('inProccess');
@@ -179,34 +184,36 @@ export default class EThree {
         return res as Buffer;
     }
 
-    async lookupPublicKeys(identities: string): Promise<LookupResult>;
-    async lookupPublicKeys(identities: string[]): Promise<LookupResult[]>;
-    async lookupPublicKeys(identities: string[] | string): Promise<LookupResult[] | LookupResult> {
+    async lookupPublicKeys(identities: string): Promise<VirgilPublicKey>;
+    async lookupPublicKeys(identities: string[]): Promise<LookupResult>;
+    async lookupPublicKeys(identities: string[] | string): Promise<LookupResult | VirgilPublicKey> {
         const argument = isArray(identities) ? identities : [identities];
-
         if (argument.length === 0) throw new EmptyArrayError('lookupPublicKeys');
+        if (hasDuplicates(argument)) throw new Error(DUPLICATE_IDENTITES);
 
         const cards = await this.cardManager.searchCards(argument);
 
-        let result: LookupResult[] = [],
-            missingCards: LookupNotFoundError[] = [],
-            extraCards: MultipleCardsError[] = [];
+        let result: LookupResult = {},
+            resultWithErrors: LookupResultWithErrors = {};
 
         for (let identity of argument) {
             const filteredCards = cards.filter(card => card.identity === identity);
-            if (filteredCards.length === 0) missingCards.push(new LookupNotFoundError(identity));
-            else if (filteredCards.length > 1) extraCards.push(new MultipleCardsError(identity));
-            else {
-                result.push({ identity, publicKey: filteredCards[0].publicKey as VirgilPublicKey });
+            if (filteredCards.length === 0) {
+                resultWithErrors[identity] = new LookupNotFoundError(identity);
+            } else if (filteredCards.length > 1) {
+                resultWithErrors[identity] = new MultipleCardsError(identity);
+            } else {
+                result[identity] = filteredCards[0].publicKey as VirgilPublicKey;
             }
         }
 
-        if (extraCards.length || missingCards.length) {
-            throw new LookupError(result, [...missingCards, ...extraCards]);
+        if (Object.values(resultWithErrors).length !== 0) {
+            throw new LookupError({ ...resultWithErrors, ...result });
         }
 
-        if (isArray(identities)) return result;
-        return result[0];
+        if (Array.isArray(identities)) return result;
+
+        return result[identities];
     }
 
     async changePassword(oldPwd: string, newPwd: string) {
