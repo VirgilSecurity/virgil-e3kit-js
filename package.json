@@ -39,7 +39,7 @@
         "typescript": "^3.2.1",
         "virgil-crypto": "^3.2.0",
         "virgil-pythia": "^0.2.3",
-        "virgil-sdk": "^5.1.1"
+        "virgil-sdk": "^5.2.0"
     },
     "peerDependencies": {},
     "devDependencies": {

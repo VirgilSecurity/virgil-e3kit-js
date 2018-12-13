@@ -1,5 +1,3 @@
-import { VirgilPublicKey } from 'virgil-crypto/dist/virgil-crypto-pythia.cjs';
-
 export class SdkError extends Error {
     name: string;
     constructor(m: string, name: string = 'SdkError') {
@@ -52,60 +50,24 @@ export class PrivateKeyNoBackupError extends SdkError {
 }
 
 export class MultipleCardsError extends SdkError {
-    constructor(identity: string) {
+    constructor(public identity: string) {
         super(
             `There are several public keys registered with ${identity}, which is not supported.`,
             'MultipleCardsError',
         );
     }
 }
-type LookupRejected = { identity: string; error: Error };
-type LookupResolved = { identity: string; publicKey: VirgilPublicKey };
+
+type ErrorWithIdenetiy = { identity: string } & Error;
+type LookupResult = import('./EThree').LookupResult;
 
 export class LookupError extends SdkError {
-    result: Array<VirgilPublicKey | Error>;
-    identities: Array<string>;
-
-    rejected(): LookupRejected[] {
-        const result: LookupRejected[] = [];
-        for (let i = 0; i < this.identities.length; i++) {
-            const value = this.result[i];
-            if (value instanceof Error) {
-                result.push({
-                    identity: this.identities[i],
-                    error: value,
-                });
-            }
-        }
-        return result;
-    }
-
-    resolved(): LookupResolved[] {
-        const result: LookupResolved[] = [];
-        for (let i = 0; i < this.identities.length; i++) {
-            const value = this.result[i];
-            if (value instanceof VirgilPublicKey) {
-                result.push({
-                    identity: this.identities[i],
-                    publicKey: value,
-                });
-            }
-        }
-        return result;
-    }
-
-    constructor(identities: string[], result: Array<VirgilPublicKey | Error>) {
+    constructor(public resolved: Array<LookupResult>, public rejected: ErrorWithIdenetiy[]) {
         super(
-            `Failed some public keys lookups. You can see the results by calling error.resolved() and error.rejected() methods of this error instance`,
+            `Failed some public keys lookups. You can see the results by calling error.resolved and error.rejected properties of this error instance`,
             'LookupError',
         );
-        this.result = result;
-        this.identities = identities;
-        console.error(
-            this.rejected()
-                .map(obj => obj.error.toString())
-                .join('\n'),
-        );
+        console.error(this.rejected.map(obj => obj.toString()).join('\n'));
     }
 }
 

@@ -5,9 +5,8 @@ import {
     KeyknoxCrypto,
     CloudEntryDoesntExistError,
 } from '@virgilsecurity/keyknox';
-import { VirgilPythiaCrypto, VirgilPublicKey, VirgilPrivateKey } from 'virgil-crypto';
-import VirgilToolbox from './VirgilToolbox';
-import { KeyEntryStorage } from 'virgil-sdk';
+import { VirgilPythiaCrypto, VirgilPublicKey, VirgilPrivateKey, VirgilCrypto } from 'virgil-crypto';
+import { KeyEntryStorage, CachingJwtProvider } from 'virgil-sdk';
 import { WrongKeyknoxPasswordError, PrivateKeyNoBackupError } from './errors';
 
 const BRAIN_KEY_RATE_LIMIT_DELAY = 2000;
@@ -18,11 +17,16 @@ type KeyPair = {
     publicKey: VirgilPublicKey;
 };
 
+export interface IPrivateKeyLoader {
+    virgilCrypto: VirgilCrypto;
+    jwtProvider: CachingJwtProvider;
+}
+
 export default class PrivateKeyLoader {
     private pythiaCrypto = new VirgilPythiaCrypto();
     private localStorage: KeyEntryStorage;
 
-    constructor(private identity: string, public toolbox: VirgilToolbox) {
+    constructor(private identity: string, public options: IPrivateKeyLoader) {
         this.localStorage = new KeyEntryStorage('.virgil-local-storage');
     }
 
@@ -30,21 +34,21 @@ export default class PrivateKeyLoader {
         const storage = await this.getStorage(password);
         return await storage.storeEntry(
             this.identity,
-            this.toolbox.virgilCrypto.exportPrivateKey(privateKey),
+            this.options.virgilCrypto.exportPrivateKey(privateKey),
         );
     }
 
     async savePrivateKeyLocal(privateKey: VirgilPrivateKey) {
         return await this.localStorage.save({
             name: this.identity,
-            value: this.toolbox.virgilCrypto.exportPrivateKey(privateKey),
+            value: this.options.virgilCrypto.exportPrivateKey(privateKey),
         });
     }
 
     async loadLocalPrivateKey() {
         const privateKeyData = await this.localStorage.load(this.identity);
         if (!privateKeyData) return null;
-        return this.toolbox.virgilCrypto.importPrivateKey(privateKeyData.value) as VirgilPrivateKey;
+        return this.options.virgilCrypto.importPrivateKey(privateKeyData.value) as VirgilPrivateKey;
     }
 
     async resetLocalPrivateKey() {
@@ -60,7 +64,7 @@ export default class PrivateKeyLoader {
         const storage = await this.getStorage(password);
         const rawKey = await storage.retrieveEntry(this.identity);
         await this.localStorage.save({ name: this.identity, value: rawKey.data });
-        return this.toolbox.virgilCrypto.importPrivateKey(rawKey.data);
+        return this.options.virgilCrypto.importPrivateKey(rawKey.data);
     }
 
     async changePassword(oldPwd: string, newPwd: string) {
@@ -86,9 +90,9 @@ export default class PrivateKeyLoader {
 
     private async generateBrainPair(pwd: string) {
         const brainKey = createBrainKey({
-            virgilCrypto: this.toolbox.virgilCrypto,
+            virgilCrypto: this.options.virgilCrypto,
             virgilPythiaCrypto: this.pythiaCrypto,
-            accessTokenProvider: this.toolbox.jwtProvider,
+            accessTokenProvider: this.options.jwtProvider,
         });
 
         return await brainKey.generateKeyPair(pwd).catch((e: Error & { code?: number }) => {
@@ -112,11 +116,11 @@ export default class PrivateKeyLoader {
 
         const storage = new CloudKeyStorage(
             new KeyknoxManager(
-                this.toolbox.jwtProvider,
+                this.options.jwtProvider,
                 keyPair.privateKey,
                 keyPair.publicKey,
                 undefined,
-                new KeyknoxCrypto(this.toolbox.virgilCrypto),
+                new KeyknoxCrypto(this.options.virgilCrypto),
             ),
         );
         try {

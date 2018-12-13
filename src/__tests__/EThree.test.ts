@@ -4,7 +4,7 @@ import {
     RegisterRequiredError,
     LookupNotFoundError,
     PrivateKeyAlreadyExistsError,
-    PrivateKeyNoBackupError,
+    // PrivateKeyNoBackupError,
     IdentityAlreadyExistsError,
     WrongKeyknoxPasswordError,
     LookupError,
@@ -18,9 +18,7 @@ import {
     createFetchToken,
     virgilCrypto,
 } from './utils';
-import { IKeyEntry, CachingJwtProvider } from 'virgil-sdk';
-import VirgilToolbox from '../VirgilToolbox';
-import { VirgilPublicKey } from 'virgil-crypto';
+import { IKeyEntry } from 'virgil-sdk';
 
 describe('VirgilE2ee', () => {
     const identity = 'virgiltest' + Date.now();
@@ -190,7 +188,7 @@ describe('EThree.rotatePrivateKey', () => {
     });
 });
 
-describe('lookupPublicKeys', () => {
+describe.only('lookupPublicKeys', () => {
     clear();
 
     it('lookupPublicKeys for one identity success', async done => {
@@ -200,10 +198,10 @@ describe('lookupPublicKeys', () => {
         const sdk = await EThree.initialize(fetchToken);
         const keypair = virgilCrypto.generateKeys();
         await cardManager.publishCard({ identity: identity2, ...keypair });
-        const publicKey = await sdk.lookupPublicKeys(identity2);
+        const lookupResult = await sdk.lookupPublicKeys(identity2);
 
-        expect(Array.isArray(publicKey)).not.toBeTruthy();
-        expect(virgilCrypto.exportPublicKey(publicKey).toString('base64')).toEqual(
+        expect(Array.isArray(lookupResult)).not.toBeTruthy();
+        expect(virgilCrypto.exportPublicKey(lookupResult.publicKey).toString('base64')).toEqual(
             virgilCrypto.exportPublicKey(keypair.publicKey).toString('base64'),
         );
         done();
@@ -225,10 +223,10 @@ describe('lookupPublicKeys', () => {
         const publicKeys = await sdk.lookupPublicKeys([identity1, identity2]);
 
         expect(publicKeys.length).toBe(2);
-        expect(virgilCrypto.exportPublicKey(publicKeys[0]).toString('base64')).toEqual(
+        expect(virgilCrypto.exportPublicKey(publicKeys[0].publicKey).toString('base64')).toEqual(
             virgilCrypto.exportPublicKey(keypair1.publicKey).toString('base64'),
         );
-        expect(virgilCrypto.exportPublicKey(publicKeys[1]).toString('base64')).toEqual(
+        expect(virgilCrypto.exportPublicKey(publicKeys[1].publicKey).toString('base64')).toEqual(
             virgilCrypto.exportPublicKey(keypair2.publicKey).toString('base64'),
         );
         done();
@@ -245,52 +243,14 @@ describe('lookupPublicKeys', () => {
         } catch (e) {
             expect(e).toBeInstanceOf(LookupError);
             if (e instanceof LookupError) {
-                expect(e.rejected().length).toBe(2);
-                expect(e.rejected()[0].error).toBeInstanceOf(LookupNotFoundError);
-                expect(e.rejected()[1].error).toBeInstanceOf(LookupNotFoundError);
+                expect(e.rejected.length).toBe(2);
+                expect(e.rejected[0]).toBeInstanceOf(LookupNotFoundError);
+                expect(e.rejected[1]).toBeInstanceOf(LookupNotFoundError);
             }
             return done();
         }
 
         return done('should throw');
-    });
-
-    it('lookupKeys with error', async done => {
-        const identity = 'virgiltestlookup' + Date.now();
-        const fetchToken = createFetchToken(identity);
-
-        const identity1 = 'virgiltestlookuperror1' + Date.now();
-        const keypair1 = virgilCrypto.generateKeys();
-        const fnStore = VirgilToolbox.prototype.getPublicKey;
-        VirgilToolbox.prototype.getPublicKey = jest
-            .fn()
-            .mockResolvedValueOnce(keypair1.publicKey as VirgilPublicKey)
-            .mockRejectedValueOnce(new Error('something happens'))
-            .mockRejectedValueOnce(new LookupNotFoundError('not exists'));
-
-        const provider = new CachingJwtProvider(fetchToken);
-
-        const sdk = new EThree(identity, { provider });
-
-        await Promise.all([cardManager.publishCard({ identity: identity1, ...keypair1 })]);
-
-        try {
-            const res = await sdk.lookupPublicKeys([identity1, 'not exists', 'with error']);
-            expect(res).not.toBeDefined();
-        } catch (e) {
-            VirgilToolbox.prototype.getPublicKey = fnStore;
-            expect(e).toBeInstanceOf(LookupError);
-            if (e instanceof LookupError) {
-                expect(e.resolved().length).toBe(1);
-                expect(e.resolved()[0].publicKey).toBeDefined();
-                expect(e.rejected().length).toBe(2);
-                expect(e.rejected()[0].error).toBeInstanceOf(Error);
-                expect(e.rejected()[1].error).toBeInstanceOf(LookupNotFoundError);
-            }
-            return done();
-        }
-        VirgilToolbox.prototype.getPublicKey = fnStore;
-        done('should throw');
     });
 
     it('STE-2 lookupKeys with empty array of identities', async done => {
