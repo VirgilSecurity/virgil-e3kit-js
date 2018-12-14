@@ -1,4 +1,4 @@
-export const DUPLICATE_IDENTITES = 'Identities in array should be unique';
+export const DUPLICATE_IDENTITIES = 'Identities in array should be unique';
 
 export class SdkError extends Error {
     name: string;
@@ -60,19 +60,15 @@ export class MultipleCardsError extends SdkError {
     }
 }
 
-type LookupResultWithErrors = import('./EThree').LookupResultWithErrors;
+export type LookupResultWithErrors = {
+    [identity: string]: import('virgil-crypto').VirgilPublicKey | Error;
+};
 
 export class LookupError extends SdkError {
     constructor(public lookupResult: LookupResultWithErrors) {
         super(
-            `Failed some public keys lookups. You can see the results by calling error.lookupResul property of this error instance`,
+            `Failed some public keys lookups. You can see the results by calling error.lookupResult property of this error instance`,
             'LookupError',
-        );
-        console.error(
-            Object.values(lookupResult)
-                .filter(obj => obj instanceof Error)
-                .map(obj => obj.toString())
-                .join('\n'),
         );
     }
 }

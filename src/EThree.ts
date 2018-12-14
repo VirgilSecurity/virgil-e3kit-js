@@ -20,10 +20,10 @@ import {
     MultipleCardsError,
     LookupNotFoundError,
     LookupError,
-    DUPLICATE_IDENTITES,
+    DUPLICATE_IDENTITIES,
 } from './errors';
 import { isArray, isString } from './utils/typeguards';
-import { hasDuplicates } from './utils/array';
+import { hasDuplicates, getObjectValues } from './utils/array';
 
 interface IEThreeOptions {
     provider: CachingJwtProvider;
@@ -41,10 +41,6 @@ export type KeyPair = {
 
 export type LookupResult = {
     [identity: string]: VirgilPublicKey;
-};
-
-export type LookupResultWithErrors = {
-    [identity: string]: VirgilPublicKey | Error;
 };
 
 type EncryptVirgilPublicKeyArg = LookupResult | VirgilPublicKey;
@@ -155,7 +151,7 @@ export default class EThree {
 
         if (publicKeys == null) argument = [];
         else if (publicKeys instanceof VirgilPublicKey) argument = [publicKeys];
-        else argument = Object.values(publicKeys) as VirgilPublicKey[];
+        else argument = getObjectValues(publicKeys) as VirgilPublicKey[];
 
         const privateKey = await this[_keyLoader].loadLocalPrivateKey();
         if (!privateKey) throw new RegisterRequiredError();
@@ -185,12 +181,12 @@ export default class EThree {
     async lookupPublicKeys(identities: string[] | string): Promise<LookupResult | VirgilPublicKey> {
         const argument = isArray(identities) ? identities : [identities];
         if (argument.length === 0) throw new EmptyArrayError('lookupPublicKeys');
-        if (hasDuplicates(argument)) throw new Error(DUPLICATE_IDENTITES);
+        if (hasDuplicates(argument)) throw new Error(DUPLICATE_IDENTITIES);
 
         const cards = await this.cardManager.searchCards(argument);
 
         let result: LookupResult = {},
-            resultWithErrors: LookupResultWithErrors = {};
+            resultWithErrors: { [identity: string]: Error } = {};
 
         for (let identity of argument) {
             const filteredCards = cards.filter(card => card.identity === identity);
@@ -203,7 +199,7 @@ export default class EThree {
             }
         }
 
-        if (Object.values(resultWithErrors).length !== 0) {
+        if (getObjectValues(resultWithErrors).length !== 0) {
             throw new LookupError({ ...resultWithErrors, ...result });
         }
 

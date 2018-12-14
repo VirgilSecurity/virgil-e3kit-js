@@ -17,7 +17,7 @@ type KeyPair = {
     publicKey: VirgilPublicKey;
 };
 
-export interface IPrivateKeyLoader {
+export interface IPrivateKeyLoaderOptions {
     virgilCrypto: VirgilCrypto;
     jwtProvider: CachingJwtProvider;
 }
@@ -26,7 +26,7 @@ export default class PrivateKeyLoader {
     private pythiaCrypto = new VirgilPythiaCrypto();
     private localStorage: KeyEntryStorage;
 
-    constructor(private identity: string, public options: IPrivateKeyLoader) {
+    constructor(private identity: string, public options: IPrivateKeyLoaderOptions) {
         this.localStorage = new KeyEntryStorage('.virgil-local-storage');
     }
 

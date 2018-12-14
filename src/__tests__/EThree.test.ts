@@ -7,7 +7,7 @@ import {
     IdentityAlreadyExistsError,
     WrongKeyknoxPasswordError,
     LookupError,
-    DUPLICATE_IDENTITES,
+    DUPLICATE_IDENTITIES,
     PrivateKeyNoBackupError,
 } from '../errors';
 import {
@@ -20,6 +20,7 @@ import {
     virgilCrypto,
 } from './utils';
 import { IKeyEntry } from 'virgil-sdk';
+import { getObjectValues } from '../utils/array';
 
 describe('VirgilE2ee', () => {
     const identity = 'virgiltest' + Date.now();
@@ -223,7 +224,7 @@ describe('lookupPublicKeys', () => {
         ]);
         const publicKeys = await sdk.lookupPublicKeys([identity1, identity2]);
 
-        expect(Object.values(publicKeys).length).toBe(2);
+        expect(getObjectValues(publicKeys).length).toBe(2);
         expect(virgilCrypto.exportPublicKey(publicKeys[identity1]).toString('base64')).toEqual(
             virgilCrypto.exportPublicKey(keypair1.publicKey).toString('base64'),
         );
@@ -233,7 +234,7 @@ describe('lookupPublicKeys', () => {
         done();
     });
 
-    it('STE-2 lookupKeys nonexistent identity', async done => {
+    it('STE-2 lookupKeys nonexistent identity', async () => {
         const identity = 'virgiltestlookup' + Date.now();
         const fetchToken = createFetchToken(identity);
         const sdk = await EThree.initialize(fetchToken);
@@ -247,13 +248,13 @@ describe('lookupPublicKeys', () => {
                 expect(e.lookupResult[identity1]).toBeInstanceOf(LookupNotFoundError);
                 expect(e.lookupResult[identity2]).toBeInstanceOf(LookupNotFoundError);
             }
-            return done();
+            return;
         }
 
-        return done('should throw');
+        throw 'should throw';
     });
 
-    it('STE-2 lookupKeys with empty array of identities', async done => {
+    it('STE-2 lookupKeys with empty array of identities', async () => {
         const identity = 'virgiltestlookup' + Date.now();
         const fetchToken = createFetchToken(identity);
 
@@ -262,9 +263,9 @@ describe('lookupPublicKeys', () => {
             await sdk.lookupPublicKeys([]);
         } catch (e) {
             expect(e).toBeInstanceOf(EmptyArrayError);
-            return done();
+            return;
         }
-        done('should throw');
+        throw 'should throw';
     });
 
     it('lookupKeys with duplicate identites', async done => {
@@ -276,7 +277,7 @@ describe('lookupPublicKeys', () => {
             await sdk.lookupPublicKeys([identity, identity, 'random']);
         } catch (e) {
             expect(e).toBeInstanceOf(Error);
-            expect(e.message).toEqual(DUPLICATE_IDENTITES);
+            expect(e.message).toEqual(DUPLICATE_IDENTITIES);
             return done();
         }
         done('should throw');
