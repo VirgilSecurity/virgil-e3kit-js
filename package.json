@@ -1,6 +1,6 @@
 {
     "name": "@virgilsecurity/e3kit",
-    "version": "0.3.0",
+    "version": "0.3.1",
     "description": "End-to-end encryption with multiple device support powered by Virgil Security",
     "main": "./dist/e3kit.browser.umd.js",
     "module": "./dist/e3kit.browser.umd.js",
@@ -12,7 +12,7 @@
     "files": [
         "dist"
     ],
-    "repository": "https://github.com/VirgilSecurity/e3kit-js",
+    "repository": "https://github.com/VirgilSecurity/virgil-e3kit-js",
     "author": "Virgil Security Inc. <support@virgilsecurity.com>",
     "license": "BSD-3-Clause",
     "scripts": {
@@ -39,7 +39,7 @@
         "typescript": "^3.2.1",
         "virgil-crypto": "^3.2.0",
         "virgil-pythia": "^0.2.3",
-        "virgil-sdk": "^5.1.1"
+        "virgil-sdk": "^5.2.0"
     },
     "peerDependencies": {},
     "devDependencies": {

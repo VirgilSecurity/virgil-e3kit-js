@@ -4,10 +4,11 @@ import {
     RegisterRequiredError,
     LookupNotFoundError,
     PrivateKeyAlreadyExistsError,
-    PrivateKeyNoBackupError,
     IdentityAlreadyExistsError,
     WrongKeyknoxPasswordError,
     LookupError,
+    DUPLICATE_IDENTITIES,
+    PrivateKeyNoBackupError,
 } from '../errors';
 import {
     generator,
@@ -18,9 +19,8 @@ import {
     createFetchToken,
     virgilCrypto,
 } from './utils';
-import { IKeyEntry, CachingJwtProvider } from 'virgil-sdk';
-import VirgilToolbox from '../VirgilToolbox';
-import { VirgilPublicKey } from 'virgil-crypto';
+import { IKeyEntry } from 'virgil-sdk';
+import { getObjectValues } from '../utils/array';
 
 describe('VirgilE2ee', () => {
     const identity = 'virgiltest' + Date.now();
@@ -200,10 +200,10 @@ describe('lookupPublicKeys', () => {
         const sdk = await EThree.initialize(fetchToken);
         const keypair = virgilCrypto.generateKeys();
         await cardManager.publishCard({ identity: identity2, ...keypair });
-        const publicKey = await sdk.lookupPublicKeys(identity2);
+        const lookupResult = await sdk.lookupPublicKeys(identity2);
 
-        expect(Array.isArray(publicKey)).not.toBeTruthy();
-        expect(virgilCrypto.exportPublicKey(publicKey).toString('base64')).toEqual(
+        expect(Array.isArray(lookupResult)).not.toBeTruthy();
+        expect(virgilCrypto.exportPublicKey(lookupResult).toString('base64')).toEqual(
             virgilCrypto.exportPublicKey(keypair.publicKey).toString('base64'),
         );
         done();
@@ -224,76 +224,37 @@ describe('lookupPublicKeys', () => {
         ]);
         const publicKeys = await sdk.lookupPublicKeys([identity1, identity2]);
 
-        expect(publicKeys.length).toBe(2);
-        expect(virgilCrypto.exportPublicKey(publicKeys[0]).toString('base64')).toEqual(
+        expect(getObjectValues(publicKeys).length).toBe(2);
+        expect(virgilCrypto.exportPublicKey(publicKeys[identity1]).toString('base64')).toEqual(
             virgilCrypto.exportPublicKey(keypair1.publicKey).toString('base64'),
         );
-        expect(virgilCrypto.exportPublicKey(publicKeys[1]).toString('base64')).toEqual(
+        expect(virgilCrypto.exportPublicKey(publicKeys[identity2]).toString('base64')).toEqual(
             virgilCrypto.exportPublicKey(keypair2.publicKey).toString('base64'),
         );
         done();
     });
 
-    it('STE-2 lookupKeys nonexistent identity', async done => {
+    it('STE-2 lookupKeys nonexistent identity', async () => {
         const identity = 'virgiltestlookup' + Date.now();
         const fetchToken = createFetchToken(identity);
         const sdk = await EThree.initialize(fetchToken);
-        const identity1 = 'virgiltestlookupnonexist' + Date.now();
-        const identity2 = 'virgiltestlookupnonexist' + Date.now();
+        const identity1 = 'virgiltestlookupnonexist1' + Date.now();
+        const identity2 = 'virgiltestlookupnonexist2' + Date.now();
         try {
             await sdk.lookupPublicKeys([identity1, identity2]);
         } catch (e) {
             expect(e).toBeInstanceOf(LookupError);
             if (e instanceof LookupError) {
-                expect(e.rejected().length).toBe(2);
-                expect(e.rejected()[0].error).toBeInstanceOf(LookupNotFoundError);
-                expect(e.rejected()[1].error).toBeInstanceOf(LookupNotFoundError);
+                expect(e.lookupResult[identity1]).toBeInstanceOf(LookupNotFoundError);
+                expect(e.lookupResult[identity2]).toBeInstanceOf(LookupNotFoundError);
             }
-            return done();
+            return;
         }
 
-        return done('should throw');
+        throw 'should throw';
     });
 
-    it('lookupKeys with error', async done => {
-        const identity = 'virgiltestlookup' + Date.now();
-        const fetchToken = createFetchToken(identity);
-
-        const identity1 = 'virgiltestlookuperror1' + Date.now();
-        const keypair1 = virgilCrypto.generateKeys();
-        const fnStore = VirgilToolbox.prototype.getPublicKey;
-        VirgilToolbox.prototype.getPublicKey = jest
-            .fn()
-            .mockResolvedValueOnce(keypair1.publicKey as VirgilPublicKey)
-            .mockRejectedValueOnce(new Error('something happens'))
-            .mockRejectedValueOnce(new LookupNotFoundError('not exists'));
-
-        const provider = new CachingJwtProvider(fetchToken);
-
-        const sdk = new EThree(identity, { provider });
-
-        await Promise.all([cardManager.publishCard({ identity: identity1, ...keypair1 })]);
-
-        try {
-            const res = await sdk.lookupPublicKeys([identity1, 'not exists', 'with error']);
-            expect(res).not.toBeDefined();
-        } catch (e) {
-            VirgilToolbox.prototype.getPublicKey = fnStore;
-            expect(e).toBeInstanceOf(LookupError);
-            if (e instanceof LookupError) {
-                expect(e.resolved().length).toBe(1);
-                expect(e.resolved()[0].publicKey).toBeDefined();
-                expect(e.rejected().length).toBe(2);
-                expect(e.rejected()[0].error).toBeInstanceOf(Error);
-                expect(e.rejected()[1].error).toBeInstanceOf(LookupNotFoundError);
-            }
-            return done();
-        }
-        VirgilToolbox.prototype.getPublicKey = fnStore;
-        done('should throw');
-    });
-
-    it('STE-2 lookupKeys with empty array of identities', async done => {
+    it('STE-2 lookupKeys with empty array of identities', async () => {
         const identity = 'virgiltestlookup' + Date.now();
         const fetchToken = createFetchToken(identity);
 
@@ -302,6 +263,21 @@ describe('lookupPublicKeys', () => {
             await sdk.lookupPublicKeys([]);
         } catch (e) {
             expect(e).toBeInstanceOf(EmptyArrayError);
+            return;
+        }
+        throw 'should throw';
+    });
+
+    it('lookupKeys with duplicate identites', async done => {
+        const identity = 'virgiltestlookup' + Date.now();
+        const fetchToken = createFetchToken(identity);
+
+        const sdk = await EThree.initialize(fetchToken);
+        try {
+            await sdk.lookupPublicKeys([identity, identity, 'random']);
+        } catch (e) {
+            expect(e).toBeInstanceOf(Error);
+            expect(e.message).toEqual(DUPLICATE_IDENTITIES);
             return done();
         }
         done('should throw');
@@ -480,24 +456,9 @@ describe('encrypt and decrypt', () => {
         } catch (e) {
             expect(e).toBeInstanceOf(Error);
         }
-        const decryptedMessage = await sdk2.decrypt(encryptedMessage, sdk1PublicKeys[0]);
+        const decryptedMessage = await sdk2.decrypt(encryptedMessage, sdk1PublicKeys[identity1]);
         expect(decryptedMessage).toEqual(message);
         done();
-    });
-
-    it('STE-4 encrypt for empty public keys', async done => {
-        const identity = 'virgiltestencrypt' + Date.now();
-        const fetchToken = () => Promise.resolve(generator.generateToken(identity).toString());
-
-        const sdk = await EThree.initialize(fetchToken);
-        await sdk.register();
-        try {
-            await sdk.encrypt('privet', []);
-        } catch (e) {
-            expect(e).toBeInstanceOf(EmptyArrayError);
-            return done();
-        }
-        done('should throw');
     });
 
     it('STE-5 encrypt for one public key', async done => {
@@ -538,7 +499,7 @@ describe('encrypt and decrypt', () => {
         const { publicKey: senderPublicKey } = virgilCrypto.generateKeys();
         const message = 'encrypted, but not signed :)';
         const encryptedMessage = await virgilCrypto
-            .encrypt(message, receiverPublicKey)
+            .encrypt(message, receiverPublicKey[identity])
             .toString('base64');
         try {
             await sdk.decrypt(encryptedMessage, senderPublicKey);
@@ -578,7 +539,7 @@ describe('encrypt and decrypt', () => {
         const sdk = await EThree.initialize(fetchToken);
         await sdk.register();
         const publicKey = (await sdk.lookupPublicKeys([identity]))[0];
-        const encryptedMessage = await sdk.encrypt(buf, [recipient.publicKey]);
+        const encryptedMessage = await sdk.encrypt(buf, recipient.publicKey);
         expect(encryptedMessage).toBeInstanceOf(Buffer);
 
         const resp = await sdk.decrypt(encryptedMessage, publicKey);
