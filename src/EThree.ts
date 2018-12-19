@@ -79,7 +79,6 @@ export default class EThree {
             cardVerifier: this.cardVerifier,
             accessTokenProvider: this.jwtProvider,
             retryOnUnauthorized: true,
-            apiUrl: process.env.API_URL,
         });
     }
 
