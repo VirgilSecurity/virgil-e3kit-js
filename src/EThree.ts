@@ -155,7 +155,11 @@ export default class EThree {
         const privateKey = await this[_keyLoader].loadLocalPrivateKey();
         if (!privateKey) throw new RegisterRequiredError();
 
-        argument.push(this.virgilCrypto.extractPublicKey(privateKey));
+        const ownPublicKey = this.virgilCrypto.extractPublicKey(privateKey);
+
+        if (!this._isOwnPublicKeysIncluded(ownPublicKey, argument)) {
+            argument.push(ownPublicKey);
+        }
 
         let res: Data = this.virgilCrypto.signThenEncrypt(message, privateKey, argument);
         if (isString) res = res.toString('base64');
@@ -230,5 +234,14 @@ export default class EThree {
         });
 
         return { keyPair, card };
+    }
+
+    private _isOwnPublicKeysIncluded(ownPublicKey: VirgilPublicKey, publicKeys: VirgilPublicKey[]) {
+        const selfPublicKey = this.virgilCrypto.exportPublicKey(ownPublicKey).toString('base64');
+
+        const stringKeys = publicKeys.map(key =>
+            this.virgilCrypto.exportPublicKey(key).toString('base64'),
+        );
+        return stringKeys.some((key, i) => key === selfPublicKey);
     }
 }
