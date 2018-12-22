@@ -449,7 +449,7 @@ describe('encrypt and decrypt', () => {
         await Promise.all([sdk1.register(), sdk2.register()]);
         const message = 'encrypt, decrypt, repeat';
         const sdk1PublicKeys = await sdk1.lookupPublicKeys([identity1]);
-        const sdk2PublicKeys = await sdk2.lookupPublicKeys([identity2]);
+        const sdk2PublicKeys = await sdk2.lookupPublicKeys([identity1, identity2]);
         const encryptedMessage = await sdk1.encrypt(message, sdk2PublicKeys);
         try {
             await sdk2.decrypt(encryptedMessage);

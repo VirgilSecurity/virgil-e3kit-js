@@ -1,5 +1,10 @@
 # Changelog
 
+## 2018-12-22 0.3.4
+
+* Fixed broken buildings bugs
+* Fixed error when encryptor public key was passed in encrypt function
+
 ## 2018-11-30 0.3.0
 
 * Removed method EThree.boostrap(pwd)
