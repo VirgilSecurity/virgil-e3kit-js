@@ -3,7 +3,7 @@ import {
     VirgilAccessTokenSigner,
     VirgilCardCrypto,
     VirgilPythiaCrypto,
-} from 'virgil-crypto';
+} from 'virgil-crypto/dist/virgil-crypto-pythia.es';
 import {
     JwtGenerator,
     KeyEntryStorage,

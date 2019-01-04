@@ -4,6 +4,7 @@ import {
     KeyEntryAlreadyExistsError,
     CardManager,
     VirgilCardVerifier,
+    IKeyEntryStorage,
 } from 'virgil-sdk';
 import {
     VirgilPublicKey,
@@ -11,7 +12,7 @@ import {
     VirgilCrypto,
     VirgilCardCrypto,
     VirgilPrivateKey,
-} from 'virgil-crypto';
+} from 'virgil-crypto/dist/virgil-crypto-pythia.es';
 import {
     RegisterRequiredError,
     EmptyArrayError,
@@ -27,7 +28,7 @@ import { hasDuplicates, getObjectValues } from './utils/array';
 
 interface IEThreeOptions {
     provider: CachingJwtProvider;
-    keyLoader?: PrivateKeyLoader;
+    keyEntryStorage?: IKeyEntryStorage;
 }
 
 const throwIllegalInvocationError = (method: string) => {
@@ -59,11 +60,11 @@ export default class EThree {
     private [_keyLoader]: PrivateKeyLoader;
     private [_inProcess]: boolean = false;
 
-    static async initialize(getToken: () => Promise<string>) {
-        const provider = new CachingJwtProvider(getToken);
-        const token = await provider.getToken({ operation: 'get' });
+    static async initialize(getToken: () => Promise<string>, options?: IEThreeOptions) {
+        const opts = Object.assign({ provider: new CachingJwtProvider(getToken) }, options);
+        const token = await opts.provider.getToken({ operation: 'get' });
         const identity = token.identity();
-        return new EThree(identity, { provider });
+        return new EThree(identity, opts);
     }
 
     constructor(identity: string, options: IEThreeOptions) {
@@ -72,6 +73,7 @@ export default class EThree {
         this[_keyLoader] = new PrivateKeyLoader(this.identity, {
             jwtProvider: this.jwtProvider,
             virgilCrypto: this.virgilCrypto,
+            keyEntryStorage: options.keyEntryStorage,
         });
 
         this.cardManager = new CardManager({

@@ -1,9 +1,9 @@
-declare module 'virgil-crypto/dist/virgil-crypto-pythia.cjs' {
+declare module 'virgil-crypto/dist/virgil-crypto-pythia.es' {
     export * from 'virgil-crypto/dist/types/pythia';
 }
 
-declare module 'virgil-crypto' {
-    export * from 'virgil-crypto/dist/types/pythia';
+declare module 'virgil-sdk/dist/virgil-sdk.cjs' {
+    export * from 'virgil-sdk';
 }
 
 declare module 'virgil-pythia' {

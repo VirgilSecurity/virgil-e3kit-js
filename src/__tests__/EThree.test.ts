@@ -1,4 +1,3 @@
-import EThree from '../EThree';
 import {
     EmptyArrayError,
     RegisterRequiredError,
@@ -21,8 +20,9 @@ import {
 } from './utils';
 import { IKeyEntry } from 'virgil-sdk';
 import { getObjectValues } from '../utils/array';
+import EThree from '../EThree';
 
-describe('VirgilE2ee', () => {
+describe('VirgilE2ee', async () => {
     const identity = 'virgiltest' + Date.now();
     const fetchToken = () => Promise.resolve(generator.generateToken(identity).toString());
     clear();
