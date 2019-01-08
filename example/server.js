@@ -1,28 +1,32 @@
 const express = require('express');
 const cors = require('cors');
 const { JwtGenerator } = require('virgil-sdk');
+const crypto = require('crypto');
 const { VirgilCrypto, VirgilAccessTokenSigner } = require('virgil-crypto');
 const dotenv = require('dotenv');
 
 dotenv.config();
 
 const app = express();
-const crypto = new VirgilCrypto();
+const virgilCrypto = new VirgilCrypto();
 const { APP_ID, API_KEY_ID, API_KEY } = process.env;
 
 const generator = new JwtGenerator({
   appId: APP_ID,
   apiKeyId: API_KEY_ID,
-  apiKey: crypto.importPrivateKey(API_KEY),
-  accessTokenSigner: new VirgilAccessTokenSigner(crypto)
+  apiKey: virgilCrypto.importPrivateKey(API_KEY),
+  accessTokenSigner: new VirgilAccessTokenSigner(virgilCrypto)
 });
 
-const IDENTITY = 'TEST_IDENTITY';
+const IDENTITY = crypto.randomBytes(8).toString('base64');
 
 app.use(cors({ origin: true, methods: 'OPTIONS,GET,HEAD,PUT,PATCH,POST,DELETE', }));
 app.get('/get-virgil-jwt', (_req, res) => {
   const virgilJwtToken = generator.generateToken(IDENTITY);
   res.json({ token: virgilJwtToken.toString() });
 });
+
+app.use(express.static('./umd/'));
+app.use(express.static('../dist'));
 
 app.listen(3000, () => console.log(`Example app listening on port http://localhost:3000!`))

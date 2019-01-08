@@ -2,12 +2,8 @@
     "name": "@virgilsecurity/e3kit",
     "version": "0.3.4",
     "description": "End-to-end encryption with multiple device support powered by Virgil Security",
-    "main": "./dist/e3kit.browser.umd.js",
-    "module": "./dist/e3kit.browser.umd.js",
-    "browser": {
-        "./dist/e3kit.browser.umd.js": "./dist/e3kit.browser.umd.js",
-        "./dist/e3kit.browser.umd.min.js": "./dist/e3kit.browser.umd.min.js"
-    },
+    "main": "./dist/e3kit.browser.es.js",
+    "module": "./dist/e3kit.browser.es.js",
     "typings": "./dist/types/index.d.ts",
     "files": [
         "dist"
@@ -16,17 +12,18 @@
     "author": "Virgil Security Inc. <support@virgilsecurity.com>",
     "license": "BSD-3-Clause",
     "scripts": {
+        "build:browser:umd": "cross-env PLATFORM=browser rollup -c config/rollup.config.umd.js",
+        "build:browser:es": "cross-env PLATFORM=browser rollup -c config/rollup.config.es.js",
+        "build": "npm run build:browser:umd && npm run build:browser:es",
+        "clean": "rimraf .rpt2_cache .virgil_key_entries coverage dist",
+        "debug:test": "node --inspect-brk node_modules/.bin/jest --runInBand",
+        "lint": "tslint --project tsconfig.json",
+        "prepare": "npm run clean && npm run build",
+        "prettier": "prettier 'src/**/*.ts' --write",
+        "precommit": "lint-staged",
         "test": "jest",
         "test:dev": "jest --watch --verbose false",
-        "debug:test": "node --inspect-brk node_modules/.bin/jest --runInBand",
-        "clean": "rimraf .rpt2_cache .virgil_key_entries coverage dist",
-        "build:browser:umd": "cross-env ENV=browser FORMAT=umd rollup -c",
-        "build:browser:umd:min": "cross-env ENV=browser FORMAT=umd MINIFY=true rollup -c",
-        "build": "npm run build:browser:umd && npm run build:browser:umd:min",
-        "prepare": "npm run clean && npm run build",
-        "lint": "tslint --project tsconfig.json",
-        "prettier": "prettier 'src/**/*.ts' --write",
-        "precommit": "lint-staged"
+        "test:build:umd": "npm run build:umd && FORMAT=umd npm run test"
     },
     "lint-staged": {
         "src/**/*.ts": [
@@ -35,8 +32,7 @@
         ]
     },
     "dependencies": {
-        "@virgilsecurity/keyknox": "^0.2.0",
-        "typescript": "^3.2.1",
+        "@virgilsecurity/keyknox": "^0.2.2",
         "virgil-crypto": "^3.2.0",
         "virgil-pythia": "^0.2.3",
         "virgil-sdk": "^5.2.0"
@@ -46,6 +42,7 @@
         "@types/jest": "^23.3.7",
         "@types/node": "^10.7.1",
         "babel-jest": "^23.6.0",
+        "buffer": "^5.2.1",
         "buffer-es6": "^4.9.3",
         "cross-env": "^5.2.0",
         "dotenv": "^6.0.0",
@@ -55,6 +52,7 @@
         "prettier": "^1.14.2",
         "rimraf": "^2.6.2",
         "rollup": "^0.64.1",
+        "rollup-plugin-analyzer": "^3.0.0",
         "rollup-plugin-commonjs": "^9.1.5",
         "rollup-plugin-inject": "^2.2.0",
         "rollup-plugin-node-globals": "^1.2.1",
