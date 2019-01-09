@@ -7,7 +7,7 @@
     "test": "jest"
   },
   "dependencies": {
-    "@virgilsecurity/e3kit": "file:../e3kit-js",
+    "@virgilsecurity/e3kit": "file:../../",
     "@virgilsecurity/key-storage-rn": "0.1.1",
     "buffer": "^5.2.1",
     "react": "16.6.1",

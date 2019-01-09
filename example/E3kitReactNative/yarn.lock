@@ -647,8 +647,8 @@
     lodash "^4.17.10"
     to-fast-properties "^2.0.0"
 
-"@virgilsecurity/e3kit@file:../e3kit-js":
-  version "0.3.4"
+"@virgilsecurity/e3kit@file:../..":
+  version "0.3.5"
   dependencies:
     "@virgilsecurity/keyknox" "^0.2.2"
     virgil-crypto "^3.2.0"
