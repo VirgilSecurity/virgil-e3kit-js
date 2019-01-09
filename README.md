@@ -6,8 +6,6 @@
 
 [Introduction](#introduction) | [SDK Features](#sdk-features) | [Installation](#installation) | [Usage Example](#usage-example) | [Docs](#docs) | [Support](#support)
 
-## This library currently in active development.
-Don't use it in the production apps. Future API can be changed! More info in [Slack](#support)
 
 ## Introduction
 
