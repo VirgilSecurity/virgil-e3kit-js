@@ -18,8 +18,6 @@ module.exports = {
         plugins.resolve({ browser: true }),
         plugins.commonjs(),
         plugins.typescriptResolved,
-        plugins.injectResolved,
-        plugins.nodeGlobals(),
         plugins.uglify(),
     ],
 };

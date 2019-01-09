@@ -35,9 +35,6 @@ class RollupPluginsResolver {
             exclude: ['**/*.test.ts', '**/*.spec.ts', '**/__mocks__/*.ts'],
             useTsconfigDeclarationDir: true,
         });
-        this.injectResolved = inject({
-            Buffer: ['buffer-es6', 'Buffer'],
-        });
     }
 }
 

@@ -12,18 +12,18 @@ const virgilCrypto = new VirgilCrypto();
 const { APP_ID, API_KEY_ID, API_KEY } = process.env;
 
 const generator = new JwtGenerator({
-  appId: APP_ID,
-  apiKeyId: API_KEY_ID,
-  apiKey: virgilCrypto.importPrivateKey(API_KEY),
-  accessTokenSigner: new VirgilAccessTokenSigner(virgilCrypto)
+    appId: APP_ID,
+    apiKeyId: API_KEY_ID,
+    apiKey: virgilCrypto.importPrivateKey(API_KEY),
+    accessTokenSigner: new VirgilAccessTokenSigner(virgilCrypto)
 });
 
-const IDENTITY = crypto.randomBytes(8).toString('base64');
 
 app.use(cors({ origin: true, methods: 'OPTIONS,GET,HEAD,PUT,PATCH,POST,DELETE', }));
 app.get('/get-virgil-jwt', (_req, res) => {
-  const virgilJwtToken = generator.generateToken(IDENTITY);
-  res.json({ token: virgilJwtToken.toString() });
+    const IDENTITY = crypto.randomBytes(8).toString('base64');
+    const virgilJwtToken = generator.generateToken(IDENTITY);
+    res.json({ token: virgilJwtToken.toString() });
 });
 
 app.use(express.static('./umd/'));
