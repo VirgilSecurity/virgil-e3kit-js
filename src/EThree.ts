@@ -50,7 +50,7 @@ export type LookupResult = {
 
 type EncryptVirgilPublicKeyArg = LookupResult | VirgilPublicKey;
 
-const _inProcess = Symbol('inProccess');
+const _inProcess = Symbol('inProcess');
 const _keyLoader = Symbol('keyLoader');
 
 export default class EThree {
