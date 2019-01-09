@@ -5,6 +5,7 @@ import {
     CardManager,
     VirgilCardVerifier,
     IKeyEntryStorage,
+    IAccessTokenProvider,
 } from 'virgil-sdk';
 import {
     VirgilPublicKey,
@@ -26,9 +27,12 @@ import {
 import { isArray, isString } from './utils/typeguards';
 import { hasDuplicates, getObjectValues } from './utils/array';
 
-interface IEThreeOptions {
-    provider: CachingJwtProvider;
+interface IEThreeInitOptions {
     keyEntryStorage?: IKeyEntryStorage;
+}
+
+interface IEThreeCtorOptions extends IEThreeInitOptions {
+    accessTokenProvider: IAccessTokenProvider;
 }
 
 const throwIllegalInvocationError = (method: string) => {
@@ -55,23 +59,23 @@ export default class EThree {
     cardCrypto = new VirgilCardCrypto(this.virgilCrypto);
     cardVerifier = new VirgilCardVerifier(this.cardCrypto);
     cardManager: CardManager;
-    jwtProvider: CachingJwtProvider;
+    accessTokenProvider: IAccessTokenProvider;
 
     private [_keyLoader]: PrivateKeyLoader;
     private [_inProcess]: boolean = false;
 
-    static async initialize(getToken: () => Promise<string>, options?: IEThreeOptions) {
-        const opts = Object.assign({ provider: new CachingJwtProvider(getToken) }, options);
-        const token = await opts.provider.getToken({ operation: 'get' });
+    static async initialize(getToken: () => Promise<string>, options: IEThreeInitOptions = {}) {
+        const opts = { accessTokenProvider: new CachingJwtProvider(getToken), ...options };
+        const token = await opts.accessTokenProvider.getToken({ operation: 'get' });
         const identity = token.identity();
         return new EThree(identity, opts);
     }
 
-    constructor(identity: string, options: IEThreeOptions) {
+    constructor(identity: string, options: IEThreeCtorOptions) {
         this.identity = identity;
-        this.jwtProvider = options.provider;
+        this.accessTokenProvider = options.accessTokenProvider;
         this[_keyLoader] = new PrivateKeyLoader(this.identity, {
-            jwtProvider: this.jwtProvider,
+            accessTokenProvider: this.accessTokenProvider,
             virgilCrypto: this.virgilCrypto,
             keyEntryStorage: options.keyEntryStorage,
         });
@@ -79,7 +83,7 @@ export default class EThree {
         this.cardManager = new CardManager({
             cardCrypto: this.cardCrypto,
             cardVerifier: this.cardVerifier,
-            accessTokenProvider: this.jwtProvider,
+            accessTokenProvider: this.accessTokenProvider,
             retryOnUnauthorized: true,
         });
     }

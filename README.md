@@ -83,7 +83,7 @@ const keyEntryStorage = createNativeKeyEntryStorage();
 // or
 const keyEntryStorage = createExpoKeyEntryStorage();
 
-EThree.initialize(getTokenCallback, { keyEntryStorage: keyEntryStorage });
+EThree.initialize(getTokenCallback, { keyEntryStorage });
 ```
 
 ## Docs

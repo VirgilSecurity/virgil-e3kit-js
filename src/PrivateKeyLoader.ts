@@ -11,7 +11,7 @@ import {
     VirgilPrivateKey,
     VirgilCrypto,
 } from 'virgil-crypto/dist/virgil-crypto-pythia.es';
-import { KeyEntryStorage, CachingJwtProvider, IKeyEntryStorage } from 'virgil-sdk';
+import { KeyEntryStorage, IKeyEntryStorage, IAccessTokenProvider } from 'virgil-sdk';
 import { WrongKeyknoxPasswordError, PrivateKeyNoBackupError } from './errors';
 
 const BRAIN_KEY_RATE_LIMIT_DELAY = 2000;
@@ -24,7 +24,7 @@ type KeyPair = {
 
 export interface IPrivateKeyLoaderOptions {
     virgilCrypto: VirgilCrypto;
-    jwtProvider: CachingJwtProvider;
+    accessTokenProvider: IAccessTokenProvider;
     keyEntryStorage?: IKeyEntryStorage;
 }
 
@@ -98,7 +98,7 @@ export default class PrivateKeyLoader {
         const brainKey = createBrainKey({
             virgilCrypto: this.options.virgilCrypto,
             virgilPythiaCrypto: this.pythiaCrypto,
-            accessTokenProvider: this.options.jwtProvider,
+            accessTokenProvider: this.options.accessTokenProvider,
         });
 
         return await brainKey.generateKeyPair(pwd).catch((e: Error & { code?: number }) => {
@@ -122,7 +122,7 @@ export default class PrivateKeyLoader {
 
         const storage = new CloudKeyStorage(
             new KeyknoxManager(
-                this.options.jwtProvider,
+                this.options.accessTokenProvider,
                 keyPair.privateKey,
                 keyPair.publicKey,
                 undefined,
