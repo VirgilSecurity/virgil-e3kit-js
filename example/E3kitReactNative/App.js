@@ -28,11 +28,10 @@ export default class App extends Component {
   }
 
   componentDidMount() {
-    const getToken = () => fetch("http://192.168.1.125:3000/get-virgil-jwt")
+    const getToken = () => fetch("http://localhost:3000/get-virgil-jwt")
         .then(res => res.json())
         .then(data => data.token);
 
-    console.log('keyEntryStorage', keyEntryStorage);
     EThree.initialize(getToken, { keyEntryStorage: keyEntryStorage })
         .then(client => sdk = client)
         .then(() => sdk.register())

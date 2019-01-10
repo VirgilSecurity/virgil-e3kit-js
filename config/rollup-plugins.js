@@ -14,7 +14,6 @@ function resolveVirgilCrypto () {
         name: 'resolve-virgil-crypto',
         resolveId (importee, b) {
             if (importee === 'virgil-crypto') {
-                console.log(importee, b);
                 return paths.pythiaCryptoPath;
             }
             return null;
