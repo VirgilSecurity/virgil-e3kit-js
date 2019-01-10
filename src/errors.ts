@@ -61,7 +61,9 @@ export class MultipleCardsError extends SdkError {
 }
 
 export type LookupResultWithErrors = {
-    [identity: string]: import('virgil-crypto').VirgilPublicKey | Error;
+    [identity: string]:
+        | import('virgil-crypto/dist/virgil-crypto-pythia.es').VirgilPublicKey
+        | Error;
 };
 
 export class LookupError extends SdkError {

@@ -5,8 +5,13 @@ import {
     KeyknoxCrypto,
     CloudEntryDoesntExistError,
 } from '@virgilsecurity/keyknox';
-import { VirgilPythiaCrypto, VirgilPublicKey, VirgilPrivateKey, VirgilCrypto } from 'virgil-crypto';
-import { KeyEntryStorage, CachingJwtProvider } from 'virgil-sdk';
+import {
+    VirgilPythiaCrypto,
+    VirgilPublicKey,
+    VirgilPrivateKey,
+    VirgilCrypto,
+} from 'virgil-crypto/dist/virgil-crypto-pythia.es';
+import { KeyEntryStorage, IKeyEntryStorage, IAccessTokenProvider } from 'virgil-sdk';
 import { WrongKeyknoxPasswordError, PrivateKeyNoBackupError } from './errors';
 
 const BRAIN_KEY_RATE_LIMIT_DELAY = 2000;
@@ -19,15 +24,16 @@ type KeyPair = {
 
 export interface IPrivateKeyLoaderOptions {
     virgilCrypto: VirgilCrypto;
-    jwtProvider: CachingJwtProvider;
+    accessTokenProvider: IAccessTokenProvider;
+    keyEntryStorage?: IKeyEntryStorage;
 }
 
 export default class PrivateKeyLoader {
     private pythiaCrypto = new VirgilPythiaCrypto();
-    private localStorage: KeyEntryStorage;
+    private localStorage: IKeyEntryStorage;
 
     constructor(private identity: string, public options: IPrivateKeyLoaderOptions) {
-        this.localStorage = new KeyEntryStorage('.virgil-local-storage');
+        this.localStorage = options.keyEntryStorage || new KeyEntryStorage('.virgil-local-storage');
     }
 
     async savePrivateKeyRemote(privateKey: VirgilPrivateKey, password: string) {
@@ -92,7 +98,7 @@ export default class PrivateKeyLoader {
         const brainKey = createBrainKey({
             virgilCrypto: this.options.virgilCrypto,
             virgilPythiaCrypto: this.pythiaCrypto,
-            accessTokenProvider: this.options.jwtProvider,
+            accessTokenProvider: this.options.accessTokenProvider,
         });
 
         return await brainKey.generateKeyPair(pwd).catch((e: Error & { code?: number }) => {
@@ -116,7 +122,7 @@ export default class PrivateKeyLoader {
 
         const storage = new CloudKeyStorage(
             new KeyknoxManager(
-                this.options.jwtProvider,
+                this.options.accessTokenProvider,
                 keyPair.privateKey,
                 keyPair.publicKey,
                 undefined,

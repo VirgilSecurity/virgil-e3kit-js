@@ -65,6 +65,24 @@ const decryptedMsg = await eThree.decrypt(encryptedMsg, senderPublicKey);
 ```
 You can find more examples in [examples folder](example) and on https://e3kit.readme.io.
 
+
+### React Native usage
+
+This package works with https://github.com/VirgilSecurity/virgil-key-storage-rn
+
+```
+import { EThree } from '@virgilsecurity/e3kit';
+import createNativeKeyEntryStorage from '@virgilsecurity/key-storage-rn/native';
+// or
+import createExpoKeyEntryStorage from '@virgilsecurity/key-storage-rn/expo';
+
+const keyEntryStorage = createNativeKeyEntryStorage();
+// or
+const keyEntryStorage = createExpoKeyEntryStorage();
+
+EThree.initialize(getTokenCallback, { keyEntryStorage });
+```
+
 ## Docs
 Virgil Security has a powerful set of APIs, and the documentation below can get you started today.
 

@@ -4,6 +4,8 @@ import {
     KeyEntryAlreadyExistsError,
     CardManager,
     VirgilCardVerifier,
+    IKeyEntryStorage,
+    IAccessTokenProvider,
 } from 'virgil-sdk';
 import {
     VirgilPublicKey,
@@ -11,7 +13,7 @@ import {
     VirgilCrypto,
     VirgilCardCrypto,
     VirgilPrivateKey,
-} from 'virgil-crypto';
+} from 'virgil-crypto/dist/virgil-crypto-pythia.es';
 import {
     RegisterRequiredError,
     EmptyArrayError,
@@ -25,9 +27,12 @@ import {
 import { isArray, isString } from './utils/typeguards';
 import { hasDuplicates, getObjectValues } from './utils/array';
 
-interface IEThreeOptions {
-    provider: CachingJwtProvider;
-    keyLoader?: PrivateKeyLoader;
+interface IEThreeInitOptions {
+    keyEntryStorage?: IKeyEntryStorage;
+}
+
+interface IEThreeCtorOptions extends IEThreeInitOptions {
+    accessTokenProvider: IAccessTokenProvider;
 }
 
 const throwIllegalInvocationError = (method: string) => {
@@ -45,7 +50,7 @@ export type LookupResult = {
 
 type EncryptVirgilPublicKeyArg = LookupResult | VirgilPublicKey;
 
-const _inProcess = Symbol('inProccess');
+const _inProcess = Symbol('inProcess');
 const _keyLoader = Symbol('keyLoader');
 
 export default class EThree {
@@ -54,30 +59,31 @@ export default class EThree {
     cardCrypto = new VirgilCardCrypto(this.virgilCrypto);
     cardVerifier = new VirgilCardVerifier(this.cardCrypto);
     cardManager: CardManager;
-    jwtProvider: CachingJwtProvider;
+    accessTokenProvider: IAccessTokenProvider;
 
     private [_keyLoader]: PrivateKeyLoader;
     private [_inProcess]: boolean = false;
 
-    static async initialize(getToken: () => Promise<string>) {
-        const provider = new CachingJwtProvider(getToken);
-        const token = await provider.getToken({ operation: 'get' });
+    static async initialize(getToken: () => Promise<string>, options: IEThreeInitOptions = {}) {
+        const opts = { accessTokenProvider: new CachingJwtProvider(getToken), ...options };
+        const token = await opts.accessTokenProvider.getToken({ operation: 'get' });
         const identity = token.identity();
-        return new EThree(identity, { provider });
+        return new EThree(identity, opts);
     }
 
-    constructor(identity: string, options: IEThreeOptions) {
+    constructor(identity: string, options: IEThreeCtorOptions) {
         this.identity = identity;
-        this.jwtProvider = options.provider;
+        this.accessTokenProvider = options.accessTokenProvider;
         this[_keyLoader] = new PrivateKeyLoader(this.identity, {
-            jwtProvider: this.jwtProvider,
+            accessTokenProvider: this.accessTokenProvider,
             virgilCrypto: this.virgilCrypto,
+            keyEntryStorage: options.keyEntryStorage,
         });
 
         this.cardManager = new CardManager({
             cardCrypto: this.cardCrypto,
             cardVerifier: this.cardVerifier,
-            accessTokenProvider: this.jwtProvider,
+            accessTokenProvider: this.accessTokenProvider,
             retryOnUnauthorized: true,
         });
     }

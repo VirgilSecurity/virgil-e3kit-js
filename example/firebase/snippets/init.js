@@ -1,5 +1,5 @@
 import firebase from 'firebase';
-import { EThree } from '../../../dist/e3kit.browser.umd.js';
+import { EThree } from '@virgilsecurity/e3kit';
 
 const getTokenFromFetchResponse = (res/*: Response */) => {
     return res.ok

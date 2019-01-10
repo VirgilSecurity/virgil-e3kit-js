@@ -5,17 +5,21 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
+    "umd": "http-server",
     "firebase": "webpack-dev-server --open --config firebase/webpack.config.js",
-    "firebase:build": "webpack --config firebase/webpack.config.js"
+    "firebase:build": "webpack --config firebase/webpack.config.js",
+    "firebase:profile": "webpack --config firebase/webpack.config.js"
   },
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@virgilsecurity/e3kit": "file:../",
+    "html-webpack-plugin": "^3.2.0",
     "webpack": "^4.23.1",
-    "@virgilsecurity/e3kit": "^0.3.0",
+    "webpack-bundle-analyzer": "^3.0.3",
     "webpack-cli": "^3.1.2",
     "webpack-dev-server": "^3.1.10",
-    "html-webpack-plugin": "^3.2.0"
+    "webpack-visualizer-plugin": "^0.1.11"
   },
   "dependencies": {
     "cors": "^2.8.4",
