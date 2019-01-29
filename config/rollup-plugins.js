@@ -31,7 +31,6 @@ class RollupPluginsResolver {
         this.uglify = uglify;
         this.resolveVirgilCrypto = resolveVirgilCrypto;
         this.typescriptResolved = typescript({
-            exclude: ['**/*.spec.ts', '**/__mocks__/*.ts'],
             useTsconfigDeclarationDir: true,
         });
         this.inject = inject({
