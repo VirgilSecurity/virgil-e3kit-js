@@ -17,50 +17,16 @@ import {
     cardManager,
     createFetchToken,
     virgilCrypto,
-} from './utils';
+} from './utils.test';
 import { IKeyEntry } from 'virgil-sdk';
 import { getObjectValues } from '../utils/array';
 import EThree from '../EThree';
-
-describe('VirgilE2ee', async () => {
-    const identity = 'virgiltest' + Date.now();
-    const fetchToken = () => Promise.resolve(generator.generateToken(identity).toString());
-    clear();
-
-    it('full integration test', async done => {
-        const sdk = await EThree.initialize(fetchToken);
-        const pwd = 'secret_password';
-        const cloudStorage = await createSyncStorage(identity, pwd);
-        await sdk.register();
-        const privateKey = await keyStorage.load(identity);
-        expect(privateKey).not.toEqual(null);
-        await sdk.backupPrivateKey(pwd);
-        const encrypted = (await sdk.encrypt('message')) as string;
-        await sdk.cleanup();
-        const key = await keyStorage.load(identity);
-        expect(key).toBeNull();
-
-        try {
-            await sdk.decrypt(encrypted);
-        } catch (e) {
-            expect(e).toBeInstanceOf(Error);
-        }
-
-        await sdk.resetPrivateKeyBackup(pwd);
-        try {
-            const cloudKey = await cloudStorage.retrieveEntry(identity);
-            expect(cloudKey).not.toBeDefined();
-        } catch (e) {
-            expect(e).toBeInstanceOf(Error);
-        }
-
-        done();
-    });
-});
+import expect from 'expect';
 
 describe('EThree.register()', () => {
-    clear();
-    it('STA-9 has no local key, has no card', async done => {
+    before(clear);
+
+    it('STA-9 has no local key, has no card', async () => {
         const identity = 'virgiltestlocalnokeynocard' + Date.now();
         const fetchToken = createFetchToken(identity);
         const prevCards = await cardManager.searchCards(identity);
@@ -73,10 +39,9 @@ describe('EThree.register()', () => {
         ]);
         expect(cards.length).toBe(1);
         expect(key).not.toBe(null);
-        done();
     });
 
-    it('has local key, has no card', async done => {
+    it('has local key, has no card', async () => {
         const identity = 'virgiltestlocal2' + Date.now();
         const fetchToken = createFetchToken(identity);
         const sdk = await EThree.initialize(fetchToken);
@@ -88,10 +53,9 @@ describe('EThree.register()', () => {
         await sdk.register();
         const cards = await cardManager.searchCards(identity);
         expect(cards.length).toEqual(1);
-        done();
     });
 
-    it('STE-10 has card', async done => {
+    it('STE-10 has card', async () => {
         const identity = 'virgiltestlocal3' + Date.now();
         const keyPair = virgilCrypto.generateKeys();
         await cardManager.publishCard({ identity: identity, ...keyPair });
@@ -110,11 +74,9 @@ describe('EThree.register()', () => {
         } catch (e) {
             expect(e).toBeInstanceOf(IdentityAlreadyExistsError);
         }
-
-        done();
     });
 
-    it('STE-11 call 2 times', async done => {
+    it('STE-11 call 2 times', async () => {
         const identity = 'virgiltestregister' + Date.now();
         const fetchToken = createFetchToken(identity);
         const prevCards = await cardManager.searchCards(identity);
@@ -133,14 +95,13 @@ describe('EThree.register()', () => {
         ]);
         expect(cards.length).toBe(1);
         expect(key).not.toBe(null);
-        done();
     });
 });
 
 describe('EThree.rotatePrivateKey', () => {
-    clear();
+    before(clear);
 
-    it('STE-14 has card', async done => {
+    it('STE-14 has card', async () => {
         const identity = 'virgiltestrotate1' + Date.now();
         const fetchToken = createFetchToken(identity);
         const sdk = await EThree.initialize(fetchToken);
@@ -150,10 +111,9 @@ describe('EThree.rotatePrivateKey', () => {
         const newCards = await cardManager.searchCards(identity);
         expect(newCards.length).toBe(1);
         expect(newCards[0].previousCardId).toBe(prevCard.id);
-        done();
     });
 
-    it('STE-12 has no card', async done => {
+    it('STE-12 has no card', async () => {
         const identity = 'virgiltestrotate2' + Date.now();
         const fetchToken = createFetchToken(identity);
         const sdk = await EThree.initialize(fetchToken);
@@ -163,12 +123,13 @@ describe('EThree.rotatePrivateKey', () => {
             await sdk.rotatePrivateKey();
         } catch (e) {
             expect(e).toBeInstanceOf(RegisterRequiredError);
-            return done();
+
+            return;
         }
-        done('should throw');
+        throw 'should throw';
     });
 
-    it('STE-10 rotate 2 times', async done => {
+    it('STE-10 rotate 2 times', async () => {
         const identity = 'virgiltestrotate3' + Date.now();
         const fetchToken = createFetchToken(identity);
         const sdk = await EThree.initialize(fetchToken);
@@ -186,14 +147,13 @@ describe('EThree.rotatePrivateKey', () => {
         const newCards = await cardManager.searchCards(identity);
         expect(newCards.length).toBe(1);
         expect(newCards[0].previousCardId).toBe(cards[0].id);
-        done();
     });
 });
 
 describe('lookupPublicKeys', () => {
-    clear();
+    before(clear);
 
-    it('lookupPublicKeys for one identity success', async done => {
+    it('lookupPublicKeys for one identity success', async () => {
         const identity1 = 'virgiltestlookup1' + Date.now();
         const identity2 = 'virgiltestlookup2' + Date.now();
         const fetchToken = createFetchToken(identity1);
@@ -206,10 +166,9 @@ describe('lookupPublicKeys', () => {
         expect(virgilCrypto.exportPublicKey(lookupResult).toString('base64')).toEqual(
             virgilCrypto.exportPublicKey(keypair.publicKey).toString('base64'),
         );
-        done();
     });
 
-    it('STE-1 lookupKeys success', async done => {
+    it('STE-1 lookupKeys success', async () => {
         const identity = 'virgiltestlookup' + Date.now();
         const fetchToken = createFetchToken(identity);
         const sdk = await EThree.initialize(fetchToken);
@@ -231,7 +190,6 @@ describe('lookupPublicKeys', () => {
         expect(virgilCrypto.exportPublicKey(publicKeys[identity2]).toString('base64')).toEqual(
             virgilCrypto.exportPublicKey(keypair2.publicKey).toString('base64'),
         );
-        done();
     });
 
     it('STE-2 lookupKeys nonexistent identity', async () => {
@@ -268,7 +226,7 @@ describe('lookupPublicKeys', () => {
         throw 'should throw';
     });
 
-    it('lookupKeys with duplicate identites', async done => {
+    it('lookupKeys with duplicate identites', async () => {
         const identity = 'virgiltestlookup' + Date.now();
         const fetchToken = createFetchToken(identity);
 
@@ -278,34 +236,30 @@ describe('lookupPublicKeys', () => {
         } catch (e) {
             expect(e).toBeInstanceOf(Error);
             expect(e.message).toEqual(DUPLICATE_IDENTITIES);
-            return done();
+            return;
         }
-        done('should throw');
+        throw 'should throw';
     });
 });
 
 describe('change password', () => {
-    clear();
-    it('should change password', async done => {
+    before(clear);
+    it('should change password', async () => {
         const identity = 'virgiltest' + Date.now();
         const fetchToken = () => Promise.resolve(generator.generateToken(identity).toString());
         const oldPwd = 'old_password';
         const newPwd = 'new_password';
-        try {
-            const sdk = await EThree.initialize(fetchToken);
-            await sdk.register();
-            await sdk.backupPrivateKey(oldPwd);
-            await sdk.cleanup();
-            await sdk.changePassword(oldPwd, newPwd);
-            await sdk.restorePrivateKey(newPwd);
-        } catch (e) {
-            expect(e).not.toBeDefined();
-            return done(e);
-        }
-        done();
+        const sdk = await EThree.initialize(fetchToken);
+        await sdk.register();
+        await sdk.backupPrivateKey(oldPwd);
+        await sdk.cleanup();
+        await sdk.changePassword(oldPwd, newPwd);
+        await sdk.restorePrivateKey(newPwd);
+        const hasKey = await sdk.hasLocalPrivateKey();
+        expect(hasKey).toEqual(true);
     });
 
-    it('wrong old password', async done => {
+    it('wrong old password', async () => {
         const identity = 'virgiltest' + Date.now();
         const fetchToken = () => Promise.resolve(generator.generateToken(identity).toString());
         const oldPwd = 'old_password';
@@ -318,14 +272,14 @@ describe('change password', () => {
             await sdk.changePassword(wrongPwd, newPwd);
         } catch (e) {
             expect(e).toBeInstanceOf(WrongKeyknoxPasswordError);
-            return done();
+            return;
         }
-        done('should throw');
+        throw 'should throw';
     });
 });
 
 describe('backupPrivateKey', () => {
-    it('success', async done => {
+    it('success', async () => {
         const identity = 'virgiltestbackup1' + Date.now();
         const fetchToken = () => Promise.resolve(generator.generateToken(identity).toString());
         const pwd = 'secret_password';
@@ -347,10 +301,9 @@ describe('backupPrivateKey', () => {
         await storage.retrieveCloudEntries();
         const key = await storage.retrieveEntry(identity);
         expect(key).not.toBeNull();
-        done();
     });
 
-    it('No local private key', async done => {
+    it('No local private key', async () => {
         const identity = 'virgiltestbackup2' + Date.now();
         const fetchToken = () => Promise.resolve(generator.generateToken(identity).toString());
         const sdk = await EThree.initialize(fetchToken);
@@ -358,15 +311,15 @@ describe('backupPrivateKey', () => {
             await sdk.backupPrivateKey('secret_pass');
         } catch (e) {
             expect(e).toBeInstanceOf(RegisterRequiredError);
-            return done();
+            return;
         }
-        return done('should throw');
+        throw 'should throw';
     });
 });
 
 describe('restorePrivateKey', () => {
-    clear();
-    it('has no private key', async done => {
+    before(clear);
+    it('has no private key', async () => {
         const pwd = 'secret_password';
         const identity = 'virgiltestrestore1' + Date.now();
         const fetchToken = () => Promise.resolve(generator.generateToken(identity).toString());
@@ -395,11 +348,9 @@ describe('restorePrivateKey', () => {
         expect(restoredPrivateKey!.value.toString('base64')).toEqual(
             privateKey!.value.toString('base64'),
         );
-
-        done();
     });
 
-    it('has private key', async done => {
+    it('has private key', async () => {
         const pwd = 'secret_password';
         const identity = 'virgiltestrestore1' + Date.now();
         const fetchToken = () => Promise.resolve(generator.generateToken(identity).toString());
@@ -425,16 +376,17 @@ describe('restorePrivateKey', () => {
             await sdk.restorePrivateKey(pwd);
         } catch (e) {
             expect(e).toBeInstanceOf(PrivateKeyAlreadyExistsError);
-            return done();
+
+            return;
         }
-        done('should throw');
+        throw 'should throw';
     });
 });
 
 describe('encrypt and decrypt', () => {
-    clear();
+    before(clear);
 
-    it('STE-3 ', async done => {
+    it('STE-3 ', async () => {
         const identity1 = 'virgiltestencrypt1' + Date.now();
         const identity2 = 'virgiltestencrypt2' + Date.now();
 
@@ -458,10 +410,9 @@ describe('encrypt and decrypt', () => {
         }
         const decryptedMessage = await sdk2.decrypt(encryptedMessage, sdk1PublicKeys[identity1]);
         expect(decryptedMessage).toEqual(message);
-        done();
     });
 
-    it('STE-5 encrypt for one public key', async done => {
+    it('STE-5 encrypt for one public key', async () => {
         const identity = 'virgiltestencrypt' + Date.now();
         const fetchToken = () => Promise.resolve(generator.generateToken(identity).toString());
 
@@ -473,10 +424,9 @@ describe('encrypt and decrypt', () => {
         } catch (e) {
             expect(e).not.toBeDefined();
         }
-        done();
     });
 
-    it('STE-6 encrypt and decrypt without public keys', async done => {
+    it('STE-6 encrypt and decrypt without public keys', async () => {
         const identity = 'virgiltestencrypt' + Date.now();
         const fetchToken = () => Promise.resolve(generator.generateToken(identity).toString());
 
@@ -486,10 +436,9 @@ describe('encrypt and decrypt', () => {
         const encryptedMessage = await sdk.encrypt(message);
         const decryptedMessage = await sdk.decrypt(encryptedMessage);
         expect(decryptedMessage).toEqual(message);
-        done();
     });
 
-    it('STE-7 decrypt message without sign', async done => {
+    it('STE-7 decrypt message without sign', async () => {
         const identity = 'virgiltestencrypt' + Date.now();
         const fetchToken = () => Promise.resolve(generator.generateToken(identity).toString());
 
@@ -505,12 +454,13 @@ describe('encrypt and decrypt', () => {
             await sdk.decrypt(encryptedMessage, senderPublicKey);
         } catch (e) {
             expect(e).toBeDefined();
-            return done();
+
+            return;
         }
-        done('should throw');
+        throw 'should throw';
     });
 
-    it('STE-8 no decrypt/encrypt before register', async done => {
+    it('STE-8 no decrypt/encrypt before register', async () => {
         const identity = 'virgiltestencrypt' + Date.now();
         const fetchToken = () => Promise.resolve(generator.generateToken(identity).toString());
 
@@ -526,31 +476,29 @@ describe('encrypt and decrypt', () => {
         } catch (e) {
             expect(e).toBeInstanceOf(RegisterRequiredError);
         }
-        done();
     });
 
-    it('should return buffer', async done => {
+    it('should return buffer', async () => {
         const identity = 'virgiltestencryptbuffer' + Date.now();
         const fetchToken = () => Promise.resolve(generator.generateToken(identity).toString());
 
-        const buf = new Buffer('123');
+        const buf = new ArrayBuffer(32);
 
         const recipient = virgilCrypto.generateKeys();
         const sdk = await EThree.initialize(fetchToken);
         await sdk.register();
         const publicKey = (await sdk.lookupPublicKeys([identity]))[0];
         const encryptedMessage = await sdk.encrypt(buf, recipient.publicKey);
-        expect(encryptedMessage).toBeInstanceOf(Buffer);
+        expect(encryptedMessage).toBeInstanceOf(ArrayBuffer);
 
         const resp = await sdk.decrypt(encryptedMessage, publicKey);
-        expect(resp).toBeInstanceOf(Buffer);
-        done();
+        expect(resp).toBeInstanceOf(ArrayBuffer);
     });
 });
 
 describe('cleanup()', () => {
-    clear();
-    it('local and remote key exists', async done => {
+    before(clear);
+    it('local and remote key exists', async () => {
         const identity = 'virgiltestlogout' + Date.now();
         const fetchToken = () => Promise.resolve(generator.generateToken(identity).toString());
 
@@ -559,12 +507,11 @@ describe('cleanup()', () => {
         await sdk.cleanup();
         const privateKeyFromLocalStorage = await keyStorage.load(identity);
         expect(privateKeyFromLocalStorage).toEqual(null);
-        done();
     });
 });
 
 describe('resetPrivateKeyBackup(pwd)', () => {
-    it('reset backup private key', async done => {
+    it('reset backup private key', async () => {
         const pwd = 'secure_password';
         const identity = 'virgiltestlogout1' + Date.now();
         const fetchToken = () => Promise.resolve(generator.generateToken(identity).toString());
@@ -584,11 +531,9 @@ describe('resetPrivateKeyBackup(pwd)', () => {
         } catch (e) {
             expect(e).toBeTruthy();
         }
-
-        return done();
     });
 
-    it('reset backup private key when no backup', async done => {
+    it('reset backup private key when no backup', async () => {
         const pwd = 'secure_password';
         const identity = 'virgiltestlogout2' + Date.now();
         const fetchToken = () => Promise.resolve(generator.generateToken(identity).toString());
@@ -599,29 +544,32 @@ describe('resetPrivateKeyBackup(pwd)', () => {
             await sdk.resetPrivateKeyBackup(pwd);
         } catch (e) {
             expect(e).toBeInstanceOf(PrivateKeyNoBackupError);
-            return done();
+
+            return;
         }
-        done('should throw');
+        throw 'should throw';
     });
 });
 
 describe('hasPrivateKey()', () => {
-    it('has private key', async done => {
+    it('has private key', async () => {
         const identity = 'virgiltesthasprivatekey1' + Date.now();
         const fetchToken = () => Promise.resolve(generator.generateToken(identity).toString());
         const sdk = await EThree.initialize(fetchToken);
         await sdk.register();
         const hasPrivateKey = await sdk.hasLocalPrivateKey();
         expect(hasPrivateKey).toEqual(true);
-        return done();
+
+        return;
     });
 
-    it('has no private key', async done => {
+    it('has no private key', async () => {
         const identity = 'virgiltesthasprivatekey2' + Date.now();
         const fetchToken = () => Promise.resolve(generator.generateToken(identity).toString());
         const sdk = await EThree.initialize(fetchToken);
         const hasPrivateKey = await sdk.hasLocalPrivateKey();
         expect(hasPrivateKey).toEqual(false);
-        return done();
+
+        return;
     });
 });

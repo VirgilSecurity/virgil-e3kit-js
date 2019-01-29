@@ -25,7 +25,6 @@ export const generator = new JwtGenerator({
     apiKey: virgilCrypto.importPrivateKey(process.env.API_KEY!),
     accessTokenSigner: new VirgilAccessTokenSigner(virgilCrypto),
 });
-
 export const mockProvider = new GeneratorJwtProvider(generator);
 
 export const cardManager = new CardManager({
@@ -64,4 +63,4 @@ export const createSyncStorage = async (identity: string, password: string) => {
     return storage;
 };
 
-export const clear = () => beforeAll(done => Promise.all([keyStorage.clear()]).then(() => done()));
+export const clear = () => keyStorage.clear();

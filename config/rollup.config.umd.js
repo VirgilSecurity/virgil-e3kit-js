@@ -18,6 +18,8 @@ module.exports = {
         plugins.resolve({ browser: true }),
         plugins.commonjs(),
         plugins.typescriptResolved,
-        plugins.uglify(),
+        plugins.nodeGlobals,
+		plugins.inject,
+        process.env.NODE_ENV === 'production' && plugins.uglify(),
     ],
 };

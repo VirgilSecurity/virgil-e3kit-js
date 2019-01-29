@@ -25,15 +25,22 @@ class RollupPluginsResolver {
 
     constructor() {
         this.commonjs = commonjs;
-        this.nodeGlobals = nodeGlobals;
+        this.nodeGlobals = nodeGlobals();
         this.resolve = resolve;
         this.sourcemap = sourcemap;
         this.uglify = uglify;
         this.resolveVirgilCrypto = resolveVirgilCrypto;
         this.typescriptResolved = typescript({
-            exclude: ['**/*.test.ts', '**/*.spec.ts', '**/__mocks__/*.ts'],
+            exclude: ['**/*.spec.ts', '**/__mocks__/*.ts'],
             useTsconfigDeclarationDir: true,
         });
+        this.inject = inject({
+			include: '**/*.ts',
+			exclude: 'node_modules/**',
+			modules: {
+				Buffer: [ 'buffer-es6', 'Buffer' ]
+			}
+		})
     }
 }
 
