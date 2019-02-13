@@ -26,7 +26,7 @@ export const generator = new JwtGenerator({
     accessTokenSigner: new VirgilAccessTokenSigner(virgilCrypto),
 });
 
-export const mockProvider = new GeneratorJwtProvider(generator);
+export const mockProvider = new GeneratorJwtProvider(generator, undefined, 'default_identity');
 
 export const cardManager = new CardManager({
     cardCrypto: cardCrypto,
