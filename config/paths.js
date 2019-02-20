@@ -5,7 +5,7 @@ const pythiaCryptoBrowserPath = path.resolve(noPythiaCryptoPath, '../virgil-cryp
 
 class Paths {
     constructor() {
-        this.PLATFORM = process.env.PLATFORM || 'node';
+        this.PLATFORM = process.env.PLATFORM || 'browser';
         this.IS_BROWSER = this.PLATFORM === 'browser';
         this.NAME = 'e3kit';
 

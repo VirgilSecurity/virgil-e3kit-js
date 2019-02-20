@@ -6,6 +6,7 @@ import {
     VirgilCardVerifier,
     IKeyEntryStorage,
     IAccessTokenProvider,
+    KeyEntryStorage,
 } from 'virgil-sdk';
 import {
     VirgilPublicKey,
@@ -52,6 +53,7 @@ type EncryptVirgilPublicKeyArg = LookupResult | VirgilPublicKey;
 
 const _inProcess = Symbol('inProcess');
 const _keyLoader = Symbol('keyLoader');
+const STORAGE_NAME = '.virgil-local-storage';
 
 export default class EThree {
     identity: string;
@@ -60,6 +62,7 @@ export default class EThree {
     cardVerifier = new VirgilCardVerifier(this.cardCrypto);
     cardManager: CardManager;
     accessTokenProvider: IAccessTokenProvider;
+    keyEntryStorage: IKeyEntryStorage;
 
     private [_keyLoader]: PrivateKeyLoader;
     private [_inProcess]: boolean = false;
@@ -74,10 +77,12 @@ export default class EThree {
     constructor(identity: string, options: IEThreeCtorOptions) {
         this.identity = identity;
         this.accessTokenProvider = options.accessTokenProvider;
+        this.keyEntryStorage = options.keyEntryStorage || new KeyEntryStorage(STORAGE_NAME);
+
         this[_keyLoader] = new PrivateKeyLoader(this.identity, {
             accessTokenProvider: this.accessTokenProvider,
             virgilCrypto: this.virgilCrypto,
-            keyEntryStorage: options.keyEntryStorage,
+            keyEntryStorage: this.keyEntryStorage,
         });
 
         this.cardManager = new CardManager({
@@ -146,12 +151,14 @@ export default class EThree {
         return this[_keyLoader].resetBackupPrivateKey(password);
     }
 
+    async encrypt(
+        message: ArrayBuffer,
+        publicKey?: EncryptVirgilPublicKeyArg,
+    ): Promise<ArrayBuffer>;
     async encrypt(message: string, publicKeys?: EncryptVirgilPublicKeyArg): Promise<string>;
     async encrypt(message: Buffer, publicKey?: EncryptVirgilPublicKeyArg): Promise<Buffer>;
-    async encrypt(message: ArrayBuffer, publicKey?: EncryptVirgilPublicKeyArg): Promise<Buffer>;
     async encrypt(message: Data, publicKeys?: EncryptVirgilPublicKeyArg): Promise<Data> {
-        const isString = typeof message === 'string';
-
+        const isMessageString = isString(message);
         let argument: VirgilPublicKey[];
 
         if (publicKeys == null) argument = [];
@@ -167,8 +174,8 @@ export default class EThree {
             argument.push(ownPublicKey);
         }
 
-        let res: Data = this.virgilCrypto.signThenEncrypt(message, privateKey, argument);
-        if (isString) res = res.toString('base64');
+        const res: Data = this.virgilCrypto.signThenEncrypt(message, privateKey, argument);
+        if (isMessageString) return res.toString('base64');
         return res;
     }
 
@@ -177,10 +184,12 @@ export default class EThree {
     async decrypt(message: ArrayBuffer, publicKey?: VirgilPublicKey): Promise<Buffer>;
     async decrypt(message: Data, publicKey?: VirgilPublicKey): Promise<Data> {
         const isMessageString = isString(message);
+
         const privateKey = await this[_keyLoader].loadLocalPrivateKey();
         if (!privateKey) throw new RegisterRequiredError();
         if (!publicKey) publicKey = this.virgilCrypto.extractPublicKey(privateKey);
-        let res: Data = this.virgilCrypto.decryptThenVerify(message, privateKey, publicKey);
+
+        const res: Data = this.virgilCrypto.decryptThenVerify(message, privateKey, publicKey);
         if (isMessageString) return res.toString('utf8') as string;
         return res as Buffer;
     }

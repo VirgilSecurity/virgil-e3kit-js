@@ -11,7 +11,7 @@ import {
     VirgilPrivateKey,
     VirgilCrypto,
 } from 'virgil-crypto/dist/virgil-crypto-pythia.es';
-import { KeyEntryStorage, IKeyEntryStorage, IAccessTokenProvider } from 'virgil-sdk';
+import { IKeyEntryStorage, IAccessTokenProvider } from 'virgil-sdk';
 import { WrongKeyknoxPasswordError, PrivateKeyNoBackupError } from './errors';
 
 const BRAIN_KEY_RATE_LIMIT_DELAY = 2000;
@@ -25,7 +25,7 @@ type KeyPair = {
 export interface IPrivateKeyLoaderOptions {
     virgilCrypto: VirgilCrypto;
     accessTokenProvider: IAccessTokenProvider;
-    keyEntryStorage?: IKeyEntryStorage;
+    keyEntryStorage: IKeyEntryStorage;
 }
 
 export default class PrivateKeyLoader {
@@ -33,7 +33,7 @@ export default class PrivateKeyLoader {
     private localStorage: IKeyEntryStorage;
 
     constructor(private identity: string, public options: IPrivateKeyLoaderOptions) {
-        this.localStorage = options.keyEntryStorage || new KeyEntryStorage('.virgil-local-storage');
+        this.localStorage = options.keyEntryStorage;
     }
 
     async savePrivateKeyRemote(privateKey: VirgilPrivateKey, password: string) {
