@@ -27,7 +27,6 @@ import {
 } from './errors';
 import { isArray, isString } from './utils/typeguards';
 import { hasDuplicates, getObjectValues } from './utils/array';
-import { toArrayBuffer } from './utils/buffer';
 
 interface IEThreeInitOptions {
     keyEntryStorage?: IKeyEntryStorage;
@@ -160,7 +159,6 @@ export default class EThree {
     async encrypt(message: Buffer, publicKey?: EncryptVirgilPublicKeyArg): Promise<Buffer>;
     async encrypt(message: Data, publicKeys?: EncryptVirgilPublicKeyArg): Promise<Data> {
         const isMessageString = isString(message);
-        const isArrayBuffer = message instanceof ArrayBuffer;
         let argument: VirgilPublicKey[];
 
         if (publicKeys == null) argument = [];
@@ -178,16 +176,14 @@ export default class EThree {
 
         const res: Data = this.virgilCrypto.signThenEncrypt(message, privateKey, argument);
         if (isMessageString) return res.toString('base64');
-        if (isArrayBuffer) return toArrayBuffer(res as Buffer);
         return res;
     }
 
     async decrypt(message: string, publicKey?: VirgilPublicKey): Promise<string>;
     async decrypt(message: Buffer, publicKey?: VirgilPublicKey): Promise<Buffer>;
-    async decrypt(message: ArrayBuffer, publicKey?: VirgilPublicKey): Promise<ArrayBuffer>;
+    async decrypt(message: ArrayBuffer, publicKey?: VirgilPublicKey): Promise<Buffer>;
     async decrypt(message: Data, publicKey?: VirgilPublicKey): Promise<Data> {
         const isMessageString = isString(message);
-        const isArrayBuffer = message instanceof ArrayBuffer;
 
         const privateKey = await this[_keyLoader].loadLocalPrivateKey();
         if (!privateKey) throw new RegisterRequiredError();
@@ -195,7 +191,6 @@ export default class EThree {
 
         const res: Data = this.virgilCrypto.decryptThenVerify(message, privateKey, publicKey);
         if (isMessageString) return res.toString('utf8') as string;
-        if (isArrayBuffer) return toArrayBuffer(res as Buffer);
         return res as Buffer;
     }
 
