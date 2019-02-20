@@ -489,10 +489,10 @@ describe('encrypt and decrypt', () => {
         await sdk.register();
         const publicKey = (await sdk.lookupPublicKeys([identity]))[0];
         const encryptedMessage = await sdk.encrypt(buf, recipient.publicKey);
-        expect(encryptedMessage).toBeInstanceOf(Buffer);
+        expect(Buffer.isBuffer(encryptedMessage)).toBe(true);
 
         const resp = await sdk.decrypt(encryptedMessage, publicKey);
-        expect(resp).toBeInstanceOf(Buffer);
+        expect(Buffer.isBuffer(resp)).toBe(true);
     });
 });
 
