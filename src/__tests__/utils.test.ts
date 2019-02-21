@@ -14,6 +14,7 @@ import {
 } from 'virgil-sdk';
 import { createBrainKey } from 'virgil-pythia';
 import { CloudKeyStorage, KeyknoxManager, KeyknoxCrypto } from '@virgilsecurity/keyknox';
+import { createThrottlingHandler } from '../utils/handlers';
 
 export const virgilCrypto = new VirgilCrypto();
 const cardCrypto = new VirgilCardCrypto(virgilCrypto);
@@ -48,7 +49,9 @@ export const createSyncStorage = async (identity: string, password: string) => {
         accessTokenProvider: new CachingJwtProvider(fetchToken),
     });
 
-    const keyPair = await brainKey.generateKeyPair(password);
+    const errorHandler = createThrottlingHandler(brainKey, password);
+
+    const keyPair = await brainKey.generateKeyPair(password).catch(errorHandler);
 
     const storage = new CloudKeyStorage(
         new KeyknoxManager(

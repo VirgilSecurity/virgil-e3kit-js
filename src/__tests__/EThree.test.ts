@@ -287,7 +287,7 @@ describe('backupPrivateKey', () => {
         const storage = await createSyncStorage(identity, pwd);
 
         try {
-            await storage.retrieveEntry(identity);
+            storage.retrieveEntry(identity);
         } catch (e) {
             expect(e).toBeInstanceOf(Error);
         }
@@ -299,7 +299,7 @@ describe('backupPrivateKey', () => {
             expect(e).not.toBeDefined();
         }
         await storage.retrieveCloudEntries();
-        const key = await storage.retrieveEntry(identity);
+        const key = storage.retrieveEntry(identity);
         expect(key).not.toBeNull();
     });
 
@@ -328,7 +328,7 @@ describe('restorePrivateKey', () => {
         const storage = await createSyncStorage(identity, pwd);
 
         try {
-            await storage.retrieveEntry(identity);
+            storage.retrieveEntry(identity);
         } catch (e) {
             expect(e).toBeInstanceOf(Error);
         }
@@ -359,7 +359,7 @@ describe('restorePrivateKey', () => {
         const storage = await createSyncStorage(identity, pwd);
 
         try {
-            await storage.retrieveEntry(identity);
+            storage.retrieveEntry(identity);
         } catch (e) {
             expect(e).toBeInstanceOf(Error);
         }
@@ -510,7 +510,7 @@ describe('cleanup()', () => {
     });
 });
 
-describe('resetPrivateKeyBackup(pwd)', () => {
+describe('resetPrivateKeyBackup(pwd?)', () => {
     it('reset backup private key', async () => {
         const pwd = 'secure_password';
         const identity = 'virgiltestlogout1' + Date.now();
@@ -548,6 +548,23 @@ describe('resetPrivateKeyBackup(pwd)', () => {
             return;
         }
         throw 'should throw';
+    });
+
+    it('reset backup private without password', async () => {
+        expect.assertions(2);
+        const pwd = 'secure_password';
+        const identity = 'virgiltestlogout2' + Date.now();
+        const fetchToken = () => Promise.resolve(generator.generateToken(identity).toString());
+        const sdk = await EThree.initialize(fetchToken);
+        await sdk.register();
+        await sdk.backupPrivateKey(pwd);
+        const cloudStorage = await createSyncStorage(identity, pwd);
+        let isExists = cloudStorage.existsEntry(identity);
+        expect(isExists).toBe(true);
+        await sdk.resetPrivateKeyBackup();
+        await cloudStorage.retrieveCloudEntries();
+        isExists = cloudStorage.existsEntry(identity);
+        expect(isExists).toBe(false);
     });
 });
 

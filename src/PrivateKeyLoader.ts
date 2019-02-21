@@ -4,23 +4,16 @@ import {
     KeyknoxManager,
     KeyknoxCrypto,
     CloudEntryDoesntExistError,
+    unsafeResetAllEntries,
 } from '@virgilsecurity/keyknox';
 import {
     VirgilPythiaCrypto,
-    VirgilPublicKey,
     VirgilPrivateKey,
     VirgilCrypto,
 } from 'virgil-crypto/dist/virgil-crypto-pythia.es';
 import { IKeyEntryStorage, IAccessTokenProvider } from 'virgil-sdk';
 import { WrongKeyknoxPasswordError, PrivateKeyNoBackupError } from './errors';
-
-const BRAIN_KEY_RATE_LIMIT_DELAY = 2000;
-const BRAIN_KEY_THROTTLING_ERROR_CODE = 60007;
-
-type KeyPair = {
-    privateKey: VirgilPrivateKey;
-    publicKey: VirgilPublicKey;
-};
+import { createThrottlingHandler } from './utils/handlers';
 
 export interface IPrivateKeyLoaderOptions {
     virgilCrypto: VirgilCrypto;
@@ -61,14 +54,18 @@ export default class PrivateKeyLoader {
         await this.localStorage.remove(this.identity).catch(this.handleResetError);
     }
 
-    async resetBackupPrivateKey(password: string) {
+    async resetPrivateKeyBackup(password: string) {
         const storage = await this.getStorage(password);
         await storage.deleteEntry(this.identity).catch(this.handleResetError);
     }
 
+    async resetAll() {
+        return await unsafeResetAllEntries(this.options.accessTokenProvider);
+    }
+
     async restorePrivateKey(password: string) {
         const storage = await this.getStorage(password);
-        const rawKey = await storage.retrieveEntry(this.identity);
+        const rawKey = storage.retrieveEntry(this.identity);
         await this.localStorage.save({ name: this.identity, value: rawKey.data });
         return this.options.virgilCrypto.importPrivateKey(rawKey.data);
     }
@@ -100,21 +97,8 @@ export default class PrivateKeyLoader {
             virgilPythiaCrypto: this.pythiaCrypto,
             accessTokenProvider: this.options.accessTokenProvider,
         });
-
-        return await brainKey.generateKeyPair(pwd).catch((e: Error & { code?: number }) => {
-            if (typeof e === 'object' && e.code === BRAIN_KEY_THROTTLING_ERROR_CODE) {
-                const promise = new Promise((resolve, reject) => {
-                    const repeat = () =>
-                        brainKey
-                            .generateKeyPair(pwd)
-                            .then(resolve)
-                            .catch(reject);
-                    setTimeout(repeat, BRAIN_KEY_RATE_LIMIT_DELAY);
-                });
-                return promise as Promise<KeyPair>;
-            }
-            throw e;
-        });
+        const errorHandler = createThrottlingHandler(brainKey, pwd);
+        return await brainKey.generateKeyPair(pwd).catch(errorHandler);
     }
 
     private async getStorage(pwd: string) {

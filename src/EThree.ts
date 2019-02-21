@@ -147,8 +147,9 @@ export default class EThree {
         await this[_keyLoader].resetLocalPrivateKey();
     }
 
-    async resetPrivateKeyBackup(password: string) {
-        return this[_keyLoader].resetBackupPrivateKey(password);
+    async resetPrivateKeyBackup(pwd?: string) {
+        if (!pwd) return await this[_keyLoader].resetAll();
+        return this[_keyLoader].resetPrivateKeyBackup(pwd);
     }
 
     async encrypt(
