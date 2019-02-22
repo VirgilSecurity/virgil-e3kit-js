@@ -34,7 +34,7 @@ You will need to add `@virgilsecurity/e3kit` script.
 
 ### Initialize & Register
 
-```
+```js
 import { EThree } from '@virgilsecurity/e3kit-js'
 // get virgil token from you backend (better to protect it!)
 const getToken = () => fetch('http://localhost:3000/get-virgil-jwt/')
@@ -50,7 +50,7 @@ await sdk.backupPrivateKey('encryption_pwd');
 
 ### Encrypt & Decrypt
 
-```
+```js
 const usersToEncryptTo = ["alice@myapp.com", "bob@myapp.com", 'sofia@myapp.com'];
 const userThatEncrypts = "alex@myapp.com";
 const [receiverPublicKeys, senderPublicKey] = await Promise.all([
@@ -70,7 +70,7 @@ You can find more examples in [examples folder](example) and on https://e3kit.re
 
 This package works with https://github.com/VirgilSecurity/virgil-key-storage-rn
 
-```
+```js
 import { EThree } from '@virgilsecurity/e3kit';
 import createNativeKeyEntryStorage from '@virgilsecurity/key-storage-rn/native';
 // or
