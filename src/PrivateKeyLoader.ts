@@ -1,4 +1,3 @@
-import { createBrainKey } from 'virgil-pythia';
 import {
     CloudKeyStorage,
     KeyknoxManager,
@@ -13,7 +12,7 @@ import {
 } from 'virgil-crypto/dist/virgil-crypto-pythia.es';
 import { IKeyEntryStorage, IAccessTokenProvider } from 'virgil-sdk';
 import { WrongKeyknoxPasswordError, PrivateKeyNoBackupError } from './errors';
-import { createThrottlingHandler } from './utils/handlers';
+import { generateBrainPair } from './utils/brainkey';
 
 export interface IPrivateKeyLoaderOptions {
     virgilCrypto: VirgilCrypto;
@@ -21,7 +20,6 @@ export interface IPrivateKeyLoaderOptions {
     keyEntryStorage: IKeyEntryStorage;
     apiUrl?: string;
 }
-
 export default class PrivateKeyLoader {
     private pythiaCrypto = new VirgilPythiaCrypto();
     private localStorage: IKeyEntryStorage;
@@ -96,14 +94,12 @@ export default class PrivateKeyLoader {
     };
 
     private async generateBrainPair(pwd: string) {
-        const brainKey = createBrainKey({
+        return generateBrainPair(pwd, {
             virgilCrypto: this.options.virgilCrypto,
-            virgilPythiaCrypto: this.pythiaCrypto,
+            pythiaCrypto: this.pythiaCrypto,
             accessTokenProvider: this.options.accessTokenProvider,
             apiUrl: this.options.apiUrl,
         });
-        const errorHandler = createThrottlingHandler(brainKey, pwd);
-        return await brainKey.generateKeyPair(pwd).catch(errorHandler);
     }
 
     private async getStorage(pwd: string) {

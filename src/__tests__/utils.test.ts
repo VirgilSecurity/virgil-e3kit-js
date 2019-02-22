@@ -12,15 +12,14 @@ import {
     GeneratorJwtProvider,
     CachingJwtProvider,
 } from 'virgil-sdk';
-import { createBrainKey } from 'virgil-pythia';
 import {
     CloudKeyStorage,
     KeyknoxManager,
     KeyknoxCrypto,
     KeyknoxClient,
 } from '@virgilsecurity/keyknox';
-import { createThrottlingHandler } from '../utils/handlers';
 import { EThree } from '..';
+import { generateBrainPair } from '../utils/brainkey';
 
 export const virgilCrypto = new VirgilCrypto();
 const cardCrypto = new VirgilCardCrypto(virgilCrypto);
@@ -56,16 +55,13 @@ export const initializeEThree = (fetchToken: () => Promise<string>) =>
 
 export const createSyncStorage = async (identity: string, password: string) => {
     const fetchToken = createFetchToken(identity);
-    const brainKey = createBrainKey({
+
+    const keyPair = await generateBrainPair(password, {
         virgilCrypto: virgilCrypto,
-        virgilPythiaCrypto: new VirgilPythiaCrypto(),
+        pythiaCrypto: new VirgilPythiaCrypto(),
         accessTokenProvider: new CachingJwtProvider(fetchToken),
         apiUrl: process.env.API_URL,
     });
-
-    const errorHandler = createThrottlingHandler(brainKey, password);
-
-    const keyPair = await brainKey.generateKeyPair(password).catch(errorHandler);
 
     const storage = new CloudKeyStorage(
         new KeyknoxManager(

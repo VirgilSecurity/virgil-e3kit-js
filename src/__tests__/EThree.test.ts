@@ -559,12 +559,12 @@ describe('resetPrivateKeyBackup(pwd?)', () => {
         await sdk.register();
         await sdk.backupPrivateKey(pwd);
         const cloudStorage = await createSyncStorage(identity, pwd);
-        let isExists = cloudStorage.existsEntry(identity);
-        expect(isExists).toBe(true);
+        let isExisting = cloudStorage.existsEntry(identity);
+        expect(isExisting).toBe(true);
         await sdk.resetPrivateKeyBackup();
         await cloudStorage.retrieveCloudEntries();
-        isExists = cloudStorage.existsEntry(identity);
-        expect(isExists).toBe(false);
+        isExisting = cloudStorage.existsEntry(identity);
+        expect(isExisting).toBe(false);
     });
 });
 
