@@ -17,7 +17,6 @@ module.exports = {
         plugins.resolveVirgilCrypto(),
         plugins.resolve({ browser: true }),
         plugins.commonjs(),
-        plugins.replace,
         plugins.typescriptResolved,
         plugins.nodeGlobals,
 		plugins.inject,

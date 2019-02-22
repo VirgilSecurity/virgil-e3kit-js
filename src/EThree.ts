@@ -30,6 +30,7 @@ import { hasDuplicates, getObjectValues } from './utils/array';
 
 interface IEThreeInitOptions {
     keyEntryStorage?: IKeyEntryStorage;
+    apiUrl?: string;
 }
 
 interface IEThreeCtorOptions extends IEThreeInitOptions {
@@ -58,10 +59,7 @@ export default class EThree {
     identity: string;
     virgilCrypto = new VirgilCrypto();
     cardCrypto = new VirgilCardCrypto(this.virgilCrypto);
-    cardVerifier = new VirgilCardVerifier(this.cardCrypto, {
-        verifySelfSignature: !process.env.API_URL,
-        verifyVirgilSignature: !process.env.API_URL,
-    });
+    cardVerifier: VirgilCardVerifier;
 
     cardManager: CardManager;
     accessTokenProvider: IAccessTokenProvider;
@@ -81,11 +79,16 @@ export default class EThree {
         this.identity = identity;
         this.accessTokenProvider = options.accessTokenProvider;
         this.keyEntryStorage = options.keyEntryStorage || new KeyEntryStorage(STORAGE_NAME);
+        this.cardVerifier = new VirgilCardVerifier(this.cardCrypto, {
+            verifySelfSignature: !options.apiUrl,
+            verifyVirgilSignature: !options.apiUrl,
+        });
 
         this[_keyLoader] = new PrivateKeyLoader(this.identity, {
             accessTokenProvider: this.accessTokenProvider,
             virgilCrypto: this.virgilCrypto,
             keyEntryStorage: this.keyEntryStorage,
+            apiUrl: options.apiUrl,
         });
 
         this.cardManager = new CardManager({
@@ -93,7 +96,7 @@ export default class EThree {
             cardVerifier: this.cardVerifier,
             accessTokenProvider: this.accessTokenProvider,
             retryOnUnauthorized: true,
-            apiUrl: process.env.API_URL,
+            apiUrl: options.apiUrl,
         });
     }
 

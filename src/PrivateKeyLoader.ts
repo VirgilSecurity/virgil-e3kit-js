@@ -19,12 +19,13 @@ export interface IPrivateKeyLoaderOptions {
     virgilCrypto: VirgilCrypto;
     accessTokenProvider: IAccessTokenProvider;
     keyEntryStorage: IKeyEntryStorage;
+    apiUrl?: string;
 }
 
 export default class PrivateKeyLoader {
     private pythiaCrypto = new VirgilPythiaCrypto();
     private localStorage: IKeyEntryStorage;
-    private keyknoxClient = new KeyknoxClient(process.env.API_URL);
+    private keyknoxClient = new KeyknoxClient(this.options.apiUrl);
     private keyknoxCrypto = new KeyknoxCrypto(this.options.virgilCrypto);
 
     constructor(private identity: string, public options: IPrivateKeyLoaderOptions) {
@@ -99,7 +100,7 @@ export default class PrivateKeyLoader {
             virgilCrypto: this.options.virgilCrypto,
             virgilPythiaCrypto: this.pythiaCrypto,
             accessTokenProvider: this.options.accessTokenProvider,
-            apiUrl: process.env.API_URL,
+            apiUrl: this.options.apiUrl,
         });
         const errorHandler = createThrottlingHandler(brainKey, pwd);
         return await brainKey.generateKeyPair(pwd).catch(errorHandler);

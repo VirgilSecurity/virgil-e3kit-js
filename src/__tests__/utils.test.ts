@@ -20,6 +20,7 @@ import {
     KeyknoxClient,
 } from '@virgilsecurity/keyknox';
 import { createThrottlingHandler } from '../utils/handlers';
+import { EThree } from '..';
 
 export const virgilCrypto = new VirgilCrypto();
 const cardCrypto = new VirgilCardCrypto(virgilCrypto);
@@ -49,6 +50,9 @@ export const keyStorage = new KeyEntryStorage('.virgil-local-storage');
 
 export const createFetchToken = (identity: string) => () =>
     Promise.resolve(generator.generateToken(identity).toString());
+
+export const initializeEThree = (fetchToken: () => Promise<string>) =>
+    EThree.initialize(fetchToken, { apiUrl: process.env.API_URL });
 
 export const createSyncStorage = async (identity: string, password: string) => {
     const fetchToken = createFetchToken(identity);
