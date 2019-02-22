@@ -4,7 +4,7 @@ import {
     KeyknoxManager,
     KeyknoxCrypto,
     CloudEntryDoesntExistError,
-    unsafeResetAllEntries,
+    KeyknoxClient,
 } from '@virgilsecurity/keyknox';
 import {
     VirgilPythiaCrypto,
@@ -24,6 +24,8 @@ export interface IPrivateKeyLoaderOptions {
 export default class PrivateKeyLoader {
     private pythiaCrypto = new VirgilPythiaCrypto();
     private localStorage: IKeyEntryStorage;
+    private keyknoxClient = new KeyknoxClient(process.env.API_URL);
+    private keyknoxCrypto = new KeyknoxCrypto(this.options.virgilCrypto);
 
     constructor(private identity: string, public options: IPrivateKeyLoaderOptions) {
         this.localStorage = options.keyEntryStorage;
@@ -60,7 +62,8 @@ export default class PrivateKeyLoader {
     }
 
     async resetAll() {
-        return await unsafeResetAllEntries(this.options.accessTokenProvider);
+        const token = await this.options.accessTokenProvider.getToken({ operation: 'delete' });
+        await this.keyknoxClient.resetValue(token.toString());
     }
 
     async restorePrivateKey(password: string) {
@@ -96,6 +99,7 @@ export default class PrivateKeyLoader {
             virgilCrypto: this.options.virgilCrypto,
             virgilPythiaCrypto: this.pythiaCrypto,
             accessTokenProvider: this.options.accessTokenProvider,
+            apiUrl: process.env.API_URL,
         });
         const errorHandler = createThrottlingHandler(brainKey, pwd);
         return await brainKey.generateKeyPair(pwd).catch(errorHandler);
@@ -109,8 +113,8 @@ export default class PrivateKeyLoader {
                 this.options.accessTokenProvider,
                 keyPair.privateKey,
                 keyPair.publicKey,
-                undefined,
-                new KeyknoxCrypto(this.options.virgilCrypto),
+                this.keyknoxClient,
+                this.keyknoxCrypto,
             ),
         );
         try {

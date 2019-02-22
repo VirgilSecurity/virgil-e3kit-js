@@ -54,12 +54,15 @@ type EncryptVirgilPublicKeyArg = LookupResult | VirgilPublicKey;
 const _inProcess = Symbol('inProcess');
 const _keyLoader = Symbol('keyLoader');
 const STORAGE_NAME = '.virgil-local-storage';
-
 export default class EThree {
     identity: string;
     virgilCrypto = new VirgilCrypto();
     cardCrypto = new VirgilCardCrypto(this.virgilCrypto);
-    cardVerifier = new VirgilCardVerifier(this.cardCrypto);
+    cardVerifier = new VirgilCardVerifier(this.cardCrypto, {
+        verifySelfSignature: !process.env.API_URL,
+        verifyVirgilSignature: !process.env.API_URL,
+    });
+
     cardManager: CardManager;
     accessTokenProvider: IAccessTokenProvider;
     keyEntryStorage: IKeyEntryStorage;
@@ -90,6 +93,7 @@ export default class EThree {
             cardVerifier: this.cardVerifier,
             accessTokenProvider: this.accessTokenProvider,
             retryOnUnauthorized: true,
+            apiUrl: process.env.API_URL,
         });
     }
 

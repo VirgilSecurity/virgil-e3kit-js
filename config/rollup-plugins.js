@@ -1,3 +1,4 @@
+require('dotenv').config();
 const paths = require('./paths');
 
 const commonjs = require('rollup-plugin-commonjs');
@@ -7,7 +8,7 @@ const resolve = require('rollup-plugin-node-resolve');
 const typescript = require('rollup-plugin-typescript2');
 const { uglify } = require('rollup-plugin-uglify');
 const sourcemap = require('rollup-plugin-sourcemaps');
-
+const replace = require('rollup-plugin-replace');
 
 function resolveVirgilCrypto () {
     return {
@@ -39,7 +40,14 @@ class RollupPluginsResolver {
 			modules: {
 				Buffer: [ 'buffer-es6', 'Buffer' ]
 			}
-		})
+        })
+        this.replace = replace({
+            'process.env.API_KEY_ID': JSON.stringify(process.env.API_KEY_ID),
+            'process.env.API_KEY': JSON.stringify(process.env.API_KEY),
+            'process.env.APP_ID': JSON.stringify(process.env.APP_ID),
+            'process.env.API_URL': JSON.stringify(process.env.API_URL),
+            'process.env.NODE_ENV': JSON.stringify('production'),
+        })
     }
 }
 

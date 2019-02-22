@@ -13,12 +13,20 @@ import {
     CachingJwtProvider,
 } from 'virgil-sdk';
 import { createBrainKey } from 'virgil-pythia';
-import { CloudKeyStorage, KeyknoxManager, KeyknoxCrypto } from '@virgilsecurity/keyknox';
+import {
+    CloudKeyStorage,
+    KeyknoxManager,
+    KeyknoxCrypto,
+    KeyknoxClient,
+} from '@virgilsecurity/keyknox';
 import { createThrottlingHandler } from '../utils/handlers';
 
 export const virgilCrypto = new VirgilCrypto();
 const cardCrypto = new VirgilCardCrypto(virgilCrypto);
-const cardVerifier = new VirgilCardVerifier(cardCrypto);
+const cardVerifier = new VirgilCardVerifier(cardCrypto, {
+    verifySelfSignature: false,
+    verifyVirgilSignature: false,
+});
 
 export const generator = new JwtGenerator({
     appId: process.env.APP_ID!,
@@ -34,6 +42,7 @@ export const cardManager = new CardManager({
     cardVerifier: cardVerifier,
     accessTokenProvider: mockProvider,
     retryOnUnauthorized: true,
+    apiUrl: process.env.API_URL,
 });
 
 export const keyStorage = new KeyEntryStorage('.virgil-local-storage');
@@ -47,6 +56,7 @@ export const createSyncStorage = async (identity: string, password: string) => {
         virgilCrypto: virgilCrypto,
         virgilPythiaCrypto: new VirgilPythiaCrypto(),
         accessTokenProvider: new CachingJwtProvider(fetchToken),
+        apiUrl: process.env.API_URL,
     });
 
     const errorHandler = createThrottlingHandler(brainKey, password);
@@ -58,7 +68,7 @@ export const createSyncStorage = async (identity: string, password: string) => {
             new CachingJwtProvider(fetchToken),
             keyPair.privateKey,
             keyPair.publicKey,
-            undefined,
+            new KeyknoxClient(process.env.API_URL),
             new KeyknoxCrypto(virgilCrypto),
         ),
     );
