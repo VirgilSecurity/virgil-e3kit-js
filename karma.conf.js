@@ -1,8 +1,5 @@
-const replace = require('rollup-plugin-replace');
-// const json = require('rollup-plugin-json');
 const umdConfig = require('./config/rollup.config.umd');
-
-require('dotenv').config();
+const replace = require('rollup-plugin-replace');
 
 module.exports = function (config) {
     config.set({
@@ -30,15 +27,13 @@ module.exports = function (config) {
         },
 
         rollupPreprocessor: {
-            plugins: [
-                replace({
-                    'process.env.API_KEY_ID': JSON.stringify(process.env.API_KEY_ID),
-                    'process.env.API_KEY': JSON.stringify(process.env.API_KEY),
-                    'process.env.APP_ID': JSON.stringify(process.env.APP_ID),
-                    'process.env.NODE_ENV': JSON.stringify('production'),
-                }),
-                ...umdConfig.plugins,
-            ],
+            plugins: [...umdConfig.plugins, this.replace = replace({
+                'process.env.API_KEY_ID': JSON.stringify(process.env.API_KEY_ID),
+                'process.env.API_KEY': JSON.stringify(process.env.API_KEY),
+                'process.env.APP_ID': JSON.stringify(process.env.APP_ID),
+                'process.env.API_URL': JSON.stringify(process.env.API_URL),
+                'process.env.NODE_ENV': process.env.NODE_ENV || JSON.stringify('production'),
+            })],
             output: umdConfig.output,
         },
     });

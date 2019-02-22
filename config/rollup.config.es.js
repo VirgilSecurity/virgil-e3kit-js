@@ -17,6 +17,6 @@ module.exports = {
         plugins.commonjs(),
         plugins.typescriptResolved,
         plugins.nodeGlobals,
-		plugins.inject,
+        plugins.inject,
     ],
 };

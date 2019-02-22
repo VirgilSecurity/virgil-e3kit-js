@@ -1,36 +1,30 @@
-import { createBrainKey } from 'virgil-pythia';
 import {
     CloudKeyStorage,
     KeyknoxManager,
     KeyknoxCrypto,
     CloudEntryDoesntExistError,
+    KeyknoxClient,
 } from '@virgilsecurity/keyknox';
 import {
     VirgilPythiaCrypto,
-    VirgilPublicKey,
     VirgilPrivateKey,
     VirgilCrypto,
 } from 'virgil-crypto/dist/virgil-crypto-pythia.es';
 import { IKeyEntryStorage, IAccessTokenProvider } from 'virgil-sdk';
 import { WrongKeyknoxPasswordError, PrivateKeyNoBackupError } from './errors';
-
-const BRAIN_KEY_RATE_LIMIT_DELAY = 2000;
-const BRAIN_KEY_THROTTLING_ERROR_CODE = 60007;
-
-type KeyPair = {
-    privateKey: VirgilPrivateKey;
-    publicKey: VirgilPublicKey;
-};
+import { generateBrainPair } from './utils/brainkey';
 
 export interface IPrivateKeyLoaderOptions {
     virgilCrypto: VirgilCrypto;
     accessTokenProvider: IAccessTokenProvider;
     keyEntryStorage: IKeyEntryStorage;
+    apiUrl?: string;
 }
-
 export default class PrivateKeyLoader {
     private pythiaCrypto = new VirgilPythiaCrypto();
     private localStorage: IKeyEntryStorage;
+    private keyknoxClient = new KeyknoxClient(this.options.apiUrl);
+    private keyknoxCrypto = new KeyknoxCrypto(this.options.virgilCrypto);
 
     constructor(private identity: string, public options: IPrivateKeyLoaderOptions) {
         this.localStorage = options.keyEntryStorage;
@@ -61,14 +55,19 @@ export default class PrivateKeyLoader {
         await this.localStorage.remove(this.identity).catch(this.handleResetError);
     }
 
-    async resetBackupPrivateKey(password: string) {
+    async resetPrivateKeyBackup(password: string) {
         const storage = await this.getStorage(password);
         await storage.deleteEntry(this.identity).catch(this.handleResetError);
     }
 
+    async resetAll() {
+        const token = await this.options.accessTokenProvider.getToken({ operation: 'delete' });
+        await this.keyknoxClient.resetValue(token.toString());
+    }
+
     async restorePrivateKey(password: string) {
         const storage = await this.getStorage(password);
-        const rawKey = await storage.retrieveEntry(this.identity);
+        const rawKey = storage.retrieveEntry(this.identity);
         await this.localStorage.save({ name: this.identity, value: rawKey.data });
         return this.options.virgilCrypto.importPrivateKey(rawKey.data);
     }
@@ -95,25 +94,11 @@ export default class PrivateKeyLoader {
     };
 
     private async generateBrainPair(pwd: string) {
-        const brainKey = createBrainKey({
+        return generateBrainPair(pwd, {
             virgilCrypto: this.options.virgilCrypto,
-            virgilPythiaCrypto: this.pythiaCrypto,
+            pythiaCrypto: this.pythiaCrypto,
             accessTokenProvider: this.options.accessTokenProvider,
-        });
-
-        return await brainKey.generateKeyPair(pwd).catch((e: Error & { code?: number }) => {
-            if (typeof e === 'object' && e.code === BRAIN_KEY_THROTTLING_ERROR_CODE) {
-                const promise = new Promise((resolve, reject) => {
-                    const repeat = () =>
-                        brainKey
-                            .generateKeyPair(pwd)
-                            .then(resolve)
-                            .catch(reject);
-                    setTimeout(repeat, BRAIN_KEY_RATE_LIMIT_DELAY);
-                });
-                return promise as Promise<KeyPair>;
-            }
-            throw e;
+            apiUrl: this.options.apiUrl,
         });
     }
 
@@ -125,8 +110,8 @@ export default class PrivateKeyLoader {
                 this.options.accessTokenProvider,
                 keyPair.privateKey,
                 keyPair.publicKey,
-                undefined,
-                new KeyknoxCrypto(this.options.virgilCrypto),
+                this.keyknoxClient,
+                this.keyknoxCrypto,
             ),
         );
         try {

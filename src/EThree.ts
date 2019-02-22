@@ -27,9 +27,11 @@ import {
 } from './errors';
 import { isArray, isString } from './utils/typeguards';
 import { hasDuplicates, getObjectValues } from './utils/array';
+import { withDefaults } from './utils/object';
 
 interface IEThreeInitOptions {
     keyEntryStorage?: IKeyEntryStorage;
+    apiUrl?: string;
 }
 
 interface IEThreeCtorOptions extends IEThreeInitOptions {
@@ -54,12 +56,13 @@ type EncryptVirgilPublicKeyArg = LookupResult | VirgilPublicKey;
 const _inProcess = Symbol('inProcess');
 const _keyLoader = Symbol('keyLoader');
 const STORAGE_NAME = '.virgil-local-storage';
-
+const DEFAULT_API_URL = 'https://api.virgilsecurity.com';
 export default class EThree {
     identity: string;
     virgilCrypto = new VirgilCrypto();
     cardCrypto = new VirgilCardCrypto(this.virgilCrypto);
-    cardVerifier = new VirgilCardVerifier(this.cardCrypto);
+    cardVerifier: VirgilCardVerifier;
+
     cardManager: CardManager;
     accessTokenProvider: IAccessTokenProvider;
     keyEntryStorage: IKeyEntryStorage;
@@ -68,21 +71,29 @@ export default class EThree {
     private [_inProcess]: boolean = false;
 
     static async initialize(getToken: () => Promise<string>, options: IEThreeInitOptions = {}) {
-        const opts = { accessTokenProvider: new CachingJwtProvider(getToken), ...options };
+        const opts = withDefaults(options as IEThreeCtorOptions, {
+            accessTokenProvider: new CachingJwtProvider(getToken),
+        });
         const token = await opts.accessTokenProvider.getToken({ operation: 'get' });
         const identity = token.identity();
         return new EThree(identity, opts);
     }
 
     constructor(identity: string, options: IEThreeCtorOptions) {
+        const opts = withDefaults(options, { apiUrl: DEFAULT_API_URL });
         this.identity = identity;
-        this.accessTokenProvider = options.accessTokenProvider;
-        this.keyEntryStorage = options.keyEntryStorage || new KeyEntryStorage(STORAGE_NAME);
+        this.accessTokenProvider = opts.accessTokenProvider;
+        this.keyEntryStorage = opts.keyEntryStorage || new KeyEntryStorage(STORAGE_NAME);
+        this.cardVerifier = new VirgilCardVerifier(this.cardCrypto, {
+            verifySelfSignature: opts.apiUrl === DEFAULT_API_URL,
+            verifyVirgilSignature: opts.apiUrl === DEFAULT_API_URL,
+        });
 
         this[_keyLoader] = new PrivateKeyLoader(this.identity, {
             accessTokenProvider: this.accessTokenProvider,
             virgilCrypto: this.virgilCrypto,
             keyEntryStorage: this.keyEntryStorage,
+            apiUrl: opts.apiUrl,
         });
 
         this.cardManager = new CardManager({
@@ -90,6 +101,7 @@ export default class EThree {
             cardVerifier: this.cardVerifier,
             accessTokenProvider: this.accessTokenProvider,
             retryOnUnauthorized: true,
+            apiUrl: opts.apiUrl,
         });
     }
 
@@ -147,8 +159,9 @@ export default class EThree {
         await this[_keyLoader].resetLocalPrivateKey();
     }
 
-    async resetPrivateKeyBackup(password: string) {
-        return this[_keyLoader].resetBackupPrivateKey(password);
+    async resetPrivateKeyBackup(pwd?: string) {
+        if (!pwd) return await this[_keyLoader].resetAll();
+        return this[_keyLoader].resetPrivateKeyBackup(pwd);
     }
 
     async encrypt(

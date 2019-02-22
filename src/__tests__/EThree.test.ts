@@ -17,10 +17,10 @@ import {
     cardManager,
     createFetchToken,
     virgilCrypto,
+    initializeEThree,
 } from './utils.test';
 import { IKeyEntry } from 'virgil-sdk';
 import { getObjectValues } from '../utils/array';
-import EThree from '../EThree';
 import expect from 'expect';
 
 describe('EThree.register()', () => {
@@ -31,7 +31,7 @@ describe('EThree.register()', () => {
         const fetchToken = createFetchToken(identity);
         const prevCards = await cardManager.searchCards(identity);
         expect(prevCards.length).toBe(0);
-        const sdk = await EThree.initialize(fetchToken);
+        const sdk = await initializeEThree(fetchToken);
         await sdk.register();
         const [cards, key] = await Promise.all([
             cardManager.searchCards(identity),
@@ -44,7 +44,7 @@ describe('EThree.register()', () => {
     it('has local key, has no card', async () => {
         const identity = 'virgiltestlocal2' + Date.now();
         const fetchToken = createFetchToken(identity);
-        const sdk = await EThree.initialize(fetchToken);
+        const sdk = await initializeEThree(fetchToken);
         const keyPair = virgilCrypto.generateKeys();
         await keyStorage.save({
             name: identity,
@@ -68,7 +68,7 @@ describe('EThree.register()', () => {
 
         expect(prevCards.length).toEqual(1);
 
-        const sdk = await EThree.initialize(fetchToken);
+        const sdk = await initializeEThree(fetchToken);
         try {
             await sdk.register();
         } catch (e) {
@@ -81,7 +81,7 @@ describe('EThree.register()', () => {
         const fetchToken = createFetchToken(identity);
         const prevCards = await cardManager.searchCards(identity);
         expect(prevCards.length).toBe(0);
-        const sdk = await EThree.initialize(fetchToken);
+        const sdk = await initializeEThree(fetchToken);
         const promise = sdk.register();
         try {
             await sdk.register();
@@ -104,7 +104,7 @@ describe('EThree.rotatePrivateKey', () => {
     it('STE-14 has card', async () => {
         const identity = 'virgiltestrotate1' + Date.now();
         const fetchToken = createFetchToken(identity);
-        const sdk = await EThree.initialize(fetchToken);
+        const sdk = await initializeEThree(fetchToken);
         const keypair = virgilCrypto.generateKeys();
         const prevCard = await cardManager.publishCard({ identity: identity, ...keypair });
         await sdk.rotatePrivateKey();
@@ -116,7 +116,7 @@ describe('EThree.rotatePrivateKey', () => {
     it('STE-12 has no card', async () => {
         const identity = 'virgiltestrotate2' + Date.now();
         const fetchToken = createFetchToken(identity);
-        const sdk = await EThree.initialize(fetchToken);
+        const sdk = await initializeEThree(fetchToken);
         const cards = await cardManager.searchCards(identity);
         expect(cards.length).toEqual(0);
         try {
@@ -132,7 +132,7 @@ describe('EThree.rotatePrivateKey', () => {
     it('STE-10 rotate 2 times', async () => {
         const identity = 'virgiltestrotate3' + Date.now();
         const fetchToken = createFetchToken(identity);
-        const sdk = await EThree.initialize(fetchToken);
+        const sdk = await initializeEThree(fetchToken);
         await sdk.register();
         const cards = await cardManager.searchCards(identity);
         expect(cards.length).toEqual(1);
@@ -157,7 +157,7 @@ describe('lookupPublicKeys', () => {
         const identity1 = 'virgiltestlookup1' + Date.now();
         const identity2 = 'virgiltestlookup2' + Date.now();
         const fetchToken = createFetchToken(identity1);
-        const sdk = await EThree.initialize(fetchToken);
+        const sdk = await initializeEThree(fetchToken);
         const keypair = virgilCrypto.generateKeys();
         await cardManager.publishCard({ identity: identity2, ...keypair });
         const lookupResult = await sdk.lookupPublicKeys(identity2);
@@ -171,7 +171,7 @@ describe('lookupPublicKeys', () => {
     it('STE-1 lookupKeys success', async () => {
         const identity = 'virgiltestlookup' + Date.now();
         const fetchToken = createFetchToken(identity);
-        const sdk = await EThree.initialize(fetchToken);
+        const sdk = await initializeEThree(fetchToken);
         const identity1 = 'virgiltestlookup1' + Date.now();
         const identity2 = 'virgiltestlookup2' + Date.now();
         const keypair1 = virgilCrypto.generateKeys();
@@ -195,7 +195,7 @@ describe('lookupPublicKeys', () => {
     it('STE-2 lookupKeys nonexistent identity', async () => {
         const identity = 'virgiltestlookup' + Date.now();
         const fetchToken = createFetchToken(identity);
-        const sdk = await EThree.initialize(fetchToken);
+        const sdk = await initializeEThree(fetchToken);
         const identity1 = 'virgiltestlookupnonexist1' + Date.now();
         const identity2 = 'virgiltestlookupnonexist2' + Date.now();
         try {
@@ -216,7 +216,7 @@ describe('lookupPublicKeys', () => {
         const identity = 'virgiltestlookup' + Date.now();
         const fetchToken = createFetchToken(identity);
 
-        const sdk = await EThree.initialize(fetchToken);
+        const sdk = await initializeEThree(fetchToken);
         try {
             await sdk.lookupPublicKeys([]);
         } catch (e) {
@@ -230,7 +230,7 @@ describe('lookupPublicKeys', () => {
         const identity = 'virgiltestlookup' + Date.now();
         const fetchToken = createFetchToken(identity);
 
-        const sdk = await EThree.initialize(fetchToken);
+        const sdk = await initializeEThree(fetchToken);
         try {
             await sdk.lookupPublicKeys([identity, identity, 'random']);
         } catch (e) {
@@ -249,7 +249,7 @@ describe('change password', () => {
         const fetchToken = () => Promise.resolve(generator.generateToken(identity).toString());
         const oldPwd = 'old_password';
         const newPwd = 'new_password';
-        const sdk = await EThree.initialize(fetchToken);
+        const sdk = await initializeEThree(fetchToken);
         await sdk.register();
         await sdk.backupPrivateKey(oldPwd);
         await sdk.cleanup();
@@ -266,7 +266,7 @@ describe('change password', () => {
         const newPwd = 'new_password';
         const wrongPwd = 'wrong_password';
         try {
-            const sdk = await EThree.initialize(fetchToken);
+            const sdk = await initializeEThree(fetchToken);
             await sdk.register();
             await sdk.backupPrivateKey(oldPwd);
             await sdk.changePassword(wrongPwd, newPwd);
@@ -283,11 +283,11 @@ describe('backupPrivateKey', () => {
         const identity = 'virgiltestbackup1' + Date.now();
         const fetchToken = () => Promise.resolve(generator.generateToken(identity).toString());
         const pwd = 'secret_password';
-        const sdk = await EThree.initialize(fetchToken);
+        const sdk = await initializeEThree(fetchToken);
         const storage = await createSyncStorage(identity, pwd);
 
         try {
-            await storage.retrieveEntry(identity);
+            storage.retrieveEntry(identity);
         } catch (e) {
             expect(e).toBeInstanceOf(Error);
         }
@@ -299,14 +299,14 @@ describe('backupPrivateKey', () => {
             expect(e).not.toBeDefined();
         }
         await storage.retrieveCloudEntries();
-        const key = await storage.retrieveEntry(identity);
+        const key = storage.retrieveEntry(identity);
         expect(key).not.toBeNull();
     });
 
     it('No local private key', async () => {
         const identity = 'virgiltestbackup2' + Date.now();
         const fetchToken = () => Promise.resolve(generator.generateToken(identity).toString());
-        const sdk = await EThree.initialize(fetchToken);
+        const sdk = await initializeEThree(fetchToken);
         try {
             await sdk.backupPrivateKey('secret_pass');
         } catch (e) {
@@ -324,11 +324,11 @@ describe('restorePrivateKey', () => {
         const identity = 'virgiltestrestore1' + Date.now();
         const fetchToken = () => Promise.resolve(generator.generateToken(identity).toString());
 
-        const sdk = await EThree.initialize(fetchToken);
+        const sdk = await initializeEThree(fetchToken);
         const storage = await createSyncStorage(identity, pwd);
 
         try {
-            await storage.retrieveEntry(identity);
+            storage.retrieveEntry(identity);
         } catch (e) {
             expect(e).toBeInstanceOf(Error);
         }
@@ -355,11 +355,11 @@ describe('restorePrivateKey', () => {
         const identity = 'virgiltestrestore1' + Date.now();
         const fetchToken = () => Promise.resolve(generator.generateToken(identity).toString());
 
-        const sdk = await EThree.initialize(fetchToken);
+        const sdk = await initializeEThree(fetchToken);
         const storage = await createSyncStorage(identity, pwd);
 
         try {
-            await storage.retrieveEntry(identity);
+            storage.retrieveEntry(identity);
         } catch (e) {
             expect(e).toBeInstanceOf(Error);
         }
@@ -394,8 +394,8 @@ describe('encrypt and decrypt', () => {
         const fetchToken2 = () => Promise.resolve(generator.generateToken(identity2).toString());
 
         const [sdk1, sdk2] = await Promise.all([
-            EThree.initialize(fetchToken1),
-            EThree.initialize(fetchToken2),
+            initializeEThree(fetchToken1),
+            initializeEThree(fetchToken2),
         ]);
 
         await Promise.all([sdk1.register(), sdk2.register()]);
@@ -416,7 +416,7 @@ describe('encrypt and decrypt', () => {
         const identity = 'virgiltestencrypt' + Date.now();
         const fetchToken = () => Promise.resolve(generator.generateToken(identity).toString());
 
-        const sdk = await EThree.initialize(fetchToken);
+        const sdk = await initializeEThree(fetchToken);
         const { publicKey } = virgilCrypto.generateKeys();
         await sdk.register();
         try {
@@ -430,7 +430,7 @@ describe('encrypt and decrypt', () => {
         const identity = 'virgiltestencrypt' + Date.now();
         const fetchToken = () => Promise.resolve(generator.generateToken(identity).toString());
 
-        const sdk = await EThree.initialize(fetchToken);
+        const sdk = await initializeEThree(fetchToken);
         await sdk.register();
         const message = 'secret message';
         const encryptedMessage = await sdk.encrypt(message);
@@ -442,7 +442,7 @@ describe('encrypt and decrypt', () => {
         const identity = 'virgiltestencrypt' + Date.now();
         const fetchToken = () => Promise.resolve(generator.generateToken(identity).toString());
 
-        const sdk = await EThree.initialize(fetchToken);
+        const sdk = await initializeEThree(fetchToken);
         await sdk.register();
         const receiverPublicKey = await sdk.lookupPublicKeys([identity]);
         const { publicKey: senderPublicKey } = virgilCrypto.generateKeys();
@@ -465,7 +465,7 @@ describe('encrypt and decrypt', () => {
         const fetchToken = () => Promise.resolve(generator.generateToken(identity).toString());
 
         await keyStorage.clear();
-        const sdk = await EThree.initialize(fetchToken);
+        const sdk = await initializeEThree(fetchToken);
         try {
             await sdk.encrypt('message');
         } catch (e) {
@@ -485,7 +485,7 @@ describe('encrypt and decrypt', () => {
         const buf = new ArrayBuffer(32);
 
         const recipient = virgilCrypto.generateKeys();
-        const sdk = await EThree.initialize(fetchToken);
+        const sdk = await initializeEThree(fetchToken);
         await sdk.register();
         const publicKey = (await sdk.lookupPublicKeys([identity]))[0];
         const encryptedMessage = await sdk.encrypt(buf, recipient.publicKey);
@@ -502,7 +502,7 @@ describe('cleanup()', () => {
         const identity = 'virgiltestlogout' + Date.now();
         const fetchToken = () => Promise.resolve(generator.generateToken(identity).toString());
 
-        const sdk = await EThree.initialize(fetchToken);
+        const sdk = await initializeEThree(fetchToken);
         await sdk.register();
         await sdk.cleanup();
         const privateKeyFromLocalStorage = await keyStorage.load(identity);
@@ -510,13 +510,13 @@ describe('cleanup()', () => {
     });
 });
 
-describe('resetPrivateKeyBackup(pwd)', () => {
+describe('resetPrivateKeyBackup(pwd?)', () => {
     it('reset backup private key', async () => {
         const pwd = 'secure_password';
         const identity = 'virgiltestlogout1' + Date.now();
         const fetchToken = () => Promise.resolve(generator.generateToken(identity).toString());
         const cloudStorage = await createSyncStorage(identity, pwd);
-        const sdk = await EThree.initialize(fetchToken);
+        const sdk = await initializeEThree(fetchToken);
         await sdk.register();
         await sdk.backupPrivateKey(pwd);
 
@@ -537,7 +537,7 @@ describe('resetPrivateKeyBackup(pwd)', () => {
         const pwd = 'secure_password';
         const identity = 'virgiltestlogout2' + Date.now();
         const fetchToken = () => Promise.resolve(generator.generateToken(identity).toString());
-        const sdk = await EThree.initialize(fetchToken);
+        const sdk = await initializeEThree(fetchToken);
         await sdk.register();
 
         try {
@@ -549,13 +549,30 @@ describe('resetPrivateKeyBackup(pwd)', () => {
         }
         throw 'should throw';
     });
+
+    it('reset backup private without password', async () => {
+        expect.assertions(2);
+        const pwd = 'secure_password';
+        const identity = 'virgiltestlogout2' + Date.now();
+        const fetchToken = () => Promise.resolve(generator.generateToken(identity).toString());
+        const sdk = await initializeEThree(fetchToken);
+        await sdk.register();
+        await sdk.backupPrivateKey(pwd);
+        const cloudStorage = await createSyncStorage(identity, pwd);
+        let isExisting = cloudStorage.existsEntry(identity);
+        expect(isExisting).toBe(true);
+        await sdk.resetPrivateKeyBackup();
+        await cloudStorage.retrieveCloudEntries();
+        isExisting = cloudStorage.existsEntry(identity);
+        expect(isExisting).toBe(false);
+    });
 });
 
 describe('hasPrivateKey()', () => {
     it('has private key', async () => {
         const identity = 'virgiltesthasprivatekey1' + Date.now();
         const fetchToken = () => Promise.resolve(generator.generateToken(identity).toString());
-        const sdk = await EThree.initialize(fetchToken);
+        const sdk = await initializeEThree(fetchToken);
         await sdk.register();
         const hasPrivateKey = await sdk.hasLocalPrivateKey();
         expect(hasPrivateKey).toEqual(true);
@@ -566,7 +583,7 @@ describe('hasPrivateKey()', () => {
     it('has no private key', async () => {
         const identity = 'virgiltesthasprivatekey2' + Date.now();
         const fetchToken = () => Promise.resolve(generator.generateToken(identity).toString());
-        const sdk = await EThree.initialize(fetchToken);
+        const sdk = await initializeEThree(fetchToken);
         const hasPrivateKey = await sdk.hasLocalPrivateKey();
         expect(hasPrivateKey).toEqual(false);
 

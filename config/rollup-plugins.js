@@ -1,3 +1,4 @@
+require('dotenv').config();
 const paths = require('./paths');
 
 const commonjs = require('rollup-plugin-commonjs');
@@ -8,11 +9,10 @@ const typescript = require('rollup-plugin-typescript2');
 const { uglify } = require('rollup-plugin-uglify');
 const sourcemap = require('rollup-plugin-sourcemaps');
 
-
-function resolveVirgilCrypto () {
+function resolveVirgilCrypto() {
     return {
         name: 'resolve-virgil-crypto',
-        resolveId (importee, b) {
+        resolveId(importee, b) {
             if (importee === 'virgil-crypto') {
                 return paths.pythiaCryptoPath;
             }
@@ -34,12 +34,12 @@ class RollupPluginsResolver {
             useTsconfigDeclarationDir: true,
         });
         this.inject = inject({
-			include: '**/*.ts',
-			exclude: 'node_modules/**',
-			modules: {
-				Buffer: [ 'buffer-es6', 'Buffer' ]
-			}
-		})
+            include: '**/*.ts',
+            exclude: 'node_modules/**',
+            modules: {
+                Buffer: ['buffer-es6', 'Buffer']
+            }
+        });
     }
 }
 
