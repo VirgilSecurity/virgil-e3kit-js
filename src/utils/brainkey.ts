@@ -11,6 +11,9 @@ type KeyPair = {
     publicKey: VirgilPublicKey;
 };
 
+/**
+ * @hidden
+ */
 export type BrainkeyOptions = {
     virgilCrypto: VirgilCrypto;
     pythiaCrypto: VirgilPythiaCrypto;
@@ -18,6 +21,9 @@ export type BrainkeyOptions = {
     apiUrl?: string;
 };
 
+/**
+ * @hidden
+ */
 export const generateBrainPair = async (pwd: string, options: BrainkeyOptions) => {
     const brainKey = createBrainKey({
         virgilCrypto: options.virgilCrypto,

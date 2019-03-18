@@ -14,12 +14,19 @@ import { IKeyEntryStorage, IAccessTokenProvider } from 'virgil-sdk';
 import { WrongKeyknoxPasswordError, PrivateKeyNoBackupError } from './errors';
 import { generateBrainPair } from './utils/brainkey';
 
+/**
+ * @hidden
+ */
 export interface IPrivateKeyLoaderOptions {
     virgilCrypto: VirgilCrypto;
     accessTokenProvider: IAccessTokenProvider;
     keyEntryStorage: IKeyEntryStorage;
     apiUrl?: string;
 }
+
+/**
+ * @hidden
+ */
 export default class PrivateKeyLoader {
     private pythiaCrypto = new VirgilPythiaCrypto();
     private localStorage: IKeyEntryStorage;
