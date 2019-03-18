@@ -29,20 +29,25 @@ import { isArray, isString } from './utils/typeguards';
 import { hasDuplicates, getObjectValues } from './utils/array';
 import { withDefaults } from './utils/object';
 
-interface IEThreeInitOptions {
+export interface IEThreeInitOptions {
+    /**
+     * Implementation of IKeyEntryStorage. If not specified using IndexedDB Key Storage from [Virgil SDK](https://github.com/virgilsecurity/virgil-sdk-javascript);
+     */
     keyEntryStorage?: IKeyEntryStorage;
+    /**
+     * Url of the Card Services. Used for development purposes.
+     */
     apiUrl?: string;
 }
 
-interface IEThreeCtorOptions extends IEThreeInitOptions {
+export interface IEThreeCtorOptions extends IEThreeInitOptions {
+    /**
+     * Implementation of IAccessTokenProvider from [Virgil SDK](https://github.com/virgilsecurity/virgil-sdk-javascript);
+     */
     accessTokenProvider: IAccessTokenProvider;
 }
 
-const throwIllegalInvocationError = (method: string) => {
-    throw new Error(`Calling ${method} two or more times in a row is not allowed.`);
-};
-
-export type KeyPair = {
+type KeyPair = {
     privateKey: VirgilPrivateKey;
     publicKey: VirgilPublicKey;
 };
@@ -51,26 +56,58 @@ export type LookupResult = {
     [identity: string]: VirgilPublicKey;
 };
 
+const throwIllegalInvocationError = (method: string) => {
+    throw new Error(`Calling ${method} two or more times in a row is not allowed.`);
+};
+
 type EncryptVirgilPublicKeyArg = LookupResult | VirgilPublicKey;
 
 const _inProcess = Symbol('inProcess');
 const _keyLoader = Symbol('keyLoader');
 const STORAGE_NAME = '.virgil-local-storage';
 const DEFAULT_API_URL = 'https://api.virgilsecurity.com';
-export default class EThree {
-    identity: string;
-    virgilCrypto = new VirgilCrypto();
-    cardCrypto = new VirgilCardCrypto(this.virgilCrypto);
-    cardVerifier: VirgilCardVerifier;
 
+export default class EThree {
+    /**
+     * Unique identifier of current user. Received from JWT token.
+     */
+    identity: string;
+    /**
+     * Instance of [VirgilCrypto](https://github.com/virgilsecurity/virgil-crypto-javascript)
+     */
+    virgilCrypto = new VirgilCrypto();
+    /**
+     * Instance of VirgilCardCrypto
+     */
+    cardCrypto = new VirgilCardCrypto(this.virgilCrypto);
+    /**
+     * Instance of VirgilCardVerifier;
+     */
+    cardVerifier: VirgilCardVerifier;
+    /**
+     * Instance of CardManager;
+     */
     cardManager: CardManager;
+    /**
+     * Instance of IAccessTokenProvider implementation. Using [[getToken]] to receive JWT;
+     */
     accessTokenProvider: IAccessTokenProvider;
+    /**
+     * Instance of IKeyEntryStorage implementation. Used for storing private keys;
+     */
     keyEntryStorage: IKeyEntryStorage;
 
     private [_keyLoader]: PrivateKeyLoader;
     private [_inProcess]: boolean = false;
 
-    static async initialize(getToken: () => Promise<string>, options: IEThreeInitOptions = {}) {
+    /**
+     * Initialize a new instance of EThree which tied to specific user.
+     * @param getToken - Function that receive JWT.
+     */
+    static async initialize(
+        getToken: () => Promise<string>,
+        options: IEThreeInitOptions = {},
+    ): Promise<EThree> {
         const opts = withDefaults(options as IEThreeCtorOptions, {
             accessTokenProvider: new CachingJwtProvider(getToken),
         });
@@ -79,6 +116,9 @@ export default class EThree {
         return new EThree(identity, opts);
     }
 
+    /**
+     * @param identity - Identity of the current user.
+     */
     constructor(identity: string, options: IEThreeCtorOptions) {
         const opts = withDefaults(options, { apiUrl: DEFAULT_API_URL });
         this.identity = identity;
@@ -105,6 +145,9 @@ export default class EThree {
         });
     }
 
+    /**
+     * Register current user in Virgil Cloud. Saves private key locally and uploads public key to cloud.
+     */
     async register() {
         if (this[_inProcess]) throwIllegalInvocationError('register');
         this[_inProcess] = true;
@@ -125,6 +168,10 @@ export default class EThree {
         return;
     }
 
+    /**
+     * Generates a new private key and saves locally. Replaces old public key with new one in Cloud.
+     * Used in case if old private key is lost.
+     */
     async rotatePrivateKey(): Promise<void> {
         if (this[_inProcess]) throwIllegalInvocationError('rotatePrivateKey');
         this[_inProcess] = true;
@@ -144,6 +191,10 @@ export default class EThree {
         }
     }
 
+    /**
+     * Downloads private key from Virgil Cloud. Use [[backupPrivateKey]] to upload at first.
+     * @param pwd User password for access to Virgil Keyknox Storage.
+     */
     async restorePrivateKey(pwd: string): Promise<void> {
         try {
             await this[_keyLoader].restorePrivateKey(pwd);
@@ -155,15 +206,28 @@ export default class EThree {
         }
     }
 
+    /**
+     * Deletes local private key from key storage. Make sure you made [[backupPrivateKey]] key first.
+     */
     async cleanup() {
         await this[_keyLoader].resetLocalPrivateKey();
     }
 
+    /**
+     * Delete private key saved in Virgil Keyknox Storage.
+     * @param pwd User password for access to Virgil Keyknox Storage. If password omitted resets all
+     * Keyknox storage.
+     */
     async resetPrivateKeyBackup(pwd?: string) {
         if (!pwd) return await this[_keyLoader].resetAll();
         return this[_keyLoader].resetPrivateKeyBackup(pwd);
     }
 
+    /**
+     * Encrypts data.
+     * @param message - Plain data you want to encrypt.
+     * @param publicKey - Public keys of recipients. If omitted encrypts only for yourself.
+     */
     async encrypt(
         message: ArrayBuffer,
         publicKey?: EncryptVirgilPublicKeyArg,
@@ -192,6 +256,11 @@ export default class EThree {
         return res;
     }
 
+    /**
+     * Decrypts data.
+     * @param message - Encrypted data you want to decrypt.
+     * @param publicKey - Public key of sender. If sender is you - omit that parameter.
+     */
     async decrypt(message: string, publicKey?: VirgilPublicKey): Promise<string>;
     async decrypt(message: Buffer, publicKey?: VirgilPublicKey): Promise<Buffer>;
     async decrypt(message: ArrayBuffer, publicKey?: VirgilPublicKey): Promise<Buffer>;
@@ -207,6 +276,10 @@ export default class EThree {
         return res as Buffer;
     }
 
+    /**
+     * Find public keys for user identities which registered on Virgil Cloud.
+     * @param identities;
+     */
     async lookupPublicKeys(identities: string): Promise<VirgilPublicKey>;
     async lookupPublicKeys(identities: string[]): Promise<LookupResult>;
     async lookupPublicKeys(identities: string[] | string): Promise<LookupResult | VirgilPublicKey> {
@@ -239,10 +312,16 @@ export default class EThree {
         return result[identities];
     }
 
+    /**
+     * Changes password for access to your private key backup.
+     */
     async changePassword(oldPwd: string, newPwd: string) {
         return await this[_keyLoader].changePassword(oldPwd, newPwd);
     }
 
+    /**
+     * Uploads your private key to Virgil Keyknox Storage.
+     */
     async backupPrivateKey(pwd: string): Promise<void> {
         const privateKey = await this[_keyLoader].loadLocalPrivateKey();
         if (!privateKey) throw new RegisterRequiredError();
@@ -250,6 +329,9 @@ export default class EThree {
         return;
     }
 
+    /**
+     * Checks if you have private key saved locally.
+     */
     hasLocalPrivateKey(): Promise<Boolean> {
         return this[_keyLoader].hasPrivateKey();
     }
