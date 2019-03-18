@@ -1,5 +1,8 @@
 export const DUPLICATE_IDENTITIES = 'Identities in array should be unique';
 
+/**
+ * Custom error class for errors specific to Virgil E3kit.
+ */
 export class SdkError extends Error {
     name: string;
     constructor(m: string, name: string = 'SdkError') {
@@ -9,6 +12,9 @@ export class SdkError extends Error {
     }
 }
 
+/**
+ * Error thrown by {@link EThree.register}.
+ */
 export class IdentityAlreadyExistsError extends SdkError {
     constructor() {
         super(
@@ -18,24 +24,37 @@ export class IdentityAlreadyExistsError extends SdkError {
     }
 }
 
+/**
+ * Error thrown by {@link EThree.encrypt}, {@link EThree.decrypt} and{@link EThree.backupPrivateKey}
+ */
 export class RegisterRequiredError extends SdkError {
     constructor() {
         super('This identity is not registered', 'RegisterRequiredError');
     }
 }
 
+/**
+ * Error thrown by {@link EThree.backupPrivateKey},  {@link EThree.changePassword} and
+ * {@link EThree.resetPrivateKeyBackup}
+ */
 export class WrongKeyknoxPasswordError extends SdkError {
     constructor() {
         super('Password from remote private key storage is invalid', 'WrongKeyknoxPasswordError');
     }
 }
 
+/**
+ * Error thrown by {@link EThree.lookupPublicKeys}
+ */
 export class EmptyArrayError extends SdkError {
     constructor(method: string) {
         super(`Array must be non empty in ${method} method`);
     }
 }
 
+/**
+ * Error thrown by {@link EThree.rotatePrivateKey} and {@link EThree.restorePrivateKey}
+ */
 export class PrivateKeyAlreadyExistsError extends SdkError {
     constructor() {
         super(
@@ -45,12 +64,18 @@ export class PrivateKeyAlreadyExistsError extends SdkError {
     }
 }
 
+/**
+ * Error thrown by {@link EThree.resetPrivateKeyBackup}.
+ */
 export class PrivateKeyNoBackupError extends SdkError {
     constructor() {
         super("Backup copy of private key doesn't exist", 'PrivateKeyNoBackupError');
     }
 }
 
+/**
+ * Error thrown by {@link EThree.register}, {@link EThree.rotatePrivateKey} and {@link EThree.lookupPublicKeys}.
+ */
 export class MultipleCardsError extends SdkError {
     constructor(public identity: string) {
         super(
@@ -66,15 +91,21 @@ export type LookupResultWithErrors = {
         | Error;
 };
 
+/**
+ * Error thrown by {@link EThree.lookupPublicKeys}.
+ */
 export class LookupError extends SdkError {
     constructor(public lookupResult: LookupResultWithErrors) {
         super(
-            `Failed some public keys lookups. You can see the results by calling error.lookupResult property of this error instance`,
+            'Failed some public keys lookups. You can see the results by calling error.lookupResult property of this error instance',
             'LookupError',
         );
     }
 }
 
+/**
+ * Error thrown by {@link EThree.lookupPublicKeys}.
+ */
 export class LookupNotFoundError extends SdkError {
     constructor(public identity: string) {
         super(`${identity} not found`, 'LookupNotFoundError');

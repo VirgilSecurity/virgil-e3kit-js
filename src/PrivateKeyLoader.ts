@@ -59,7 +59,7 @@ export default class PrivateKeyLoader {
     }
 
     async resetLocalPrivateKey() {
-        await this.localStorage.remove(this.identity).catch(this.handleResetError);
+        await this.localStorage.remove(this.identity);
     }
 
     async resetPrivateKeyBackup(password: string) {

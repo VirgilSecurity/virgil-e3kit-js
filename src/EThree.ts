@@ -31,7 +31,8 @@ import { withDefaults } from './utils/object';
 
 export interface IEThreeInitOptions {
     /**
-     * Implementation of IKeyEntryStorage. If not specified using IndexedDB Key Storage from [Virgil SDK](https://github.com/virgilsecurity/virgil-sdk-javascript);
+     * Implementation of IKeyEntryStorage. If not specified using IndexedDB Key Storage from
+     * [Virgil SDK](https://github.com/virgilsecurity/virgil-sdk-javascript);
      */
     keyEntryStorage?: IKeyEntryStorage;
     /**
@@ -165,7 +166,6 @@ export default class EThree {
         } finally {
             this[_inProcess] = false;
         }
-        return;
     }
 
     /**
@@ -224,9 +224,7 @@ export default class EThree {
     }
 
     /**
-     * Encrypts data.
-     * @param message - Plain data you want to encrypt.
-     * @param publicKey - Public keys of recipients. If omitted encrypts only for yourself.
+     * Encrypts data for recipient(s) public key(s). If recipient is you - omit public key parameter.
      */
     async encrypt(
         message: ArrayBuffer,
@@ -257,9 +255,7 @@ export default class EThree {
     }
 
     /**
-     * Decrypts data.
-     * @param message - Encrypted data you want to decrypt.
-     * @param publicKey - Public key of sender. If sender is you - omit that parameter.
+     * Decrypts data and verify signature of sender by his public key. If sender is you - omit public key parameter.
      */
     async decrypt(message: string, publicKey?: VirgilPublicKey): Promise<string>;
     async decrypt(message: Buffer, publicKey?: VirgilPublicKey): Promise<Buffer>;
@@ -278,9 +274,8 @@ export default class EThree {
 
     /**
      * Find public keys for user identities which registered on Virgil Cloud.
-     * @param identities;
      */
-    async lookupPublicKeys(identities: string): Promise<VirgilPublicKey>;
+    async lookupPublicKeys(identity: string): Promise<VirgilPublicKey>;
     async lookupPublicKeys(identities: string[]): Promise<LookupResult>;
     async lookupPublicKeys(identities: string[] | string): Promise<LookupResult | VirgilPublicKey> {
         const argument = isArray(identities) ? identities : [identities];

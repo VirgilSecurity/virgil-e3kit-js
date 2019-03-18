@@ -32,7 +32,6 @@
     "excludeExternals": true,
     "suppressExcessPropertyErrors": true,
     "suppressImplicitAnyIndexErrors": true,
-    "theme": "markdown",
     "hideGenerator": true,
     "readme": "none"
   }
