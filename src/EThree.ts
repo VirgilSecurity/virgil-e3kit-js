@@ -210,7 +210,8 @@ export default class EThree {
     }
 
     /**
-     * Deletes local private key from key storage. Make sure you made [[backupPrivateKey]] key first.
+     * Deletes local private key from key storage. Make current user made [[backupPrivateKey]] key
+     * first.
      */
     async cleanup() {
         await this[_keyLoader].resetLocalPrivateKey();
@@ -227,7 +228,8 @@ export default class EThree {
     }
 
     /**
-     * Encrypts data for recipient(s) public key(s). If recipient is you - omit public key parameter.
+     * Encrypts data for recipient(s) public key(s). If there is no recipient and message encrypted
+     * for the current user, omit public key.
      */
     async encrypt(
         message: ArrayBuffer,
@@ -258,7 +260,8 @@ export default class EThree {
     }
 
     /**
-     * Decrypts data and verify signature of sender by his public key. If sender is you - omit public key parameter.
+     * Decrypts data and verify signature of sender by his public key. If message is self-encrypted,
+     * omit public key parameter.
      */
     async decrypt(message: string, publicKey?: VirgilPublicKey): Promise<string>;
     async decrypt(message: Buffer, publicKey?: VirgilPublicKey): Promise<Buffer>;
@@ -311,7 +314,7 @@ export default class EThree {
     }
 
     /**
-     * Changes password for access to your private key backup.
+     * Changes password for access to current user private key backup.
      * @param oldPwd users old password
      * @param newPwd users new password
      */
@@ -320,7 +323,7 @@ export default class EThree {
     }
 
     /**
-     * Uploads your private key to Virgil Keyknox Storage.
+     * Uploads current user private key to Virgil Keyknox Storage.
      */
     async backupPrivateKey(pwd: string): Promise<void> {
         const privateKey = await this[_keyLoader].loadLocalPrivateKey();
@@ -330,7 +333,7 @@ export default class EThree {
     }
 
     /**
-     * Checks if you have private key saved locally.
+     * Checks if current user has private key saved locally.
      */
     hasLocalPrivateKey(): Promise<Boolean> {
         return this[_keyLoader].hasPrivateKey();
