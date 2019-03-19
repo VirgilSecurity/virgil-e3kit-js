@@ -17,13 +17,13 @@ import {
 } from 'virgil-crypto/dist/virgil-crypto-pythia.es';
 import {
     RegisterRequiredError,
-    EmptyArrayError,
     IdentityAlreadyExistsError,
     PrivateKeyAlreadyExistsError,
     MultipleCardsError,
     LookupNotFoundError,
     LookupError,
     DUPLICATE_IDENTITIES,
+    EMPTY_ARRAY,
 } from './errors';
 import { isArray, isString } from './utils/typeguards';
 import { hasDuplicates, getObjectValues } from './utils/array';
@@ -40,7 +40,9 @@ export interface IEThreeInitOptions {
      */
     apiUrl?: string;
 }
-
+/**
+ * @hidden
+ */
 export interface IEThreeCtorOptions extends IEThreeInitOptions {
     /**
      * Implementation of IAccessTokenProvider from [Virgil SDK](https://github.com/virgilsecurity/virgil-sdk-javascript);
@@ -118,6 +120,7 @@ export default class EThree {
     }
 
     /**
+     * @hidden
      * @param identity - Identity of the current user.
      */
     constructor(identity: string, options: IEThreeCtorOptions) {
@@ -192,7 +195,7 @@ export default class EThree {
     }
 
     /**
-     * Downloads private key from Virgil Cloud. Use [[backupPrivateKey]] to upload at first.
+     * Downloads private key from Virgil Cloud. Use [[backupPrivateKey]] to upload the key first.
      * @param pwd User password for access to Virgil Keyknox Storage.
      */
     async restorePrivateKey(pwd: string): Promise<void> {
@@ -279,7 +282,7 @@ export default class EThree {
     async lookupPublicKeys(identities: string[]): Promise<LookupResult>;
     async lookupPublicKeys(identities: string[] | string): Promise<LookupResult | VirgilPublicKey> {
         const argument = isArray(identities) ? identities : [identities];
-        if (argument.length === 0) throw new EmptyArrayError('lookupPublicKeys');
+        if (argument.length === 0) throw new Error(EMPTY_ARRAY);
         if (hasDuplicates(argument)) throw new Error(DUPLICATE_IDENTITIES);
 
         const cards = await this.cardManager.searchCards(argument);

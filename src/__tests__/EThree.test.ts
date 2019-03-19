@@ -1,5 +1,4 @@
 import {
-    EmptyArrayError,
     RegisterRequiredError,
     LookupNotFoundError,
     PrivateKeyAlreadyExistsError,
@@ -8,6 +7,7 @@ import {
     LookupError,
     DUPLICATE_IDENTITIES,
     PrivateKeyNoBackupError,
+    EMPTY_ARRAY,
 } from '../errors';
 import {
     generator,
@@ -220,7 +220,8 @@ describe('lookupPublicKeys', () => {
         try {
             await sdk.lookupPublicKeys([]);
         } catch (e) {
-            expect(e).toBeInstanceOf(EmptyArrayError);
+            expect(e).toBeInstanceOf(Error);
+            expect(e.message).toEqual(EMPTY_ARRAY);
             return;
         }
         throw 'should throw';
