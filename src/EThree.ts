@@ -31,8 +31,8 @@ import { withDefaults } from './utils/object';
 
 export interface IEThreeInitOptions {
     /**
-     * Implementation of IKeyEntryStorage. If not specified using IndexedDB Key Storage from
-     * [Virgil SDK](https://github.com/virgilsecurity/virgil-sdk-javascript);
+     * Implementation of IKeyEntryStorage. Used IndexedDB Key Storage from
+     * [Virgil SDK](https://github.com/virgilsecurity/virgil-sdk-javascript) by default.
      */
     keyEntryStorage?: IKeyEntryStorage;
     /**
@@ -74,27 +74,27 @@ export default class EThree {
      */
     identity: string;
     /**
-     * Instance of [VirgilCrypto](https://github.com/virgilsecurity/virgil-crypto-javascript)
+     * Instance of [VirgilCrypto](https://github.com/virgilsecurity/virgil-crypto-javascript).
      */
     virgilCrypto = new VirgilCrypto();
     /**
-     * Instance of VirgilCardCrypto
+     * Instance of VirgilCardCrypto.
      */
     cardCrypto = new VirgilCardCrypto(this.virgilCrypto);
     /**
-     * Instance of VirgilCardVerifier;
+     * Instance of VirgilCardVerifier.
      */
     cardVerifier: VirgilCardVerifier;
     /**
-     * Instance of CardManager;
+     * Instance of CardManager. Used to create cards with user public keys.
      */
     cardManager: CardManager;
     /**
-     * Instance of IAccessTokenProvider implementation. Using [[getToken]] to receive JWT;
+     * Instance of IAccessTokenProvider implementation. Using [[getToken]] to receive JWT.
      */
     accessTokenProvider: IAccessTokenProvider;
     /**
-     * Instance of IKeyEntryStorage implementation. Used for storing private keys;
+     * Instance of IKeyEntryStorage implementation. Used for storing private keys.
      */
     keyEntryStorage: IKeyEntryStorage;
 
@@ -309,6 +309,8 @@ export default class EThree {
 
     /**
      * Changes password for access to your private key backup.
+     * @param oldPwd users old password
+     * @param newPwd users new password
      */
     async changePassword(oldPwd: string, newPwd: string) {
         return await this[_keyLoader].changePassword(oldPwd, newPwd);
