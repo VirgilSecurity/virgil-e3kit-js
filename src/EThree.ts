@@ -210,7 +210,7 @@ export default class EThree {
     }
 
     /**
-     * Deletes local private key from key storage. Make current user made [[backupPrivateKey]] key
+     * Deletes local private key from key storage. Make sure [[backupPrivateKey]] method was called
      * first.
      */
     async cleanup() {
@@ -279,7 +279,7 @@ export default class EThree {
     }
 
     /**
-     * Find public keys for user identities which registered on Virgil Cloud.
+     * Find public keys for user identities registered on Virgil Cloud.
      */
     async lookupPublicKeys(identity: string): Promise<VirgilPublicKey>;
     async lookupPublicKeys(identities: string[]): Promise<LookupResult>;
