@@ -17,5 +17,22 @@
   },
   "include": [
     "src"
-  ]
+  ],
+  "typedocOptions": {
+    "out": "docs",
+    "mode": "file",
+    "target": "ES6",
+    "module": "es6",
+    "moduleResolution": "node",
+    "exclude": "**/__tests__/**",
+    "ignoreCompilerErrors": true,
+    "excludePrivate": true,
+    "excludeNotExported": true,
+    "stripInternal": true,
+    "excludeExternals": true,
+    "suppressExcessPropertyErrors": true,
+    "suppressImplicitAnyIndexErrors": true,
+    "hideGenerator": true,
+    "readme": "none"
+  }
 }
