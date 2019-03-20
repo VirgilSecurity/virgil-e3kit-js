@@ -86,6 +86,7 @@ EThree.initialize(getTokenCallback, { keyEntryStorage });
 ## Docs
 Virgil Security has a powerful set of APIs, and the documentation below can get you started today.
 
+* [Api Reference](https://virgilsecurity.github.io/virgil-e3kit-js/)
 * [Virgil Security Documentation][_documentation]
 
 ## License
