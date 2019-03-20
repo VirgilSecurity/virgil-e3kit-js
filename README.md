@@ -63,7 +63,7 @@ const decryptedMsg = await eThree.decrypt(encryptedMsg, senderPublicKey);
 // we decrypt the message and check that it is sent by "alex@myapp.com"
 
 ```
-You can find more examples in [examples folder](example) and on https://e3kit.readme.io.
+You can find more examples in [examples folder](example) and on https://developer.virgilsecurity.com/docs/use-cases.
 
 
 ### React Native usage
