@@ -8,7 +8,8 @@
     "umd": "http-server",
     "firebase": "webpack-dev-server --open --config firebase/webpack.config.js",
     "firebase:build": "webpack --config firebase/webpack.config.js",
-    "firebase:profile": "webpack --config firebase/webpack.config.js"
+    "firebase:profile": "webpack --config firebase/webpack.config.js",
+    "twilio:client": "http-server -o -p 3001 -c-1 twilio"
   },
   "author": "",
   "license": "ISC",
