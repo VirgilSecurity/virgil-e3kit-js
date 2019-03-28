@@ -1,3 +1,5 @@
+const CHANNEL_NAME = 'general-1';
+
 loginOrRegister()
     .then(firstUserData => joinOrCreateChannel(firstUserData))
     .then(firstUserData => subscribeOnMessage(firstUserData))
@@ -7,15 +9,15 @@ loginOrRegister()
 
 function loginOrRegister(prevIdentity) {
     let promptMessage = `type identity of the ${prevIdentity ? 'second' : 'first'} user`;
+
     const identity = prompt(promptMessage).trim().toLowerCase();
+
     if (prevIdentity === identity) {
-        return loginOrRegister('identity shouldn\'t be the same!');
+        alert('identity shouldn\'t be the same!');
+        return loginOrRegister(identity);
     }
-    return authenticate(identity).then(authToken => Promise.all([
-        E3kit.EThree.initialize(() => getVirgilToken(authToken)),
-        getTwilioToken(authToken).then(twilioToken => Twilio.Chat.Client.create(twilioToken))
-    ]))
-    .then(([e3kit, twilioChat]) => {
+
+    return initialize(identity).then(({ e3kit, twilioChat }) => {
         return e3kit.register()
             .then(() => {
                 displayMessage('register', identity);
@@ -24,24 +26,24 @@ function loginOrRegister(prevIdentity) {
                 if (e.name === 'IdentityAlreadyExistsError') {
                     displayMessage('login', `${identity} is already registered`);
                 } else {
-                    console.log('oops, unexpected error:');
+                    displayMessage('oops, unexpected error:');
                     console.error(e);
-                    return e3kit.rotatePrivateKey();
+                    return;
                 }
             }).then(() => ({ identity, e3kit, twilioChat }))
     });
 }
 
 function joinOrCreateChannel({ identity, e3kit, twilioChat }) {
-    return getChannel(twilioChat, 'general').then((channel) => {
+    return getChannel(twilioChat, CHANNEL_NAME).then((channel) => {
         if (channel) {
-            return joinChannel(twilioChat, 'general').catch(() => {
+            return joinChannel(twilioChat, CHANNEL_NAME).catch(() => {
                 displayMessage(identity, 'user already in channel');
                 return channel;
             });
         } else {
             displayMessage('creating channel');
-            return createChannel(twilioChat, 'general');
+            return createChannel(twilioChat, CHANNEL_NAME);
         }
     }).then(channel => {
         displayMessage(identity, 'joined to channel');

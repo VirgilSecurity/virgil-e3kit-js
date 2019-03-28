@@ -1,3 +1,7 @@
+// simulate requiring from module, cause it global UMD module
+const { EThree } = E3kit;
+const { Chat } = Twilio;
+
 // This function returns a token that will be used to authenticate requests
 // to your backend.
 // This is a simplified solution without any real protection, so here you need use your
@@ -50,6 +54,17 @@ async function getTwilioToken(authToken) {
     return response.json().then(data => data.twilioToken);
 }
 
+async function initialize(identity) {
+    const authToken = await authenticate(identity);
+
+    const [ e3kit, twilioChat ] = await Promise.all([
+        EThree.initialize(() => getVirgilToken(authToken)),
+        getTwilioToken(authToken).then(twilioToken => Chat.Client.create(twilioToken))
+    ]);
+
+    return { e3kit, twilioChat };
+}
+
 async function createChannel(twilioChat, name) {
     return await twilioChat.createChannel({
         uniqueName: name,
@@ -80,7 +95,8 @@ async function decryptMessage(e3kit, message) {
 }
 
 async function sendMessage(e3kit, channel, message) {
-    const membersIdentities = await channel.getMembers().then(members => members.map(member => member.identity));
+    const members = await channel.getMembers();
+    const membersIdentities = members.map(member => member.identity);
     const publicKeys = await e3kit.lookupPublicKeys(membersIdentities);
     const encryptedMessage = await e3kit.encrypt(message, publicKeys);
     return channel.sendMessage(encryptedMessage);
