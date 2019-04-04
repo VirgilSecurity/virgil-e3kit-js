@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
-import { EThree } from '../../../../../dist/e3kit.browser.umd.min';
+import eThree from '../../../../e3kit-sample-backend/snippets';
+import { EThree } from '@virgilsecurity/e3kit';
 
 @Component({
   selector: 'page-hello-ionic',
@@ -10,15 +11,10 @@ export class HelloIonicPage {
   fetch: any;
   constructor() {
     this.result = 'waiting for test';
-    let sdk;
-
-    const getToken = () => fetch("http://YOUR_LOCAL_IP_ADDRESS:3000/get-virgil-jwt")
-      .then(res => res.json() as Promise<{ token: string }>)
-      .then(data => data.token);
+    let sdk: EThree;
 
     this.fetch = fetch.toString();
-    EThree.initalize(getToken)
-      .then(client => sdk = client)
+    eThree.then(client => sdk = client)
       .then(() => sdk.register())
       .then(() => sdk.encrypt('success!'))
       .then((encryptedMessage) => sdk.decrypt(encryptedMessage))
