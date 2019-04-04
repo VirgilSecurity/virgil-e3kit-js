@@ -1,8 +1,8 @@
-import eThree from './snippets';
+import getEThreeInstance from './snippets';
 
 let sdk;
 
-eThree.then(client => sdk = client)
+getEThreeInstance(prompt('Write here unique identity')).then(client => sdk = client)
 .then(() => sdk.hasLocalPrivateKey())
 .then(() => sdk.register())
 .then(() => sdk.encrypt('success!'))

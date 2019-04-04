@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import eThree from '../../../../e3kit-sample-backend/snippets';
+import getEThreeInstance from '../../../../e3kit-sample-backend/snippets';
 import { EThree } from '@virgilsecurity/e3kit';
 
 @Component({
@@ -14,7 +14,7 @@ export class HelloIonicPage {
     let sdk: EThree;
 
     this.fetch = fetch.toString();
-    eThree.then(client => sdk = client)
+    getEThreeInstance(prompt('type identity here')).then(client => sdk = client)
       .then(() => sdk.register())
       .then(() => sdk.encrypt('success!'))
       .then((encryptedMessage) => sdk.decrypt(encryptedMessage))

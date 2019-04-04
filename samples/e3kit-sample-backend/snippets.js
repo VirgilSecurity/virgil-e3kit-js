@@ -36,7 +36,7 @@ async function getVirgilToken(authToken) {
 }
 
 // Log in as `alice`
-export default authenticate(prompt('Type your identity')).then(authToken => {
+export default (identity) => authenticate(identity).then(authToken => {
     // E3kit will call this callback function and wait for the Promise resolve.
     // When it receives Virgil JWT it can do authorized requests to Virgil Cloud.
     // E3kit uses the identity encoded in the JWT as the current user's identity.
@@ -44,7 +44,4 @@ export default authenticate(prompt('Type your identity')).then(authToken => {
 
     // This function makes authenticated request to GET /virgil-jwt endpoint
     // The token it returns serves to make authenticated requests to Virgil Cloud
-}).catch(error => {
-    alert(error);
-    console.error(error);
 });
