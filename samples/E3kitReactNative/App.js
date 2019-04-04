@@ -7,12 +7,13 @@
  */
 
 import React, {Component} from 'react';
-import {Platform, StyleSheet, Text, View} from 'react-native';
-import { EThree } from '@virgilsecurity/e3kit';
+import {Platform, StyleSheet, Text, View, Alert} from 'react-native';
 import createNativeKeyEntryStorage from '@virgilsecurity/key-storage-rn/native';
 const keyEntryStorage = createNativeKeyEntryStorage();
+import { Buffer } from 'buffer';
 import 'whatwg-fetch';
-import 'es6-symbol'
+import getEThreeInstance from './snippets.js';
+global.Buffer = Buffer;
 
 const instructions = Platform.select({
   ios: 'Press Cmd+R to reload,\n' + 'Cmd+D or shake for dev menu',
@@ -28,20 +29,22 @@ export default class App extends Component {
   }
 
   componentDidMount() {
-    const getToken = () => fetch("http://localhost:3000/get-virgil-jwt")
-        .then(res => res.json())
-        .then(data => data.token);
-
-    EThree.initialize(getToken, { keyEntryStorage: keyEntryStorage })
-        .then(client => sdk = client)
-        .then(() => sdk.register())
-        .then(() => sdk.encrypt('success!'))
-        .then((encryptedMessage) => sdk.decrypt(encryptedMessage))
-        .then((message) => this.setState({ message: message }))
-        .then(() => sdk.cleanup())
-        .catch((error) => {
-          this.setState({ message: error.toString() })
+    Alert.prompt('Enter an unique identity', null, (text) => {
+        getEThreeInstance(text, { keyEntryStorage: keyEntryStorage })
+            .then(client => sdk = client)
+            .then(() => sdk.hasLocalPrivateKey())
+            .then(() => sdk.register())
+            .then(() => sdk.encrypt('success!'))
+            .then((encryptedMessage) => sdk.decrypt(encryptedMessage))
+            .then((message) => this.setState({ message: message }))
+            .then(() => sdk.cleanup())
+            .catch((error) => {
+                console.error(error)
+                this.setState({ message: error.toString() })
+            });
         });
+
+
   }
   render() {
     return (
