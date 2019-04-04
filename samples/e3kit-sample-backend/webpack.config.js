@@ -8,7 +8,6 @@ module.exports = {
         filename: 'index.js',
         path: path.resolve(__dirname, 'dist'),
     },
-    resolve: { symlinks: false,  modules: ['../node_modules'] },
     plugins: [
         new HtmlWebpackPlugin(),
     ],
