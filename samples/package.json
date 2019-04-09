@@ -6,11 +6,12 @@
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1",
         "umd": "http-server",
-        "firebase": "webpack-dev-server --open --config firebase/webpack.config.js",
+        "firebase": "webpack-dev-server --open --config e3kit-firebase/webpack.config.js",
+        "firebase:build": "webpack --config e3kit-firebase/webpack.config.js",
+        "firebase:profile": "webpack --config e3kit-firebase/webpack.config.js",
         "sample-backend": "webpack-dev-server --open --config e3kit-sample-backend/webpack.config.js",
-        "firebase:build": "webpack --config firebase/webpack.config.js",
-        "firebase:profile": "webpack --config firebase/webpack.config.js",
-        "twilio:client": "http-server -o -p 3001 -c-1 twilio"
+        "twilio": "http-server -o -p 3001 -c-1 e3kit-twilio",
+        "umd": "http-server -o -p 3001 -c-1 e3kit-umd"
     },
     "author": "",
     "license": "ISC",
@@ -23,7 +24,7 @@
         "webpack-visualizer-plugin": "^0.1.11"
     },
     "dependencies": {
-        "@virgilsecurity/e3kit": "file:../",
+        "@virgilsecurity/e3kit": "^0.3.7",
         "cors": "^2.8.4",
         "express": "^4.16.4",
         "firebase": "^5.5.6",
