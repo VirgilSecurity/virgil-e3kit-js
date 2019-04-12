@@ -5,7 +5,6 @@
     "main": "index.js",
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1",
-        "umd": "http-server",
         "firebase": "webpack-dev-server --open --config e3kit-firebase/webpack.config.js",
         "firebase:build": "webpack --config e3kit-firebase/webpack.config.js",
         "firebase:profile": "webpack --config e3kit-firebase/webpack.config.js",

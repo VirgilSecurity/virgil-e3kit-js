@@ -35,7 +35,6 @@ export async function getVirgilToken(authToken) {
     return response.json().then(data => data.virgilToken);
 }
 
-// Log in as `alice`
 export const getEThreeInstance = (identity, options) => authenticate(identity).then(authToken => {
     // E3kit will call this callback function and wait for the Promise resolve.
     // When it receives Virgil JWT it can do authorized requests to Virgil Cloud.
