@@ -1,4 +1,5 @@
 import 'es6-symbol/implement';
 
-export { default as EThree } from './EThree';
+export * from './EThree';
 export * from './errors';
+export { default as EThree } from './EThree';

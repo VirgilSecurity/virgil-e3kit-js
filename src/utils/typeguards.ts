@@ -18,3 +18,15 @@ export const isWithoutErrors = <T>(arr: Array<T | Error>): arr is Array<T> => {
 export const isString = (val: any): val is string => {
     return typeof val === 'string';
 };
+/**
+ * @hidden
+ */
+export const isBlob = (val: any): val is Blob => {
+    return val instanceof Blob;
+};
+/**
+ * @hidden
+ */
+export const isFile = (val: any): val is File => {
+    return val instanceof File;
+};

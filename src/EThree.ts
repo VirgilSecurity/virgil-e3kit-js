@@ -24,10 +24,11 @@ import {
     LookupError,
     DUPLICATE_IDENTITIES,
     EMPTY_ARRAY,
+    throwIllegalInvocationError,
 } from './errors';
-import { isArray, isString } from './utils/typeguards';
-import { hasDuplicates, getObjectValues } from './utils/array';
+import { isArray, isString, isFile } from './utils/typeguards';
 import { withDefaults } from './utils/object';
+import { getObjectValues, hasDuplicates } from './utils/array';
 
 export interface IEThreeInitOptions {
     /**
@@ -59,9 +60,26 @@ export type LookupResult = {
     [identity: string]: VirgilPublicKey;
 };
 
-const throwIllegalInvocationError = (method: string) => {
-    throw new Error(`Calling ${method} two or more times in a row is not allowed.`);
+export type onProgressCallback = (
+    snapshot: {
+        fileSize: number;
+        bytesEncrypted: number;
+    },
+) => void;
+
+export type BatchEncryptOpts = {
+    chunkSize?: number;
+    onProgress?: onProgressCallback;
 };
+
+export type onProcessCallback = (
+    snapshot: {
+        offset: number;
+        chunk: string | ArrayBuffer;
+        dataSize: number;
+        endOffset: number;
+    },
+) => void;
 
 type EncryptVirgilPublicKeyArg = LookupResult | VirgilPublicKey;
 
@@ -239,22 +257,13 @@ export default class EThree {
     async encrypt(message: Buffer, publicKey?: EncryptVirgilPublicKeyArg): Promise<Buffer>;
     async encrypt(message: Data, publicKeys?: EncryptVirgilPublicKeyArg): Promise<Data> {
         const isMessageString = isString(message);
-        let argument: VirgilPublicKey[];
-
-        if (publicKeys == null) argument = [];
-        else if (publicKeys instanceof VirgilPublicKey) argument = [publicKeys];
-        else argument = getObjectValues(publicKeys) as VirgilPublicKey[];
 
         const privateKey = await this[_keyLoader].loadLocalPrivateKey();
         if (!privateKey) throw new RegisterRequiredError();
 
-        const ownPublicKey = this.virgilCrypto.extractPublicKey(privateKey);
+        const publicKeysArray = this.addOwnPublicKey(privateKey, publicKeys);
 
-        if (!this._isOwnPublicKeysIncluded(ownPublicKey, argument)) {
-            argument.push(ownPublicKey);
-        }
-
-        const res: Data = this.virgilCrypto.signThenEncrypt(message, privateKey, argument);
+        const res: Data = this.virgilCrypto.signThenEncrypt(message, privateKey, publicKeysArray);
         if (isMessageString) return res.toString('base64');
         return res;
     }
@@ -276,6 +285,135 @@ export default class EThree {
         const res: Data = this.virgilCrypto.decryptThenVerify(message, privateKey, publicKey);
         if (isMessageString) return res.toString('utf8') as string;
         return res as Buffer;
+    }
+
+    async batchEncrypt(
+        data: File | Blob,
+        publicKeys?: EncryptVirgilPublicKeyArg,
+        options?: BatchEncryptOpts,
+    ): Promise<File | Blob> {
+        let file: Blob | File;
+        if (isString(data)) file = new Blob([data], { type: 'text/plain' });
+        else file = data;
+        // Using 64kB chunk size here, but can be arbitrary size up to 1MB
+        const chunkSize = 64 * 1024;
+
+        const privateKey = await this[_keyLoader].loadLocalPrivateKey();
+        if (!privateKey) throw new RegisterRequiredError();
+
+        const publicKeysArray = this.addOwnPublicKey(privateKey, publicKeys);
+
+        const streamCipher = this.virgilCrypto.createStreamCipher(publicKeysArray);
+
+        const encryptedChunksPromise = new Promise<Buffer[]>((resolve, reject) => {
+            const encryptedChunks: Buffer[] = [];
+            encryptedChunks.push(streamCipher.start());
+
+            const onFileProcess: onProcessCallback = ({ offset, endOffset, dataSize, chunk }) => {
+                if (offset !== endOffset) {
+                    encryptedChunks.push(streamCipher.update(chunk));
+                } else {
+                    encryptedChunks.push(streamCipher.final());
+                    resolve(encryptedChunks);
+                }
+            };
+
+            this.processFile(file, chunkSize, onFileProcess, reject);
+        });
+
+        const encryptedChunks = await encryptedChunksPromise;
+        if (isFile(file)) return new File(encryptedChunks, file.name, { type: file.type });
+        return new Blob(encryptedChunks, { type: file.type });
+    }
+
+    async batchDecrypt(
+        data: File | Blob,
+        publicKey?: VirgilPublicKey,
+        options?: {
+            chunkSize?: number;
+            onProgress?: (
+                snapshot: {
+                    fileSize: number;
+                    bytesEncrypted: number;
+                },
+            ) => void;
+        },
+    ): Promise<File | Blob> {
+        // Using 64kB chunk size here, but can be arbitrary size up to 1MB
+        let file: Blob | File;
+        if (isString(data)) file = new Blob([data], { type: 'text/plain' });
+        else file = data;
+
+        const opts = options ? options : {};
+        const chunkSize = opts.chunkSize ? opts.chunkSize : 64 * 1024;
+
+        const privateKey = await this[_keyLoader].loadLocalPrivateKey();
+        if (!privateKey) throw new RegisterRequiredError();
+
+        const streamDecipher = this.virgilCrypto.createStreamDecipher(privateKey);
+
+        const decryptedChunksPromise = new Promise<Buffer[]>((resolve, reject) => {
+            const decryptedChunks: Buffer[] = [];
+
+            const onFileProcess: onProcessCallback = ({ offset, endOffset, dataSize, chunk }) => {
+                if (offset !== endOffset) {
+                    decryptedChunks.push(streamDecipher.update(chunk));
+                    console.log('chunk', chunk);
+                } else {
+                    decryptedChunks.push(streamDecipher.final());
+                    resolve(decryptedChunks);
+                }
+            };
+
+            this.processFile(file, chunkSize, onFileProcess, reject);
+        });
+
+        const decryptedChunks = await decryptedChunksPromise;
+        if (isFile(file)) return new File(decryptedChunks, file.name, { type: file.type });
+        return new Blob(decryptedChunks, { type: file.type });
+    }
+
+    private processFile(
+        data: Blob,
+        chunkSize: number,
+        cb: onProcessCallback,
+        errCb: (err: any) => void,
+    ) {
+        const reader = new FileReader();
+
+        const dataSize = data.size;
+
+        let offset = 0;
+        let endOffset = Math.min(offset + chunkSize, dataSize);
+
+        reader.onload = () => {
+            if (!reader.result) throw new Error('something wrong');
+
+            cb({
+                offset,
+                endOffset,
+                dataSize,
+                chunk: reader.result,
+            });
+
+            offset = endOffset;
+            endOffset = Math.min(offset + chunkSize, dataSize);
+            if (offset === dataSize) {
+                // done
+                cb({
+                    offset,
+                    endOffset,
+                    dataSize,
+                    chunk: reader.result,
+                });
+            } else {
+                // read next chunk
+                reader.readAsArrayBuffer(data.slice(offset, endOffset));
+            }
+        };
+        reader.onerror = () => errCb(reader.error);
+
+        reader.readAsArrayBuffer(data);
     }
 
     /**
@@ -356,5 +494,20 @@ export default class EThree {
             this.virgilCrypto.exportPublicKey(key).toString('base64'),
         );
         return stringKeys.some((key, i) => key === selfPublicKey);
+    }
+
+    private addOwnPublicKey(privateKey: VirgilPrivateKey, publicKeys?: EncryptVirgilPublicKeyArg) {
+        let argument: VirgilPublicKey[];
+
+        if (publicKeys == null) argument = [];
+        else if (publicKeys instanceof VirgilPublicKey) argument = [publicKeys];
+        else argument = getObjectValues(publicKeys) as VirgilPublicKey[];
+
+        const ownPublicKey = this.virgilCrypto.extractPublicKey(privateKey);
+
+        if (!this._isOwnPublicKeysIncluded(ownPublicKey, argument)) {
+            argument.push(ownPublicKey);
+        }
+        return argument;
     }
 }

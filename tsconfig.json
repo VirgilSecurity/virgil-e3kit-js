@@ -1,38 +1,39 @@
 {
-  "compilerOptions": {
-    "target": "es5",
-    "lib": [
-      "es2015",
-      "es2016",
-      "es2017",
-      "es2018"
+    "compilerOptions": {
+        "target": "es5",
+        "lib": [
+            "dom",
+            "es2015",
+            "es2016",
+            "es2017",
+            "es2018"
+        ],
+        "declaration": true,
+        "declarationDir": "./dist/types",
+        "strict": true,
+        "moduleResolution": "node",
+        "esModuleInterop": true,
+        "allowSyntheticDefaultImports": true,
+        "noUnusedLocals": true,
+    },
+    "include": [
+        "src"
     ],
-    "declaration": true,
-    "declarationDir": "./dist/types",
-    "strict": true,
-    "moduleResolution": "node",
-    "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true,
-    "noUnusedLocals": true,
-  },
-  "include": [
-    "src"
-  ],
-  "typedocOptions": {
-    "out": "docs",
-    "mode": "file",
-    "target": "ES6",
-    "module": "es6",
-    "moduleResolution": "node",
-    "exclude": "**/__tests__/**",
-    "ignoreCompilerErrors": true,
-    "excludePrivate": true,
-    "excludeNotExported": true,
-    "stripInternal": true,
-    "excludeExternals": true,
-    "suppressExcessPropertyErrors": true,
-    "suppressImplicitAnyIndexErrors": true,
-    "hideGenerator": true,
-    "readme": "none"
-  }
+    "typedocOptions": {
+        "out": "docs",
+        "mode": "file",
+        "target": "ES6",
+        "module": "es6",
+        "moduleResolution": "node",
+        "exclude": "**/__tests__/**",
+        "ignoreCompilerErrors": true,
+        "excludePrivate": true,
+        "excludeNotExported": true,
+        "stripInternal": true,
+        "excludeExternals": true,
+        "suppressExcessPropertyErrors": true,
+        "suppressImplicitAnyIndexErrors": true,
+        "hideGenerator": true,
+        "readme": "none"
+    }
 }

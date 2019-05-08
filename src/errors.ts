@@ -7,8 +7,16 @@ export const DUPLICATE_IDENTITIES = 'Identities in array should be unique';
  */
 export const EMPTY_ARRAY = `Array should be non empty`;
 /**
+ * @hidden
+ */
+export const throwIllegalInvocationError = (method: string) => {
+    throw new Error(`Calling ${method} two or more times in a row is not allowed.`);
+};
+
+/**
  * Custom error class for errors specific to Virgil E3kit.
  */
+
 export class SdkError extends Error {
     name: string;
     constructor(m: string, name: string = 'SdkError') {
