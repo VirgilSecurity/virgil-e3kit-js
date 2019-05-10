@@ -27,7 +27,7 @@ npm install @virgilsecurity/e3kit
 ### In browser via `script` tag
 You will need to add `@virgilsecurity/e3kit` script.
 ```html
-<script src="https://unpkg.com/@virgilsecurity/e3kit/dist/e3kit.browser.umd.js"></script>
+<script src="https://unpkg.com/@virgilsecurity/e3kit/dist/e3kit.browser.umd.min.js"></script>
 ```
 
 ## Usage Example
