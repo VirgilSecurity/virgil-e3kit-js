@@ -25,7 +25,7 @@ import {
     DUPLICATE_IDENTITIES,
     EMPTY_ARRAY,
 } from './errors';
-import { isArray, isString } from './utils/typeguards';
+import { isArray, isString, isVirgilPublicKey } from './utils/typeguards';
 import { hasDuplicates, getObjectValues } from './utils/array';
 import { withDefaults } from './utils/object';
 
@@ -242,7 +242,7 @@ export default class EThree {
         let argument: VirgilPublicKey[];
 
         if (publicKeys == null) argument = [];
-        else if (publicKeys instanceof VirgilPublicKey) argument = [publicKeys];
+        else if (isVirgilPublicKey(publicKeys)) argument = [publicKeys];
         else argument = getObjectValues(publicKeys) as VirgilPublicKey[];
 
         const privateKey = await this[_keyLoader].loadLocalPrivateKey();

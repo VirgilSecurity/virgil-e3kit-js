@@ -1,5 +1,9 @@
 # Changelog
 
+## 2019-05-10 0.3.9
+
+* Fixed public key checking in encrypt method.
+
 ## 2019-05-10 0.3.8
 
 * Fixed web worker usage.
