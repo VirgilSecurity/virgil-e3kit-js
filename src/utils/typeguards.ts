@@ -1,3 +1,5 @@
+import { VirgilPublicKey } from 'virgil-crypto';
+
 /**
  * @hidden
  */
@@ -17,4 +19,10 @@ export const isWithoutErrors = <T>(arr: Array<T | Error>): arr is Array<T> => {
  */
 export const isString = (val: any): val is string => {
     return typeof val === 'string';
+};
+/**
+ * @hidden
+ */
+export const isVirgilPublicKey = (val: Object): val is VirgilPublicKey => {
+    return Boolean(val) && 'identifier' in val && 'key' in val;
 };
