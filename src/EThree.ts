@@ -300,8 +300,18 @@ export default class EThree {
 
         const publicKeysArray = this._addOwnPublicKey(privateKey, publicKeys);
 
-        const createStreamSigner = this.virgilCrypto.createStreamSigner();
-        const streamCipher = this.virgilCrypto.createStreamCipher(publicKeysArray);
+        const streamSigner = this.virgilCrypto.createStreamSigner();
+
+        const signaturePromise = new Promise<Buffer>((resolve, reject) => {
+            const onFileProcess = (chunk: string | ArrayBuffer) => streamSigner.update(chunk);
+            const onFinish = () => resolve(streamSigner.sign(privateKey));
+            processFile(file, chunkSize, onFileProcess, onFinish, reject);
+        });
+
+        const streamCipher = this.virgilCrypto.createStreamCipher(
+            publicKeysArray,
+            await signaturePromise,
+        );
 
         const encryptedChunksPromise = new Promise<Buffer[]>((resolve, reject) => {
             const encryptedChunks: Buffer[] = [];
