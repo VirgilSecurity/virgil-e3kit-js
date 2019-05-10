@@ -25,6 +25,7 @@ import { IKeyEntry } from 'virgil-sdk';
 import { getObjectValues } from '../utils/array';
 import expect from 'expect';
 import uuid from 'uuid/v4';
+import { EThree } from '..';
 
 describe('EThree.register()', () => {
     before(clear);
@@ -595,25 +596,31 @@ describe('hasPrivateKey()', () => {
     });
 });
 
-describe.only('batchEncrypt/batchDecrypt', () => {
-    it('should decrypt file for one public key', async () => {
-        expect.assertions(1);
+describe('batchEncrypt/batchDecrypt', async () => {
+    const identity1 = uuid();
+    const identity2 = uuid();
+    const identity3 = uuid();
 
-        const identity1 = uuid();
-        const identity2 = uuid();
+    let sdk1: EThree, sdk2: EThree, sdk3: EThree;
 
-        const [sdk1, sdk2] = await Promise.all([
+    const originString = 'foo';
+
+    const originFile = new File([originString], 'foo.txt', {
+        type: 'text/plain',
+    });
+
+    before(async () => {
+        [sdk1, sdk2, sdk3] = await Promise.all([
             initializeETheeFromIdentity(identity1),
             initializeETheeFromIdentity(identity2),
+            initializeETheeFromIdentity(identity3),
         ]);
 
-        const originString = 'foo';
+        await Promise.all([sdk1.register(), sdk2.register(), sdk3.register()]);
+    });
 
-        const originFile = new File([originString], 'foo.txt', {
-            type: 'text/plain',
-        });
-
-        await Promise.all([sdk1.register(), sdk2.register()]);
+    it('should decrypt file for one public key', async () => {
+        expect.assertions(1);
 
         const [publicKey2, publicKey1] = await Promise.all([
             sdk1.lookupPublicKeys(identity2),
@@ -628,21 +635,29 @@ describe.only('batchEncrypt/batchDecrypt', () => {
         expect(originString).toEqual(decryptedString);
     });
 
+    it('should encrypt for multiple keys', async () => {
+        const onlyTwoKeys = await sdk1.lookupPublicKeys([identity1, identity2]);
+        const encryptedFile = await sdk1.batchEncrypt(originFile, onlyTwoKeys);
+        const decryptedFile = await sdk2.batchDecrypt(encryptedFile, onlyTwoKeys[identity1]);
+
+        const decryptedString = await readFile(decryptedFile);
+
+        expect(originString).toBe(decryptedString);
+
+        try {
+            await sdk3.batchDecrypt(encryptedFile, onlyTwoKeys[identity1]);
+        } catch (e) {
+            return expect(e).toBeInstanceOf(Error);
+        }
+
+        throw new Error('should throw');
+    });
+
     it('should self encrypt', async () => {
         expect.assertions(1);
 
-        const identity1 = uuid();
-        const sdk = await initializeETheeFromIdentity(identity1);
-        await sdk.register();
-
-        const originString = 'foo';
-
-        const originFile = new File([originString], 'foo.txt', {
-            type: 'text/plain',
-        });
-
-        const encryptedFile = await sdk.batchEncrypt(originFile);
-        const decryptedFile = await sdk.batchDecrypt(encryptedFile);
+        const encryptedFile = await sdk1.batchEncrypt(originFile);
+        const decryptedFile = await sdk1.batchDecrypt(encryptedFile);
 
         const decryptedString = await readFile(decryptedFile);
 
@@ -652,25 +667,41 @@ describe.only('batchEncrypt/batchDecrypt', () => {
     it('should take input as string, file or blob', async () => {
         expect.assertions(3);
 
-        const identity1 = uuid();
-
-        const sdk = await initializeETheeFromIdentity(identity1);
-        await sdk.register();
         const keypair = virgilCrypto.generateKeys();
-
-        const originFile = new File(['foo'], 'foo.txt', {
-            type: 'text/plain',
-        });
 
         const originBlob = new Blob(['foo'], {
             type: 'text/plain',
         });
 
-        const encryptedFile = await sdk.batchEncrypt(originFile, keypair.publicKey);
-        const encryptedBlob = await sdk.batchEncrypt(originBlob, keypair.publicKey);
+        const encryptedFile = await sdk1.batchEncrypt(originFile, keypair.publicKey);
+        const encryptedBlob = await sdk1.batchEncrypt(originBlob, keypair.publicKey);
 
         expect(encryptedFile).toBeInstanceOf(File);
         expect(encryptedBlob).toBeInstanceOf(Blob);
         expect(encryptedBlob).not.toBeInstanceOf(File);
+    });
+
+    it('should process different chunks of data', async () => {
+        const keypair = virgilCrypto.generateKeys();
+
+        const originString1 = 'foo';
+
+        const originFile1 = new File([originString1], 'foo.txt', {
+            type: 'text/plain',
+        });
+
+        const chunks: number[] = [];
+        const fileSizes: number[] = [];
+
+        await sdk1.batchEncrypt(originFile1, keypair.publicKey, {
+            chunkSize: 2,
+            onProgress: ({ fileSize, bytesProcessed }) => {
+                chunks.push(bytesProcessed);
+                fileSizes.push(fileSize);
+            },
+        });
+
+        expect(chunks).toEqual([2, 3]);
+        expect(fileSizes).toEqual([3, 3]);
     });
 });

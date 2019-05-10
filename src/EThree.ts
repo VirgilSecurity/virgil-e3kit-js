@@ -63,7 +63,7 @@ export type LookupResult = {
 export type onProgressCallback = (
     snapshot: {
         fileSize: number;
-        bytesEncrypted: number;
+        bytesProcessed: number;
     },
 ) => void;
 
@@ -288,15 +288,11 @@ export default class EThree {
     }
 
     async batchEncrypt(
-        data: File | Blob,
+        file: File | Blob,
         publicKeys?: EncryptVirgilPublicKeyArg,
-        options?: BatchEncryptOpts,
+        options: BatchEncryptOpts = {},
     ): Promise<File | Blob> {
-        let file: Blob | File;
-        if (isString(data)) file = new Blob([data], { type: 'text/plain' });
-        else file = data;
-        // Using 64kB chunk size here, but can be arbitrary size up to 1MB
-        const chunkSize = 64 * 1024;
+        const chunkSize = options.chunkSize ? options.chunkSize : 64 * 1024;
 
         const privateKey = await this[_keyLoader].loadLocalPrivateKey();
         if (!privateKey) throw new RegisterRequiredError();
@@ -309,16 +305,16 @@ export default class EThree {
             const encryptedChunks: Buffer[] = [];
             encryptedChunks.push(streamCipher.start());
 
-            const onFileProcess: onProcessCallback = ({ offset, endOffset, dataSize, chunk }) => {
-                if (offset !== endOffset) {
-                    encryptedChunks.push(streamCipher.update(chunk));
-                } else {
-                    encryptedChunks.push(streamCipher.final());
-                    resolve(encryptedChunks);
-                }
+            const onFileProcess = (chunk: string | ArrayBuffer) => {
+                encryptedChunks.push(streamCipher.update(chunk));
             };
 
-            this.processFile(file, chunkSize, onFileProcess, reject);
+            const onFinish = () => {
+                encryptedChunks.push(streamCipher.final());
+                resolve(encryptedChunks);
+            };
+
+            this.processFile(file, chunkSize, onFileProcess, onFinish, reject, options.onProgress);
         });
 
         const encryptedChunks = await encryptedChunksPromise;
@@ -327,25 +323,11 @@ export default class EThree {
     }
 
     async batchDecrypt(
-        data: File | Blob,
+        file: File | Blob,
         publicKey?: VirgilPublicKey,
-        options?: {
-            chunkSize?: number;
-            onProgress?: (
-                snapshot: {
-                    fileSize: number;
-                    bytesEncrypted: number;
-                },
-            ) => void;
-        },
+        options: BatchEncryptOpts = {},
     ): Promise<File | Blob> {
-        // Using 64kB chunk size here, but can be arbitrary size up to 1MB
-        let file: Blob | File;
-        if (isString(data)) file = new Blob([data], { type: 'text/plain' });
-        else file = data;
-
-        const opts = options ? options : {};
-        const chunkSize = opts.chunkSize ? opts.chunkSize : 64 * 1024;
+        const chunkSize = options.chunkSize ? options.chunkSize : 64 * 1024;
 
         const privateKey = await this[_keyLoader].loadLocalPrivateKey();
         if (!privateKey) throw new RegisterRequiredError();
@@ -355,17 +337,16 @@ export default class EThree {
         const decryptedChunksPromise = new Promise<Buffer[]>((resolve, reject) => {
             const decryptedChunks: Buffer[] = [];
 
-            const onFileProcess: onProcessCallback = ({ offset, endOffset, dataSize, chunk }) => {
-                if (offset !== endOffset) {
-                    decryptedChunks.push(streamDecipher.update(chunk));
-                    console.log('chunk', chunk);
-                } else {
-                    decryptedChunks.push(streamDecipher.final());
-                    resolve(decryptedChunks);
-                }
+            const onFileProcess = (chunk: string | ArrayBuffer) => {
+                decryptedChunks.push(streamDecipher.update(chunk));
             };
 
-            this.processFile(file, chunkSize, onFileProcess, reject);
+            const onFinish = () => {
+                decryptedChunks.push(streamDecipher.final());
+                resolve(decryptedChunks);
+            };
+
+            this.processFile(file, chunkSize, onFileProcess, onFinish, reject, options.onProgress);
         });
 
         const decryptedChunks = await decryptedChunksPromise;
@@ -376,8 +357,10 @@ export default class EThree {
     private processFile(
         data: Blob,
         chunkSize: number,
-        cb: onProcessCallback,
-        errCb: (err: any) => void,
+        onChunkCallback: (chunk: string | ArrayBuffer) => void,
+        onFinishCallback: () => void,
+        onErrorCallback: (err: any) => void,
+        onProgress?: onProgressCallback,
     ) {
         const reader = new FileReader();
 
@@ -389,29 +372,34 @@ export default class EThree {
         reader.onload = () => {
             if (!reader.result) throw new Error('something wrong');
 
-            cb({
-                offset,
-                endOffset,
-                dataSize,
-                chunk: reader.result,
-            });
+            try {
+                onChunkCallback(reader.result);
+            } catch (err) {
+                return onErrorCallback(err);
+            }
+
+            if (onProgress) {
+                try {
+                    onProgress({ fileSize: dataSize, bytesProcessed: endOffset });
+                } catch (err) {
+                    return onErrorCallback(err);
+                }
+            }
 
             offset = endOffset;
             endOffset = Math.min(offset + chunkSize, dataSize);
+
             if (offset === dataSize) {
-                // done
-                cb({
-                    offset,
-                    endOffset,
-                    dataSize,
-                    chunk: reader.result,
-                });
+                try {
+                    onFinishCallback();
+                } catch (err) {
+                    return onErrorCallback(err);
+                }
             } else {
-                // read next chunk
                 reader.readAsArrayBuffer(data.slice(offset, endOffset));
             }
         };
-        reader.onerror = () => errCb(reader.error);
+        reader.onerror = () => onErrorCallback(reader.error);
 
         reader.readAsArrayBuffer(data);
     }
