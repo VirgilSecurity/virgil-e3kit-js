@@ -29,6 +29,7 @@ import {
 import { isArray, isString, isFile } from './utils/typeguards';
 import { withDefaults } from './utils/object';
 import { getObjectValues, hasDuplicates } from './utils/array';
+import { processFile } from './utils/processFile';
 
 export interface IEThreeInitOptions {
     /**
@@ -261,7 +262,7 @@ export default class EThree {
         const privateKey = await this[_keyLoader].loadLocalPrivateKey();
         if (!privateKey) throw new RegisterRequiredError();
 
-        const publicKeysArray = this.addOwnPublicKey(privateKey, publicKeys);
+        const publicKeysArray = this._addOwnPublicKey(privateKey, publicKeys);
 
         const res: Data = this.virgilCrypto.signThenEncrypt(message, privateKey, publicKeysArray);
         if (isMessageString) return res.toString('base64');
@@ -297,8 +298,9 @@ export default class EThree {
         const privateKey = await this[_keyLoader].loadLocalPrivateKey();
         if (!privateKey) throw new RegisterRequiredError();
 
-        const publicKeysArray = this.addOwnPublicKey(privateKey, publicKeys);
+        const publicKeysArray = this._addOwnPublicKey(privateKey, publicKeys);
 
+        const createStreamSigner = this.virgilCrypto.createStreamSigner();
         const streamCipher = this.virgilCrypto.createStreamCipher(publicKeysArray);
 
         const encryptedChunksPromise = new Promise<Buffer[]>((resolve, reject) => {
@@ -314,7 +316,7 @@ export default class EThree {
                 resolve(encryptedChunks);
             };
 
-            this.processFile(file, chunkSize, onFileProcess, onFinish, reject, options.onProgress);
+            processFile(file, chunkSize, onFileProcess, onFinish, reject, options.onProgress);
         });
 
         const encryptedChunks = await encryptedChunksPromise;
@@ -346,62 +348,12 @@ export default class EThree {
                 resolve(decryptedChunks);
             };
 
-            this.processFile(file, chunkSize, onFileProcess, onFinish, reject, options.onProgress);
+            processFile(file, chunkSize, onFileProcess, onFinish, reject, options.onProgress);
         });
 
         const decryptedChunks = await decryptedChunksPromise;
         if (isFile(file)) return new File(decryptedChunks, file.name, { type: file.type });
         return new Blob(decryptedChunks, { type: file.type });
-    }
-
-    private processFile(
-        data: Blob,
-        chunkSize: number,
-        onChunkCallback: (chunk: string | ArrayBuffer) => void,
-        onFinishCallback: () => void,
-        onErrorCallback: (err: any) => void,
-        onProgress?: onProgressCallback,
-    ) {
-        const reader = new FileReader();
-
-        const dataSize = data.size;
-
-        let offset = 0;
-        let endOffset = Math.min(offset + chunkSize, dataSize);
-
-        reader.onload = () => {
-            if (!reader.result) throw new Error('something wrong');
-
-            try {
-                onChunkCallback(reader.result);
-            } catch (err) {
-                return onErrorCallback(err);
-            }
-
-            if (onProgress) {
-                try {
-                    onProgress({ fileSize: dataSize, bytesProcessed: endOffset });
-                } catch (err) {
-                    return onErrorCallback(err);
-                }
-            }
-
-            offset = endOffset;
-            endOffset = Math.min(offset + chunkSize, dataSize);
-
-            if (offset === dataSize) {
-                try {
-                    onFinishCallback();
-                } catch (err) {
-                    return onErrorCallback(err);
-                }
-            } else {
-                reader.readAsArrayBuffer(data.slice(offset, endOffset));
-            }
-        };
-        reader.onerror = () => onErrorCallback(reader.error);
-
-        reader.readAsArrayBuffer(data);
     }
 
     /**
@@ -484,7 +436,7 @@ export default class EThree {
         return stringKeys.some((key, i) => key === selfPublicKey);
     }
 
-    private addOwnPublicKey(privateKey: VirgilPrivateKey, publicKeys?: EncryptVirgilPublicKeyArg) {
+    private _addOwnPublicKey(privateKey: VirgilPrivateKey, publicKeys?: EncryptVirgilPublicKeyArg) {
         let argument: VirgilPublicKey[];
 
         if (publicKeys == null) argument = [];
