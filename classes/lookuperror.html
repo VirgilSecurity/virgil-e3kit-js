@@ -65,7 +65,7 @@
 			<section class="tsd-panel tsd-comment">
 				<div class="tsd-comment tsd-typography">
 					<div class="lead">
-						<p>Error thrown by <a href="ethree.html#lookuppublickeys">EThree.lookupPublicKeys</a>.</p>
+						<p>Error thrown by <a href="ethree.html#lookuppublickeys">EThree.lookupPublicKeys</a> in case if some identity missing or has multiple cards.</p>
 					</div>
 				</div>
 			</section>
@@ -117,7 +117,7 @@
 							<aside class="tsd-sources">
 								<p>Overrides <a href="sdkerror.html">SdkError</a>.<a href="sdkerror.html#constructor">constructor</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/VirgilSecurity/virgil-e3kit-js/blob/2d1dcbb/src/errors.ts#L97">errors.ts:97</a></li>
+									<li>Defined in <a href="https://github.com/VirgilSecurity/virgil-e3kit-js/blob/4d9161a/src/errors.ts#L101">errors.ts:101</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -139,9 +139,14 @@
 					<div class="tsd-signature tsd-kind-icon">lookup<wbr>Result<span class="tsd-signature-symbol">:</span> <a href="../index.html#lookupresultwitherrors" class="tsd-signature-type">LookupResultWithErrors</a></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/VirgilSecurity/virgil-e3kit-js/blob/2d1dcbb/src/errors.ts#L98">errors.ts:98</a></li>
+							<li>Defined in <a href="https://github.com/VirgilSecurity/virgil-e3kit-js/blob/4d9161a/src/errors.ts#L101">errors.ts:101</a></li>
 						</ul>
 					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>Key Value object, where key is identity and value is VirgilPublicKey or <a href="multiplecardserror.html">MultipleCardsError</a> or <a href="lookupnotfounderror.html">LookupNotFoundError</a></p>
+						</div>
+					</div>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-inherited">
 					<a name="message" class="tsd-anchor"></a>
@@ -162,7 +167,7 @@
 						<p>Inherited from <a href="sdkerror.html">SdkError</a>.<a href="sdkerror.html#name">name</a></p>
 						<p>Overrides Error.name</p>
 						<ul>
-							<li>Defined in <a href="https://github.com/VirgilSecurity/virgil-e3kit-js/blob/2d1dcbb/src/errors.ts#L7">errors.ts:7</a></li>
+							<li>Defined in <a href="https://github.com/VirgilSecurity/virgil-e3kit-js/blob/4d9161a/src/errors.ts#L13">errors.ts:13</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -192,9 +197,6 @@
 				<ul class="before-current">
 					<li class=" tsd-kind-class">
 						<a href="ethree.html" class="tsd-kind-icon">EThree</a>
-					</li>
-					<li class=" tsd-kind-class">
-						<a href="emptyarrayerror.html" class="tsd-kind-icon">Empty<wbr>Array<wbr>Error</a>
 					</li>
 					<li class=" tsd-kind-class">
 						<a href="identityalreadyexistserror.html" class="tsd-kind-icon">Identity<wbr>Already<wbr>Exists<wbr>Error</a>
@@ -245,9 +247,6 @@
 						<a href="wrongkeyknoxpassworderror.html" class="tsd-kind-icon">Wrong<wbr>Keyknox<wbr>Password<wbr>Error</a>
 					</li>
 					<li class=" tsd-kind-interface">
-						<a href="../interfaces/iethreectoroptions.html" class="tsd-kind-icon">IEThree<wbr>Ctor<wbr>Options</a>
-					</li>
-					<li class=" tsd-kind-interface">
 						<a href="../interfaces/iethreeinitoptions.html" class="tsd-kind-icon">IEThree<wbr>Init<wbr>Options</a>
 					</li>
 					<li class=" tsd-kind-type-alias">
@@ -255,9 +254,6 @@
 					</li>
 					<li class=" tsd-kind-type-alias">
 						<a href="../index.html#lookupresultwitherrors" class="tsd-kind-icon">Lookup<wbr>Result<wbr>With<wbr>Errors</a>
-					</li>
-					<li class=" tsd-kind-variable">
-						<a href="../index.html#duplicate_identities" class="tsd-kind-icon">DUPLICATE_<wbr>IDENTITIES</a>
 					</li>
 				</ul>
 			</nav>
