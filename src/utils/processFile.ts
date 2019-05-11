@@ -1,12 +1,11 @@
-import { onProgressCallback } from '../EThree';
+export type onChunkCallback = (chunk: string | ArrayBuffer, offset: number) => void;
 
 export function processFile(
     data: Blob,
     chunkSize: number,
-    onChunkCallback: (chunk: string | ArrayBuffer) => void,
+    onChunkCallback: onChunkCallback,
     onFinishCallback: () => void,
     onErrorCallback: (err: any) => void,
-    onProgress?: onProgressCallback,
 ) {
     const reader = new FileReader();
 
@@ -14,22 +13,15 @@ export function processFile(
 
     let offset = 0;
     let endOffset = Math.min(offset + chunkSize, dataSize);
+    console.log('processFile', endOffset, dataSize);
 
     reader.onload = () => {
         if (!reader.result) throw new Error('something wrong');
 
         try {
-            onChunkCallback(reader.result);
+            onChunkCallback(reader.result, endOffset);
         } catch (err) {
             return onErrorCallback(err);
-        }
-
-        if (onProgress) {
-            try {
-                onProgress({ fileSize: dataSize, bytesProcessed: endOffset });
-            } catch (err) {
-                return onErrorCallback(err);
-            }
         }
 
         offset = endOffset;

@@ -27,6 +27,8 @@ import { getObjectValues } from '../utils/array';
 import expect from 'expect';
 import uuid from 'uuid/v4';
 import { EThree } from '..';
+import { LookupResult, onEncryptProgressSnapshot, onDecryptProgressSnapshot } from '../EThree';
+import { VIRGIL_STREAM_SIGNING_STATE, VIRGIL_STREAM_ENCRYPTING_STATE } from '../utils/constants';
 
 describe('EThree.register()', () => {
     before(clear);
@@ -602,7 +604,7 @@ describe.only('batchEncrypt/batchDecrypt', async () => {
     const identity2 = uuid();
     const identity3 = uuid();
 
-    let sdk1: EThree, sdk2: EThree, sdk3: EThree;
+    let sdk1: EThree, sdk2: EThree, sdk3: EThree, lookupResult: LookupResult;
 
     const originString = 'foo';
 
@@ -618,6 +620,7 @@ describe.only('batchEncrypt/batchDecrypt', async () => {
         ]);
 
         await Promise.all([sdk1.register(), sdk2.register(), sdk3.register()]);
+        lookupResult = await sdk1.lookupPublicKeys([identity1, identity2, identity3]);
     });
 
     it('should decrypt file for one public key', async () => {
@@ -676,22 +679,82 @@ describe.only('batchEncrypt/batchDecrypt', async () => {
         expect(encryptedBlob).not.toBeInstanceOf(File);
     });
 
-    it('should process different chunks of data', async () => {
-        const keypair = virgilCrypto.generateKeys();
+    it.only('should process different chunks of data', async () => {
+        const encryptedSnapshots: onEncryptProgressSnapshot[] = [];
 
-        const chunks: number[] = [];
-        const fileSizes: number[] = [];
+        const originString = 'foo';
 
-        await sdk1.batchEncrypt(originFile, keypair.publicKey, {
-            chunkSize: 2,
-            onProgress: ({ fileSize, bytesProcessed }) => {
-                chunks.push(bytesProcessed);
-                fileSizes.push(fileSize);
-            },
+        const originFile = new File([originString], 'foo.txt', {
+            type: 'text/plain',
         });
 
-        expect(chunks).toEqual([2, 3]);
-        expect(fileSizes).toEqual([3, 3]);
+        expect(originFile.size).toBe(3);
+
+        const encryptedFile = await sdk1.batchEncrypt(originFile, lookupResult[identity2], {
+            chunkSize: 2,
+            onProgress: encryptedSnapshots.push.bind(encryptedSnapshots),
+        });
+
+        expect(encryptedSnapshots.length).toEqual(4);
+        expect(encryptedSnapshots[0]).toMatchObject({
+            fileSize: originFile.size,
+            bytesSigned: 2,
+            bytesEncrypted: 0,
+            state: VIRGIL_STREAM_SIGNING_STATE,
+        });
+        expect(encryptedSnapshots[1]).toMatchObject({
+            fileSize: originFile.size,
+            bytesSigned: 3,
+            bytesEncrypted: 0,
+            state: VIRGIL_STREAM_SIGNING_STATE,
+        });
+        expect(encryptedSnapshots[2]).toMatchObject({
+            fileSize: originFile.size,
+            bytesSigned: 3,
+            bytesEncrypted: 2,
+            state: VIRGIL_STREAM_ENCRYPTING_STATE,
+        });
+        expect(encryptedSnapshots[3]).toMatchObject({
+            fileSize: originFile.size,
+            bytesSigned: 3,
+            bytesEncrypted: 3,
+            state: VIRGIL_STREAM_ENCRYPTING_STATE,
+        });
+
+        const decryptedSnapshots: onDecryptProgressSnapshot[] = [];
+        console.log(originFile.size, Math.ceil(encryptedFile.size / 2), encryptedFile.size);
+        await sdk2.batchDecrypt(encryptedFile, lookupResult[identity1], {
+            chunkSize: Math.ceil(encryptedFile.size / 2),
+            onProgress: decryptedSnapshots.push.bind(decryptedSnapshots),
+        });
+
+        console.log('encryptedFile.size', encryptedFile.size);
+
+        // expect(encryptedSnapshots.length).toEqual(4);
+        // expect(encryptedSnapshots[0]).toMatchObject({
+        //     fileSize: originFile.size,
+        //     bytesDecrypted: 2,
+        //     bytesSigned: 0,
+        //     state: VIRGIL_STREAM_DECRYPTING_STATE
+        // });
+        // expect(encryptedSnapshots[1]).toMatchObject({
+        //     fileSize: originFile.size,
+        //     bytesSigned: 3,
+        //     bytesEncrypted: 0,
+        //     state: VIRGIL_STREAM_SIGNING_STATE
+        // });
+        // expect(encryptedSnapshots[2]).toMatchObject({
+        //     fileSize: originFile.size,
+        //     bytesSigned: 3,
+        //     bytesEncrypted: 2,
+        //     state: VIRGIL_STREAM_ENCRYPTING_STATE
+        // });
+        // expect(encryptedSnapshots[3]).toMatchObject({
+        //     fileSize: originFile.size,
+        //     bytesSigned: 3,
+        //     bytesEncrypted: 3,
+        //     state: VIRGIL_STREAM_ENCRYPTING_STATE
+        // });
     });
 
     it('should verify the signature', async () => {
