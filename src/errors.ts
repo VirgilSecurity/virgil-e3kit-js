@@ -124,3 +124,9 @@ export class LookupNotFoundError extends SdkError {
         super(`${identity} not found`, 'LookupNotFoundError');
     }
 }
+
+export class IntegrityCheckFailedError extends SdkError {
+    constructor(message: string) {
+        super(message, 'IntegrityCheckFailedError');
+    }
+}

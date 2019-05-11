@@ -25,6 +25,7 @@ import {
     DUPLICATE_IDENTITIES,
     EMPTY_ARRAY,
     throwIllegalInvocationError,
+    IntegrityCheckFailedError,
 } from './errors';
 import { isArray, isString, isFile } from './utils/typeguards';
 import { withDefaults } from './utils/object';
@@ -333,7 +334,6 @@ export default class EThree {
         if (isFile(file)) return new File(encryptedChunks, file.name, { type: file.type });
         return new Blob(encryptedChunks, { type: file.type });
     }
-
     async batchDecrypt(
         file: File | Blob,
         publicKey?: VirgilPublicKey,
@@ -343,10 +343,12 @@ export default class EThree {
 
         const privateKey = await this[_keyLoader].loadLocalPrivateKey();
         if (!privateKey) throw new RegisterRequiredError();
+        if (!publicKey) publicKey = this.virgilCrypto.extractPublicKey(privateKey);
 
         const streamDecipher = this.virgilCrypto.createStreamDecipher(privateKey);
 
-        const decryptedChunksPromise = new Promise<Buffer[]>((resolve, reject) => {
+        type decryptStreamResult = { signature: Buffer; decryptedChunks: Buffer[] };
+        const decryptedChunksPromise = new Promise<decryptStreamResult>((resolve, reject) => {
             const decryptedChunks: Buffer[] = [];
 
             const onFileProcess = (chunk: string | ArrayBuffer) => {
@@ -354,16 +356,45 @@ export default class EThree {
             };
 
             const onFinish = () => {
-                decryptedChunks.push(streamDecipher.final());
-                resolve(decryptedChunks);
+                decryptedChunks.push(streamDecipher.final(false));
+                const signature = streamDecipher.getSignature();
+                if (!signature) throw new IntegrityCheckFailedError('Signature not present.');
+                streamDecipher.dispose();
+                resolve({ decryptedChunks, signature });
             };
 
             processFile(file, chunkSize, onFileProcess, onFinish, reject, options.onProgress);
         });
 
-        const decryptedChunks = await decryptedChunksPromise;
-        if (isFile(file)) return new File(decryptedChunks, file.name, { type: file.type });
-        return new Blob(decryptedChunks, { type: file.type });
+        const { decryptedChunks, signature } = await decryptedChunksPromise;
+        const streamVerifier = this.virgilCrypto.createStreamVerifier(signature, 'utf8');
+
+        let decryptedFile: File | Blob;
+        if (isFile(file)) decryptedFile = new File(decryptedChunks, file.name, { type: file.type });
+        decryptedFile = new Blob(decryptedChunks, { type: file.type });
+
+        const verifyPromise = new Promise<boolean>((resolve, reject) => {
+            const onFileProcess = (chunk: string | ArrayBuffer) => streamVerifier.update(chunk);
+
+            const onFinish = () => resolve(streamVerifier.verify(publicKey!));
+
+            processFile(
+                decryptedFile,
+                chunkSize,
+                onFileProcess,
+                onFinish,
+                reject,
+                options.onProgress,
+            );
+        });
+
+        const isVerified = await verifyPromise;
+
+        if (!isVerified) {
+            throw new IntegrityCheckFailedError('Signature verification has failed.');
+        }
+
+        return decryptedFile;
     }
 
     /**

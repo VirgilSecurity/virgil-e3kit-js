@@ -8,6 +8,7 @@ import {
     DUPLICATE_IDENTITIES,
     PrivateKeyNoBackupError,
     EMPTY_ARRAY,
+    IntegrityCheckFailedError,
 } from '../errors';
 import {
     generator,
@@ -596,7 +597,7 @@ describe('hasPrivateKey()', () => {
     });
 });
 
-describe('batchEncrypt/batchDecrypt', async () => {
+describe.only('batchEncrypt/batchDecrypt', async () => {
     const identity1 = uuid();
     const identity2 = uuid();
     const identity3 = uuid();
@@ -620,8 +621,6 @@ describe('batchEncrypt/batchDecrypt', async () => {
     });
 
     it('should decrypt file for one public key', async () => {
-        expect.assertions(1);
-
         const [publicKey2, publicKey1] = await Promise.all([
             sdk1.lookupPublicKeys(identity2),
             sdk2.lookupPublicKeys(identity1),
@@ -654,8 +653,6 @@ describe('batchEncrypt/batchDecrypt', async () => {
     });
 
     it('should self encrypt', async () => {
-        expect.assertions(1);
-
         const encryptedFile = await sdk1.batchEncrypt(originFile);
         const decryptedFile = await sdk1.batchDecrypt(encryptedFile);
 
@@ -665,8 +662,6 @@ describe('batchEncrypt/batchDecrypt', async () => {
     });
 
     it('should take input as string, file or blob', async () => {
-        expect.assertions(3);
-
         const keypair = virgilCrypto.generateKeys();
 
         const originBlob = new Blob(['foo'], {
@@ -684,16 +679,10 @@ describe('batchEncrypt/batchDecrypt', async () => {
     it('should process different chunks of data', async () => {
         const keypair = virgilCrypto.generateKeys();
 
-        const originString1 = 'foo';
-
-        const originFile1 = new File([originString1], 'foo.txt', {
-            type: 'text/plain',
-        });
-
         const chunks: number[] = [];
         const fileSizes: number[] = [];
 
-        await sdk1.batchEncrypt(originFile1, keypair.publicKey, {
+        await sdk1.batchEncrypt(originFile, keypair.publicKey, {
             chunkSize: 2,
             onProgress: ({ fileSize, bytesProcessed }) => {
                 chunks.push(bytesProcessed);
@@ -703,5 +692,17 @@ describe('batchEncrypt/batchDecrypt', async () => {
 
         expect(chunks).toEqual([2, 3]);
         expect(fileSizes).toEqual([3, 3]);
+    });
+
+    it('should verify the signature', async () => {
+        const receiverPublicKey = await sdk1.lookupPublicKeys(identity2);
+        const encryptedFile = await sdk1.batchEncrypt(originFile, receiverPublicKey);
+        try {
+            await sdk2.batchDecrypt(encryptedFile);
+        } catch (err) {
+            expect(err).toBeInstanceOf(IntegrityCheckFailedError);
+            return;
+        }
+        throw new Error('should throw');
     });
 });
