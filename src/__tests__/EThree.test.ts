@@ -28,7 +28,12 @@ import expect from 'expect';
 import uuid from 'uuid/v4';
 import { EThree } from '..';
 import { LookupResult, onEncryptProgressSnapshot, onDecryptProgressSnapshot } from '../EThree';
-import { VIRGIL_STREAM_SIGNING_STATE, VIRGIL_STREAM_ENCRYPTING_STATE } from '../utils/constants';
+import {
+    VIRGIL_STREAM_SIGNING_STATE,
+    VIRGIL_STREAM_ENCRYPTING_STATE,
+    VIRGIL_STREAM_DECRYPTING_STATE,
+    VIRGIL_STREAM_VERIFYING_STATE,
+} from '../utils/constants';
 
 describe('EThree.register()', () => {
     before(clear);
@@ -599,14 +604,14 @@ describe('hasPrivateKey()', () => {
     });
 });
 
-describe.only('batchEncrypt/batchDecrypt', async () => {
+describe('EThree.encryptFile/EThree.decryptFile', async () => {
     const identity1 = uuid();
     const identity2 = uuid();
     const identity3 = uuid();
 
     let sdk1: EThree, sdk2: EThree, sdk3: EThree, lookupResult: LookupResult;
 
-    const originString = 'foo';
+    const originString = 'foo'.repeat(1024 * 3);
 
     const originFile = new File([originString], 'foo.txt', {
         type: 'text/plain',
@@ -629,8 +634,8 @@ describe.only('batchEncrypt/batchDecrypt', async () => {
             sdk2.lookupPublicKeys(identity1),
         ]);
 
-        const encryptedFile = await sdk1.batchEncrypt(originFile, publicKey2);
-        const decryptedFile = await sdk2.batchDecrypt(encryptedFile, publicKey1);
+        const encryptedFile = await sdk1.encryptFile(originFile, publicKey2);
+        const decryptedFile = await sdk2.decryptFile(encryptedFile, publicKey1);
 
         const decryptedString = await readFile(decryptedFile);
 
@@ -639,29 +644,20 @@ describe.only('batchEncrypt/batchDecrypt', async () => {
 
     it('should encrypt for multiple keys', async () => {
         const onlyTwoKeys = await sdk1.lookupPublicKeys([identity1, identity2]);
-        const encryptedFile = await sdk1.batchEncrypt(originFile, onlyTwoKeys);
-        const decryptedFile = await sdk2.batchDecrypt(encryptedFile, onlyTwoKeys[identity1]);
+        const encryptedFile = await sdk1.encryptFile(originFile, onlyTwoKeys);
+        const decryptedFile = await sdk2.decryptFile(encryptedFile, onlyTwoKeys[identity1]);
 
         const decryptedString = await readFile(decryptedFile);
 
         expect(originString).toBe(decryptedString);
 
         try {
-            await sdk3.batchDecrypt(encryptedFile, onlyTwoKeys[identity1]);
+            await sdk3.decryptFile(encryptedFile, onlyTwoKeys[identity1]);
         } catch (e) {
             return expect(e).toBeInstanceOf(Error);
         }
 
         throw new Error('should throw');
-    });
-
-    it('should self encrypt', async () => {
-        const encryptedFile = await sdk1.batchEncrypt(originFile);
-        const decryptedFile = await sdk1.batchDecrypt(encryptedFile);
-
-        const decryptedString = await readFile(decryptedFile);
-
-        expect(originString).toBe(decryptedString);
     });
 
     it('should take input as string, file or blob', async () => {
@@ -671,15 +667,15 @@ describe.only('batchEncrypt/batchDecrypt', async () => {
             type: 'text/plain',
         });
 
-        const encryptedFile = await sdk1.batchEncrypt(originFile, keypair.publicKey);
-        const encryptedBlob = await sdk1.batchEncrypt(originBlob, keypair.publicKey);
+        const encryptedFile = await sdk1.encryptFile(originFile, keypair.publicKey);
+        const encryptedBlob = await sdk1.encryptFile(originBlob, keypair.publicKey);
 
         expect(encryptedFile).toBeInstanceOf(File);
         expect(encryptedBlob).toBeInstanceOf(Blob);
         expect(encryptedBlob).not.toBeInstanceOf(File);
     });
 
-    it.only('should process different chunks of data', async () => {
+    it('should process different chunks of data', async () => {
         const encryptedSnapshots: onEncryptProgressSnapshot[] = [];
 
         const originString = 'foo';
@@ -690,7 +686,7 @@ describe.only('batchEncrypt/batchDecrypt', async () => {
 
         expect(originFile.size).toBe(3);
 
-        const encryptedFile = await sdk1.batchEncrypt(originFile, lookupResult[identity2], {
+        const encryptedFile = await sdk1.encryptFile(originFile, lookupResult[identity2], {
             chunkSize: 2,
             onProgress: encryptedSnapshots.push.bind(encryptedSnapshots),
         });
@@ -722,46 +718,39 @@ describe.only('batchEncrypt/batchDecrypt', async () => {
         });
 
         const decryptedSnapshots: onDecryptProgressSnapshot[] = [];
-        console.log(originFile.size, Math.ceil(encryptedFile.size / 2), encryptedFile.size);
-        await sdk2.batchDecrypt(encryptedFile, lookupResult[identity1], {
+
+        await sdk2.decryptFile(encryptedFile, lookupResult[identity1], {
             chunkSize: Math.ceil(encryptedFile.size / 2),
             onProgress: decryptedSnapshots.push.bind(decryptedSnapshots),
         });
 
-        console.log('encryptedFile.size', encryptedFile.size);
-
-        // expect(encryptedSnapshots.length).toEqual(4);
-        // expect(encryptedSnapshots[0]).toMatchObject({
-        //     fileSize: originFile.size,
-        //     bytesDecrypted: 2,
-        //     bytesSigned: 0,
-        //     state: VIRGIL_STREAM_DECRYPTING_STATE
-        // });
-        // expect(encryptedSnapshots[1]).toMatchObject({
-        //     fileSize: originFile.size,
-        //     bytesSigned: 3,
-        //     bytesEncrypted: 0,
-        //     state: VIRGIL_STREAM_SIGNING_STATE
-        // });
-        // expect(encryptedSnapshots[2]).toMatchObject({
-        //     fileSize: originFile.size,
-        //     bytesSigned: 3,
-        //     bytesEncrypted: 2,
-        //     state: VIRGIL_STREAM_ENCRYPTING_STATE
-        // });
-        // expect(encryptedSnapshots[3]).toMatchObject({
-        //     fileSize: originFile.size,
-        //     bytesSigned: 3,
-        //     bytesEncrypted: 3,
-        //     state: VIRGIL_STREAM_ENCRYPTING_STATE
-        // });
+        expect(decryptedSnapshots.length).toEqual(3);
+        expect(decryptedSnapshots[0]).toMatchObject({
+            encryptedFileSize: encryptedFile.size,
+            bytesDecrypted: Math.ceil(encryptedFile.size / 2),
+            bytesVerified: 0,
+            state: VIRGIL_STREAM_DECRYPTING_STATE,
+        });
+        expect(decryptedSnapshots[1]).toMatchObject({
+            encryptedFileSize: encryptedFile.size,
+            bytesDecrypted: encryptedFile.size,
+            bytesVerified: 0,
+            state: VIRGIL_STREAM_DECRYPTING_STATE,
+        });
+        expect(decryptedSnapshots[2]).toMatchObject({
+            fileSize: originFile.size,
+            encryptedFileSize: encryptedFile.size,
+            bytesDecrypted: encryptedFile.size,
+            bytesVerified: originFile.size,
+            state: VIRGIL_STREAM_VERIFYING_STATE,
+        });
     });
 
     it('should verify the signature', async () => {
         const receiverPublicKey = await sdk1.lookupPublicKeys(identity2);
-        const encryptedFile = await sdk1.batchEncrypt(originFile, receiverPublicKey);
+        const encryptedFile = await sdk1.encryptFile(originFile, receiverPublicKey);
         try {
-            await sdk2.batchDecrypt(encryptedFile);
+            await sdk2.decryptFile(encryptedFile);
         } catch (err) {
             expect(err).toBeInstanceOf(IntegrityCheckFailedError);
             return;

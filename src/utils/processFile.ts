@@ -13,7 +13,6 @@ export function processFile(
 
     let offset = 0;
     let endOffset = Math.min(offset + chunkSize, dataSize);
-    console.log('processFile', endOffset, dataSize);
 
     reader.onload = () => {
         if (!reader.result) throw new Error('something wrong');
@@ -39,5 +38,5 @@ export function processFile(
     };
     reader.onerror = () => onErrorCallback(reader.error);
 
-    reader.readAsArrayBuffer(data);
+    reader.readAsArrayBuffer(data.slice(offset, endOffset));
 }

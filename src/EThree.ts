@@ -78,7 +78,8 @@ export type onEncryptProgressSnapshot = {
 export type onEncryptProgressCallback = (snapshot: onEncryptProgressSnapshot) => void;
 
 export type onDecryptProgressSnapshot = {
-    fileSize: number;
+    encryptedFileSize: number;
+    fileSize?: number;
     bytesDecrypted: number;
     bytesVerified: number;
     state: VIRGIL_STREAM_DECRYPTING_STATE | VIRGIL_STREAM_VERIFYING_STATE;
@@ -86,12 +87,12 @@ export type onDecryptProgressSnapshot = {
 
 export type onDecryptProgressCallback = (snapshot: onDecryptProgressSnapshot) => void;
 
-export type BatchEncryptOpts = {
+export type encryptFileOpts = {
     chunkSize?: number;
     onProgress?: onEncryptProgressCallback;
 };
 
-export type BatchDecryptOpts = {
+export type decryptFileOpts = {
     chunkSize?: number;
     onProgress?: onDecryptProgressCallback;
 };
@@ -311,10 +312,10 @@ export default class EThree {
         return res as Buffer;
     }
 
-    async batchEncrypt(
+    async encryptFile(
         file: File | Blob,
         publicKeys?: EncryptVirgilPublicKeyArg,
-        options: BatchEncryptOpts = {},
+        options: encryptFileOpts = {},
     ): Promise<File | Blob> {
         const chunkSize = options.chunkSize ? options.chunkSize : 64 * 1024;
         const fileSize = file.size;
@@ -328,7 +329,6 @@ export default class EThree {
 
         const signaturePromise = new Promise<Buffer>((resolve, reject) => {
             const onFileProcess = (chunk: string | ArrayBuffer, offset: number) => {
-                console.log('options.onProgress', options.onProgress);
                 if (options.onProgress) {
                     options.onProgress({
                         state: VIRGIL_STREAM_SIGNING_STATE,
@@ -376,10 +376,11 @@ export default class EThree {
         if (isFile(file)) return new File(encryptedChunks, file.name, { type: file.type });
         return new Blob(encryptedChunks, { type: file.type });
     }
-    async batchDecrypt(
+
+    async decryptFile(
         file: File | Blob,
         publicKey?: VirgilPublicKey,
-        options: BatchDecryptOpts = {},
+        options: decryptFileOpts = {},
     ): Promise<File | Blob> {
         const fileSize = file.size;
         const chunkSize = options.chunkSize ? options.chunkSize : 64 * 1024;
@@ -395,23 +396,20 @@ export default class EThree {
             const decryptedChunks: Buffer[] = [];
 
             const onFileProcess = (chunk: string | ArrayBuffer, offset: number) => {
-                console.log('chunk.size', chunk.toString());
                 decryptedChunks.push(streamDecipher.update(chunk));
                 if (options.onProgress) {
                     options.onProgress({
                         state: VIRGIL_STREAM_DECRYPTING_STATE,
                         bytesDecrypted: offset,
                         bytesVerified: 0,
-                        fileSize: fileSize,
+                        encryptedFileSize: fileSize,
                     });
                 }
             };
 
             const onFinish = () => {
-                console.log('decryptedChunksPromise finish', decryptedChunks);
                 decryptedChunks.push(streamDecipher.final(false));
                 const signature = streamDecipher.getSignature();
-                console.log('decryptedChunksPromise final');
                 if (!signature) throw new IntegrityCheckFailedError('Signature not present.');
                 streamDecipher.dispose();
                 resolve({ decryptedChunks, signature });
@@ -422,29 +420,27 @@ export default class EThree {
 
         const { decryptedChunks, signature } = await decryptedChunksPromise;
         const streamVerifier = this.virgilCrypto.createStreamVerifier(signature, 'utf8');
-        console.log('signature', signature);
+
         let decryptedFile: File | Blob;
         if (isFile(file)) decryptedFile = new File(decryptedChunks, file.name, { type: file.type });
         decryptedFile = new Blob(decryptedChunks, { type: file.type });
+        const decryptedFileSize = decryptedFile.size;
 
         const verifyPromise = new Promise<boolean>((resolve, reject) => {
             const onFileProcess: onChunkCallback = (chunk, offset) => {
-                console.log('onFileProcess');
                 streamVerifier.update(chunk);
                 if (options.onProgress) {
                     options.onProgress({
                         state: VIRGIL_STREAM_VERIFYING_STATE,
+                        encryptedFileSize: fileSize,
                         bytesDecrypted: fileSize,
                         bytesVerified: offset,
-                        fileSize: fileSize,
+                        fileSize: decryptedFileSize,
                     });
                 }
             };
 
-            const onFinish = () => {
-                console.log('on finish verify');
-                resolve(streamVerifier.verify(publicKey!));
-            };
+            const onFinish = () => resolve(streamVerifier.verify(publicKey!));
 
             processFile(decryptedFile, chunkSize, onFileProcess, onFinish, reject);
         });
