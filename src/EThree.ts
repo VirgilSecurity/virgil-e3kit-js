@@ -27,7 +27,7 @@ import {
     throwIllegalInvocationError,
     IntegrityCheckFailedError,
 } from './errors';
-import { isArray, isString, isFile } from './utils/typeguards';
+import { isArray, isString, isFile, isVirgilPublicKey } from './utils/typeguards';
 import { withDefaults } from './utils/object';
 import { getObjectValues, hasDuplicates } from './utils/array';
 import { processFile, onChunkCallback } from './utils/processFile';
@@ -538,7 +538,7 @@ export default class EThree {
         let argument: VirgilPublicKey[];
 
         if (publicKeys == null) argument = [];
-        else if (publicKeys instanceof VirgilPublicKey) argument = [publicKeys];
+        else if (isVirgilPublicKey(publicKeys)) argument = [publicKeys];
         else argument = getObjectValues(publicKeys) as VirgilPublicKey[];
 
         const ownPublicKey = this.virgilCrypto.extractPublicKey(privateKey);

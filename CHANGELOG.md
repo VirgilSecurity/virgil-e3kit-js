@@ -1,5 +1,13 @@
 # Changelog
 
+## 2019-05-10 0.3.9
+
+* Fixed public key checking in encrypt method.
+
+## 2019-05-10 0.3.8
+
+* Fixed web worker usage.
+
 ## 2019-02-21 0.3.7
 
 * Changed method signature of EThree.resetPrivateKeyBackup(pwd?). Now password is optional. But if you using the Virgil Keyknox service directly to save some additional data, you should use password to not delete this data.

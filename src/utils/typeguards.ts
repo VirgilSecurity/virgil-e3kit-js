@@ -1,3 +1,5 @@
+import { VirgilPublicKey } from 'virgil-crypto';
+
 /**
  * @hidden
  */
@@ -29,4 +31,10 @@ export const isBlob = (val: any): val is Blob => {
  */
 export const isFile = (val: any): val is File => {
     return val instanceof File;
+};
+/**
+ * @hidden
+ */
+export const isVirgilPublicKey = (val: Object): val is VirgilPublicKey => {
+    return Boolean(val) && 'identifier' in val && 'key' in val;
 };
