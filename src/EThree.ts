@@ -43,7 +43,8 @@ import {
     EncryptVirgilPublicKeyArg,
     LookupResult,
     EThreeInitializeOptions,
-    FileOptions,
+    EncryptFileOptions,
+    DecryptFileOptions,
 } from './types';
 import { KeyPair, EThreeCtorOptions } from './utils/innerTypes';
 
@@ -257,9 +258,10 @@ export default class EThree {
     async encryptFile(
         file: File | Blob,
         publicKeys?: EncryptVirgilPublicKeyArg,
-        options: FileOptions = {},
+        options: EncryptFileOptions = {},
     ): Promise<File | Blob> {
         const chunkSize = options.chunkSize ? options.chunkSize : 64 * 1024;
+        if (!Number.isInteger(chunkSize)) throw SyntaxError('chunkSize should be an integer value');
         const fileSize = file.size;
 
         const privateKey = await this[_keyLoader].loadLocalPrivateKey();
@@ -284,8 +286,8 @@ export default class EThree {
             const onFinishCallback = () => resolve(streamSigner.sign(privateKey));
 
             const onErrorCallback = (err: any) => {
+                streamSigner.dispose();
                 reject(err);
-                streamCipher.dispose();
             };
 
             processFile({
@@ -349,10 +351,11 @@ export default class EThree {
     async decryptFile(
         file: File | Blob,
         publicKey?: VirgilPublicKey,
-        options: FileOptions = {},
+        options: DecryptFileOptions = {},
     ): Promise<File | Blob> {
         const fileSize = file.size;
         const chunkSize = options.chunkSize ? options.chunkSize : 64 * 1024;
+        if (!Number.isInteger(chunkSize)) throw SyntaxError('chunkSize should be an integer value');
 
         const privateKey = await this[_keyLoader].loadLocalPrivateKey();
         if (!privateKey) throw new RegisterRequiredError();
