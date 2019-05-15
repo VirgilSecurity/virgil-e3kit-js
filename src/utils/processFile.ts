@@ -1,21 +1,50 @@
+import { AbortError } from '../errors';
+
+/**
+ * @hidden
+ */
 export type onChunkCallback = (chunk: string | ArrayBuffer, offset: number) => void;
 
-export function processFile(
-    data: Blob,
-    chunkSize: number,
-    onChunkCallback: onChunkCallback,
-    onFinishCallback: () => void,
-    onErrorCallback: (err: any) => void,
-) {
+/**
+ * @hidden
+ */
+export type processFileOptions = {
+    file: Blob;
+    chunkSize: number;
+    signal?: AbortSignal;
+    onChunkCallback: onChunkCallback;
+    onFinishCallback: () => void;
+    onErrorCallback: (err: any) => void;
+};
+
+/**
+ * @hidden
+ */
+export function processFile({
+    file,
+    chunkSize,
+    signal,
+    onChunkCallback,
+    onFinishCallback,
+    onErrorCallback,
+}: processFileOptions) {
     const reader = new FileReader();
 
-    const dataSize = data.size;
+    const dataSize = file.size;
 
     let offset = 0;
     let endOffset = Math.min(offset + chunkSize, dataSize);
 
+    if (signal) {
+        const onAbort = () => {
+            reader.abort();
+            onErrorCallback(new AbortError());
+        };
+        signal.aborted ? onAbort() : signal.addEventListener('abort', onAbort);
+    }
+
     reader.onload = () => {
-        if (!reader.result) throw new Error('something wrong');
+        if (!reader.result) throw new SyntaxError('reader.result is null');
 
         try {
             onChunkCallback(reader.result, endOffset);
@@ -33,10 +62,11 @@ export function processFile(
                 return onErrorCallback(err);
             }
         } else {
-            reader.readAsArrayBuffer(data.slice(offset, endOffset));
+            reader.readAsArrayBuffer(file.slice(offset, endOffset));
         }
     };
+
     reader.onerror = () => onErrorCallback(reader.error);
 
-    reader.readAsArrayBuffer(data.slice(offset, endOffset));
+    reader.readAsArrayBuffer(file.slice(offset, endOffset));
 }

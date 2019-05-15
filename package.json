@@ -32,7 +32,7 @@
     },
     "dependencies": {
         "@virgilsecurity/keyknox": "^0.2.4",
-        "virgil-crypto": "^3.2.2",
+        "virgil-crypto": "^3.2.3",
         "virgil-pythia": "^0.2.3",
         "virgil-sdk": "^5.2.2"
     },

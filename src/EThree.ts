@@ -36,82 +36,19 @@ import {
     VIRGIL_STREAM_ENCRYPTING_STATE,
     VIRGIL_STREAM_DECRYPTING_STATE,
     VIRGIL_STREAM_VERIFYING_STATE,
+    DEFAULT_API_URL,
+    STORAGE_NAME,
 } from './utils/constants';
-
-export interface IEThreeInitOptions {
-    /**
-     * Implementation of IKeyEntryStorage. Used IndexedDB Key Storage from
-     * [Virgil SDK](https://github.com/virgilsecurity/virgil-sdk-javascript) by default.
-     */
-    keyEntryStorage?: IKeyEntryStorage;
-    /**
-     * Url of the Card Services. Used for development purposes.
-     */
-    apiUrl?: string;
-}
-/**
- * @hidden
- */
-export interface IEThreeCtorOptions extends IEThreeInitOptions {
-    /**
-     * Implementation of IAccessTokenProvider from [Virgil SDK](https://github.com/virgilsecurity/virgil-sdk-javascript);
-     */
-    accessTokenProvider: IAccessTokenProvider;
-}
-
-type KeyPair = {
-    privateKey: VirgilPrivateKey;
-    publicKey: VirgilPublicKey;
-};
-
-export type LookupResult = {
-    [identity: string]: VirgilPublicKey;
-};
-
-export type onEncryptProgressSnapshot = {
-    fileSize: number;
-    bytesEncrypted: number;
-    bytesSigned: number;
-    state: VIRGIL_STREAM_SIGNING_STATE | VIRGIL_STREAM_ENCRYPTING_STATE;
-};
-
-export type onEncryptProgressCallback = (snapshot: onEncryptProgressSnapshot) => void;
-
-export type onDecryptProgressSnapshot = {
-    encryptedFileSize: number;
-    fileSize?: number;
-    bytesDecrypted: number;
-    bytesVerified: number;
-    state: VIRGIL_STREAM_DECRYPTING_STATE | VIRGIL_STREAM_VERIFYING_STATE;
-};
-
-export type onDecryptProgressCallback = (snapshot: onDecryptProgressSnapshot) => void;
-
-export type encryptFileOpts = {
-    chunkSize?: number;
-    onProgress?: onEncryptProgressCallback;
-};
-
-export type decryptFileOpts = {
-    chunkSize?: number;
-    onProgress?: onDecryptProgressCallback;
-};
-
-export type onProcessCallback = (
-    snapshot: {
-        offset: number;
-        chunk: string | ArrayBuffer;
-        dataSize: number;
-        endOffset: number;
-    },
-) => void;
-
-type EncryptVirgilPublicKeyArg = LookupResult | VirgilPublicKey;
+import {
+    EncryptVirgilPublicKeyArg,
+    LookupResult,
+    EThreeInitializeOptions,
+    FileOptions,
+} from './types';
+import { KeyPair, EThreeCtorOptions } from './utils/innerTypes';
 
 const _inProcess = Symbol('inProcess');
 const _keyLoader = Symbol('keyLoader');
-const STORAGE_NAME = '.virgil-local-storage';
-const DEFAULT_API_URL = 'https://api.virgilsecurity.com';
 
 export default class EThree {
     /**
@@ -152,9 +89,9 @@ export default class EThree {
      */
     static async initialize(
         getToken: () => Promise<string>,
-        options: IEThreeInitOptions = {},
+        options: EThreeInitializeOptions = {},
     ): Promise<EThree> {
-        const opts = withDefaults(options as IEThreeCtorOptions, {
+        const opts = withDefaults(options as EThreeCtorOptions, {
             accessTokenProvider: new CachingJwtProvider(getToken),
         });
         const token = await opts.accessTokenProvider.getToken({ operation: 'get' });
@@ -166,7 +103,7 @@ export default class EThree {
      * @hidden
      * @param identity - Identity of the current user.
      */
-    constructor(identity: string, options: IEThreeCtorOptions) {
+    constructor(identity: string, options: EThreeCtorOptions) {
         const opts = withDefaults(options, { apiUrl: DEFAULT_API_URL });
         this.identity = identity;
         this.accessTokenProvider = opts.accessTokenProvider;
@@ -271,8 +208,8 @@ export default class EThree {
     }
 
     /**
-     * Encrypts data for recipient(s) public key(s). If there is no recipient and message encrypted
-     * for the current user, omit public key.
+     * Encrypts and signs data for recipient public key or `LookupResult` dictionary for multiple recipients.
+     * If there is no recipient and message encrypted for the current user, omit public key.
      */
     async encrypt(
         message: ArrayBuffer,
@@ -312,10 +249,15 @@ export default class EThree {
         return res as Buffer;
     }
 
+    /**
+     * Encrypts and signs File or Blob for recipient public key or `LookupResult` dictionary for multiple
+     * recipients. If there is no recipient and message encrypted for the current user, omit public
+     * key. Also you can define chunk size and callback, what will invoked on each chunk.
+     */
     async encryptFile(
         file: File | Blob,
         publicKeys?: EncryptVirgilPublicKeyArg,
-        options: encryptFileOpts = {},
+        options: FileOptions = {},
     ): Promise<File | Blob> {
         const chunkSize = options.chunkSize ? options.chunkSize : 64 * 1024;
         const fileSize = file.size;
@@ -328,59 +270,86 @@ export default class EThree {
         const streamSigner = this.virgilCrypto.createStreamSigner();
 
         const signaturePromise = new Promise<Buffer>((resolve, reject) => {
-            const onFileProcess = (chunk: string | ArrayBuffer, offset: number) => {
+            const onChunkCallback: onChunkCallback = (chunk, offset) => {
                 if (options.onProgress) {
                     options.onProgress({
                         state: VIRGIL_STREAM_SIGNING_STATE,
-                        bytesSigned: offset,
-                        bytesEncrypted: 0,
+                        bytesProcessed: offset,
                         fileSize: fileSize,
                     });
                 }
                 streamSigner.update(chunk);
             };
-            const onFinish = () => resolve(streamSigner.sign(privateKey));
-            processFile(file, chunkSize, onFileProcess, onFinish, reject);
+
+            const onFinishCallback = () => resolve(streamSigner.sign(privateKey));
+
+            const onErrorCallback = (err: any) => {
+                reject(err);
+                streamCipher.dispose();
+            };
+
+            processFile({
+                file,
+                chunkSize,
+                onChunkCallback,
+                onFinishCallback,
+                onErrorCallback,
+                signal: options.signal,
+            });
         });
 
-        const streamCipher = this.virgilCrypto.createStreamCipher(
-            publicKeysArray,
-            await signaturePromise,
-        );
+        const streamCipher = this.virgilCrypto.createStreamCipher(publicKeysArray, {
+            signature: await signaturePromise,
+        });
 
         const encryptedChunksPromise = new Promise<Buffer[]>((resolve, reject) => {
             const encryptedChunks: Buffer[] = [];
             encryptedChunks.push(streamCipher.start());
 
-            const onFileProcess = (chunk: string | ArrayBuffer, offset: number) => {
+            const onChunkCallback: onChunkCallback = (chunk, offset) => {
                 encryptedChunks.push(streamCipher.update(chunk));
                 if (options.onProgress) {
                     options.onProgress({
                         state: VIRGIL_STREAM_ENCRYPTING_STATE,
-                        bytesSigned: fileSize,
-                        bytesEncrypted: offset,
+                        bytesProcessed: offset,
                         fileSize: fileSize,
                     });
                 }
             };
 
-            const onFinish = () => {
+            const onFinishCallback = () => {
                 encryptedChunks.push(streamCipher.final());
                 resolve(encryptedChunks);
             };
 
-            processFile(file, chunkSize, onFileProcess, onFinish, reject);
+            const onErrorCallback = (err: any) => {
+                reject(err);
+                streamCipher.dispose();
+            };
+
+            processFile({
+                file,
+                chunkSize,
+                onChunkCallback,
+                onFinishCallback,
+                onErrorCallback,
+                signal: options.signal,
+            });
         });
 
         const encryptedChunks = await encryptedChunksPromise;
         if (isFile(file)) return new File(encryptedChunks, file.name, { type: file.type });
         return new Blob(encryptedChunks, { type: file.type });
     }
-
+    /**
+     * Decrypts and verifies File or Blob for recipient public key. If there is no recipient and message
+     * encrypted for the current user, omit public key. Also you can define chunk size and callback,
+     * what will invoked on each chunk.
+     */
     async decryptFile(
         file: File | Blob,
         publicKey?: VirgilPublicKey,
-        options: decryptFileOpts = {},
+        options: FileOptions = {},
     ): Promise<File | Blob> {
         const fileSize = file.size;
         const chunkSize = options.chunkSize ? options.chunkSize : 64 * 1024;
@@ -395,19 +364,18 @@ export default class EThree {
         const decryptedChunksPromise = new Promise<decryptStreamResult>((resolve, reject) => {
             const decryptedChunks: Buffer[] = [];
 
-            const onFileProcess = (chunk: string | ArrayBuffer, offset: number) => {
+            const onChunkCallback: onChunkCallback = (chunk, offset) => {
                 decryptedChunks.push(streamDecipher.update(chunk));
                 if (options.onProgress) {
                     options.onProgress({
                         state: VIRGIL_STREAM_DECRYPTING_STATE,
-                        bytesDecrypted: offset,
-                        bytesVerified: 0,
-                        encryptedFileSize: fileSize,
+                        bytesProcessed: offset,
+                        fileSize: fileSize,
                     });
                 }
             };
 
-            const onFinish = () => {
+            const onFinishCallback = () => {
                 decryptedChunks.push(streamDecipher.final(false));
                 const signature = streamDecipher.getSignature();
                 if (!signature) throw new IntegrityCheckFailedError('Signature not present.');
@@ -415,7 +383,19 @@ export default class EThree {
                 resolve({ decryptedChunks, signature });
             };
 
-            processFile(file, chunkSize, onFileProcess, onFinish, reject);
+            const onErrorCallback = (err: any) => {
+                streamDecipher.dispose();
+                reject(err);
+            };
+
+            processFile({
+                file,
+                chunkSize,
+                onChunkCallback,
+                onFinishCallback,
+                onErrorCallback,
+                signal: options.signal,
+            });
         });
 
         const { decryptedChunks, signature } = await decryptedChunksPromise;
@@ -427,22 +407,31 @@ export default class EThree {
         const decryptedFileSize = decryptedFile.size;
 
         const verifyPromise = new Promise<boolean>((resolve, reject) => {
-            const onFileProcess: onChunkCallback = (chunk, offset) => {
+            const onChunkCallback: onChunkCallback = (chunk, offset) => {
                 streamVerifier.update(chunk);
                 if (options.onProgress) {
                     options.onProgress({
                         state: VIRGIL_STREAM_VERIFYING_STATE,
-                        encryptedFileSize: fileSize,
-                        bytesDecrypted: fileSize,
-                        bytesVerified: offset,
+                        bytesProcessed: offset,
                         fileSize: decryptedFileSize,
                     });
                 }
             };
 
-            const onFinish = () => resolve(streamVerifier.verify(publicKey!));
+            const onFinishCallback = () => resolve(streamVerifier.verify(publicKey!));
+            const onErrorCallback = (err: any) => {
+                streamVerifier.dispose();
+                reject(err);
+            };
 
-            processFile(decryptedFile, chunkSize, onFileProcess, onFinish, reject);
+            processFile({
+                file: decryptedFile,
+                chunkSize,
+                onChunkCallback,
+                onFinishCallback,
+                onErrorCallback,
+                signal: options.signal,
+            });
         });
 
         const isVerified = await verifyPromise;

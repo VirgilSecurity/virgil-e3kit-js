@@ -1,3 +1,4 @@
+import { LookupResult, onEncryptProgressSnapshot, onDecryptProgressSnapshot } from './../types';
 import {
     RegisterRequiredError,
     LookupNotFoundError,
@@ -27,7 +28,6 @@ import { getObjectValues } from '../utils/array';
 import expect from 'expect';
 import uuid from 'uuid/v4';
 import { EThree } from '..';
-import { LookupResult, onEncryptProgressSnapshot, onDecryptProgressSnapshot } from '../EThree';
 import {
     VIRGIL_STREAM_SIGNING_STATE,
     VIRGIL_STREAM_ENCRYPTING_STATE,
@@ -694,26 +694,22 @@ describe('EThree.encryptFile/EThree.decryptFile', async () => {
         expect(encryptedSnapshots.length).toEqual(4);
         expect(encryptedSnapshots[0]).toMatchObject({
             fileSize: originFile.size,
-            bytesSigned: 2,
-            bytesEncrypted: 0,
+            bytesProcessed: 2,
             state: VIRGIL_STREAM_SIGNING_STATE,
         });
         expect(encryptedSnapshots[1]).toMatchObject({
             fileSize: originFile.size,
-            bytesSigned: 3,
-            bytesEncrypted: 0,
+            bytesProcessed: 3,
             state: VIRGIL_STREAM_SIGNING_STATE,
         });
         expect(encryptedSnapshots[2]).toMatchObject({
             fileSize: originFile.size,
-            bytesSigned: 3,
-            bytesEncrypted: 2,
+            bytesProcessed: 2,
             state: VIRGIL_STREAM_ENCRYPTING_STATE,
         });
         expect(encryptedSnapshots[3]).toMatchObject({
             fileSize: originFile.size,
-            bytesSigned: 3,
-            bytesEncrypted: 3,
+            bytesProcessed: 3,
             state: VIRGIL_STREAM_ENCRYPTING_STATE,
         });
 
@@ -726,24 +722,52 @@ describe('EThree.encryptFile/EThree.decryptFile', async () => {
 
         expect(decryptedSnapshots.length).toEqual(3);
         expect(decryptedSnapshots[0]).toMatchObject({
-            encryptedFileSize: encryptedFile.size,
-            bytesDecrypted: Math.ceil(encryptedFile.size / 2),
-            bytesVerified: 0,
+            fileSize: encryptedFile.size,
+            bytesProcessed: Math.ceil(encryptedFile.size / 2),
             state: VIRGIL_STREAM_DECRYPTING_STATE,
         });
         expect(decryptedSnapshots[1]).toMatchObject({
-            encryptedFileSize: encryptedFile.size,
-            bytesDecrypted: encryptedFile.size,
-            bytesVerified: 0,
+            fileSize: encryptedFile.size,
+            bytesProcessed: encryptedFile.size,
             state: VIRGIL_STREAM_DECRYPTING_STATE,
         });
         expect(decryptedSnapshots[2]).toMatchObject({
             fileSize: originFile.size,
-            encryptedFileSize: encryptedFile.size,
-            bytesDecrypted: encryptedFile.size,
-            bytesVerified: originFile.size,
+            bytesProcessed: originFile.size,
             state: VIRGIL_STREAM_VERIFYING_STATE,
         });
+    });
+
+    it('should abort encryptFile', async () => {
+        const encryptAbort = new AbortController();
+        const decryptAbort = new AbortController();
+
+        const encryptPromise = sdk1.encryptFile(originFile, lookupResult[identity2]);
+        const encryptAbortedPromise = sdk1.encryptFile(originFile, lookupResult[identity2], {
+            chunkSize: 1,
+            signal: encryptAbort.signal,
+        });
+
+        encryptAbort.abort();
+
+        try {
+            await encryptAbortedPromise;
+        } catch (err) {
+            expect(err).toBeInstanceOf(Error);
+        }
+
+        try {
+            await sdk1.decryptFile(await encryptPromise, lookupResult[identity1], {
+                chunkSize: Math.floor(originFile.size / 3),
+                signal: decryptAbort.signal,
+                onProgress: decryptAbort.abort,
+            });
+        } catch (err) {
+            expect(err).toBeInstanceOf(Error);
+            return;
+        }
+
+        throw new Error('should throw');
     });
 
     it('should verify the signature', async () => {

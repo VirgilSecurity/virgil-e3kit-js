@@ -125,8 +125,20 @@ export class LookupNotFoundError extends SdkError {
     }
 }
 
+/**
+ * Error thrown by {@link EThree.decryptFile} in case if signature of the file is not valid.
+ */
 export class IntegrityCheckFailedError extends SdkError {
     constructor(message: string) {
         super(message, 'IntegrityCheckFailedError');
+    }
+}
+
+/**
+ * Error thrown by {@link EThree.decryptFile} or {@link EThree.encryptFile} if user aborts an operation.
+ */
+export class AbortError extends SdkError {
+    constructor() {
+        super('Operation aborted by user', 'AbortError');
     }
 }
