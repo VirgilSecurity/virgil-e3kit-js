@@ -381,8 +381,8 @@ export default class EThree {
             const onFinishCallback = () => {
                 decryptedChunks.push(streamDecipher.final(false));
                 const signature = streamDecipher.getSignature();
-                if (!signature) throw new IntegrityCheckFailedError('Signature not present.');
                 streamDecipher.dispose();
+                if (!signature) throw new IntegrityCheckFailedError('Signature not present.');
                 resolve({ decryptedChunks, signature });
             };
 

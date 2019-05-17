@@ -40,7 +40,8 @@ export function processFile({
             reader.abort();
             onErrorCallback(new AbortError());
         };
-        signal.aborted ? onAbort() : signal.addEventListener('abort', onAbort);
+        if (signal.aborted) return onAbort();
+        else signal.addEventListener('abort', onAbort);
     }
 
     reader.onload = () => {
@@ -59,7 +60,7 @@ export function processFile({
             try {
                 onFinishCallback();
             } catch (err) {
-                return onErrorCallback(err);
+                onErrorCallback(err);
             }
         } else {
             reader.readAsArrayBuffer(file.slice(offset, endOffset));
