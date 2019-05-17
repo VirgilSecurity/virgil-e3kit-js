@@ -253,7 +253,10 @@ export default class EThree {
     /**
      * Encrypts and signs File or Blob for recipient public key or `LookupResult` dictionary for multiple
      * recipients. If there is no recipient and message encrypted for the current user, omit public
-     * key. Also you can define chunk size and callback, what will invoked on each chunk.
+     * key. Also you can define chunk size and callback, what will invoked on each chunk. Encryption
+     * consist of two phases:
+     * 1. Signs plaintext file.
+     * 2. Encrypts the file and puts the signature with it.
      */
     async encryptFile(
         file: File | Blob,
@@ -346,7 +349,9 @@ export default class EThree {
     /**
      * Decrypts and verifies File or Blob for recipient public key. If there is no recipient and message
      * encrypted for the current user, omit public key. Also you can define chunk size and callback,
-     * what will invoked on each chunk.
+     * what will invoked on each chunk. Decryptions consist of two phases:
+     * 1. Decrypts encrypted file.
+     * 2. Verifies decrypted file and checks the signature.
      */
     async decryptFile(
         file: File | Blob,

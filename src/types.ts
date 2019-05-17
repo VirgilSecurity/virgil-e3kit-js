@@ -73,7 +73,7 @@ export interface onDecryptProgressSnapshot extends onProgressSnapshot {
 interface FileOptions {
     /**
      * Size of chunk being processed at one time. Bigger chunks make function execute faster, but
-     * consume more memory in one time and can cause a performance hit.
+     * consume more memory in one time and can cause a performance hit. Default value is 64kb.
      */
     chunkSize?: number;
     /**
