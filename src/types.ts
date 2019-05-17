@@ -81,9 +81,6 @@ interface FileOptions {
      * operation.
      */
     signal?: AbortSignal;
-    /**
-     * `onEncryptProgressCallback` parameter.
-     */
 }
 
 /**

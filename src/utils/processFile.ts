@@ -45,7 +45,7 @@ export function processFile({
     }
 
     reader.onload = () => {
-        if (!reader.result) throw new SyntaxError('reader.result is null');
+        if (!reader.result) throw new Error('reader.result is null');
 
         try {
             onChunkCallback(reader.result, endOffset);

@@ -251,12 +251,13 @@ export default class EThree {
     }
 
     /**
-     * Encrypts and signs File or Blob for recipient public key or `LookupResult` dictionary for multiple
-     * recipients. If there is no recipient and message encrypted for the current user, omit public
-     * key. Also you can define chunk size and callback, what will invoked on each chunk. Encryption
-     * consist of two phases:
-     * 1. Signs plaintext file.
-     * 2. Encrypts the file and puts the signature with it.
+     * Signs and encrypts File or Blob for recipient public key or `LookupResult` dictionary for multiple
+     * recipients. If there is no recipient and the message is encrypted for the current user, omit the
+     * public key parameter. You can define chunk size and a callback, that will be invoked on each chunk.
+     *
+     * The file will be read twice during this method execution:
+     * 1. To calculate the signature of the plaintext file.
+     * 2. To encrypt the file with encoded signature.
      */
     async encryptFile(
         file: File | Blob,
@@ -347,11 +348,13 @@ export default class EThree {
         return new Blob(encryptedChunks, { type: file.type });
     }
     /**
-     * Decrypts and verifies File or Blob for recipient public key. If there is no recipient and message
-     * encrypted for the current user, omit public key. Also you can define chunk size and callback,
-     * what will invoked on each chunk. Decryptions consist of two phases:
-     * 1. Decrypts encrypted file.
-     * 2. Verifies decrypted file and checks the signature.
+     * Decrypts and verifies integrity of File or Blob for recipient public key. If there is no recipient
+     * and the message is encrypted for the current user, omit the public key parameter. You can define
+     * chunk size and a callback, that will be invoked on each chunk.
+     *
+     * The file will be read twice during this method execution:
+     * 1. To decrypt encrypted file.
+     * 2. To verify the validity of the signature over the decrypted file for the public key.
      */
     async decryptFile(
         file: File | Blob,
