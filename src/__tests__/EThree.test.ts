@@ -34,7 +34,7 @@ import {
     VIRGIL_STREAM_DECRYPTING_STATE,
     VIRGIL_STREAM_VERIFYING_STATE,
 } from '../utils/constants';
-import AbortController from 'abort-controller';
+import 'abort-controller/polyfill';
 
 describe('EThree.register()', () => {
     before(clear);
@@ -739,7 +739,7 @@ describe('EThree.encryptFile/EThree.decryptFile', async () => {
         });
     });
 
-    it.only('should abort encryptFile', async () => {
+    it('should abort encryptFile', async () => {
         const encryptAbort = new AbortController();
         const decryptAbort = new AbortController();
 
@@ -756,7 +756,6 @@ describe('EThree.encryptFile/EThree.decryptFile', async () => {
         } catch (err) {
             expect(err).toBeInstanceOf(Error);
         }
-        console.log('privet');
         try {
             await sdk1.decryptFile(await encryptPromise, lookupResult[identity1], {
                 chunkSize: Math.floor(originFile.size / 3),
@@ -767,7 +766,6 @@ describe('EThree.encryptFile/EThree.decryptFile', async () => {
                 },
             });
         } catch (err) {
-            console.log('err', err);
             expect(err).toBeInstanceOf(Error);
             return;
         }
