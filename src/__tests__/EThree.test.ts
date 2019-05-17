@@ -760,10 +760,7 @@ describe('EThree.encryptFile/EThree.decryptFile', async () => {
             await sdk1.decryptFile(await encryptPromise, lookupResult[identity1], {
                 chunkSize: Math.floor(originFile.size / 3),
                 signal: decryptAbort.signal,
-                onProgress: s => {
-                    console.log('s', s);
-                    decryptAbort.abort();
-                },
+                onProgress: decryptAbort.abort,
             });
         } catch (err) {
             expect(err).toBeInstanceOf(Error);
