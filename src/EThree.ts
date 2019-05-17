@@ -261,7 +261,7 @@ export default class EThree {
         options: EncryptFileOptions = {},
     ): Promise<File | Blob> {
         const chunkSize = options.chunkSize ? options.chunkSize : 64 * 1024;
-        if (!Number.isInteger(chunkSize)) throw SyntaxError('chunkSize should be an integer value');
+        if (!Number.isInteger(chunkSize)) throw TypeError('chunkSize should be an integer value');
         const fileSize = file.size;
 
         const privateKey = await this[_keyLoader].loadLocalPrivateKey();
@@ -355,7 +355,7 @@ export default class EThree {
     ): Promise<File | Blob> {
         const fileSize = file.size;
         const chunkSize = options.chunkSize ? options.chunkSize : 64 * 1024;
-        if (!Number.isInteger(chunkSize)) throw SyntaxError('chunkSize should be an integer value');
+        if (!Number.isInteger(chunkSize)) throw TypeError('chunkSize should be an integer value');
 
         const privateKey = await this[_keyLoader].loadLocalPrivateKey();
         if (!privateKey) throw new RegisterRequiredError();
