@@ -23,7 +23,7 @@
         "precommit": "lint-staged",
         "test": "karma start",
         "docs": "typedoc src && npm run build:browser:umd && npm run encryptFileDoc",
-        "encryptFileDoc": "cpx example/encryptFile.html docs && cpx dist/e3kit.browser.umd.min.js docs"
+        "encryptFileDoc": "cpx example/encryptFile.html docs"
     },
     "lint-staged": {
         "src/**/*.ts": [
