@@ -66,8 +66,10 @@
 						<section class="tsd-index-section ">
 							<h3>Classes</h3>
 							<ul class="tsd-index-list">
+								<li class="tsd-kind-class"><a href="classes/aborterror.html" class="tsd-kind-icon">Abort<wbr>Error</a></li>
 								<li class="tsd-kind-class"><a href="classes/ethree.html" class="tsd-kind-icon">EThree</a></li>
 								<li class="tsd-kind-class"><a href="classes/identityalreadyexistserror.html" class="tsd-kind-icon">Identity<wbr>Already<wbr>Exists<wbr>Error</a></li>
+								<li class="tsd-kind-class"><a href="classes/integritycheckfailederror.html" class="tsd-kind-icon">Integrity<wbr>Check<wbr>Failed<wbr>Error</a></li>
 								<li class="tsd-kind-class"><a href="classes/lookuperror.html" class="tsd-kind-icon">Lookup<wbr>Error</a></li>
 								<li class="tsd-kind-class"><a href="classes/lookupnotfounderror.html" class="tsd-kind-icon">Lookup<wbr>Not<wbr>Found<wbr>Error</a></li>
 								<li class="tsd-kind-class"><a href="classes/multiplecardserror.html" class="tsd-kind-icon">Multiple<wbr>Cards<wbr>Error</a></li>
@@ -81,14 +83,25 @@
 						<section class="tsd-index-section ">
 							<h3>Interfaces</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-interface"><a href="interfaces/iethreeinitoptions.html" class="tsd-kind-icon">IEThree<wbr>Init<wbr>Options</a></li>
+								<li class="tsd-kind-interface"><a href="interfaces/decryptfileoptions.html" class="tsd-kind-icon">Decrypt<wbr>File<wbr>Options</a></li>
+								<li class="tsd-kind-interface"><a href="interfaces/ethreeinitializeoptions.html" class="tsd-kind-icon">EThree<wbr>Initialize<wbr>Options</a></li>
+								<li class="tsd-kind-interface"><a href="interfaces/encryptfileoptions.html" class="tsd-kind-icon">Encrypt<wbr>File<wbr>Options</a></li>
+								<li class="tsd-kind-interface"><a href="interfaces/ondecryptprogresssnapshot.html" class="tsd-kind-icon">on<wbr>Decrypt<wbr>Progress<wbr>Snapshot</a></li>
+								<li class="tsd-kind-interface"><a href="interfaces/onencryptprogresssnapshot.html" class="tsd-kind-icon">on<wbr>Encrypt<wbr>Progress<wbr>Snapshot</a></li>
 							</ul>
 						</section>
 						<section class="tsd-index-section ">
 							<h3>Type aliases</h3>
 							<ul class="tsd-index-list">
+								<li class="tsd-kind-type-alias"><a href="index.html#encryptvirgilpublickeyarg" class="tsd-kind-icon">Encrypt<wbr>Virgil<wbr>Public<wbr>Key<wbr>Arg</a></li>
 								<li class="tsd-kind-type-alias"><a href="index.html#lookupresult" class="tsd-kind-icon">Lookup<wbr>Result</a></li>
 								<li class="tsd-kind-type-alias"><a href="index.html#lookupresultwitherrors" class="tsd-kind-icon">Lookup<wbr>Result<wbr>With<wbr>Errors</a></li>
+								<li class="tsd-kind-type-alias"><a href="index.html#virgil_stream_decrypting_state" class="tsd-kind-icon">VIRGIL_<wbr>STREAM_<wbr>DECRYPTING_<wbr>STATE</a></li>
+								<li class="tsd-kind-type-alias"><a href="index.html#virgil_stream_encrypting_state" class="tsd-kind-icon">VIRGIL_<wbr>STREAM_<wbr>ENCRYPTING_<wbr>STATE</a></li>
+								<li class="tsd-kind-type-alias"><a href="index.html#virgil_stream_signing_state" class="tsd-kind-icon">VIRGIL_<wbr>STREAM_<wbr>SIGNING_<wbr>STATE</a></li>
+								<li class="tsd-kind-type-alias"><a href="index.html#virgil_stream_verifying_state" class="tsd-kind-icon">VIRGIL_<wbr>STREAM_<wbr>VERIFYING_<wbr>STATE</a></li>
+								<li class="tsd-kind-type-alias"><a href="index.html#ondecryptprogresscallback" class="tsd-kind-icon">on<wbr>Decrypt<wbr>Progress<wbr>Callback</a></li>
+								<li class="tsd-kind-type-alias"><a href="index.html#onencryptprogresscallback" class="tsd-kind-icon">on<wbr>Encrypt<wbr>Progress<wbr>Callback</a></li>
 							</ul>
 						</section>
 					</div>
@@ -97,14 +110,34 @@
 			<section class="tsd-panel-group tsd-member-group ">
 				<h2>Type aliases</h2>
 				<section class="tsd-panel tsd-member tsd-kind-type-alias">
+					<a name="encryptvirgilpublickeyarg" class="tsd-anchor"></a>
+					<h3>Encrypt<wbr>Virgil<wbr>Public<wbr>Key<wbr>Arg</h3>
+					<div class="tsd-signature tsd-kind-icon">Encrypt<wbr>Virgil<wbr>Public<wbr>Key<wbr>Arg<span class="tsd-signature-symbol">:</span> <a href="index.html#lookupresult" class="tsd-signature-type">LookupResult</a><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">VirgilPublicKey</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/VirgilSecurity/virgil-e3kit-js/blob/931835e/src/types.ts#L33">types.ts:33</a></li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>Argument for encrypt function can be single VirgilPublicKey or LookupResult</p>
+						</div>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-type-alias">
 					<a name="lookupresult" class="tsd-anchor"></a>
 					<h3>Lookup<wbr>Result</h3>
 					<div class="tsd-signature tsd-kind-icon">Lookup<wbr>Result<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">object</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/VirgilSecurity/virgil-e3kit-js/blob/13f4d6f/src/EThree.ts#L58">EThree.ts:58</a></li>
+							<li>Defined in <a href="https://github.com/VirgilSecurity/virgil-e3kit-js/blob/931835e/src/types.ts#L26">types.ts:26</a></li>
 						</ul>
 					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>Dictionary returned from lookupPublicKey method</p>
+						</div>
+					</div>
 					<div class="tsd-type-declaration">
 						<h4>Type declaration</h4>
 						<ul class="tsd-parameters">
@@ -120,7 +153,7 @@
 					<div class="tsd-signature tsd-kind-icon">Lookup<wbr>Result<wbr>With<wbr>Errors<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">object</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/VirgilSecurity/virgil-e3kit-js/blob/13f4d6f/src/errors.ts#L88">errors.ts:88</a></li>
+							<li>Defined in <a href="https://github.com/VirgilSecurity/virgil-e3kit-js/blob/931835e/src/errors.ts#L96">errors.ts:96</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-type-declaration">
@@ -128,6 +161,122 @@
 						<ul class="tsd-parameters">
 							<li class="tsd-parameter-index-signature">
 								<h5><span class="tsd-signature-symbol">[</span>identity: <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">]: </span><span class="tsd-signature-type">VirgilPublicKey</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">Error</span></h5>
+							</li>
+						</ul>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-type-alias">
+					<a name="virgil_stream_decrypting_state" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagConst">Const</span> VIRGIL_<wbr>STREAM_<wbr>DECRYPTING_<wbr>STATE</h3>
+					<div class="tsd-signature tsd-kind-icon">VIRGIL_<wbr>STREAM_<wbr>DECRYPTING_<wbr>STATE<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">"Decrypting"</span><span class="tsd-signature-symbol"> =&nbsp;&quot;Decrypting&quot;</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/VirgilSecurity/virgil-e3kit-js/blob/931835e/src/utils/constants.ts#L16">utils/constants.ts:16</a></li>
+							<li>Defined in <a href="https://github.com/VirgilSecurity/virgil-e3kit-js/blob/931835e/src/utils/constants.ts#L17">utils/constants.ts:17</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-type-alias">
+					<a name="virgil_stream_encrypting_state" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagConst">Const</span> VIRGIL_<wbr>STREAM_<wbr>ENCRYPTING_<wbr>STATE</h3>
+					<div class="tsd-signature tsd-kind-icon">VIRGIL_<wbr>STREAM_<wbr>ENCRYPTING_<wbr>STATE<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">"Encrypting"</span><span class="tsd-signature-symbol"> =&nbsp;&quot;Encrypting&quot;</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/VirgilSecurity/virgil-e3kit-js/blob/931835e/src/utils/constants.ts#L13">utils/constants.ts:13</a></li>
+							<li>Defined in <a href="https://github.com/VirgilSecurity/virgil-e3kit-js/blob/931835e/src/utils/constants.ts#L14">utils/constants.ts:14</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-type-alias">
+					<a name="virgil_stream_signing_state" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagConst">Const</span> VIRGIL_<wbr>STREAM_<wbr>SIGNING_<wbr>STATE</h3>
+					<div class="tsd-signature tsd-kind-icon">VIRGIL_<wbr>STREAM_<wbr>SIGNING_<wbr>STATE<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">"Signing"</span><span class="tsd-signature-symbol"> =&nbsp;&quot;Signing&quot;</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/VirgilSecurity/virgil-e3kit-js/blob/931835e/src/utils/constants.ts#L10">utils/constants.ts:10</a></li>
+							<li>Defined in <a href="https://github.com/VirgilSecurity/virgil-e3kit-js/blob/931835e/src/utils/constants.ts#L11">utils/constants.ts:11</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-type-alias">
+					<a name="virgil_stream_verifying_state" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagConst">Const</span> VIRGIL_<wbr>STREAM_<wbr>VERIFYING_<wbr>STATE</h3>
+					<div class="tsd-signature tsd-kind-icon">VIRGIL_<wbr>STREAM_<wbr>VERIFYING_<wbr>STATE<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">"Verifying"</span><span class="tsd-signature-symbol"> =&nbsp;&quot;Verifying&quot;</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/VirgilSecurity/virgil-e3kit-js/blob/931835e/src/utils/constants.ts#L19">utils/constants.ts:19</a></li>
+							<li>Defined in <a href="https://github.com/VirgilSecurity/virgil-e3kit-js/blob/931835e/src/utils/constants.ts#L20">utils/constants.ts:20</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-type-alias">
+					<a name="ondecryptprogresscallback" class="tsd-anchor"></a>
+					<h3>on<wbr>Decrypt<wbr>Progress<wbr>Callback</h3>
+					<div class="tsd-signature tsd-kind-icon">on<wbr>Decrypt<wbr>Progress<wbr>Callback<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">function</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/VirgilSecurity/virgil-e3kit-js/blob/931835e/src/types.ts#L43">types.ts:43</a></li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>Callback invoked for each chunk being processed in decryptFile method.</p>
+						</div>
+					</div>
+					<div class="tsd-type-declaration">
+						<h4>Type declaration</h4>
+						<ul class="tsd-parameters">
+							<li class="tsd-parameter-siganture">
+								<ul class="tsd-signatures tsd-kind-type-literal tsd-parent-kind-type-alias tsd-is-not-exported">
+									<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">(</span>snapshot<span class="tsd-signature-symbol">: </span><a href="interfaces/ondecryptprogresssnapshot.html" class="tsd-signature-type">onDecryptProgressSnapshot</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+								</ul>
+								<ul class="tsd-descriptions">
+									<li class="tsd-description">
+										<h4 class="tsd-parameters-title">Parameters</h4>
+										<ul class="tsd-parameters">
+											<li>
+												<h5>snapshot: <a href="interfaces/ondecryptprogresssnapshot.html" class="tsd-signature-type">onDecryptProgressSnapshot</a></h5>
+											</li>
+										</ul>
+										<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+									</li>
+								</ul>
+							</li>
+						</ul>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-type-alias">
+					<a name="onencryptprogresscallback" class="tsd-anchor"></a>
+					<h3>on<wbr>Encrypt<wbr>Progress<wbr>Callback</h3>
+					<div class="tsd-signature tsd-kind-icon">on<wbr>Encrypt<wbr>Progress<wbr>Callback<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">function</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/VirgilSecurity/virgil-e3kit-js/blob/931835e/src/types.ts#L38">types.ts:38</a></li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>Callback invoked for each chunk being processed in encryptFile method.</p>
+						</div>
+					</div>
+					<div class="tsd-type-declaration">
+						<h4>Type declaration</h4>
+						<ul class="tsd-parameters">
+							<li class="tsd-parameter-siganture">
+								<ul class="tsd-signatures tsd-kind-type-literal tsd-parent-kind-type-alias tsd-is-not-exported">
+									<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">(</span>snapshot<span class="tsd-signature-symbol">: </span><a href="interfaces/onencryptprogresssnapshot.html" class="tsd-signature-type">onEncryptProgressSnapshot</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+								</ul>
+								<ul class="tsd-descriptions">
+									<li class="tsd-description">
+										<h4 class="tsd-parameters-title">Parameters</h4>
+										<ul class="tsd-parameters">
+											<li>
+												<h5>snapshot: <a href="interfaces/onencryptprogresssnapshot.html" class="tsd-signature-type">onEncryptProgressSnapshot</a></h5>
+											</li>
+										</ul>
+										<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+									</li>
+								</ul>
 							</li>
 						</ul>
 					</div>
@@ -145,10 +294,16 @@
 			<nav class="tsd-navigation secondary menu-sticky">
 				<ul class="before-current">
 					<li class=" tsd-kind-class">
+						<a href="classes/aborterror.html" class="tsd-kind-icon">Abort<wbr>Error</a>
+					</li>
+					<li class=" tsd-kind-class">
 						<a href="classes/ethree.html" class="tsd-kind-icon">EThree</a>
 					</li>
 					<li class=" tsd-kind-class">
 						<a href="classes/identityalreadyexistserror.html" class="tsd-kind-icon">Identity<wbr>Already<wbr>Exists<wbr>Error</a>
+					</li>
+					<li class=" tsd-kind-class">
+						<a href="classes/integritycheckfailederror.html" class="tsd-kind-icon">Integrity<wbr>Check<wbr>Failed<wbr>Error</a>
 					</li>
 					<li class=" tsd-kind-class">
 						<a href="classes/lookuperror.html" class="tsd-kind-icon">Lookup<wbr>Error</a>
@@ -175,13 +330,46 @@
 						<a href="classes/wrongkeyknoxpassworderror.html" class="tsd-kind-icon">Wrong<wbr>Keyknox<wbr>Password<wbr>Error</a>
 					</li>
 					<li class=" tsd-kind-interface">
-						<a href="interfaces/iethreeinitoptions.html" class="tsd-kind-icon">IEThree<wbr>Init<wbr>Options</a>
+						<a href="interfaces/decryptfileoptions.html" class="tsd-kind-icon">Decrypt<wbr>File<wbr>Options</a>
+					</li>
+					<li class=" tsd-kind-interface">
+						<a href="interfaces/ethreeinitializeoptions.html" class="tsd-kind-icon">EThree<wbr>Initialize<wbr>Options</a>
+					</li>
+					<li class=" tsd-kind-interface">
+						<a href="interfaces/encryptfileoptions.html" class="tsd-kind-icon">Encrypt<wbr>File<wbr>Options</a>
+					</li>
+					<li class=" tsd-kind-interface">
+						<a href="interfaces/ondecryptprogresssnapshot.html" class="tsd-kind-icon">on<wbr>Decrypt<wbr>Progress<wbr>Snapshot</a>
+					</li>
+					<li class=" tsd-kind-interface">
+						<a href="interfaces/onencryptprogresssnapshot.html" class="tsd-kind-icon">on<wbr>Encrypt<wbr>Progress<wbr>Snapshot</a>
+					</li>
+					<li class=" tsd-kind-type-alias">
+						<a href="index.html#encryptvirgilpublickeyarg" class="tsd-kind-icon">Encrypt<wbr>Virgil<wbr>Public<wbr>Key<wbr>Arg</a>
 					</li>
 					<li class=" tsd-kind-type-alias">
 						<a href="index.html#lookupresult" class="tsd-kind-icon">Lookup<wbr>Result</a>
 					</li>
 					<li class=" tsd-kind-type-alias">
 						<a href="index.html#lookupresultwitherrors" class="tsd-kind-icon">Lookup<wbr>Result<wbr>With<wbr>Errors</a>
+					</li>
+					<li class=" tsd-kind-type-alias">
+						<a href="index.html#virgil_stream_decrypting_state" class="tsd-kind-icon">VIRGIL_<wbr>STREAM_<wbr>DECRYPTING_<wbr>STATE</a>
+					</li>
+					<li class=" tsd-kind-type-alias">
+						<a href="index.html#virgil_stream_encrypting_state" class="tsd-kind-icon">VIRGIL_<wbr>STREAM_<wbr>ENCRYPTING_<wbr>STATE</a>
+					</li>
+					<li class=" tsd-kind-type-alias">
+						<a href="index.html#virgil_stream_signing_state" class="tsd-kind-icon">VIRGIL_<wbr>STREAM_<wbr>SIGNING_<wbr>STATE</a>
+					</li>
+					<li class=" tsd-kind-type-alias">
+						<a href="index.html#virgil_stream_verifying_state" class="tsd-kind-icon">VIRGIL_<wbr>STREAM_<wbr>VERIFYING_<wbr>STATE</a>
+					</li>
+					<li class=" tsd-kind-type-alias">
+						<a href="index.html#ondecryptprogresscallback" class="tsd-kind-icon">on<wbr>Decrypt<wbr>Progress<wbr>Callback</a>
+					</li>
+					<li class=" tsd-kind-type-alias">
+						<a href="index.html#onencryptprogresscallback" class="tsd-kind-icon">on<wbr>Encrypt<wbr>Progress<wbr>Callback</a>
 					</li>
 				</ul>
 			</nav>

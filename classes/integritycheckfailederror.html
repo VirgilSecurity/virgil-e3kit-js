@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>WrongKeyknoxPasswordError | @virgilsecurity/e3kit</title>
+	<title>IntegrityCheckFailedError | @virgilsecurity/e3kit</title>
 	<meta name="description" content="">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="../assets/css/main.css">
@@ -52,10 +52,10 @@
 					<a href="../index.html">Globals</a>
 				</li>
 				<li>
-					<a href="wrongkeyknoxpassworderror.html">WrongKeyknoxPasswordError</a>
+					<a href="integritycheckfailederror.html">IntegrityCheckFailedError</a>
 				</li>
 			</ul>
-			<h1>Class WrongKeyknoxPasswordError</h1>
+			<h1>Class IntegrityCheckFailedError</h1>
 		</div>
 	</div>
 </header>
@@ -65,8 +65,7 @@
 			<section class="tsd-panel tsd-comment">
 				<div class="tsd-comment tsd-typography">
 					<div class="lead">
-						<p>Error thrown by <a href="ethree.html#backupprivatekey">EThree.backupPrivateKey</a>,  <a href="ethree.html#changepassword">EThree.changePassword</a> and
-						<a href="ethree.html#resetprivatekeybackup">EThree.resetPrivateKeyBackup</a> when user enters wrong password.</p>
+						<p>Error thrown by <a href="ethree.html#decryptfile">EThree.decryptFile</a> in case if signature of the file is not valid.</p>
 					</div>
 				</div>
 			</section>
@@ -77,7 +76,7 @@
 						<a href="sdkerror.html" class="tsd-signature-type">SdkError</a>
 						<ul class="tsd-hierarchy">
 							<li>
-								<span class="target">WrongKeyknoxPasswordError</span>
+								<span class="target">IntegrityCheckFailedError</span>
 							</li>
 						</ul>
 					</li>
@@ -90,15 +89,15 @@
 						<section class="tsd-index-section ">
 							<h3>Constructors</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-constructor tsd-parent-kind-class tsd-is-overwrite"><a href="wrongkeyknoxpassworderror.html#constructor" class="tsd-kind-icon">constructor</a></li>
+								<li class="tsd-kind-constructor tsd-parent-kind-class tsd-is-overwrite"><a href="integritycheckfailederror.html#constructor" class="tsd-kind-icon">constructor</a></li>
 							</ul>
 						</section>
 						<section class="tsd-index-section tsd-is-inherited">
 							<h3>Properties</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited"><a href="wrongkeyknoxpassworderror.html#message" class="tsd-kind-icon">message</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-overwrite tsd-is-inherited"><a href="wrongkeyknoxpassworderror.html#name" class="tsd-kind-icon">name</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-overwrite tsd-is-inherited"><a href="wrongkeyknoxpassworderror.html#stack" class="tsd-kind-icon">stack</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited"><a href="integritycheckfailederror.html#message" class="tsd-kind-icon">message</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-overwrite tsd-is-inherited"><a href="integritycheckfailederror.html#name" class="tsd-kind-icon">name</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-overwrite tsd-is-inherited"><a href="integritycheckfailederror.html#stack" class="tsd-kind-icon">stack</a></li>
 							</ul>
 						</section>
 					</div>
@@ -110,17 +109,23 @@
 					<a name="constructor" class="tsd-anchor"></a>
 					<h3>constructor</h3>
 					<ul class="tsd-signatures tsd-kind-constructor tsd-parent-kind-class tsd-is-overwrite">
-						<li class="tsd-signature tsd-kind-icon">new <wbr>Wrong<wbr>Keyknox<wbr>Password<wbr>Error<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="wrongkeyknoxpassworderror.html" class="tsd-signature-type">WrongKeyknoxPasswordError</a></li>
+						<li class="tsd-signature tsd-kind-icon">new <wbr>Integrity<wbr>Check<wbr>Failed<wbr>Error<span class="tsd-signature-symbol">(</span>message<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="integritycheckfailederror.html" class="tsd-signature-type">IntegrityCheckFailedError</a></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<p>Overrides <a href="sdkerror.html">SdkError</a>.<a href="sdkerror.html#constructor">constructor</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/VirgilSecurity/virgil-e3kit-js/blob/931835e/src/errors.ts#L56">errors.ts:56</a></li>
+									<li>Defined in <a href="https://github.com/VirgilSecurity/virgil-e3kit-js/blob/931835e/src/errors.ts#L131">errors.ts:131</a></li>
 								</ul>
 							</aside>
-							<h4 class="tsd-returns-title">Returns <a href="wrongkeyknoxpassworderror.html" class="tsd-signature-type">WrongKeyknoxPasswordError</a></h4>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>message: <span class="tsd-signature-type">string</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <a href="integritycheckfailederror.html" class="tsd-signature-type">IntegrityCheckFailedError</a></h4>
 						</li>
 					</ul>
 				</section>
@@ -183,9 +188,27 @@
 					<li class=" tsd-kind-class">
 						<a href="identityalreadyexistserror.html" class="tsd-kind-icon">Identity<wbr>Already<wbr>Exists<wbr>Error</a>
 					</li>
-					<li class=" tsd-kind-class">
+				</ul>
+				<ul class="current">
+					<li class="current tsd-kind-class">
 						<a href="integritycheckfailederror.html" class="tsd-kind-icon">Integrity<wbr>Check<wbr>Failed<wbr>Error</a>
+						<ul>
+							<li class=" tsd-kind-constructor tsd-parent-kind-class tsd-is-overwrite">
+								<a href="integritycheckfailederror.html#constructor" class="tsd-kind-icon">constructor</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-inherited">
+								<a href="integritycheckfailederror.html#message" class="tsd-kind-icon">message</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-overwrite tsd-is-inherited">
+								<a href="integritycheckfailederror.html#name" class="tsd-kind-icon">name</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-overwrite tsd-is-inherited">
+								<a href="integritycheckfailederror.html#stack" class="tsd-kind-icon">stack</a>
+							</li>
+						</ul>
 					</li>
+				</ul>
+				<ul class="after-current">
 					<li class=" tsd-kind-class">
 						<a href="lookuperror.html" class="tsd-kind-icon">Lookup<wbr>Error</a>
 					</li>
@@ -207,27 +230,9 @@
 					<li class=" tsd-kind-class">
 						<a href="sdkerror.html" class="tsd-kind-icon">Sdk<wbr>Error</a>
 					</li>
-				</ul>
-				<ul class="current">
-					<li class="current tsd-kind-class">
+					<li class=" tsd-kind-class">
 						<a href="wrongkeyknoxpassworderror.html" class="tsd-kind-icon">Wrong<wbr>Keyknox<wbr>Password<wbr>Error</a>
-						<ul>
-							<li class=" tsd-kind-constructor tsd-parent-kind-class tsd-is-overwrite">
-								<a href="wrongkeyknoxpassworderror.html#constructor" class="tsd-kind-icon">constructor</a>
-							</li>
-							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-inherited">
-								<a href="wrongkeyknoxpassworderror.html#message" class="tsd-kind-icon">message</a>
-							</li>
-							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-overwrite tsd-is-inherited">
-								<a href="wrongkeyknoxpassworderror.html#name" class="tsd-kind-icon">name</a>
-							</li>
-							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-overwrite tsd-is-inherited">
-								<a href="wrongkeyknoxpassworderror.html#stack" class="tsd-kind-icon">stack</a>
-							</li>
-						</ul>
 					</li>
-				</ul>
-				<ul class="after-current">
 					<li class=" tsd-kind-interface">
 						<a href="../interfaces/decryptfileoptions.html" class="tsd-kind-icon">Decrypt<wbr>File<wbr>Options</a>
 					</li>

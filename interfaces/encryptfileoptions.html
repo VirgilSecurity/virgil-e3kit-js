@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>WrongKeyknoxPasswordError | @virgilsecurity/e3kit</title>
+	<title>EncryptFileOptions | @virgilsecurity/e3kit</title>
 	<meta name="description" content="">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="../assets/css/main.css">
@@ -52,10 +52,10 @@
 					<a href="../index.html">Globals</a>
 				</li>
 				<li>
-					<a href="wrongkeyknoxpassworderror.html">WrongKeyknoxPasswordError</a>
+					<a href="encryptfileoptions.html">EncryptFileOptions</a>
 				</li>
 			</ul>
-			<h1>Class WrongKeyknoxPasswordError</h1>
+			<h1>Interface EncryptFileOptions</h1>
 		</div>
 	</div>
 </header>
@@ -65,8 +65,7 @@
 			<section class="tsd-panel tsd-comment">
 				<div class="tsd-comment tsd-typography">
 					<div class="lead">
-						<p>Error thrown by <a href="ethree.html#backupprivatekey">EThree.backupPrivateKey</a>,  <a href="ethree.html#changepassword">EThree.changePassword</a> and
-						<a href="ethree.html#resetprivatekeybackup">EThree.resetPrivateKeyBackup</a> when user enters wrong password.</p>
+						<p>Options for encryptedFile method.</p>
 					</div>
 				</div>
 			</section>
@@ -74,10 +73,10 @@
 				<h3>Hierarchy</h3>
 				<ul class="tsd-hierarchy">
 					<li>
-						<a href="sdkerror.html" class="tsd-signature-type">SdkError</a>
+						<span class="tsd-signature-type">FileOptions</span>
 						<ul class="tsd-hierarchy">
 							<li>
-								<span class="target">WrongKeyknoxPasswordError</span>
+								<span class="target">EncryptFileOptions</span>
 							</li>
 						</ul>
 					</li>
@@ -88,79 +87,66 @@
 				<section class="tsd-panel tsd-index-panel">
 					<div class="tsd-index-content">
 						<section class="tsd-index-section ">
-							<h3>Constructors</h3>
-							<ul class="tsd-index-list">
-								<li class="tsd-kind-constructor tsd-parent-kind-class tsd-is-overwrite"><a href="wrongkeyknoxpassworderror.html#constructor" class="tsd-kind-icon">constructor</a></li>
-							</ul>
-						</section>
-						<section class="tsd-index-section tsd-is-inherited">
 							<h3>Properties</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited"><a href="wrongkeyknoxpassworderror.html#message" class="tsd-kind-icon">message</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-overwrite tsd-is-inherited"><a href="wrongkeyknoxpassworderror.html#name" class="tsd-kind-icon">name</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-overwrite tsd-is-inherited"><a href="wrongkeyknoxpassworderror.html#stack" class="tsd-kind-icon">stack</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-inherited"><a href="encryptfileoptions.html#chunksize" class="tsd-kind-icon">chunk<wbr>Size</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="encryptfileoptions.html#onprogress" class="tsd-kind-icon">on<wbr>Progress</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-inherited"><a href="encryptfileoptions.html#signal" class="tsd-kind-icon">signal</a></li>
 							</ul>
 						</section>
 					</div>
 				</section>
 			</section>
 			<section class="tsd-panel-group tsd-member-group ">
-				<h2>Constructors</h2>
-				<section class="tsd-panel tsd-member tsd-kind-constructor tsd-parent-kind-class tsd-is-overwrite">
-					<a name="constructor" class="tsd-anchor"></a>
-					<h3>constructor</h3>
-					<ul class="tsd-signatures tsd-kind-constructor tsd-parent-kind-class tsd-is-overwrite">
-						<li class="tsd-signature tsd-kind-icon">new <wbr>Wrong<wbr>Keyknox<wbr>Password<wbr>Error<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="wrongkeyknoxpassworderror.html" class="tsd-signature-type">WrongKeyknoxPasswordError</a></li>
-					</ul>
-					<ul class="tsd-descriptions">
-						<li class="tsd-description">
-							<aside class="tsd-sources">
-								<p>Overrides <a href="sdkerror.html">SdkError</a>.<a href="sdkerror.html#constructor">constructor</a></p>
-								<ul>
-									<li>Defined in <a href="https://github.com/VirgilSecurity/virgil-e3kit-js/blob/931835e/src/errors.ts#L56">errors.ts:56</a></li>
-								</ul>
-							</aside>
-							<h4 class="tsd-returns-title">Returns <a href="wrongkeyknoxpassworderror.html" class="tsd-signature-type">WrongKeyknoxPasswordError</a></h4>
-						</li>
-					</ul>
-				</section>
-			</section>
-			<section class="tsd-panel-group tsd-member-group tsd-is-inherited">
 				<h2>Properties</h2>
-				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-inherited">
-					<a name="message" class="tsd-anchor"></a>
-					<h3>message</h3>
-					<div class="tsd-signature tsd-kind-icon">message<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
+					<a name="chunksize" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagOptional">Optional</span> chunk<wbr>Size</h3>
+					<div class="tsd-signature tsd-kind-icon">chunk<wbr>Size<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">number</span></div>
 					<aside class="tsd-sources">
-						<p>Inherited from Error.message</p>
+						<p>Inherited from FileOptions.chunkSize</p>
 						<ul>
-							<li>Defined in /home/travis/build/VirgilSecurity/virgil-e3kit-js/node_modules/typescript/lib/lib.es5.d.ts:964</li>
+							<li>Defined in <a href="https://github.com/VirgilSecurity/virgil-e3kit-js/blob/931835e/src/types.ts#L78">types.ts:78</a></li>
 						</ul>
 					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>Size of chunk being processed at one time. Bigger chunks make function execute faster, but
+							consume more memory in one time and can cause a performance hit. Default value is 64kb.</p>
+						</div>
+					</div>
 				</section>
-				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-overwrite tsd-is-inherited">
-					<a name="name" class="tsd-anchor"></a>
-					<h3>name</h3>
-					<div class="tsd-signature tsd-kind-icon">name<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
+					<a name="onprogress" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagOptional">Optional</span> on<wbr>Progress</h3>
+					<div class="tsd-signature tsd-kind-icon">on<wbr>Progress<span class="tsd-signature-symbol">:</span> <a href="../index.html#onencryptprogresscallback" class="tsd-signature-type">onEncryptProgressCallback</a></div>
 					<aside class="tsd-sources">
-						<p>Inherited from <a href="sdkerror.html">SdkError</a>.<a href="sdkerror.html#name">name</a></p>
-						<p>Overrides Error.name</p>
 						<ul>
-							<li>Defined in <a href="https://github.com/VirgilSecurity/virgil-e3kit-js/blob/931835e/src/errors.ts#L21">errors.ts:21</a></li>
+							<li>Defined in <a href="https://github.com/VirgilSecurity/virgil-e3kit-js/blob/931835e/src/types.ts#L93">types.ts:93</a></li>
 						</ul>
 					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p><code>onEncryptProgressCallback</code> parameter.</p>
+						</div>
+					</div>
 				</section>
-				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-overwrite tsd-is-inherited">
-					<a name="stack" class="tsd-anchor"></a>
-					<h3><span class="tsd-flag ts-flagOptional">Optional</span> stack</h3>
-					<div class="tsd-signature tsd-kind-icon">stack<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">string</span></div>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
+					<a name="signal" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagOptional">Optional</span> signal</h3>
+					<div class="tsd-signature tsd-kind-icon">signal<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">AbortSignal</span></div>
 					<aside class="tsd-sources">
-						<p>Inherited from Error.stack</p>
-						<p>Overrides Error.stack</p>
+						<p>Inherited from FileOptions.signal</p>
 						<ul>
-							<li>Defined in /home/travis/build/VirgilSecurity/virgil-e3kit-js/node_modules/typescript/lib/lib.es5.d.ts:965</li>
+							<li>Defined in <a href="https://github.com/VirgilSecurity/virgil-e3kit-js/blob/931835e/src/types.ts#L83">types.ts:83</a></li>
 						</ul>
 					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>Instance of <code>AbortSignal</code> which can be received from <code>AbortController</code>. Used to cancel encryptFile
+							operation.</p>
+						</div>
+					</div>
 				</section>
 			</section>
 		</div>
@@ -175,73 +161,70 @@
 			<nav class="tsd-navigation secondary menu-sticky">
 				<ul class="before-current">
 					<li class=" tsd-kind-class">
-						<a href="aborterror.html" class="tsd-kind-icon">Abort<wbr>Error</a>
+						<a href="../classes/aborterror.html" class="tsd-kind-icon">Abort<wbr>Error</a>
 					</li>
 					<li class=" tsd-kind-class">
-						<a href="ethree.html" class="tsd-kind-icon">EThree</a>
+						<a href="../classes/ethree.html" class="tsd-kind-icon">EThree</a>
 					</li>
 					<li class=" tsd-kind-class">
-						<a href="identityalreadyexistserror.html" class="tsd-kind-icon">Identity<wbr>Already<wbr>Exists<wbr>Error</a>
+						<a href="../classes/identityalreadyexistserror.html" class="tsd-kind-icon">Identity<wbr>Already<wbr>Exists<wbr>Error</a>
 					</li>
 					<li class=" tsd-kind-class">
-						<a href="integritycheckfailederror.html" class="tsd-kind-icon">Integrity<wbr>Check<wbr>Failed<wbr>Error</a>
+						<a href="../classes/integritycheckfailederror.html" class="tsd-kind-icon">Integrity<wbr>Check<wbr>Failed<wbr>Error</a>
 					</li>
 					<li class=" tsd-kind-class">
-						<a href="lookuperror.html" class="tsd-kind-icon">Lookup<wbr>Error</a>
+						<a href="../classes/lookuperror.html" class="tsd-kind-icon">Lookup<wbr>Error</a>
 					</li>
 					<li class=" tsd-kind-class">
-						<a href="lookupnotfounderror.html" class="tsd-kind-icon">Lookup<wbr>Not<wbr>Found<wbr>Error</a>
+						<a href="../classes/lookupnotfounderror.html" class="tsd-kind-icon">Lookup<wbr>Not<wbr>Found<wbr>Error</a>
 					</li>
 					<li class=" tsd-kind-class">
-						<a href="multiplecardserror.html" class="tsd-kind-icon">Multiple<wbr>Cards<wbr>Error</a>
+						<a href="../classes/multiplecardserror.html" class="tsd-kind-icon">Multiple<wbr>Cards<wbr>Error</a>
 					</li>
 					<li class=" tsd-kind-class">
-						<a href="privatekeyalreadyexistserror.html" class="tsd-kind-icon">Private<wbr>Key<wbr>Already<wbr>Exists<wbr>Error</a>
+						<a href="../classes/privatekeyalreadyexistserror.html" class="tsd-kind-icon">Private<wbr>Key<wbr>Already<wbr>Exists<wbr>Error</a>
 					</li>
 					<li class=" tsd-kind-class">
-						<a href="privatekeynobackuperror.html" class="tsd-kind-icon">Private<wbr>Key<wbr>NoBackup<wbr>Error</a>
+						<a href="../classes/privatekeynobackuperror.html" class="tsd-kind-icon">Private<wbr>Key<wbr>NoBackup<wbr>Error</a>
 					</li>
 					<li class=" tsd-kind-class">
-						<a href="registerrequirederror.html" class="tsd-kind-icon">Register<wbr>Required<wbr>Error</a>
+						<a href="../classes/registerrequirederror.html" class="tsd-kind-icon">Register<wbr>Required<wbr>Error</a>
 					</li>
 					<li class=" tsd-kind-class">
-						<a href="sdkerror.html" class="tsd-kind-icon">Sdk<wbr>Error</a>
+						<a href="../classes/sdkerror.html" class="tsd-kind-icon">Sdk<wbr>Error</a>
+					</li>
+					<li class=" tsd-kind-class">
+						<a href="../classes/wrongkeyknoxpassworderror.html" class="tsd-kind-icon">Wrong<wbr>Keyknox<wbr>Password<wbr>Error</a>
+					</li>
+					<li class=" tsd-kind-interface">
+						<a href="decryptfileoptions.html" class="tsd-kind-icon">Decrypt<wbr>File<wbr>Options</a>
+					</li>
+					<li class=" tsd-kind-interface">
+						<a href="ethreeinitializeoptions.html" class="tsd-kind-icon">EThree<wbr>Initialize<wbr>Options</a>
 					</li>
 				</ul>
 				<ul class="current">
-					<li class="current tsd-kind-class">
-						<a href="wrongkeyknoxpassworderror.html" class="tsd-kind-icon">Wrong<wbr>Keyknox<wbr>Password<wbr>Error</a>
+					<li class="current tsd-kind-interface">
+						<a href="encryptfileoptions.html" class="tsd-kind-icon">Encrypt<wbr>File<wbr>Options</a>
 						<ul>
-							<li class=" tsd-kind-constructor tsd-parent-kind-class tsd-is-overwrite">
-								<a href="wrongkeyknoxpassworderror.html#constructor" class="tsd-kind-icon">constructor</a>
+							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
+								<a href="encryptfileoptions.html#chunksize" class="tsd-kind-icon">chunk<wbr>Size</a>
 							</li>
-							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-inherited">
-								<a href="wrongkeyknoxpassworderror.html#message" class="tsd-kind-icon">message</a>
+							<li class=" tsd-kind-property tsd-parent-kind-interface">
+								<a href="encryptfileoptions.html#onprogress" class="tsd-kind-icon">on<wbr>Progress</a>
 							</li>
-							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-overwrite tsd-is-inherited">
-								<a href="wrongkeyknoxpassworderror.html#name" class="tsd-kind-icon">name</a>
-							</li>
-							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-overwrite tsd-is-inherited">
-								<a href="wrongkeyknoxpassworderror.html#stack" class="tsd-kind-icon">stack</a>
+							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
+								<a href="encryptfileoptions.html#signal" class="tsd-kind-icon">signal</a>
 							</li>
 						</ul>
 					</li>
 				</ul>
 				<ul class="after-current">
 					<li class=" tsd-kind-interface">
-						<a href="../interfaces/decryptfileoptions.html" class="tsd-kind-icon">Decrypt<wbr>File<wbr>Options</a>
+						<a href="ondecryptprogresssnapshot.html" class="tsd-kind-icon">on<wbr>Decrypt<wbr>Progress<wbr>Snapshot</a>
 					</li>
 					<li class=" tsd-kind-interface">
-						<a href="../interfaces/ethreeinitializeoptions.html" class="tsd-kind-icon">EThree<wbr>Initialize<wbr>Options</a>
-					</li>
-					<li class=" tsd-kind-interface">
-						<a href="../interfaces/encryptfileoptions.html" class="tsd-kind-icon">Encrypt<wbr>File<wbr>Options</a>
-					</li>
-					<li class=" tsd-kind-interface">
-						<a href="../interfaces/ondecryptprogresssnapshot.html" class="tsd-kind-icon">on<wbr>Decrypt<wbr>Progress<wbr>Snapshot</a>
-					</li>
-					<li class=" tsd-kind-interface">
-						<a href="../interfaces/onencryptprogresssnapshot.html" class="tsd-kind-icon">on<wbr>Encrypt<wbr>Progress<wbr>Snapshot</a>
+						<a href="onencryptprogresssnapshot.html" class="tsd-kind-icon">on<wbr>Encrypt<wbr>Progress<wbr>Snapshot</a>
 					</li>
 					<li class=" tsd-kind-type-alias">
 						<a href="../index.html#encryptvirgilpublickeyarg" class="tsd-kind-icon">Encrypt<wbr>Virgil<wbr>Public<wbr>Key<wbr>Arg</a>
