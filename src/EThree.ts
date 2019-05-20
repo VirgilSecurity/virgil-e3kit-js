@@ -24,51 +24,32 @@ import {
     LookupError,
     DUPLICATE_IDENTITIES,
     EMPTY_ARRAY,
+    throwIllegalInvocationError,
+    IntegrityCheckFailedError,
 } from './errors';
-import { isArray, isString, isVirgilPublicKey } from './utils/typeguards';
-import { hasDuplicates, getObjectValues } from './utils/array';
+import { isArray, isString, isFile, isVirgilPublicKey } from './utils/typeguards';
 import { withDefaults } from './utils/object';
-
-export interface IEThreeInitOptions {
-    /**
-     * Implementation of IKeyEntryStorage. Used IndexedDB Key Storage from
-     * [Virgil SDK](https://github.com/virgilsecurity/virgil-sdk-javascript) by default.
-     */
-    keyEntryStorage?: IKeyEntryStorage;
-    /**
-     * Url of the Card Services. Used for development purposes.
-     */
-    apiUrl?: string;
-}
-/**
- * @hidden
- */
-export interface IEThreeCtorOptions extends IEThreeInitOptions {
-    /**
-     * Implementation of IAccessTokenProvider from [Virgil SDK](https://github.com/virgilsecurity/virgil-sdk-javascript);
-     */
-    accessTokenProvider: IAccessTokenProvider;
-}
-
-type KeyPair = {
-    privateKey: VirgilPrivateKey;
-    publicKey: VirgilPublicKey;
-};
-
-export type LookupResult = {
-    [identity: string]: VirgilPublicKey;
-};
-
-const throwIllegalInvocationError = (method: string) => {
-    throw new Error(`Calling ${method} two or more times in a row is not allowed.`);
-};
-
-type EncryptVirgilPublicKeyArg = LookupResult | VirgilPublicKey;
+import { getObjectValues, hasDuplicates } from './utils/array';
+import { processFile, onChunkCallback } from './utils/processFile';
+import {
+    VIRGIL_STREAM_SIGNING_STATE,
+    VIRGIL_STREAM_ENCRYPTING_STATE,
+    VIRGIL_STREAM_DECRYPTING_STATE,
+    VIRGIL_STREAM_VERIFYING_STATE,
+    DEFAULT_API_URL,
+    STORAGE_NAME,
+} from './utils/constants';
+import {
+    EncryptVirgilPublicKeyArg,
+    LookupResult,
+    EThreeInitializeOptions,
+    EncryptFileOptions,
+    DecryptFileOptions,
+} from './types';
+import { KeyPair, EThreeCtorOptions } from './utils/innerTypes';
 
 const _inProcess = Symbol('inProcess');
 const _keyLoader = Symbol('keyLoader');
-const STORAGE_NAME = '.virgil-local-storage';
-const DEFAULT_API_URL = 'https://api.virgilsecurity.com';
 
 export default class EThree {
     /**
@@ -109,9 +90,9 @@ export default class EThree {
      */
     static async initialize(
         getToken: () => Promise<string>,
-        options: IEThreeInitOptions = {},
+        options: EThreeInitializeOptions = {},
     ): Promise<EThree> {
-        const opts = withDefaults(options as IEThreeCtorOptions, {
+        const opts = withDefaults(options as EThreeCtorOptions, {
             accessTokenProvider: new CachingJwtProvider(getToken),
         });
         const token = await opts.accessTokenProvider.getToken({ operation: 'get' });
@@ -123,7 +104,7 @@ export default class EThree {
      * @hidden
      * @param identity - Identity of the current user.
      */
-    constructor(identity: string, options: IEThreeCtorOptions) {
+    constructor(identity: string, options: EThreeCtorOptions) {
         const opts = withDefaults(options, { apiUrl: DEFAULT_API_URL });
         this.identity = identity;
         this.accessTokenProvider = opts.accessTokenProvider;
@@ -228,8 +209,8 @@ export default class EThree {
     }
 
     /**
-     * Encrypts data for recipient(s) public key(s). If there is no recipient and message encrypted
-     * for the current user, omit public key.
+     * Encrypts and signs data for recipient public key or `LookupResult` dictionary for multiple recipients.
+     * If there is no recipient and message encrypted for the current user, omit public key.
      */
     async encrypt(
         message: ArrayBuffer,
@@ -239,22 +220,13 @@ export default class EThree {
     async encrypt(message: Buffer, publicKey?: EncryptVirgilPublicKeyArg): Promise<Buffer>;
     async encrypt(message: Data, publicKeys?: EncryptVirgilPublicKeyArg): Promise<Data> {
         const isMessageString = isString(message);
-        let argument: VirgilPublicKey[];
-
-        if (publicKeys == null) argument = [];
-        else if (isVirgilPublicKey(publicKeys)) argument = [publicKeys];
-        else argument = getObjectValues(publicKeys) as VirgilPublicKey[];
 
         const privateKey = await this[_keyLoader].loadLocalPrivateKey();
         if (!privateKey) throw new RegisterRequiredError();
 
-        const ownPublicKey = this.virgilCrypto.extractPublicKey(privateKey);
+        const publicKeysArray = this._addOwnPublicKey(privateKey, publicKeys);
 
-        if (!this._isOwnPublicKeysIncluded(ownPublicKey, argument)) {
-            argument.push(ownPublicKey);
-        }
-
-        const res: Data = this.virgilCrypto.signThenEncrypt(message, privateKey, argument);
+        const res: Data = this.virgilCrypto.signThenEncrypt(message, privateKey, publicKeysArray);
         if (isMessageString) return res.toString('base64');
         return res;
     }
@@ -276,6 +248,210 @@ export default class EThree {
         const res: Data = this.virgilCrypto.decryptThenVerify(message, privateKey, publicKey);
         if (isMessageString) return res.toString('utf8') as string;
         return res as Buffer;
+    }
+
+    /**
+     * Signs and encrypts File or Blob for recipient public key or `LookupResult` dictionary for multiple
+     * recipients. If there is no recipient and the message is encrypted for the current user, omit the
+     * public key parameter. You can define chunk size and a callback, that will be invoked on each chunk.
+     *
+     * The file will be read twice during this method execution:
+     * 1. To calculate the signature of the plaintext file.
+     * 2. To encrypt the file with encoded signature.
+     */
+    async encryptFile(
+        file: File | Blob,
+        publicKeys?: EncryptVirgilPublicKeyArg,
+        options: EncryptFileOptions = {},
+    ): Promise<File | Blob> {
+        const chunkSize = options.chunkSize ? options.chunkSize : 64 * 1024;
+        if (!Number.isInteger(chunkSize)) throw TypeError('chunkSize should be an integer value');
+        const fileSize = file.size;
+
+        const privateKey = await this[_keyLoader].loadLocalPrivateKey();
+        if (!privateKey) throw new RegisterRequiredError();
+
+        const publicKeysArray = this._addOwnPublicKey(privateKey, publicKeys);
+
+        const streamSigner = this.virgilCrypto.createStreamSigner();
+
+        const signaturePromise = new Promise<Buffer>((resolve, reject) => {
+            const onChunkCallback: onChunkCallback = (chunk, offset) => {
+                if (options.onProgress) {
+                    options.onProgress({
+                        state: VIRGIL_STREAM_SIGNING_STATE,
+                        bytesProcessed: offset,
+                        fileSize: fileSize,
+                    });
+                }
+                streamSigner.update(chunk);
+            };
+
+            const onFinishCallback = () => resolve(streamSigner.sign(privateKey));
+
+            const onErrorCallback = (err: any) => {
+                streamSigner.dispose();
+                reject(err);
+            };
+
+            processFile({
+                file,
+                chunkSize,
+                onChunkCallback,
+                onFinishCallback,
+                onErrorCallback,
+                signal: options.signal,
+            });
+        });
+
+        const streamCipher = this.virgilCrypto.createStreamCipher(publicKeysArray, {
+            signature: await signaturePromise,
+        });
+
+        const encryptedChunksPromise = new Promise<Buffer[]>((resolve, reject) => {
+            const encryptedChunks: Buffer[] = [];
+            encryptedChunks.push(streamCipher.start());
+
+            const onChunkCallback: onChunkCallback = (chunk, offset) => {
+                encryptedChunks.push(streamCipher.update(chunk));
+                if (options.onProgress) {
+                    options.onProgress({
+                        state: VIRGIL_STREAM_ENCRYPTING_STATE,
+                        bytesProcessed: offset,
+                        fileSize: fileSize,
+                    });
+                }
+            };
+
+            const onFinishCallback = () => {
+                encryptedChunks.push(streamCipher.final());
+                resolve(encryptedChunks);
+            };
+
+            const onErrorCallback = (err: any) => {
+                reject(err);
+                streamCipher.dispose();
+            };
+
+            processFile({
+                file,
+                chunkSize,
+                onChunkCallback,
+                onFinishCallback,
+                onErrorCallback,
+                signal: options.signal,
+            });
+        });
+
+        const encryptedChunks = await encryptedChunksPromise;
+        if (isFile(file)) return new File(encryptedChunks, file.name, { type: file.type });
+        return new Blob(encryptedChunks, { type: file.type });
+    }
+    /**
+     * Decrypts and verifies integrity of File or Blob for recipient public key. If there is no recipient
+     * and the message is encrypted for the current user, omit the public key parameter. You can define
+     * chunk size and a callback, that will be invoked on each chunk.
+     *
+     * The file will be read twice during this method execution:
+     * 1. To decrypt encrypted file.
+     * 2. To verify the validity of the signature over the decrypted file for the public key.
+     */
+    async decryptFile(
+        file: File | Blob,
+        publicKey?: VirgilPublicKey,
+        options: DecryptFileOptions = {},
+    ): Promise<File | Blob> {
+        const fileSize = file.size;
+        const chunkSize = options.chunkSize ? options.chunkSize : 64 * 1024;
+        if (!Number.isInteger(chunkSize)) throw TypeError('chunkSize should be an integer value');
+
+        const privateKey = await this[_keyLoader].loadLocalPrivateKey();
+        if (!privateKey) throw new RegisterRequiredError();
+        if (!publicKey) publicKey = this.virgilCrypto.extractPublicKey(privateKey);
+
+        const streamDecipher = this.virgilCrypto.createStreamDecipher(privateKey);
+
+        type decryptStreamResult = { signature: Buffer; decryptedChunks: Buffer[] };
+        const decryptedChunksPromise = new Promise<decryptStreamResult>((resolve, reject) => {
+            const decryptedChunks: Buffer[] = [];
+
+            const onChunkCallback: onChunkCallback = (chunk, offset) => {
+                decryptedChunks.push(streamDecipher.update(chunk));
+                if (options.onProgress) {
+                    options.onProgress({
+                        state: VIRGIL_STREAM_DECRYPTING_STATE,
+                        bytesProcessed: offset,
+                        fileSize: fileSize,
+                    });
+                }
+            };
+
+            const onFinishCallback = () => {
+                decryptedChunks.push(streamDecipher.final(false));
+                const signature = streamDecipher.getSignature();
+                streamDecipher.dispose();
+                if (!signature) throw new IntegrityCheckFailedError('Signature not present.');
+                resolve({ decryptedChunks, signature });
+            };
+
+            const onErrorCallback = (err: any) => {
+                streamDecipher.dispose();
+                reject(err);
+            };
+
+            processFile({
+                file,
+                chunkSize,
+                onChunkCallback,
+                onFinishCallback,
+                onErrorCallback,
+                signal: options.signal,
+            });
+        });
+
+        const { decryptedChunks, signature } = await decryptedChunksPromise;
+        const streamVerifier = this.virgilCrypto.createStreamVerifier(signature, 'utf8');
+
+        let decryptedFile: File | Blob;
+        if (isFile(file)) decryptedFile = new File(decryptedChunks, file.name, { type: file.type });
+        decryptedFile = new Blob(decryptedChunks, { type: file.type });
+        const decryptedFileSize = decryptedFile.size;
+
+        const verifyPromise = new Promise<boolean>((resolve, reject) => {
+            const onChunkCallback: onChunkCallback = (chunk, offset) => {
+                streamVerifier.update(chunk);
+                if (options.onProgress) {
+                    options.onProgress({
+                        state: VIRGIL_STREAM_VERIFYING_STATE,
+                        bytesProcessed: offset,
+                        fileSize: decryptedFileSize,
+                    });
+                }
+            };
+
+            const onFinishCallback = () => resolve(streamVerifier.verify(publicKey!));
+            const onErrorCallback = (err: any) => {
+                streamVerifier.dispose();
+                reject(err);
+            };
+
+            processFile({
+                file: decryptedFile,
+                chunkSize,
+                onChunkCallback,
+                onFinishCallback,
+                onErrorCallback,
+                signal: options.signal,
+            });
+        });
+
+        const isVerified = await verifyPromise;
+
+        if (!isVerified) {
+            throw new IntegrityCheckFailedError('Signature verification has failed.');
+        }
+
+        return decryptedFile;
     }
 
     /**
@@ -356,5 +532,20 @@ export default class EThree {
             this.virgilCrypto.exportPublicKey(key).toString('base64'),
         );
         return stringKeys.some((key, i) => key === selfPublicKey);
+    }
+
+    private _addOwnPublicKey(privateKey: VirgilPrivateKey, publicKeys?: EncryptVirgilPublicKeyArg) {
+        let argument: VirgilPublicKey[];
+
+        if (publicKeys == null) argument = [];
+        else if (isVirgilPublicKey(publicKeys)) argument = [publicKeys];
+        else argument = getObjectValues(publicKeys) as VirgilPublicKey[];
+
+        const ownPublicKey = this.virgilCrypto.extractPublicKey(privateKey);
+
+        if (!this._isOwnPublicKeysIncluded(ownPublicKey, argument)) {
+            argument.push(ownPublicKey);
+        }
+        return argument;
     }
 }

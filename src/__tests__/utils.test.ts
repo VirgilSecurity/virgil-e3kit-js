@@ -53,6 +53,9 @@ export const createFetchToken = (identity: string) => () =>
 export const initializeEThree = (fetchToken: () => Promise<string>) =>
     EThree.initialize(fetchToken, { apiUrl: process.env.API_URL });
 
+export const initializeETheeFromIdentity = (identity: string) =>
+    EThree.initialize(createFetchToken(identity));
+
 export const createSyncStorage = async (identity: string, password: string) => {
     const fetchToken = createFetchToken(identity);
 
@@ -78,3 +81,13 @@ export const createSyncStorage = async (identity: string, password: string) => {
 };
 
 export const clear = () => keyStorage.clear();
+
+export const readFile = (file: Blob) => {
+    const reader = new FileReader();
+
+    const promise = new Promise(r => reader.addEventListener('loadend', () => r(reader.result!)));
+
+    reader.readAsText(file);
+
+    return promise;
+};

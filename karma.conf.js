@@ -17,6 +17,9 @@ module.exports = function (config) {
         browserNoActivityTimeout: 60 * 1000,
         singleRun: true,
         reporters: ['spec'],
+        specReporter: {
+            showSpecTiming: true,      // print the time elapsed for each spec
+        },
         preprocessors: {
             'src/**/*.ts': ['rollup'],
         },

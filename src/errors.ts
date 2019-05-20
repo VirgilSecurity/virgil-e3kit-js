@@ -7,8 +7,16 @@ export const DUPLICATE_IDENTITIES = 'Identities in array should be unique';
  */
 export const EMPTY_ARRAY = `Array should be non empty`;
 /**
+ * @hidden
+ */
+export const throwIllegalInvocationError = (method: string) => {
+    throw new Error(`Calling ${method} two or more times in a row is not allowed.`);
+};
+
+/**
  * Custom error class for errors specific to Virgil E3kit.
  */
+
 export class SdkError extends Error {
     name: string;
     constructor(m: string, name: string = 'SdkError') {
@@ -114,5 +122,23 @@ export class LookupError extends SdkError {
 export class LookupNotFoundError extends SdkError {
     constructor(public identity: string) {
         super(`${identity} not found`, 'LookupNotFoundError');
+    }
+}
+
+/**
+ * Error thrown by {@link EThree.decryptFile} in case if signature of the file is not valid.
+ */
+export class IntegrityCheckFailedError extends SdkError {
+    constructor(message: string) {
+        super(message, 'IntegrityCheckFailedError');
+    }
+}
+
+/**
+ * Error thrown by {@link EThree.decryptFile} or {@link EThree.encryptFile} if user aborts an operation.
+ */
+export class AbortError extends SdkError {
+    constructor() {
+        super('Operation aborted by user', 'AbortError');
     }
 }
