@@ -59,11 +59,11 @@ export default class EThree {
     /**
      * Instance of [VirgilCrypto](https://github.com/virgilsecurity/virgil-crypto-javascript).
      */
-    virgilCrypto = new VirgilCrypto();
+    virgilCrypto: VirgilCrypto;
     /**
      * Instance of VirgilCardCrypto.
      */
-    cardCrypto = new VirgilCardCrypto(this.virgilCrypto);
+    cardCrypto: VirgilCardCrypto;
     /**
      * Instance of VirgilCardVerifier.
      */
@@ -105,10 +105,19 @@ export default class EThree {
      * @param identity - Identity of the current user.
      */
     constructor(identity: string, options: EThreeCtorOptions) {
-        const opts = withDefaults(options, { apiUrl: DEFAULT_API_URL });
+        const opts = withDefaults(options, {
+            apiUrl: DEFAULT_API_URL,
+            storageName: STORAGE_NAME,
+            useSha256Identifiers: false,
+        });
+
         this.identity = identity;
         this.accessTokenProvider = opts.accessTokenProvider;
-        this.keyEntryStorage = opts.keyEntryStorage || new KeyEntryStorage(STORAGE_NAME);
+
+        this.keyEntryStorage = opts.keyEntryStorage || new KeyEntryStorage(opts.storageName);
+        this.virgilCrypto = new VirgilCrypto({ useSha256Identifiers: opts.useSha256Identifiers });
+        this.cardCrypto = new VirgilCardCrypto(this.virgilCrypto);
+
         this.cardVerifier = new VirgilCardVerifier(this.cardCrypto, {
             verifySelfSignature: opts.apiUrl === DEFAULT_API_URL,
             verifyVirgilSignature: opts.apiUrl === DEFAULT_API_URL,
