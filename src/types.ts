@@ -17,6 +17,14 @@ export interface EThreeInitializeOptions {
      * Url of the Card Services. Used for development purposes.
      */
     apiUrl?: string;
+    /**
+     * Indicates whether to use old algorithm to calculate keypair identifiers.
+     */
+    useSha256Identifiers?: boolean;
+    /**
+     * Name of the IndexedDB database. Default `.virgil-local-storage`.
+     */
+    storageName?: string;
 }
 
 /**

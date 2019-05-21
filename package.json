@@ -1,6 +1,6 @@
 {
     "name": "@virgilsecurity/e3kit",
-    "version": "0.4.0",
+    "version": "0.4.1",
     "description": "End-to-end encryption with multiple device support powered by Virgil Security",
     "main": "./dist/e3kit.browser.es.js",
     "module": "./dist/e3kit.browser.es.js",
@@ -23,7 +23,7 @@
         "precommit": "lint-staged",
         "test": "karma start",
         "docs": "typedoc src && npm run build:browser:umd && npm run encryptFileDoc",
-        "encryptFileDoc": "cpx example/encryptFile.html docs && cpx dist/e3kit.browser.umd.min.js docs"
+        "encryptFileDoc": "cpx example/encryptFile.html docs"
     },
     "lint-staged": {
         "src/**/*.ts": [
@@ -33,9 +33,9 @@
     },
     "dependencies": {
         "@virgilsecurity/keyknox": "^0.2.4",
-        "virgil-crypto": "^3.2.3",
+        "virgil-crypto": "^3.2.4",
         "virgil-pythia": "^0.2.3",
-        "virgil-sdk": "^5.2.2"
+        "virgil-sdk": "^5.2.3"
     },
     "peerDependencies": {},
     "devDependencies": {
