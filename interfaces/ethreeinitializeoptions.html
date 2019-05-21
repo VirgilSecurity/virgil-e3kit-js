@@ -79,6 +79,8 @@
 							<ul class="tsd-index-list">
 								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="ethreeinitializeoptions.html#apiurl" class="tsd-kind-icon">api<wbr>Url</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="ethreeinitializeoptions.html#keyentrystorage" class="tsd-kind-icon">key<wbr>Entry<wbr>Storage</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="ethreeinitializeoptions.html#storagename" class="tsd-kind-icon">storage<wbr>Name</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="ethreeinitializeoptions.html#usesha256identifiers" class="tsd-kind-icon">use<wbr>Sha256<wbr>Identifiers</a></li>
 							</ul>
 						</section>
 					</div>
@@ -92,7 +94,7 @@
 					<div class="tsd-signature tsd-kind-icon">api<wbr>Url<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">string</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/VirgilSecurity/virgil-e3kit-js/blob/931835e/src/types.ts#L19">types.ts:19</a></li>
+							<li>Defined in <a href="https://github.com/VirgilSecurity/virgil-e3kit-js/blob/15c2128/src/types.ts#L19">types.ts:19</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -107,13 +109,43 @@
 					<div class="tsd-signature tsd-kind-icon">key<wbr>Entry<wbr>Storage<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">IKeyEntryStorage</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/VirgilSecurity/virgil-e3kit-js/blob/931835e/src/types.ts#L15">types.ts:15</a></li>
+							<li>Defined in <a href="https://github.com/VirgilSecurity/virgil-e3kit-js/blob/15c2128/src/types.ts#L15">types.ts:15</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
 						<div class="lead">
 							<p>Implementation of IKeyEntryStorage. Used IndexedDB Key Storage from
 							<a href="https://github.com/virgilsecurity/virgil-sdk-javascript">Virgil SDK</a> by default.</p>
+						</div>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
+					<a name="storagename" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagOptional">Optional</span> storage<wbr>Name</h3>
+					<div class="tsd-signature tsd-kind-icon">storage<wbr>Name<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">string</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/VirgilSecurity/virgil-e3kit-js/blob/15c2128/src/types.ts#L27">types.ts:27</a></li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>Name of the IndexedDB database. Default <code>.virgil-local-storage</code>.</p>
+						</div>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
+					<a name="usesha256identifiers" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagOptional">Optional</span> use<wbr>Sha256<wbr>Identifiers</h3>
+					<div class="tsd-signature tsd-kind-icon">use<wbr>Sha256<wbr>Identifiers<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">false</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">true</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/VirgilSecurity/virgil-e3kit-js/blob/15c2128/src/types.ts#L23">types.ts:23</a></li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>Indicates whether to use old algorithm to calculate keypair identifiers.</p>
 						</div>
 					</div>
 				</section>
@@ -178,6 +210,12 @@
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-interface">
 								<a href="ethreeinitializeoptions.html#keyentrystorage" class="tsd-kind-icon">key<wbr>Entry<wbr>Storage</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-interface">
+								<a href="ethreeinitializeoptions.html#storagename" class="tsd-kind-icon">storage<wbr>Name</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-interface">
+								<a href="ethreeinitializeoptions.html#usesha256identifiers" class="tsd-kind-icon">use<wbr>Sha256<wbr>Identifiers</a>
 							</li>
 						</ul>
 					</li>

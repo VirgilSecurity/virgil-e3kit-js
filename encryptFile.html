@@ -7,7 +7,7 @@
     <title>Document</title>
     <script src="https://unpkg.com/virgil-crypto/dist/virgil-crypto.browser.umd.min.js"></script>
     <script src="https://unpkg.com/virgil-sdk/dist/virgil-sdk.browser.umd.min.js"></script>
-    <script src="./e3kit.browser.umd.min.js"></script>
+    <script src="https://unpkg.com/@virgilsecurity/e3kit/dist/e3kit.browser.umd.min.js"></script>
     <script src="https://mrdoob.github.io/stats.js/build/stats.min.js"></script>
 </head>
 <body>
@@ -34,10 +34,6 @@
             <label>
                 api key id
                 <input id="api-key-id" />
-            </label>
-            <label>
-                test identity
-                <input id="identity" value="test-identity" />
             </label>
         </fieldset>
         <fieldset>
@@ -145,7 +141,6 @@
                 const APP_ID = document.getElementById('app-id').value;
                 const API_KEY = document.getElementById('api-key').value;
                 const API_KEY_ID = document.getElementById('api-key-id').value;
-                const IDENTITY = document.getElementById('identity').value;
 
                 const virgilCrypto = new VirgilCrypto.VirgilCrypto();
                 const accessTokenSigner = new VirgilCrypto.VirgilAccessTokenSigner(virgilCrypto);
@@ -162,7 +157,7 @@
 
 
                 return E3kit.EThree.initialize(() => {
-                    return Promise.resolve(jwtGenerator.generateToken(IDENTITY));
+                    return Promise.resolve(jwtGenerator.generateToken('test'));
                 }).then(sdk => {
                     e3kit = sdk;
                     return e3kit.hasLocalPrivateKey();
