@@ -1,6 +1,6 @@
 {
     "name": "@virgilsecurity/e3kit",
-    "version": "0.4.1",
+    "version": "0.4.2",
     "description": "End-to-end encryption with multiple device support powered by Virgil Security",
     "main": "./dist/e3kit.browser.es.js",
     "module": "./dist/e3kit.browser.es.js",
@@ -33,7 +33,7 @@
     },
     "dependencies": {
         "@virgilsecurity/keyknox": "^0.2.4",
-        "virgil-crypto": "^3.2.4",
+        "virgil-crypto": "^3.2.5",
         "virgil-pythia": "^0.2.3",
         "virgil-sdk": "^5.2.3"
     },
