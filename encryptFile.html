@@ -13,7 +13,7 @@
 <body>
 
     <form style="margin-top: 100px; display: flex; flex-direction: column; font-family: sans-serif;">
-        Memory measurments works only in chrome!
+        Tested only in chrome!
         To receive precise memory measurement, run Chrome with <b>--enable-precise-memory-info</b>
         <ol>
             <li>Get the credentials at <a href="https://dashboard.virgilsecurity.com/">Virgil Dashboard</a>.</li>
@@ -59,6 +59,7 @@
             var fps = new Stats();
             let abort = new AbortController();
 
+            fps.showPanel(2);
             document.body.appendChild( fps.dom );
 
             function encryptAbort() {
