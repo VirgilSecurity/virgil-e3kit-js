@@ -7,8 +7,7 @@ module.exports = {
     input: paths.input,
     output: {
         format: paths.formats.umd,
-        file: paths.getFileName(paths.formats.umd, true),
-        dir: paths.outputDir,
+        file: paths.getOutputFile(paths.formats.umd),
         sourcemap: true,
         name: UMD_NAME
     },

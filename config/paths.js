@@ -30,6 +30,10 @@ class Paths {
         parts.push(ext);
         return parts.join('.');
     }
+
+    getOutputFile(format) {
+        return path.resolve(this.outputDir, this.getFileName(format));
+    }
 }
 
 module.exports = new Paths();

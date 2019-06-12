@@ -7,8 +7,7 @@ module.exports = {
     input: paths.input,
     output: {
         format: format,
-        file: paths.getFileName(format, false),
-        dir: paths.outputDir,
+        file: paths.getOutputFile(format),
         sourcemap: true,
     },
     plugins: [
