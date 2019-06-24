@@ -1,6 +1,6 @@
 {
     "name": "@virgilsecurity/e3kit",
-    "version": "0.4.3",
+    "version": "0.5.0",
     "description": "End-to-end encryption with multiple device support powered by Virgil Security",
     "main": "./dist/e3kit.browser.es.js",
     "module": "./dist/e3kit.browser.es.js",
