@@ -1,5 +1,9 @@
 # Changelog
 
+## 2019-06-24 0.4.3
+
+* Added `Ethree.unregister()` method to revoke the current user's Virgil Card in Virgil Cloud and delete the local private key (i.e. undo everything `register` does).
+
 ## 2019-05-10 0.3.9
 
 * Fixed public key checking in encrypt method.

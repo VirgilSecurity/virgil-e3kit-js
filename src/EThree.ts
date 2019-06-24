@@ -529,6 +529,10 @@ export default class EThree {
 
     /**
      * Unregister current user. Revokes public key in Virgil Cloud and deletes local private key.
+     *
+     * @throws {RegisterRequiredError} If current user is not registered (i.e.
+     *                                 there is no Virgil Card for this identity)
+     * @throws {MultipleCardsError} If there is more than one Virgil Card for this identity
      */
     async unregister(): Promise<void> {
         if (this[_inProcess]) throwIllegalInvocationError('unregister');
