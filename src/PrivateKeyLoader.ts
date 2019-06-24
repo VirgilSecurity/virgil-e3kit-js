@@ -68,7 +68,10 @@ export default class PrivateKeyLoader {
     }
 
     async resetAll() {
-        const token = await this.options.accessTokenProvider.getToken({ operation: 'delete' });
+        const token = await this.options.accessTokenProvider.getToken({
+            service: 'keyknox',
+            operation: 'delete',
+        });
         await this.keyknoxClient.resetValue(token.toString());
     }
 

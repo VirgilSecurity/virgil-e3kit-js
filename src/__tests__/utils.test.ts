@@ -54,7 +54,7 @@ export const initializeEThree = (fetchToken: () => Promise<string>) =>
     EThree.initialize(fetchToken, { apiUrl: process.env.API_URL });
 
 export const initializeETheeFromIdentity = (identity: string) =>
-    EThree.initialize(createFetchToken(identity));
+    EThree.initialize(createFetchToken(identity), { apiUrl: process.env.API_URL });
 
 export const createSyncStorage = async (identity: string, password: string) => {
     const fetchToken = createFetchToken(identity);

@@ -95,7 +95,10 @@ export default class EThree {
         const opts = withDefaults(options as EThreeCtorOptions, {
             accessTokenProvider: new CachingJwtProvider(getToken),
         });
-        const token = await opts.accessTokenProvider.getToken({ operation: 'get' });
+        const token = await opts.accessTokenProvider.getToken({
+            service: 'cards',
+            operation: '',
+        });
         const identity = token.identity();
         return new EThree(identity, opts);
     }
@@ -522,6 +525,25 @@ export default class EThree {
      */
     hasLocalPrivateKey(): Promise<Boolean> {
         return this[_keyLoader].hasPrivateKey();
+    }
+
+    /**
+     * Unregister current user. Revokes public key in Virgil Cloud and deletes local private key.
+     */
+    async unregister(): Promise<void> {
+        if (this[_inProcess]) throwIllegalInvocationError('unregister');
+        this[_inProcess] = true;
+        try {
+            const cards = await this.cardManager.searchCards(this.identity);
+
+            if (cards.length > 1) throw new MultipleCardsError(this.identity);
+            if (cards.length === 0) throw new RegisterRequiredError();
+
+            await this.cardManager.revokeCard(cards[0].id);
+            await this[_keyLoader].resetLocalPrivateKey();
+        } finally {
+            this[_inProcess] = false;
+        }
     }
 
     private async _publishCard(keyPair: KeyPair, previousCardId?: string) {

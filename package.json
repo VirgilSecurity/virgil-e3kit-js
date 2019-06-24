@@ -34,7 +34,7 @@
         "@virgilsecurity/keyknox": "^0.2.5",
         "virgil-crypto": "^3.2.5",
         "virgil-pythia": "^0.2.3",
-        "virgil-sdk": "^5.2.3"
+        "virgil-sdk": "^5.3.0"
     },
     "peerDependencies": {},
     "devDependencies": {
