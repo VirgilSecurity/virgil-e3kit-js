@@ -782,3 +782,23 @@ describe('EThree.encryptFile/EThree.decryptFile', async () => {
         throw new Error('should throw');
     });
 });
+
+describe('unregister()', () => {
+    it('STE-20 revokes Virgil Card and deletes private key', async () => {
+        const identity = `virgiltest_unregister_${Date.now()}`;
+        const fetchToken = () => Promise.resolve(generator.generateToken(identity).toString());
+        const sdk = await initializeEThree(fetchToken);
+
+        await expect(sdk.unregister()).rejects.toBeInstanceOf(RegisterRequiredError);
+
+        await sdk.register();
+        await sdk.unregister();
+
+        const [cards, key] = await Promise.all([
+            cardManager.searchCards(identity),
+            keyStorage.load(identity),
+        ]);
+        expect(cards).toHaveLength(0);
+        expect(key).toBe(null);
+    });
+});

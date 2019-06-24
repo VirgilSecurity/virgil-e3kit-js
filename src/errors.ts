@@ -40,7 +40,8 @@ export class IdentityAlreadyExistsError extends SdkError {
 }
 
 /**
- * Error thrown by {@link EThree.encrypt}, {@link EThree.decrypt} and {@link EThree.backupPrivateKey}
+ * Error thrown by {@link EThree.encrypt}, {@link EThree.decrypt},
+ * {@link Ethree.unregister} and {@link EThree.backupPrivateKey}
  * when current identity of E3kit instance is not registered.
  */
 export class RegisterRequiredError extends SdkError {
