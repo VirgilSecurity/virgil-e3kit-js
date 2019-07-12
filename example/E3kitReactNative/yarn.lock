@@ -648,12 +648,12 @@
     to-fast-properties "^2.0.0"
 
 "@virgilsecurity/e3kit@file:../..":
-  version "0.4.3"
+  version "0.5.0"
   dependencies:
     "@virgilsecurity/keyknox" "^0.2.5"
     virgil-crypto "^3.2.5"
     virgil-pythia "^0.2.3"
-    virgil-sdk "^5.2.3"
+    virgil-sdk "^5.3.0"
 
 "@virgilsecurity/key-storage-rn@0.1.1":
   version "0.1.1"
@@ -3573,9 +3573,9 @@ lodash.throttle@^4.1.1:
   integrity sha1-wj6RtxAkKscMN/HhzaknTMOb8vQ=
 
 lodash@^4.13.1, lodash@^4.17.10, lodash@^4.17.4, lodash@^4.17.5, lodash@^4.3.0, lodash@^4.6.1:
-  version "4.17.11"
-  resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.11.tgz#b39ea6229ef607ecd89e2c8df12536891cac9b8d"
-  integrity sha512-cQKh8igo5QUhZ7lg38DYWAxMvjSAKG0A8wGSVimP07SIUEK2UO+arSRKbRZWtelMtN5V0Hkwh5ryOto/SshYIg==
+  version "4.17.14"
+  resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.14.tgz#9ce487ae66c96254fe20b599f21b6816028078ba"
+  integrity sha512-mmKYbW3GLuJeX+iGP+Y7Gp1AiGHGbXHCOh/jZmrawMmsE7MS4znI3RL2FsjbqOyMayHInjOeykW7PEajUk1/xw==
 
 loose-envify@^1.0.0, loose-envify@^1.1.0, loose-envify@^1.3.1:
   version "1.4.0"
@@ -5848,10 +5848,10 @@ virgil-pythia@^0.2.3:
   dependencies:
     cross-fetch "^2.2.2"
 
-virgil-sdk@^5.2.3:
-  version "5.2.3"
-  resolved "https://registry.yarnpkg.com/virgil-sdk/-/virgil-sdk-5.2.3.tgz#381e077f10279a2d4061dff10b226ea01e93fabf"
-  integrity sha512-uxKjMcAUMazqq0dEvC0BKw4WqiQyhHl8n+BKDsKP2b9mqxWWHx+ndr4egnjpw3ewKaAsvG3LaIqAUDlDVcvrCA==
+virgil-sdk@^5.3.0:
+  version "5.3.0"
+  resolved "https://registry.yarnpkg.com/virgil-sdk/-/virgil-sdk-5.3.0.tgz#43f0233a5f9691051a123743ac66fc8e2522e9f3"
+  integrity sha512-Eq/wtoisvQ02I6FpAJ4xm5FGVgKSPSbaxLlmzTuKXbYMwotqgVrFL9qwHrBKo0icC2Apgmbz3/1zy2ciyF+GXw==
   dependencies:
     fetch-ponyfill "^6.0.2"
     mkdirp "^0.5.1"
