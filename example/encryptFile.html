@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <script src="https://unpkg.com/virgil-crypto/dist/virgil-crypto.browser.umd.min.js"></script>
+    <script src="https://unpkg.com/virgil-sdk/dist/virgil-sdk.browser.umd.min.js"></script>
+    <script src="https://unpkg.com/@virgilsecurity/e3kit/dist/e3kit.browser.umd.min.js"></script>
+    <script src="https://mrdoob.github.io/stats.js/build/stats.min.js"></script>
+</head>
+<body>
+
+    <form style="margin-top: 100px; display: flex; flex-direction: column; font-family: sans-serif;">
+        Tested only in chrome!
+        To receive precise memory measurement, run Chrome with <b>--enable-precise-memory-info</b>
+        <ol>
+            <li>Get the credentials at <a href="https://dashboard.virgilsecurity.com/">Virgil Dashboard</a>.</li>
+            <li>Upload file or choose size.</li>
+            <li>You will receive encrypted file at the end of the encryption.</li>
+            <li>Upload encrypted file (file size ignored).</li>
+            <li>You will receive decrypted file at the end.</li>
+        </ol>
+        <fieldset>
+            <label>
+                app id
+                <input id="app-id" />
+            </label>
+            <label>
+                api key
+                <input id="api-key" />
+            </label>
+            <label>
+                api key id
+                <input id="api-key-id" />
+            </label>
+        </fieldset>
+        <fieldset>
+            <label>
+                file size
+                <input type="number" id="file-size"  value="10485760"/>
+            </label>
+            - or -
+            <input type="file" id="file-input" />
+            <label>
+                chunk size
+                <input id="chunk-size" value="65536" />
+            </label>
+        </fieldset>
+        <fieldset>
+            <button type="button" onclick="encryptAbort()">cancel</button>
+            <button type="button" onclick="encrypt()">encrypt</button>
+            <button type="button" onclick="decrypt()">decrypt</button>
+        </fieldset>
+    </form>
+    <pre id="log"></pre>
+    <script>
+            var fps = new Stats();
+            let abort = new AbortController();
+
+            fps.showPanel(2);
+            document.body.appendChild( fps.dom );
+
+            function encryptAbort() {
+                abort.abort();
+                abort = new AbortController();
+            }
+
+            function encrypt() {
+                document.getElementById('log').appendChild(document.createElement('p'));
+
+                const fileSize = parseInt(document.getElementById('file-size').value);
+                const file = document.getElementById('file-input').files[0] ?
+                    document.getElementById('file-input').files[0] :
+                    new File(['f'.repeat(fileSize)], 'file');
+
+                const chunkSize = parseInt(document.getElementById('chunk-size').value);
+
+                initializeE3kit().then(e3kit => {
+                    fps.begin();
+                    const start = Date.now();
+                    e3kit.encryptFile(file, undefined, {
+                        signal: abort.signal,
+                        chunkSize,
+                        onProgress: (snapshot) => {
+                            fps.update();
+
+                            const percent = Math.round(snapshot.bytesProcessed / snapshot.fileSize * 100);
+                            const lastChild = document.getElementById('log').lastChild;
+                            lastChild.innerHTML = log({
+                                [snapshot.state]: percent,
+                                time: ((Date.now() - start) / 1000).toFixed('3') + 'ms',
+                                fileSize: (file.size / 1024 / 1024).toFixed(2) + 'mb',
+                                chunkSize: (chunkSize / 1024).toFixed(2) + 'kb'
+                            })
+                        }
+                    }).then((file) => {
+                        fps.end();
+                        download(file);
+                    })
+                });
+
+            }
+
+            function decrypt() {
+                document.getElementById('log').appendChild(document.createElement('p'));
+
+                const fileSize = parseInt(document.getElementById('file-size').value);
+                const file = document.getElementById('file-input').files[0] ?
+                    document.getElementById('file-input').files[0] :
+                    new File(['f'.repeat(fileSize)], 'file');
+                const chunkSize = parseInt(document.getElementById('chunk-size').value);
+
+                initializeE3kit().then(e3kit => {
+                    fps.begin();
+                    const start = Date.now();
+
+                    e3kit.decryptFile(file, undefined, {
+                        signal: abort.signal,
+                        chunkSize,
+                        onProgress: (snapshot) => {
+                            fps.update();
+                            const percent = Math.round(snapshot.bytesProcessed / snapshot.fileSize * 100);
+                            const lastChild = document.getElementById('log').lastChild;
+                            lastChild.innerHTML = log({
+                                [snapshot.state]: percent,
+                                time: ((Date.now() - start) / 1000).toFixed('3') + 'ms',
+                                fileSize: (file.size / 1024 / 1024).toFixed(2) + 'mb',
+                                chunkSize: (chunkSize / 1024).toFixed(2) + 'kb'
+                            })
+                        }
+                    }).then((file) => {
+                        fps.end();
+                        download(file);
+                    })
+                });
+            }
+
+            function initializeE3kit() {
+                const APP_ID = document.getElementById('app-id').value;
+                const API_KEY = document.getElementById('api-key').value;
+                const API_KEY_ID = document.getElementById('api-key-id').value;
+
+                const virgilCrypto = new VirgilCrypto.VirgilCrypto();
+                const accessTokenSigner = new VirgilCrypto.VirgilAccessTokenSigner(virgilCrypto);
+
+                const jwtGenerator = new Virgil.JwtGenerator({
+                    appId: APP_ID,
+                    apiKey: virgilCrypto.importPrivateKey(API_KEY),
+                    apiKeyId: API_KEY_ID,
+                    accessTokenSigner: accessTokenSigner,
+                });
+
+
+                let e3kit;
+
+
+                return E3kit.EThree.initialize(() => {
+                    return Promise.resolve(jwtGenerator.generateToken('test'));
+                }).then(sdk => {
+                    e3kit = sdk;
+                    return e3kit.hasLocalPrivateKey();
+                }).then(hasLocalPrivateKey => {
+                    if (!hasLocalPrivateKey) return e3kit.register();
+                    return e3kit;
+                });
+            }
+
+
+            function download(file) {
+                var element = document.createElement('a');
+                element.setAttribute('href', URL.createObjectURL(file));
+                element.setAttribute('download', file.name);
+
+                element.style.display = 'none';
+                document.body.appendChild(element);
+
+                element.click();
+
+                document.body.removeChild(element);
+            }
+
+            function log(options) {
+                return Object.keys(options).map(key =>  `${key}: <b>${options[key]}</b>`).join('\n');
+            }
+
+        </script>
+
+</body>
+</html>
