@@ -10,7 +10,7 @@ export const EMPTY_ARRAY = 'Array should be non empty';
  * @hidden
  */
 export const throwGetTokenNotAFunction = (typeofArg: string) => {
-    throw new SyntaxError(
+    throw new TypeError(
         `EThree.initialize expects a function that returns Virgil JWT, got ${typeofArg}`,
     );
 };
