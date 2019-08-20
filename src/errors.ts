@@ -5,7 +5,15 @@ export const DUPLICATE_IDENTITIES = 'Identities in array should be unique';
 /**
  * @hidden
  */
-export const EMPTY_ARRAY = `Array should be non empty`;
+export const EMPTY_ARRAY = 'Array should be non empty';
+/**
+ * @hidden
+ */
+export const throwGetTokenNotAFunction = (typeofArg: string) => {
+    throw new SyntaxError(
+        `EThree.initialize expects a function that returns Virgil JWT, got ${typeofArg}`,
+    );
+};
 /**
  * @hidden
  */
