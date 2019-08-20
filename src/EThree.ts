@@ -26,6 +26,7 @@ import {
     EMPTY_ARRAY,
     throwIllegalInvocationError,
     IntegrityCheckFailedError,
+    throwGetTokenNotAFunction,
 } from './errors';
 import { isArray, isString, isFile, isVirgilPublicKey } from './utils/typeguards';
 import { withDefaults } from './utils/object';
@@ -92,6 +93,8 @@ export default class EThree {
         getToken: () => Promise<string>,
         options: EThreeInitializeOptions = {},
     ): Promise<EThree> {
+        if (typeof getToken !== 'function') throwGetTokenNotAFunction(typeof getToken);
+
         const opts = withDefaults(options as EThreeCtorOptions, {
             accessTokenProvider: new CachingJwtProvider(getToken),
         });
