@@ -109,6 +109,18 @@ describe('EThree.register()', () => {
         expect(cards.length).toBe(1);
         expect(key).not.toBe(null);
     });
+
+    it('STE-44 registers with provided key pair', async () => {
+        const identity = uuid();
+        const fetchToken = createFetchToken(identity);
+        const sdk = await initializeEThree(fetchToken);
+        const keyPair = virgilCrypto.generateKeys();
+        await sdk.register(keyPair);
+        const cards = await cardManager.searchCards(identity);
+        expect(cards[0].identity).toBe(identity);
+        const keyEntry = await keyStorage.load(identity);
+        expect(keyEntry).toBeDefined();
+    });
 });
 
 describe('EThree.rotatePrivateKey', () => {

@@ -7,6 +7,11 @@ import {
 } from './utils/constants';
 import { IKeyEntryStorage } from 'virgil-sdk';
 
+/**
+ * Object representation of private and public keys pair.
+ */
+export type VirgilKeyPair = import('virgil-crypto').VirgilKeyPair;
+
 export interface EThreeInitializeOptions {
     /**
      * Implementation of IKeyEntryStorage. Used IndexedDB Key Storage from
