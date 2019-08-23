@@ -41,6 +41,7 @@ import {
     STORAGE_NAME,
 } from './utils/constants';
 import {
+    VirgilKeyPair,
     EncryptVirgilPublicKeyArg,
     LookupResult,
     EThreeInitializeOptions,
@@ -148,7 +149,7 @@ export default class EThree {
     /**
      * Register current user in Virgil Cloud. Saves private key locally and uploads public key to cloud.
      */
-    async register() {
+    async register(keyPair?: VirgilKeyPair) {
         if (this[_inProcess]) throwIllegalInvocationError('register');
         this[_inProcess] = true;
         try {
@@ -159,9 +160,9 @@ export default class EThree {
             if (cards.length > 1) throw new MultipleCardsError(this.identity);
             if (cards.length > 0) throw new IdentityAlreadyExistsError();
             if (privateKey && cards.length === 0) await this[_keyLoader].resetLocalPrivateKey();
-            const keyPair = this.virgilCrypto.generateKeys();
-            await this._publishCard(keyPair);
-            await this[_keyLoader].savePrivateKeyLocal(keyPair.privateKey);
+            const myKeyPair = keyPair || this.virgilCrypto.generateKeys();
+            await this._publishCard(myKeyPair);
+            await this[_keyLoader].savePrivateKeyLocal(myKeyPair.privateKey);
         } finally {
             this[_inProcess] = false;
         }
