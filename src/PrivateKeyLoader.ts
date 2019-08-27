@@ -32,6 +32,7 @@ export default class PrivateKeyLoader {
     private localStorage: IKeyEntryStorage;
     private keyknoxClient = new KeyknoxClient(this.options.apiUrl);
     private keyknoxCrypto = new KeyknoxCrypto(this.options.virgilCrypto);
+    private cachedPrivateKey: VirgilPrivateKey | null = null;
 
     constructor(private identity: string, public options: IPrivateKeyLoaderOptions) {
         this.localStorage = options.keyEntryStorage;
@@ -46,6 +47,7 @@ export default class PrivateKeyLoader {
     }
 
     async savePrivateKeyLocal(privateKey: VirgilPrivateKey) {
+        this.cachedPrivateKey = privateKey;
         return await this.localStorage.save({
             name: this.identity,
             value: this.options.virgilCrypto.exportPrivateKey(privateKey),
@@ -53,13 +55,15 @@ export default class PrivateKeyLoader {
     }
 
     async loadLocalPrivateKey() {
+        if (this.cachedPrivateKey) return this.cachedPrivateKey;
         const privateKeyData = await this.localStorage.load(this.identity);
         if (!privateKeyData) return null;
-        return this.options.virgilCrypto.importPrivateKey(privateKeyData.value) as VirgilPrivateKey;
+        return this.importAndCachePrivateKey(privateKeyData.value);
     }
 
     async resetLocalPrivateKey() {
         await this.localStorage.remove(this.identity);
+        this.cachedPrivateKey = null;
     }
 
     async resetPrivateKeyBackup(password: string) {
@@ -79,7 +83,7 @@ export default class PrivateKeyLoader {
         const storage = await this.getStorage(password);
         const rawKey = storage.retrieveEntry(this.identity);
         await this.localStorage.save({ name: this.identity, value: rawKey.data });
-        return this.options.virgilCrypto.importPrivateKey(rawKey.data);
+        return this.importAndCachePrivateKey(rawKey.data);
     }
 
     async changePassword(oldPwd: string, newPwd: string) {
@@ -131,5 +135,12 @@ export default class PrivateKeyLoader {
             throw e;
         }
         return storage;
+    }
+
+    private importAndCachePrivateKey(rawKeyData: Buffer) {
+        this.cachedPrivateKey = this.options.virgilCrypto.importPrivateKey(
+            rawKeyData,
+        ) as VirgilPrivateKey;
+        return this.cachedPrivateKey;
     }
 }
