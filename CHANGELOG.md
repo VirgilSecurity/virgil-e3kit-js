@@ -1,5 +1,17 @@
 # Changelog
 
+## 2019-08-28 0.5.3
+
+* Caching the private key in memory to improve performace.
+
+## 2019-08-23 0.5.2
+
+* Added ability to provide custom keypair to `e3Instance.register` method.
+
+## 2019-08-20 0.5.1
+
+* `EThree.initialize` now throws a `TypeError` if the `getToken` argument is not a function.
+
 ## 2019-06-24 0.5.0
 
 * Added `Ethree.unregister()` method to revoke the current user's Virgil Card in Virgil Cloud and delete the local private key (i.e. undo everything `register` does).
