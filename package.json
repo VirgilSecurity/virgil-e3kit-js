@@ -12,9 +12,7 @@
     "author": "Virgil Security Inc. <support@virgilsecurity.com>",
     "license": "BSD-3-Clause",
     "scripts": {
-        "build:browser:umd": "cross-env NODE_ENV=production rollup -c config/rollup.config.umd.js",
-        "build:browser:es": "cross-env NODE_ENV=production rollup -c config/rollup.config.es.js",
-        "build": "npm run build:browser:umd && npm run build:browser:es",
+        "build": "rollup -c config/rollup.config.js",
         "clean": "rimraf .rpt2_cache .virgil_key_entries coverage dist",
         "debug:test": "node --inspect-brk node_modules/.bin/jest --runInBand",
         "lint": "tslint --project tsconfig.json",
@@ -22,7 +20,7 @@
         "prettier": "prettier 'src/**/*.ts' --write",
         "precommit": "lint-staged",
         "test": "karma start",
-        "docs": "typedoc src && npm run build:browser:umd && copy example/*.html docs"
+        "docs": "typedoc src && npm run build && copy example/*.html docs"
     },
     "lint-staged": {
         "src/**/*.ts": [
@@ -57,17 +55,16 @@
         "lint-staged": "^7.2.2",
         "mocha": "^5.2.0",
         "prettier": "^1.14.2",
+        "react-native-virgil-crypto": "git://github.com/VirgilSecurity/react-native-virgil-crypto.git#e3kit-compat",
         "rimraf": "^2.6.2",
         "rollup": "^1.15.1",
-        "rollup-plugin-analyzer": "^3.0.0",
         "rollup-plugin-commonjs": "^10.0.0",
-        "rollup-plugin-inject": "^2.2.0",
-        "rollup-plugin-node-globals": "^1.2.1",
+        "rollup-plugin-copy": "^3.1.0",
         "rollup-plugin-node-resolve": "^5.0.1",
-        "rollup-plugin-replace": "^2.1.0",
+        "rollup-plugin-re": "^1.0.7",
         "rollup-plugin-sourcemaps": "^0.4.2",
+        "rollup-plugin-terser": "^5.1.1",
         "rollup-plugin-typescript2": "^0.20.1",
-        "rollup-plugin-uglify": "^6.0.2",
         "source-map-explorer": "^1.6.0",
         "tslint": "^5.11.0",
         "tslint-config-airbnb": "^5.9.2",
@@ -80,5 +77,8 @@
         "virgil-pythia": "next",
         "virgil-sdk": "next"
     },
-    "sideEffects": false
+    "sideEffects": false,
+    "publishConfig": {
+        "access": "public"
+    }
 }
