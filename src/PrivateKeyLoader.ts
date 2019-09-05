@@ -5,20 +5,23 @@ import {
     CloudEntryDoesntExistError,
     KeyknoxClient,
 } from '@virgilsecurity/keyknox';
-import {
-    VirgilPythiaCrypto,
-    VirgilPrivateKey,
-    VirgilCrypto,
-} from 'virgil-crypto/dist/virgil-crypto-pythia.es';
-import { IKeyEntryStorage, IAccessTokenProvider } from 'virgil-sdk';
-import { WrongKeyknoxPasswordError, PrivateKeyNoBackupError } from './errors';
+
 import { generateBrainPair } from './utils/brainkey';
+import { WrongKeyknoxPasswordError, PrivateKeyNoBackupError } from './errors';
+import {
+    IPrivateKey,
+    ICrypto,
+    IBrainKeyCrypto,
+    IAccessTokenProvider,
+    IKeyEntryStorage,
+} from './types';
 
 /**
  * @hidden
  */
 export interface IPrivateKeyLoaderOptions {
-    virgilCrypto: VirgilCrypto;
+    virgilCrypto: ICrypto;
+    brainKeyCrypto: IBrainKeyCrypto;
     accessTokenProvider: IAccessTokenProvider;
     keyEntryStorage: IKeyEntryStorage;
     apiUrl?: string;
@@ -27,30 +30,29 @@ export interface IPrivateKeyLoaderOptions {
 /**
  * @hidden
  */
-export default class PrivateKeyLoader {
-    private pythiaCrypto = new VirgilPythiaCrypto();
+export class PrivateKeyLoader {
     private localStorage: IKeyEntryStorage;
     private keyknoxClient = new KeyknoxClient(this.options.apiUrl);
     private keyknoxCrypto = new KeyknoxCrypto(this.options.virgilCrypto);
-    private cachedPrivateKey: VirgilPrivateKey | null = null;
+    private cachedPrivateKey: IPrivateKey | null = null;
 
     constructor(private identity: string, public options: IPrivateKeyLoaderOptions) {
         this.localStorage = options.keyEntryStorage;
     }
 
-    async savePrivateKeyRemote(privateKey: VirgilPrivateKey, password: string) {
+    async savePrivateKeyRemote(privateKey: IPrivateKey, password: string) {
         const storage = await this.getStorage(password);
         return await storage.storeEntry(
             this.identity,
-            this.options.virgilCrypto.exportPrivateKey(privateKey),
+            this.options.virgilCrypto.exportPrivateKey(privateKey).toString('base64'),
         );
     }
 
-    async savePrivateKeyLocal(privateKey: VirgilPrivateKey) {
+    async savePrivateKeyLocal(privateKey: IPrivateKey) {
         this.cachedPrivateKey = privateKey;
         return await this.localStorage.save({
             name: this.identity,
-            value: this.options.virgilCrypto.exportPrivateKey(privateKey),
+            value: this.options.virgilCrypto.exportPrivateKey(privateKey).toString('base64'),
         });
     }
 
@@ -110,7 +112,7 @@ export default class PrivateKeyLoader {
     private async generateBrainPair(pwd: string) {
         return generateBrainPair(pwd, {
             virgilCrypto: this.options.virgilCrypto,
-            pythiaCrypto: this.pythiaCrypto,
+            pythiaCrypto: this.options.brainKeyCrypto,
             accessTokenProvider: this.options.accessTokenProvider,
             apiUrl: this.options.apiUrl,
         });
@@ -124,8 +126,8 @@ export default class PrivateKeyLoader {
                 this.options.accessTokenProvider,
                 keyPair.privateKey,
                 keyPair.publicKey,
-                this.keyknoxClient,
                 this.keyknoxCrypto,
+                this.keyknoxClient,
             ),
         );
         try {
@@ -137,10 +139,11 @@ export default class PrivateKeyLoader {
         return storage;
     }
 
-    private importAndCachePrivateKey(rawKeyData: Buffer) {
-        this.cachedPrivateKey = this.options.virgilCrypto.importPrivateKey(
-            rawKeyData,
-        ) as VirgilPrivateKey;
+    private importAndCachePrivateKey(rawKeyData: string) {
+        this.cachedPrivateKey = this.options.virgilCrypto.importPrivateKey({
+            value: rawKeyData,
+            encoding: 'base64',
+        });
         return this.cachedPrivateKey;
     }
 }

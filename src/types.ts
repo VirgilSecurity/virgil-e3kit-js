@@ -1,4 +1,17 @@
-import { VirgilPublicKey } from 'virgil-crypto';
+export type VirgilPrivateKey = import('@virgilsecurity/base-crypto').VirgilPrivateKey;
+
+export type NodeBuffer = import('@virgilsecurity/crypto-types').NodeBuffer;
+export type Data = import('@virgilsecurity/crypto-types').Data;
+export type IKeyPair = import('@virgilsecurity/crypto-types').IKeyPair;
+export type IPrivateKey = import('@virgilsecurity/crypto-types').IPrivateKey;
+export type IPublicKey = import('@virgilsecurity/crypto-types').IPublicKey;
+export type ICrypto = import('@virgilsecurity/crypto-types').ICrypto;
+export type ICardCrypto = import('@virgilsecurity/crypto-types').ICardCrypto;
+export type IBrainKeyCrypto = import('@virgilsecurity/crypto-types').IBrainKeyCrypto;
+
+export type IAccessTokenProvider = import('virgil-sdk').IAccessTokenProvider;
+export type IKeyEntryStorage = import('virgil-sdk').IKeyEntryStorage;
+
 import {
     VIRGIL_STREAM_SIGNING_STATE,
     VIRGIL_STREAM_ENCRYPTING_STATE,
@@ -6,11 +19,6 @@ import {
     VIRGIL_STREAM_DECRYPTING_STATE,
 } from './utils/constants';
 import { IKeyEntryStorage } from 'virgil-sdk';
-
-/**
- * Object representation of private and public keys pair.
- */
-export type VirgilKeyPair = import('virgil-crypto').VirgilKeyPair;
 
 export interface EThreeInitializeOptions {
     /**
@@ -33,17 +41,26 @@ export interface EThreeInitializeOptions {
 }
 
 /**
+ * @hidden
+ */
+export interface EThreeCtorOptions extends EThreeInitializeOptions {
+    /**
+     * Implementation of IAccessTokenProvider from [Virgil SDK](https://github.com/virgilsecurity/virgil-sdk-javascript);
+     */
+    accessTokenProvider: IAccessTokenProvider;
+}
+
+/**
  * Dictionary returned from lookupPublicKey method
  */
-
 export type LookupResult = {
-    [identity: string]: VirgilPublicKey;
+    [identity: string]: IPublicKey;
 };
 
 /**
- * Argument for encrypt function can be single VirgilPublicKey or LookupResult
+ * Argument for encrypt function can be single IPublicKey or LookupResult
  */
-export type EncryptVirgilPublicKeyArg = LookupResult | VirgilPublicKey;
+export type EncryptPublicKeyArg = LookupResult | IPublicKey;
 
 /**
  * Callback invoked for each chunk being processed in encryptFile method.

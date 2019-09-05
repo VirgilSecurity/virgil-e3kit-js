@@ -1,22 +1,16 @@
-import { VirgilPrivateKey, VirgilPublicKey, VirgilCrypto } from 'virgil-crypto';
 import { createBrainKey } from 'virgil-pythia';
-import { VirgilPythiaCrypto } from 'virgil-crypto/dist/types/pythia';
-import { IAccessTokenProvider } from 'virgil-sdk';
+
+import { IKeyPair, ICrypto, IBrainKeyCrypto, IAccessTokenProvider } from '../types';
 
 const BRAIN_KEY_RATE_LIMIT_DELAY = 2000;
 const BRAIN_KEY_THROTTLING_ERROR_CODE = 60007;
-
-type KeyPair = {
-    privateKey: VirgilPrivateKey;
-    publicKey: VirgilPublicKey;
-};
 
 /**
  * @hidden
  */
 export type BrainkeyOptions = {
-    virgilCrypto: VirgilCrypto;
-    pythiaCrypto: VirgilPythiaCrypto;
+    virgilCrypto: ICrypto;
+    pythiaCrypto: IBrainKeyCrypto;
     accessTokenProvider: IAccessTokenProvider;
     apiUrl?: string;
 };
@@ -27,7 +21,7 @@ export type BrainkeyOptions = {
 export const generateBrainPair = async (pwd: string, options: BrainkeyOptions) => {
     const brainKey = createBrainKey({
         virgilCrypto: options.virgilCrypto,
-        virgilPythiaCrypto: options.pythiaCrypto,
+        virgilBrainKeyCrypto: options.pythiaCrypto,
         accessTokenProvider: options.accessTokenProvider,
         apiUrl: options.apiUrl,
     });
@@ -42,7 +36,7 @@ export const generateBrainPair = async (pwd: string, options: BrainkeyOptions) =
                         .catch(reject);
                 setTimeout(repeat, BRAIN_KEY_RATE_LIMIT_DELAY);
             });
-            return promise as Promise<KeyPair>;
+            return promise as Promise<IKeyPair>;
         }
         throw e;
     });

@@ -1,3 +1,5 @@
+import { IPublicKey } from './types';
+
 /**
  * @hidden
  */
@@ -103,9 +105,7 @@ export class MultipleCardsError extends SdkError {
 }
 
 export type LookupResultWithErrors = {
-    [identity: string]:
-        | import('virgil-crypto/dist/virgil-crypto-pythia.es').VirgilPublicKey
-        | Error;
+    [identity: string]: IPublicKey | Error;
 };
 
 /**
@@ -113,7 +113,7 @@ export type LookupResultWithErrors = {
  */
 export class LookupError extends SdkError {
     /**
-     * Key Value object, where key is identity and value is VirgilPublicKey or [[MultipleCardsError]] or [[LookupNotFoundError]]
+     * Key Value object, where key is identity and value is IPublicKey or [[MultipleCardsError]] or [[LookupNotFoundError]]
      */
     public lookupResult: LookupResultWithErrors;
     constructor(lookupResult: LookupResultWithErrors) {
