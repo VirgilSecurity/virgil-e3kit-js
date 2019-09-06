@@ -3,6 +3,9 @@ node_js:
   - "8"
   - "10"
   - "11"
+branches:
+    except:
+    - v0.6.0
 script:
   - npm run test
 before_deploy:
