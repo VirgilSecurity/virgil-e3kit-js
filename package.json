@@ -2,11 +2,19 @@
     "name": "@virgilsecurity/e3kit",
     "version": "0.5.3",
     "description": "End-to-end encryption with multiple device support powered by Virgil Security",
-    "main": "./dist/e3kit.browser.es.js",
-    "module": "./dist/e3kit.browser.es.js",
+    "main": "./dist/node.cjs.js",
+    "module": "./dist/node.es.js",
+    "browser": {
+        "./dist/node.cjs.js": "./dist/browser.cjs.js",
+        "./dist/node.es.js": "./dist/browser.es.js",
+        "./dist/node.asmjs.cjs.js": "./dist/browser.asmjs.cjs.js",
+        "./dist/node.asmjs.es.js": "./dist/browser.asmjs.es.js"
+    },
     "typings": "./dist/types/index.d.ts",
     "files": [
-        "dist"
+        "dist",
+        "native.js",
+        "worker.js"
     ],
     "repository": "https://github.com/VirgilSecurity/virgil-e3kit-js",
     "author": "Virgil Security Inc. <support@virgilsecurity.com>",
