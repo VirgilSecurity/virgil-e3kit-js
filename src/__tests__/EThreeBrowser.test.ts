@@ -3,6 +3,7 @@ import uuid from 'uuid/v4';
 
 import { setFoundationModules, VirgilCrypto } from '@virgilsecurity/base-crypto';
 import initFoundation from '@virgilsecurity/core-foundation';
+import { initPythia } from '@virgilsecurity/pythia-crypto';
 import { VirgilAccessTokenSigner } from '@virgilsecurity/sdk-crypto';
 import { JwtGenerator } from 'virgil-sdk';
 
@@ -16,17 +17,13 @@ import { IntegrityCheckFailedError } from '../errors';
 import { EThree } from '../EThree';
 import { LookupResult, onEncryptProgressSnapshot, onDecryptProgressSnapshot } from '../types';
 
-import './EThree.test';
-
-describe('EThree', () => {
+describe('EThreeBrowser', () => {
     let virgilCrypto: VirgilCrypto;
     let jwtGenerator: JwtGenerator;
 
     before(async () => {
         await initFoundation().then(setFoundationModules);
-    });
-
-    beforeEach(async () => {
+        await initPythia();
         virgilCrypto = new VirgilCrypto();
         jwtGenerator = new JwtGenerator({
             appId: process.env.APP_ID!,

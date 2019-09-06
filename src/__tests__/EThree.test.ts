@@ -1,5 +1,6 @@
 import expect from 'expect';
 import uuid from 'uuid/v4';
+import isBuffer from 'is-buffer';
 
 import { setFoundationModules, VirgilCrypto } from '@virgilsecurity/base-crypto';
 import initFoundation from '@virgilsecurity/core-foundation';
@@ -597,10 +598,10 @@ describe('EThree', () => {
             await sdk.register();
             const publicKey = (await sdk.lookupPublicKeys([identity]))[0];
             const encryptedMessage = await sdk.encrypt(buf, recipient.publicKey);
-            expect(Buffer.isBuffer(encryptedMessage)).toBe(true);
+            expect(isBuffer(encryptedMessage)).toBe(true);
 
             const resp = await sdk.decrypt(encryptedMessage, publicKey);
-            expect(Buffer.isBuffer(resp)).toBe(true);
+            expect(isBuffer(resp)).toBe(true);
         });
     });
 
