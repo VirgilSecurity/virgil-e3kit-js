@@ -27,7 +27,9 @@
         "prepare": "npm run clean && npm run build",
         "prettier": "prettier 'src/**/*.ts' --write",
         "precommit": "lint-staged",
-        "test": "karma start",
+        "test:node": "mocha -t 0 -r dotenv/config -r ts-node/register src/__tests__/EThree.test.ts",
+        "test:browser": "karma start",
+        "test": "npm run test:node && npm run test:browser",
         "docs": "typedoc src && npm run build && copy example/*.html docs"
     },
     "lint-staged": {
@@ -37,25 +39,19 @@
         ]
     },
     "dependencies": {
-        "@virgilsecurity/base-crypto": "^0.4.4",
-        "@virgilsecurity/core-foundation": "^0.1.0",
+        "@virgilsecurity/base-crypto": "^0.4.5",
+        "@virgilsecurity/core-foundation": "^0.1.1",
         "@virgilsecurity/crypto-types": "^0.1.3",
         "@virgilsecurity/keyknox": "next",
-        "@virgilsecurity/pythia-crypto": "^0.1.0",
+        "@virgilsecurity/pythia-crypto": "^0.1.1",
         "@virgilsecurity/sdk-crypto": "^0.4.4",
         "virgil-pythia": "next",
         "virgil-sdk": "next"
     },
-    "peerDependencies": {},
     "devDependencies": {
         "@types/mocha": "^5.2.5",
         "@types/uuid": "^3.4.4",
-        "@virgilsecurity/base-crypto": "^0.4.4",
-        "@virgilsecurity/core-foundation": "^0.1.0",
         "@virgilsecurity/key-storage-rn": "next",
-        "@virgilsecurity/keyknox": "next",
-        "@virgilsecurity/pythia-crypto": "^0.1.0",
-        "@virgilsecurity/sdk-crypto": "^0.4.4",
         "abort-controller": "^3.0.0",
         "builtin-modules": "^3.1.0",
         "copy": "^0.3.2",
@@ -84,6 +80,7 @@
         "rollup-plugin-terser": "^5.1.1",
         "rollup-plugin-typescript2": "^0.21.1",
         "source-map-explorer": "^1.6.0",
+        "ts-node": "^8.3.0",
         "tslint": "^5.11.0",
         "tslint-config-airbnb": "^5.9.2",
         "tslint-config-prettier": "^1.14.0",

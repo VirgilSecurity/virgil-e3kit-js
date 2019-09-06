@@ -1,6 +1,11 @@
 import initFoundation from '@virgilsecurity/core-foundation';
-import { setFoundationModules, VirgilCrypto, VirgilPublicKey } from '@virgilsecurity/base-crypto';
-import { initPythia, VirgilBrainKeyCrypto } from '@virgilsecurity/pythia-crypto';
+import {
+    getFoundationModules,
+    setFoundationModules,
+    VirgilCrypto,
+    VirgilPublicKey,
+} from '@virgilsecurity/base-crypto';
+import { initPythia, getPythiaModules, VirgilBrainKeyCrypto } from '@virgilsecurity/pythia-crypto';
 import { VirgilCardCrypto } from '@virgilsecurity/sdk-crypto';
 import { CachingJwtProvider, CardManager, KeyEntryStorage, VirgilCardVerifier } from 'virgil-sdk';
 
@@ -95,8 +100,14 @@ export class EThree extends AbstractEThree {
         getToken: () => Promise<string>,
         options: EThreeInitializeOptions = {},
     ): Promise<EThree> {
-        const [foundationModules] = await Promise.all([initFoundation(), initPythia()]);
-        setFoundationModules(foundationModules);
+        const modulesToLoad: Promise<void>[] = [];
+        if (!getFoundationModules()) {
+            modulesToLoad.push(initFoundation().then(setFoundationModules));
+        }
+        if (!getPythiaModules()) {
+            modulesToLoad.push(initPythia());
+        }
+        await Promise.all(modulesToLoad);
 
         if (typeof getToken !== 'function') throwGetTokenNotAFunction(typeof getToken);
 
@@ -222,7 +233,7 @@ export class EThree extends AbstractEThree {
      */
     async decryptFile(
         file: File | Blob,
-        publicKey?: VirgilPublicKey,
+        publicKey?: IPublicKey,
         options: DecryptFileOptions = {},
     ): Promise<File | Blob> {
         const fileSize = file.size;
@@ -294,7 +305,8 @@ export class EThree extends AbstractEThree {
                 }
             };
 
-            const onFinishCallback = () => resolve(streamVerifier.verify(publicKey!));
+            const onFinishCallback = () =>
+                resolve(streamVerifier.verify(publicKey! as VirgilPublicKey));
             const onErrorCallback = (err: any) => {
                 streamVerifier.dispose();
                 reject(err);

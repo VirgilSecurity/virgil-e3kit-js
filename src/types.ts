@@ -1,4 +1,5 @@
 export type VirgilPrivateKey = import('@virgilsecurity/base-crypto').VirgilPrivateKey;
+export type VirgilPublicKey = import('@virgilsecurity/base-crypto').VirgilPublicKey;
 
 export type NodeBuffer = import('@virgilsecurity/crypto-types').NodeBuffer;
 export type Data = import('@virgilsecurity/crypto-types').Data;
@@ -12,6 +13,7 @@ export type IBrainKeyCrypto = import('@virgilsecurity/crypto-types').IBrainKeyCr
 export type IAccessTokenProvider = import('virgil-sdk').IAccessTokenProvider;
 export type IKeyEntryStorage = import('virgil-sdk').IKeyEntryStorage;
 export type ICard = import('virgil-sdk').ICard;
+export type IKeyEntry = import('virgil-sdk').IKeyEntry;
 
 import {
     VIRGIL_STREAM_SIGNING_STATE,
