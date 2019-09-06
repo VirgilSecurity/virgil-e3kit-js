@@ -23,7 +23,8 @@ const CRYPTO_TYPE = {
 
 const TARGET = {
     BROWSER: 'browser',
-    WORKER: 'worker'
+    WORKER: 'worker',
+    NODE: 'node'
 };
 
 const sourceDir = path.join(__dirname, 'src');
@@ -54,22 +55,22 @@ const createNativeEntry = () => {
     }
 };
 
-const getBrowserCryptoEntryPointName = (target, cryptoType, format) => {
+const getCryptoEntryPointName = (target, cryptoType, format) => {
     return `${target}${cryptoType === CRYPTO_TYPE.ASMJS ? '.asmjs' : ''}.${format}.js`
 };
 
 const createBrowserEntry = (target, cryptoType, format) => {
     const foundationModuleName = '@virgilsecurity/core-foundation';
     const foundationPath = path.resolve('node_modules', foundationModuleName);
-    const foundationEntryPoint = path.join(foundationModuleName, getBrowserCryptoEntryPointName(target, cryptoType, FORMAT.ES));
+    const foundationEntryPoint = path.join(foundationModuleName, getCryptoEntryPointName(target, cryptoType, FORMAT.ES));
     const foundationWasmPath = path.join(foundationPath, `libfoundation.${target}.wasm`);
 
     const pythiaModuleName = '@virgilsecurity/pythia-crypto';
     const pythiaPath = path.resolve('node_modules', pythiaModuleName);
-    const pythiaEntryPoint = path.join(pythiaModuleName, 'dist', getBrowserCryptoEntryPointName(target, cryptoType, FORMAT.ES));
+    const pythiaEntryPoint = path.join(pythiaModuleName, 'dist', getCryptoEntryPointName(target, cryptoType, FORMAT.ES));
     const pythiaWasmPath = path.join(pythiaPath, 'dist', `libpythia.${target}.wasm`);
 
-    const outputFileName = getBrowserCryptoEntryPointName(target, cryptoType, format);
+    const outputFileName = getCryptoEntryPointName(target, cryptoType, format);
     const umdName = format === FORMAT.UMD ? 'E3kit' : undefined;
 
     const tsconfigOverride = format === FORMAT.ES ? { compilerOptions: { target: 'es2015' } } : {};
@@ -86,12 +87,12 @@ const createBrowserEntry = (target, cryptoType, format) => {
                 patterns: [
                     {
                         match: /EThree\.ts$/,
-                        test: '@virgilsecurity/core-foundation',
+                        test: foundationModuleName,
                         replace: foundationEntryPoint
                     },
                     {
                         match: /EThree\.ts$/,
-                        test: '@virgilsecurity/pythia-crypto',
+                        test: pythiaModuleName,
                         replace: pythiaEntryPoint
                     }
                 ],
@@ -120,26 +121,70 @@ const createBrowserEntry = (target, cryptoType, format) => {
     };
 };
 
+const createNodeJsEntry = (cryptoType, format) => {
+    const foundationModuleName = '@virgilsecurity/core-foundation';
+    const foundationEntryPoint = path.join(foundationModuleName, getCryptoEntryPointName(TARGET.NODE, cryptoType, format));
+
+    const pythiaModuleName = '@virgilsecurity/pythia-crypto';
+    const pythiaEntryPoint = path.join(pythiaModuleName, 'dist', getCryptoEntryPointName(TARGET.NODE, cryptoType, format));
+
+    const external = builtinModules.concat(Object.keys(packageJson.dependencies)).concat([foundationEntryPoint, pythiaEntryPoint]);
+    const outputFileName = getCryptoEntryPointName(TARGET.NODE, cryptoType, format);
+    const tsconfigOverride = format === FORMAT.ES ? { compilerOptions: { target: 'es2015' } } : {};
+
+    return {
+        input: path.join(sourceDir, 'index.ts'),
+        output: {
+            format,
+            file: path.join(outputDir, outputFileName)
+        },
+        external,
+        plugins: [
+            replace({
+                patterns: [
+                    {
+                        match: /EThree\.ts$/,
+                        test: foundationModuleName,
+                        replace: foundationEntryPoint
+                    },
+                    {
+                        match: /EThree\.ts$/,
+                        test: pythiaModuleName,
+                        replace: pythiaEntryPoint
+                    }
+                ],
+            }),
+            nodeResolve({ extensions: ['.js', '.ts' ] }),
+            typescript({
+                typescript: require('typescript'),
+                exclude: ['**/*.test.ts'],
+                useTsconfigDeclarationDir: true,
+                objectHashIgnoreUnknownHack: true,
+                tsconfigOverride
+            })
+        ].filter(Boolean),
+    };
+}
+
 module.exports = [
     createBrowserEntry(TARGET.BROWSER, CRYPTO_TYPE.ASMJS, FORMAT.UMD),
     createBrowserEntry(TARGET.BROWSER, CRYPTO_TYPE.WASM, FORMAT.UMD),
-    createBrowserEntry(TARGET.WORKER, CRYPTO_TYPE.ASMJS, FORMAT.UMD),
-    createBrowserEntry(TARGET.WORKER, CRYPTO_TYPE.WASM, FORMAT.UMD),
-
     createBrowserEntry(TARGET.BROWSER, CRYPTO_TYPE.ASMJS, FORMAT.CJS),
-    createBrowserEntry(TARGET.BROWSER, CRYPTO_TYPE.ASMJS, FORMAT.ES),
     createBrowserEntry(TARGET.BROWSER, CRYPTO_TYPE.WASM, FORMAT.CJS),
+    createBrowserEntry(TARGET.BROWSER, CRYPTO_TYPE.ASMJS, FORMAT.ES),
     createBrowserEntry(TARGET.BROWSER, CRYPTO_TYPE.WASM, FORMAT.ES),
 
+    createBrowserEntry(TARGET.WORKER, CRYPTO_TYPE.ASMJS, FORMAT.UMD),
+    createBrowserEntry(TARGET.WORKER, CRYPTO_TYPE.WASM, FORMAT.UMD),
     createBrowserEntry(TARGET.WORKER, CRYPTO_TYPE.ASMJS, FORMAT.CJS),
-    createBrowserEntry(TARGET.WORKER, CRYPTO_TYPE.ASMJS, FORMAT.ES),
     createBrowserEntry(TARGET.WORKER, CRYPTO_TYPE.WASM, FORMAT.CJS),
+    createBrowserEntry(TARGET.WORKER, CRYPTO_TYPE.ASMJS, FORMAT.ES),
     createBrowserEntry(TARGET.WORKER, CRYPTO_TYPE.WASM, FORMAT.ES),
 
-    // createModuleEntry(FORMAT.CJS, '@virgilsecurity/core-foundation/node.asmjs.cjs.js', '@virgilsecurity/pythia-crypto/dist/node.asmjs.cjs.js'),
-    // createModuleEntry(FORMAT.ES, '@virgilsecurity/core-foundation/node.asmjs.es.js', '@virgilsecurity/pythia-crypto/dist/node.asmjs.es.js'),
-    // createModuleEntry(FORMAT.CJS, '@virgilsecurity/core-foundation/node.cjs.js', '@virgilsecurity/pythia-crypto/dist/node.cjs.js'),
-    // createModuleEntry(FORMAT.ES, '@virgilsecurity/core-foundation/node.es.js', '@virgilsecurity/pythia-crypto/dist/node.es.js'),
+    createNodeJsEntry(CRYPTO_TYPE.ASMJS, FORMAT.CJS),
+    createNodeJsEntry(CRYPTO_TYPE.WASM, FORMAT.CJS),
+    createNodeJsEntry(CRYPTO_TYPE.ASMJS, FORMAT.ES),
+    createNodeJsEntry(CRYPTO_TYPE.WASM, FORMAT.ES),
 
     createNativeEntry(),
 ];
