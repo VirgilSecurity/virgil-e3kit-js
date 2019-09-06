@@ -56,7 +56,7 @@ export class PrivateKeyLoader {
         });
     }
 
-    async loadLocalPrivateKey() {
+    async loadLocalPrivateKey(): Promise<IPrivateKey | null> {
         if (this.cachedPrivateKey) return this.cachedPrivateKey;
         const privateKeyData = await this.localStorage.load(this.identity);
         if (!privateKeyData) return null;
@@ -81,7 +81,7 @@ export class PrivateKeyLoader {
         await this.keyknoxClient.resetValue(token.toString());
     }
 
-    async restorePrivateKey(password: string) {
+    async restorePrivateKey(password: string): Promise<IPrivateKey> {
         const storage = await this.getStorage(password);
         const rawKey = storage.retrieveEntry(this.identity);
         await this.localStorage.save({ name: this.identity, value: rawKey.data });

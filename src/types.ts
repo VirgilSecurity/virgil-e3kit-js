@@ -11,6 +11,7 @@ export type IBrainKeyCrypto = import('@virgilsecurity/crypto-types').IBrainKeyCr
 
 export type IAccessTokenProvider = import('virgil-sdk').IAccessTokenProvider;
 export type IKeyEntryStorage = import('virgil-sdk').IKeyEntryStorage;
+export type ICard = import('virgil-sdk').ICard;
 
 import {
     VIRGIL_STREAM_SIGNING_STATE,
@@ -18,7 +19,6 @@ import {
     VIRGIL_STREAM_VERIFYING_STATE,
     VIRGIL_STREAM_DECRYPTING_STATE,
 } from './utils/constants';
-import { IKeyEntryStorage } from 'virgil-sdk';
 
 export interface EThreeInitializeOptions {
     /**

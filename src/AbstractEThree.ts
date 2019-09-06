@@ -16,6 +16,7 @@ import {
 import { PrivateKeyLoader } from './PrivateKeyLoader';
 import {
     Data,
+    ICard,
     IKeyPair,
     IPrivateKey,
     IPublicKey,
@@ -287,7 +288,10 @@ export abstract class AbstractEThree {
     /**
      * @hidden
      */
-    protected async publishCard(keyPair: IKeyPair, previousCardId?: string) {
+    protected async publishCard(
+        keyPair: IKeyPair,
+        previousCardId?: string,
+    ): Promise<{ keyPair: IKeyPair; card: ICard }> {
         const card = await this.cardManager.publishCard({
             privateKey: keyPair.privateKey,
             publicKey: keyPair.publicKey,
@@ -312,7 +316,10 @@ export abstract class AbstractEThree {
     /**
      * @hidden
      */
-    protected addOwnPublicKey(privateKey: IPrivateKey, publicKeys?: EncryptPublicKeyArg) {
+    protected addOwnPublicKey(
+        privateKey: IPrivateKey,
+        publicKeys?: EncryptPublicKeyArg,
+    ): IPublicKey[] {
         let argument: IPublicKey[];
 
         if (publicKeys == null) argument = [];

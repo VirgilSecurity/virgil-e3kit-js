@@ -18,7 +18,7 @@ export type BrainkeyOptions = {
 /**
  * @hidden
  */
-export const generateBrainPair = async (pwd: string, options: BrainkeyOptions) => {
+export async function generateBrainPair(pwd: string, options: BrainkeyOptions): Promise<IKeyPair> {
     const brainKey = createBrainKey({
         virgilCrypto: options.virgilCrypto,
         virgilBrainKeyCrypto: options.pythiaCrypto,
@@ -40,4 +40,4 @@ export const generateBrainPair = async (pwd: string, options: BrainkeyOptions) =
         }
         throw e;
     });
-};
+}
