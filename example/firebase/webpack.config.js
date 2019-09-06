@@ -1,6 +1,5 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer')
 const Visualizer = require('webpack-visualizer-plugin');
 
 module.exports = {
@@ -12,6 +11,18 @@ module.exports = {
         path: path.resolve(__dirname, 'dist'),
     },
     resolve: { symlinks: false,  modules: ['./node_modules'] },
+    module: {
+        rules: [
+            {
+                test: /\.wasm$/,
+                type: 'javascript/auto',
+                loader: 'file-loader',
+                options: {
+                  name: '[name].[ext]'
+                }
+            }
+        ],
+    },
     plugins: [
         new HtmlWebpackPlugin({
             inject: true,
@@ -19,6 +30,9 @@ module.exports = {
         }),
         new Visualizer(),
     ],
+    optimization: {
+        minimize: false,
+    },
     devServer: {
         contentBase: './dist/',
         port: 3003,
