@@ -6,70 +6,106 @@
  * @flow
  */
 
-import React, {Component} from 'react';
-import {Platform, StyleSheet, Text, View} from 'react-native';
-import { EThree } from '@virgilsecurity/e3kit';
-import createNativeKeyEntryStorage from '@virgilsecurity/key-storage-rn/native';
-const keyEntryStorage = createNativeKeyEntryStorage();
-import 'whatwg-fetch';
-import 'es6-symbol'
+import React, { Component, Fragment } from 'react';
+import {
+  SafeAreaView,
+  StyleSheet,
+  ScrollView,
+  View,
+  Text,
+  StatusBar,
+  Platform,
+} from 'react-native';
 
-const instructions = Platform.select({
-  ios: 'Press Cmd+R to reload,\n' + 'Cmd+D or shake for dev menu',
-  android:
-    'Double tap R on your keyboard to reload,\n' +
-    'Shake or press menu button for dev menu',
-});
+import { Header, Colors } from 'react-native/Libraries/NewAppScreen';
+
+import { EThree } from '@virgilsecurity/e3kit/native';
+
+// variable that will hold the initialized EThree instance
+let sdk;
 
 export default class App extends Component {
+    state = {
+        message: null
+    }
 
-  state = {
-      message: null
-  }
+    componentDidMount() {
+        const apiUrl = `http://${ Platform.OS === 'android' ? '10.0.2.2' : 'localhost' }:3000`;
+        const getToken = () => fetch(`${apiUrl}/get-virgil-jwt`)
+            .then(res => res.json())
+            .then(data => data.token);
 
-  componentDidMount() {
-    const getToken = () => fetch("http://localhost:3000/get-virgil-jwt")
-        .then(res => res.json())
-        .then(data => data.token);
+        EThree.initialize(getToken)
+            .then(client => sdk = client)
+            .then(() => sdk.register())
+            .then(() => sdk.backupPrivateKey('pa$$w0rd'))
+            .then(() => sdk.encrypt('success!'))
+            .then((encryptedMessage) => sdk.decrypt(encryptedMessage))
+            .then((message) => this.setState({ message: message }))
+            .then(() => sdk.resetPrivateKeyBackup('pa$$w0rd'))
+            .then(() => sdk.cleanup())
+            .catch((error) => {
+              this.setState({ message: error.toString() })
+            });
+      }
 
-    EThree.initialize(getToken, { keyEntryStorage: keyEntryStorage })
-        .then(client => sdk = client)
-        .then(() => sdk.register())
-        .then(() => sdk.encrypt('success!'))
-        .then((encryptedMessage) => sdk.decrypt(encryptedMessage))
-        .then((message) => this.setState({ message: message }))
-        .then(() => sdk.cleanup())
-        .catch((error) => {
-          this.setState({ message: error.toString() })
-        });
-  }
-  render() {
-    return (
-      <View style={styles.container}>
-        <Text style={styles.welcome}>Welcome to React Native!</Text>
-        <Text style={styles.instructions}>To get started, edit App.js</Text>
-        <Text style={styles.instructions}>{instructions}</Text>
-        {this.state.message && <Text style={styles.instructions}>{this.state.message}</Text>}
-      </View>
-    );
-  }
+    render() {
+        return (
+            <Fragment>
+              <StatusBar barStyle="dark-content" />
+              <SafeAreaView>
+                <ScrollView
+                  contentInsetAdjustmentBehavior="automatic"
+                  style={styles.scrollView}>
+                  <Header />
+                  {global.HermesInternal == null ? null : (
+                    <View style={styles.engine}>
+                      <Text style={styles.footer}>Engine: Hermes</Text>
+                    </View>
+                  )}
+                  <View style={styles.body}>
+                    <View style={styles.sectionContainer}>
+                      <Text style={styles.sectionTitle}>E3kit React Native</Text>
+                      <Text style={styles.sectionDescription}>
+                          If all goes well, you should see "success!" message printed below...
+                      </Text>
+                      <Text style={styles.highlight}>{this.state.message}</Text>
+                    </View>
+                  </View>
+                </ScrollView>
+              </SafeAreaView>
+            </Fragment>
+          );
+    }
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#F5FCFF',
+  scrollView: {
+    backgroundColor: Colors.lighter,
   },
-  welcome: {
-    fontSize: 20,
-    textAlign: 'center',
-    margin: 10,
+  engine: {
+    position: 'absolute',
+    right: 0,
   },
-  instructions: {
-    textAlign: 'center',
-    color: '#333333',
-    marginBottom: 5,
+  body: {
+    backgroundColor: Colors.white,
+  },
+  sectionContainer: {
+    marginTop: 32,
+    paddingHorizontal: 24,
+  },
+  sectionTitle: {
+    fontSize: 24,
+    fontWeight: '600',
+    color: Colors.black,
+  },
+  sectionDescription: {
+    marginVertical: 8,
+    fontSize: 18,
+    fontWeight: '400',
+    color: Colors.dark,
+  },
+  highlight: {
+    fontWeight: '700',
   },
 });
