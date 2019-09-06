@@ -11,7 +11,8 @@ module.exports = function (config) {
         browsers: ['ChromeHeadless'],
         colors: true,
         mime: {
-            'text/x-typescript': ['ts']
+            'text/x-typescript': ['ts'],
+            'application/wasm': ['wasm']
         },
         logLevel: config.LOG_INFO,
         browserNoActivityTimeout: 60 * 1000,
