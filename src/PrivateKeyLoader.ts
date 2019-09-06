@@ -133,7 +133,9 @@ export class PrivateKeyLoader {
         try {
             await storage.retrieveCloudEntries();
         } catch (e) {
-            if (e.name === 'VirgilCryptoError') throw new WrongKeyknoxPasswordError();
+            if (e.name === 'VirgilCryptoError' || e.name === 'RNVirgilCryptoError') {
+                throw new WrongKeyknoxPasswordError();
+            }
             throw e;
         }
         return storage;
