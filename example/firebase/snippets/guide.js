@@ -1,7 +1,5 @@
 import firebase from 'firebase';
 import { EThree } from '@virgilsecurity/e3kit';
-import '@virgilsecurity/e3kit/dist/libfoundation.browser.wasm';
-import '@virgilsecurity/e3kit/dist/libpythia.browser.wasm';
 
 // Change YOUR_FIREBASE_FUNCTION_URL to your value from firebase project
 const CLOUD_FUNCTION_ENDPOINT = 'https://us-central1-test-test-test-e9c21.cloudfunctions.net/api/virgil-jwt';

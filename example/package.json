@@ -21,7 +21,6 @@
     "webpack-visualizer-plugin": "^0.1.11"
   },
   "dependencies": {
-    "@virgilsecurity/e3kit": "file:..",
     "cors": "^2.8.4",
     "express": "^4.16.4",
     "firebase": "^5.5.6"
