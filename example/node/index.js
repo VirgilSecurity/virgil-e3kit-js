@@ -8,7 +8,7 @@ const getJson = () => new Promise((resolve, reject) => {
 
         let error;
         if (statusCode !== 200) {
-            error = new Error(`Request failed. Status Code: ${stausCode}`);
+            error = new Error(`Request failed. Status Code: ${statusCode}`);
         } else if (!/^application\/json/.test(contentType)) {
             error = new Error(`Invalid content-type.\nExpected application/json, got ${contentType}`);
         }
