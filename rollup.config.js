@@ -91,7 +91,7 @@ const createBrowserEntry = (target, cryptoType, format) => {
                         replace: foundationEntryPoint
                     },
                     {
-                        match: /EThree\.ts$/,
+                        match: /(EThree|prepareBaseConstructorParams)\.ts$/,
                         test: pythiaModuleName,
                         replace: pythiaEntryPoint
                     }
@@ -143,12 +143,12 @@ const createNodeJsEntry = (cryptoType, format) => {
             replace({
                 patterns: [
                     {
-                        match: /EThree\.ts$/,
+                        match: /EThreeNode\.ts$/,
                         test: foundationModuleName,
                         replace: foundationEntryPoint
                     },
                     {
-                        match: /EThree\.ts$/,
+                        match: /(EThreeNode|prepareBaseConstructorParams)\.ts$/,
                         test: pythiaModuleName,
                         replace: pythiaEntryPoint
                     }
