@@ -12,15 +12,15 @@ This is a common folder for all E3kit samples. It includes a server component th
   npm install
   ```
 
-  > Note, that `npm install` above can take a while as it will also create the bundles for all of the supported plaforms.
+  > Note, that `npm install` above can take a while as it will also create the bundles for all of the supported platforms.
 
-- Call `npm link` in the root folder to create a global symlimk to the `@virgilsecurity/e3kit` package, which will allow you to use it in the samples without installing:
+- Call `npm link` in the root folder to create a global symlink to the `@virgilsecurity/e3kit` package, which will allow you to use it in the samples without installing:
 
   ```sh
   npm link
   ```
 
-- Go the the `example` directory, install dependencies and link the `@virgilsecurity/e3kit` package:
+- Go the `example` directory, install dependencies and link the `@virgilsecurity/e3kit` package:
 
   ```sh
   cd example
@@ -28,13 +28,13 @@ This is a common folder for all E3kit samples. It includes a server component th
   npm link @virgilsecurity/e3kit
   ```
 
-- Create an Application and an API Key in your [Virgil Dashboard](https://dashboard.virgilsecurity.com) account.
+- Create an Application and an API Key in your [Virgil Dashboard](https://dashboard.virgilsecurity.com) account
 - Create a file named `.env` in the `example` folder (you can use the contents of [.env.example](.env.example) as a starting point)
 
   ```sh
   cp .env.example .env
   ```
-- Set your Application Id, API Key Id and API Key value as the respective values in the `.env` file
+- Set your _Application Id_, _API Key Id_ and _API Key value_ as the respective values in the `.env` file
 
 - Start the server
 
@@ -46,7 +46,7 @@ This is a common folder for all E3kit samples. It includes a server component th
   * ReactNative - go to the [E3kitReactNative](E3kitReactNative) folder and follow the instructions in README.md file.
   * firebase - `npm run firebase`
   * node - `npm run node`
-  * umd - Navigate to [http://localhost:3000] in a browser
+  * umd - Navigate to [http://localhost:3000](http://localhost:3000) in a browser
   * webpack - `npm run webpack`
 
 

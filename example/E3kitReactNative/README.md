@@ -11,6 +11,7 @@ Sample project demonstrating the usage of `@virgilsecurity/e3kit` in React Nativ
   ```sh
   cd example/E3kitReactNative
   yarn install
+  ```
 
 - Since React Native does not support symlinked packages, `@virgilsecurity/e3kit` had to be installed from file system. When installed from file system, the package folder in `node_modules` includes the `node_modules` and `example` folders which can lead to build errors when you try to run the project, so we need to remove those folders
 
@@ -25,7 +26,7 @@ Sample project demonstrating the usage of `@virgilsecurity/e3kit` in React Nativ
   ```sh
   cd ios
   pod install
-  carthage update --plaform iOS
+  carthage update --platform iOS
   ```
 
 - If you target iOS, link the `react-native-virgil-crypto` library [manually in XCode](https://github.com/VirgilSecurity/react-native-virgil-crypto#manual-installation)

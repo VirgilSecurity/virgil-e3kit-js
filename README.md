@@ -35,7 +35,7 @@ If you develop for browsers and `import` (or `require`) e3kit from the npm packa
 
 See an example of how to do this with Webpack in the [example/webpack](example/webpack) folder.
 
-> To serve WebAssembly in the most efficient way over the network, make sure your web server has the proper MIME time for `.wasm` files, which is `application/wasm`. That will allow streaming compilation, where the browser can start to compile code as it downloads.
+> To serve WebAssembly in the most efficient way over the network, make sure your web server has the proper MIME type for `.wasm` files, which is `application/wasm`. That will allow streaming compilation, where the browser can start to compile code as it downloads.
 
 ### In browser via `script` tag
 You will need to add `@virgilsecurity/e3kit@next` script.
