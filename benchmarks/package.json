@@ -1,0 +1,16 @@
+{
+    "name": "e3kit-benchmark",
+    "version": "1.0.0",
+    "description": "E3Kit benchmark",
+    "repository": "https://github.com/VirgilSecurity/virgil-e3kit-js/tree/master/benchmarks",
+    "author": "Virgil Security Inc. <support@virgilsecurity.com>",
+    "license": "BSD-3-Clause",
+    "private": "true",
+    "scripts": {
+        "start": "node index.js"
+    },
+    "dependencies": {
+        "@virgilsecurity/e3kit": "next",
+        "@virgilsecurity/e3kit-old": "npm:@virgilsecurity/e3kit@^0.5.3"
+    }
+}
