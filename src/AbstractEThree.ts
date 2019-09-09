@@ -288,7 +288,7 @@ export abstract class AbstractEThree {
     /**
      * @hidden
      */
-    protected async publishCard(
+    private async publishCard(
         keyPair: IKeyPair,
         previousCardId?: string,
     ): Promise<{ keyPair: IKeyPair; card: ICard }> {
@@ -304,7 +304,7 @@ export abstract class AbstractEThree {
     /**
      * @hidden
      */
-    protected isOwnPublicKeysIncluded(ownPublicKey: IPublicKey, publicKeys: IPublicKey[]) {
+    private isOwnPublicKeysIncluded(ownPublicKey: IPublicKey, publicKeys: IPublicKey[]) {
         const selfPublicKey = this.virgilCrypto.exportPublicKey(ownPublicKey).toString('base64');
 
         const stringKeys = publicKeys.map(key =>
