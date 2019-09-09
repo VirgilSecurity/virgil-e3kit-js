@@ -22,7 +22,7 @@ This is a common folder for all E3kit samples. It includes a server component th
 
 - Go the the `example` directory, install dependencies and link the `@virgilsecurity/e3kit` package:
 
-  ```
+  ```sh
   cd example
   npm install
   npm link @virgilsecurity/e3kit
@@ -42,4 +42,12 @@ This is a common folder for all E3kit samples. It includes a server component th
   npm run serve
   ```
 
-- Pick an example to continue with from the subfolders of the `example` folder and follow the instructions in it's README.md file
+- Pick an example to continue with from the subfolders of the `example` folder.
+  * ReactNative - go to the [E3kitReactNative](E3kitReactNative) folder and follow the instructions in README.md file.
+  * firebase - `npm run firebase`
+  * node - `npm run node`
+  * umd - Navigate to [http://localhost:3000] in a browser
+  * webpack - `npm run webpack`
+
+
+

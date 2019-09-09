@@ -7,7 +7,8 @@
     "serve": "node server.js",
     "firebase": "webpack-dev-server --open --config firebase/webpack.config.js",
     "firebase:build": "webpack --config firebase/webpack.config.js",
-    "webpack": "webpack-dev-server --open --config webpack/webpack.config.js"
+    "webpack": "webpack-dev-server --open --config webpack/webpack.config.js",
+    "node": "node node/index.js"
   },
   "author": "",
   "license": "ISC",
