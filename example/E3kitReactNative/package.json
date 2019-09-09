@@ -9,7 +9,7 @@
   },
   "dependencies": {
     "@virgilsecurity/e3kit": "file:../../",
-    "@virgilsecurity/key-storage-rn": "^0.2.0-alpha.0",
+    "@virgilsecurity/key-storage-rn": "next",
     "react": "16.8.6",
     "react-native": "0.60.5",
     "react-native-keychain": "^3.1.3",

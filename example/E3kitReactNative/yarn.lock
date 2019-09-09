@@ -1058,7 +1058,7 @@
     lodash.unescape "4.0.1"
     semver "5.5.0"
 
-"@virgilsecurity/base-crypto@^0.4.4":
+"@virgilsecurity/base-crypto@^0.4.5":
   version "0.4.5"
   resolved "https://registry.yarnpkg.com/@virgilsecurity/base-crypto/-/base-crypto-0.4.5.tgz#53547fc91ec7af6b6bd10e136b15e022e2739763"
   integrity sha512-KB1Sb4FpX11+XAz5wcFP3GmknOaTw2FIeZ1sRMwDRmFOr8OU2dc5PAvWZ+NfLuuk0hOCisPuJPdlE+60/r2dFg==
@@ -1066,7 +1066,7 @@
     "@virgilsecurity/crypto-types" "^0.1.3"
     "@virgilsecurity/data-utils" "^0.1.4"
 
-"@virgilsecurity/core-foundation@^0.1.0":
+"@virgilsecurity/core-foundation@^0.1.1":
   version "0.1.1"
   resolved "https://registry.yarnpkg.com/@virgilsecurity/core-foundation/-/core-foundation-0.1.1.tgz#64e9da072ea3af91d151889e05df6095d87c5c5c"
   integrity sha512-dxRE94QzEAwX1q+49Wb1GBfXc091hiQxYMer5d2Yz/RRFKsUQjjtofiSsLmIViW7rqxK74p6077EQfacWhat9A==
@@ -1091,19 +1091,19 @@
     "@virgilsecurity/crypto-types" "^0.1.3"
     buffer "^5.2.1"
 
-"@virgilsecurity/e3kit@file:../../":
-  version "0.5.3"
+"@virgilsecurity/e3kit@file:../..":
+  version "0.6.0-beta.1"
   dependencies:
-    "@virgilsecurity/base-crypto" "^0.4.4"
-    "@virgilsecurity/core-foundation" "^0.1.0"
+    "@virgilsecurity/base-crypto" "^0.4.5"
+    "@virgilsecurity/core-foundation" "^0.1.1"
     "@virgilsecurity/crypto-types" "^0.1.3"
     "@virgilsecurity/keyknox" next
-    "@virgilsecurity/pythia-crypto" "^0.1.0"
+    "@virgilsecurity/pythia-crypto" "^0.1.1"
     "@virgilsecurity/sdk-crypto" "^0.4.4"
     virgil-pythia next
     virgil-sdk next
 
-"@virgilsecurity/key-storage-rn@^0.2.0-alpha.0":
+"@virgilsecurity/key-storage-rn@next":
   version "0.2.0-alpha.0"
   resolved "https://registry.yarnpkg.com/@virgilsecurity/key-storage-rn/-/key-storage-rn-0.2.0-alpha.0.tgz#69678fa041e43c49b37b1cc0ffdd721d67916d4b"
   integrity sha512-P1dUluMP+frInddNUdB+l+Y7yzXm368v9tXRdxBnR8D0FFEF5tBYun9ndpvlw+3IcmiEuPoQg2cjaDfJDPcb8w==
@@ -1118,7 +1118,7 @@
     axios "^0.19.0"
     base-64 "^0.1.0"
 
-"@virgilsecurity/pythia-crypto@^0.1.0":
+"@virgilsecurity/pythia-crypto@^0.1.1":
   version "0.1.1"
   resolved "https://registry.yarnpkg.com/@virgilsecurity/pythia-crypto/-/pythia-crypto-0.1.1.tgz#4d0c14e2367d7766e959d9797c78d7092e6e6285"
   integrity sha512-vTpMG9mHt1+oEo7s9u+n8YMBIgMYdWlCv5PsaiTlzQkTMgkfxMNGmgCPU7A3lnmYkEIm9IfBu/vJYTnjM6Wi5g==
