@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Document</title>
-    <script src="e3kit.browser.umd.min.js"></script>
+    <script src="browser.umd.js"></script>
 </head>
 
 <body>
@@ -20,11 +20,17 @@
         E3kit.EThree.initialize(getToken)
             .then(client => sdk = client)
             .then(() => sdk.register())
+            .then(() => sdk.backupPrivateKey('pa$$w0rd'))
             .then(() => sdk.encrypt('success!'))
             .then((encryptedMessage) => sdk.decrypt(encryptedMessage))
-            .then((message) => console.log('message', message))
+            .then((message) => {
+                document.body.appendChild(document.createTextNode(message))
+            })
+            .then(() => sdk.resetPrivateKeyBackup('pa$$w0rd'))
             .then(() => sdk.cleanup())
-            .catch(console.error);
+            .catch((error) => {
+              document.body.appendChild(document.createTextNode(error.toString()))
+            });
     </script>
 </body>
 
