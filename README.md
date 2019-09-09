@@ -6,28 +6,41 @@
 
 [Introduction](#introduction) | [SDK Features](#sdk-features) | [Installation](#installation) | [Usage Example](#usage-example) | [Docs](#docs) | [Support](#support)
 
+> Warning! This README is for the beta release of E3kit, if you're here for the latest stable version check out the [v0.5.x branch](https://github.com/VirgilSecurity/virgil-e3kit-js/tree/v0.5.x)
+
 ## Introduction
 
 <a href="https://developer.virgilsecurity.com/docs"><img width="230px" src="https://cdn.virgilsecurity.com/assets/images/github/logos/virgil-logo-red.png" align="left" hspace="10" vspace="6"></a> [Virgil Security](https://virgilsecurity.com) provides an SDK which simplifies work with Virgil services and presents easy to use API for adding security to any application. In a few simple steps you can setup user encryption with multidevice support.
 
-## SDK Features
-- multidevice support
-- manage users' Public Keys
+This a beta release that is made available to allow users to test and evaluate the next verion of E3kit. It is not recommended for production use at this stage.
+
+## What's new in E3kit v0.6.0?
+
+The most important changes are:
+- The switch of the underlying crypto library implementation from asm.js to the more performant and smaller WebAssembly format
+- Separate _native_ crypto library implementation for React Native via the JS [bridge](https://github.com/VirgilSecurity/react-native-virgil-crypto)
+- Node.js support
 
 ## Installation
 
-You can install this module from npm. Another option is to add it via script tag in browser.
+You can install this module from npm specifying the `@next` tag. Another option is to add it via script tag in browser.
 
 ### npm
-You will need to install `@virgilsecurity/e3kit`.
+You will need to install `@virgilsecurity/e3kit@next`. Note the `@next` suffix, it's important.
 ```sh
-npm install @virgilsecurity/e3kit
+npm install @virgilsecurity/e3kit@next
 ```
 
+If you develop for browsers and `import` (or `require`) e3kit from the npm package, you will need to tell your module bundler (such as Webpack) to handle the `.wasm` file imports by copying them into the build output directory _preserving_ the original name.
+
+See an example of how to do this with Webpack in the [example/webpack](example/webpack) folder.
+
+> To serve WebAssembly in the most efficient way over the network, make sure your web server has the proper MIME type for `.wasm` files, which is `application/wasm`. That will allow streaming compilation, where the browser can start to compile code as it downloads.
+
 ### In browser via `script` tag
-You will need to add `@virgilsecurity/e3kit` script.
+You will need to add `@virgilsecurity/e3kit@next` script.
 ```html
-<script src="https://unpkg.com/@virgilsecurity/e3kit/dist/e3kit.browser.umd.min.js"></script>
+<script src="https://unpkg.com/@virgilsecurity/e3kit@next/dist/browser.umd.js"></script>
 ```
 
 ## Usage Example
@@ -35,27 +48,29 @@ You will need to add `@virgilsecurity/e3kit` script.
 ### Initialize & Register
 
 ```js
-import { EThree } from '@virgilsecurity/e3kit-js'
+import { EThree } from '@virgilsecurity/e3kit'
 // get virgil token from you backend (better to protect it!)
 const getToken = () => fetch('http://localhost:3000/get-virgil-jwt/')
     .then(res => res.json())
     .then(data =>  data.token);
 
-// get your unique identity from backend
-const sdk = await EThree.initialize(getToken);
-// create private key and upload it to our protected cloud service
-await sdk.register();
-await sdk.backupPrivateKey('encryption_pwd');
+(async function() {
+    // get your unique identity from backend
+    const sdk = await EThree.initialize(getToken);
+    // create private key and upload it to our protected cloud service
+    await sdk.register();
+    await sdk.backupPrivateKey('encryption_pwd');
+})();
 ```
 
 ### Encrypt & Decrypt
 
 ```js
 const usersToEncryptTo = ["alice@myapp.com", "bob@myapp.com", 'sofia@myapp.com'];
-const userThatEncrypts = "alex@myapp.com";
+const userWhoEncrypts = "alex@myapp.com";
 const [receiverPublicKeys, senderPublicKey] = await Promise.all([
     eThree.lookupPublicKeys(usersToEncryptTo),
-    eThree.lookupPublicKeys(userThatEncrypts)
+    eThree.lookupPublicKeys(userWhoEncrypts)
 ]);
 
 const encryptedMsg = await eThree.encrypt('Send you my sensitive information!', receiversPublicKeys);
@@ -68,7 +83,7 @@ You can find more examples in [examples folder](example) and on https://develope
 
 ### Encrypt & decrypt large files
 
-If you need to encrypt & decrypt large files with the best speed/browser perfomance ratio, see the `encryptFile` and `decryptFile` methods:
+If you need to encrypt & decrypt files in the browser, see the `encryptFile` and `decryptFile` methods:
 - https://virgilsecurity.github.io/virgil-e3kit-js/classes/ethree.html#encryptfile
 - https://virgilsecurity.github.io/virgil-e3kit-js/classes/ethree.html#decryptfile
 
@@ -83,20 +98,17 @@ The demo source code can be found here: https://github.com/VirgilSecurity/virgil
 
 ### React Native usage
 
-This package works with https://github.com/VirgilSecurity/virgil-key-storage-rn
+This package _implicitly_ depends on [virgil-key-storage-rn](https://github.com/VirgilSecurity/virgil-key-storage-rn) to securely store private keys and [react-native-virgil-crypto](https://github.com/VirgilSecurity/react-native-virgil-crypto) as the underlying crypto library. All you have to do in your React Native project is install those two libraries and their native dependencies by following instructions in the repsective repository's README file.
+
+Then you need to specify the `@virgilsecurity/e3kit/native` entry point when importing `EThree` and the private key storage and crypto will be initialized automatically:
 
 ```js
-import { EThree } from '@virgilsecurity/e3kit';
-import createNativeKeyEntryStorage from '@virgilsecurity/key-storage-rn/native';
-// or
-import createExpoKeyEntryStorage from '@virgilsecurity/key-storage-rn/expo';
+import { EThree } from '@virgilsecurity/e3kit/native';
 
-const keyEntryStorage = createNativeKeyEntryStorage();
-// or
-const keyEntryStorage = createExpoKeyEntryStorage();
-
-EThree.initialize(getTokenCallback, { keyEntryStorage });
+EThree.initialize(getTokenCallback);
 ```
+
+See the complete example in [example/E3kitReactNative](example/E3kitReactNative).
 
 ## Docs
 Virgil Security has a powerful set of APIs, and the documentation below can get you started today.

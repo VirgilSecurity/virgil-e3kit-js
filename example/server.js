@@ -28,5 +28,7 @@ app.get('/get-virgil-jwt', (_req, res) => {
 
 app.use(express.static('./umd/'));
 app.use(express.static('../dist'));
+// if you have express version < 4.17, uncomment the following line
+// express.static.mime.types['wasm'] = 'application/wasm'
 
 app.listen(3000, () => console.log(`Example app listening on port http://localhost:3000!`))

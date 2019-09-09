@@ -15,9 +15,14 @@
         "esModuleInterop": true,
         "allowSyntheticDefaultImports": true,
         "noUnusedLocals": true,
+        "resolveJsonModule": true,
+        "noImplicitAny": false,
     },
     "include": [
         "src"
+    ],
+    "exclude": [
+        "./dist"
     ],
     "typedocOptions": {
         "out": "docs",

@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { EThree } from '../../../../../dist/e3kit.browser.umd.min';
+import { EThree } from '@virgilsecurity/e3kit/dist/browser.es';
 
 @Component({
   selector: 'page-hello-ionic',
@@ -17,7 +17,7 @@ export class HelloIonicPage {
       .then(data => data.token);
 
     this.fetch = fetch.toString();
-    EThree.initalize(getToken)
+    EThree.initialize(getToken)
       .then(client => sdk = client)
       .then(() => sdk.register())
       .then(() => sdk.encrypt('success!'))

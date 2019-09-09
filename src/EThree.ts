@@ -1,90 +1,51 @@
-import PrivateKeyLoader from './PrivateKeyLoader';
+import initFoundation from '@virgilsecurity/core-foundation';
 import {
-    CachingJwtProvider,
-    KeyEntryAlreadyExistsError,
-    CardManager,
-    VirgilCardVerifier,
-    IKeyEntryStorage,
-    IAccessTokenProvider,
-    KeyEntryStorage,
-} from 'virgil-sdk';
-import {
+    getFoundationModules,
+    setFoundationModules,
     VirgilPublicKey,
-    Data,
-    VirgilCrypto,
-    VirgilCardCrypto,
-    VirgilPrivateKey,
-} from 'virgil-crypto/dist/virgil-crypto-pythia.es';
-import {
-    RegisterRequiredError,
-    IdentityAlreadyExistsError,
-    PrivateKeyAlreadyExistsError,
-    MultipleCardsError,
-    LookupNotFoundError,
-    LookupError,
-    DUPLICATE_IDENTITIES,
-    EMPTY_ARRAY,
-    throwIllegalInvocationError,
-    IntegrityCheckFailedError,
-    throwGetTokenNotAFunction,
-} from './errors';
-import { isArray, isString, isFile, isVirgilPublicKey } from './utils/typeguards';
-import { withDefaults } from './utils/object';
-import { getObjectValues, hasDuplicates } from './utils/array';
-import { processFile, onChunkCallback } from './utils/processFile';
+} from '@virgilsecurity/base-crypto';
+import { initPythia, getPythiaModules } from '@virgilsecurity/pythia-crypto';
+import { CachingJwtProvider } from 'virgil-sdk';
+
 import {
     VIRGIL_STREAM_SIGNING_STATE,
     VIRGIL_STREAM_ENCRYPTING_STATE,
     VIRGIL_STREAM_DECRYPTING_STATE,
     VIRGIL_STREAM_VERIFYING_STATE,
-    DEFAULT_API_URL,
-    STORAGE_NAME,
 } from './utils/constants';
+import { cryptoModulesLoaded } from './utils/cryptoModulesLoaded';
+import { withDefaults } from './utils/object';
+import { prepareBaseConstructorParams } from './utils/prepareBaseConstructorParams';
+import { onChunkCallback, processFile } from './utils/processFile';
+import { isFile } from './utils/typeguards';
+import { AbstractEThree } from './AbstractEThree';
 import {
-    VirgilKeyPair,
-    EncryptVirgilPublicKeyArg,
-    LookupResult,
+    IntegrityCheckFailedError,
+    RegisterRequiredError,
+    throwGetTokenNotAFunction,
+} from './errors';
+import {
+    VirgilCrypto,
+    VirgilPrivateKey,
+    NodeBuffer,
+    Data,
+    IPublicKey,
     EThreeInitializeOptions,
+    EThreeCtorOptions,
+    EncryptPublicKeyArg,
     EncryptFileOptions,
     DecryptFileOptions,
 } from './types';
-import { KeyPair, EThreeCtorOptions } from './utils/innerTypes';
 
-const _inProcess = Symbol('inProcess');
-const _keyLoader = Symbol('keyLoader');
-
-export default class EThree {
+export class EThree extends AbstractEThree {
     /**
-     * Unique identifier of current user. Received from JWT token.
+     * @hidden
+     * @param identity - Identity of the current user.
      */
-    identity: string;
-    /**
-     * Instance of [VirgilCrypto](https://github.com/virgilsecurity/virgil-crypto-javascript).
-     */
-    virgilCrypto: VirgilCrypto;
-    /**
-     * Instance of VirgilCardCrypto.
-     */
-    cardCrypto: VirgilCardCrypto;
-    /**
-     * Instance of VirgilCardVerifier.
-     */
-    cardVerifier: VirgilCardVerifier;
-    /**
-     * Instance of CardManager. Used to create cards with user public keys.
-     */
-    cardManager: CardManager;
-    /**
-     * Instance of IAccessTokenProvider implementation. Using [[getToken]] to receive JWT.
-     */
-    accessTokenProvider: IAccessTokenProvider;
-    /**
-     * Instance of IKeyEntryStorage implementation. Used for storing private keys.
-     */
-    keyEntryStorage: IKeyEntryStorage;
-
-    private [_keyLoader]: PrivateKeyLoader;
-    private [_inProcess]: boolean = false;
+    // @ts-ignore
+    constructor(identity: string, options: EThreeCtorOptions) {
+        super(prepareBaseConstructorParams(identity, options));
+    }
 
     /**
      * Initialize a new instance of EThree which tied to specific user.
@@ -94,6 +55,15 @@ export default class EThree {
         getToken: () => Promise<string>,
         options: EThreeInitializeOptions = {},
     ): Promise<EThree> {
+        const modulesToLoad: Promise<void>[] = [];
+        if (!cryptoModulesLoaded(getFoundationModules)) {
+            modulesToLoad.push(initFoundation().then(setFoundationModules));
+        }
+        if (!cryptoModulesLoaded(getPythiaModules)) {
+            modulesToLoad.push(initPythia());
+        }
+        await Promise.all(modulesToLoad);
+
         if (typeof getToken !== 'function') throwGetTokenNotAFunction(typeof getToken);
 
         const opts = withDefaults(options as EThreeCtorOptions, {
@@ -108,165 +78,6 @@ export default class EThree {
     }
 
     /**
-     * @hidden
-     * @param identity - Identity of the current user.
-     */
-    constructor(identity: string, options: EThreeCtorOptions) {
-        const opts = withDefaults(options, {
-            apiUrl: DEFAULT_API_URL,
-            storageName: STORAGE_NAME,
-            useSha256Identifiers: false,
-        });
-
-        this.identity = identity;
-        this.accessTokenProvider = opts.accessTokenProvider;
-
-        this.keyEntryStorage = opts.keyEntryStorage || new KeyEntryStorage(opts.storageName);
-        this.virgilCrypto = new VirgilCrypto({ useSha256Identifiers: opts.useSha256Identifiers });
-        this.cardCrypto = new VirgilCardCrypto(this.virgilCrypto);
-
-        this.cardVerifier = new VirgilCardVerifier(this.cardCrypto, {
-            verifySelfSignature: opts.apiUrl === DEFAULT_API_URL,
-            verifyVirgilSignature: opts.apiUrl === DEFAULT_API_URL,
-        });
-
-        this[_keyLoader] = new PrivateKeyLoader(this.identity, {
-            accessTokenProvider: this.accessTokenProvider,
-            virgilCrypto: this.virgilCrypto,
-            keyEntryStorage: this.keyEntryStorage,
-            apiUrl: opts.apiUrl,
-        });
-
-        this.cardManager = new CardManager({
-            cardCrypto: this.cardCrypto,
-            cardVerifier: this.cardVerifier,
-            accessTokenProvider: this.accessTokenProvider,
-            retryOnUnauthorized: true,
-            apiUrl: opts.apiUrl,
-        });
-    }
-
-    /**
-     * Register current user in Virgil Cloud. Saves private key locally and uploads public key to cloud.
-     */
-    async register(keyPair?: VirgilKeyPair) {
-        if (this[_inProcess]) throwIllegalInvocationError('register');
-        this[_inProcess] = true;
-        try {
-            const [cards, privateKey] = await Promise.all([
-                this.cardManager.searchCards(this.identity),
-                this[_keyLoader].loadLocalPrivateKey(),
-            ]);
-            if (cards.length > 1) throw new MultipleCardsError(this.identity);
-            if (cards.length > 0) throw new IdentityAlreadyExistsError();
-            if (privateKey && cards.length === 0) await this[_keyLoader].resetLocalPrivateKey();
-            const myKeyPair = keyPair || this.virgilCrypto.generateKeys();
-            await this._publishCard(myKeyPair);
-            await this[_keyLoader].savePrivateKeyLocal(myKeyPair.privateKey);
-        } finally {
-            this[_inProcess] = false;
-        }
-    }
-
-    /**
-     * Generates a new private key and saves locally. Replaces old public key with new one in Cloud.
-     * Used in case if old private key is lost.
-     */
-    async rotatePrivateKey(): Promise<void> {
-        if (this[_inProcess]) throwIllegalInvocationError('rotatePrivateKey');
-        this[_inProcess] = true;
-        try {
-            const [cards, privateKey] = await Promise.all([
-                this.cardManager.searchCards(this.identity),
-                this[_keyLoader].loadLocalPrivateKey(),
-            ]);
-            if (cards.length === 0) throw new RegisterRequiredError();
-            if (cards.length > 1) throw new MultipleCardsError(this.identity);
-            if (privateKey) throw new PrivateKeyAlreadyExistsError();
-            const keyPair = this.virgilCrypto.generateKeys();
-            await this._publishCard(keyPair, cards[0].id);
-            await this[_keyLoader].savePrivateKeyLocal(keyPair.privateKey);
-        } finally {
-            this[_inProcess] = false;
-        }
-    }
-
-    /**
-     * Downloads private key from Virgil Cloud. Use [[backupPrivateKey]] to upload the key first.
-     * @param pwd User password for access to Virgil Keyknox Storage.
-     */
-    async restorePrivateKey(pwd: string): Promise<void> {
-        try {
-            await this[_keyLoader].restorePrivateKey(pwd);
-        } catch (e) {
-            if (e instanceof KeyEntryAlreadyExistsError) {
-                throw new PrivateKeyAlreadyExistsError();
-            }
-            throw e;
-        }
-    }
-
-    /**
-     * Deletes local private key from key storage. Make sure [[backupPrivateKey]] method was called
-     * first.
-     */
-    async cleanup() {
-        await this[_keyLoader].resetLocalPrivateKey();
-    }
-
-    /**
-     * Delete private key saved in Virgil Keyknox Storage.
-     * @param pwd User password for access to Virgil Keyknox Storage. If password omitted resets all
-     * Keyknox storage.
-     */
-    async resetPrivateKeyBackup(pwd?: string) {
-        if (!pwd) return await this[_keyLoader].resetAll();
-        return this[_keyLoader].resetPrivateKeyBackup(pwd);
-    }
-
-    /**
-     * Encrypts and signs data for recipient public key or `LookupResult` dictionary for multiple recipients.
-     * If there is no recipient and message encrypted for the current user, omit public key.
-     */
-    async encrypt(
-        message: ArrayBuffer,
-        publicKey?: EncryptVirgilPublicKeyArg,
-    ): Promise<ArrayBuffer>;
-    async encrypt(message: string, publicKeys?: EncryptVirgilPublicKeyArg): Promise<string>;
-    async encrypt(message: Buffer, publicKey?: EncryptVirgilPublicKeyArg): Promise<Buffer>;
-    async encrypt(message: Data, publicKeys?: EncryptVirgilPublicKeyArg): Promise<Data> {
-        const isMessageString = isString(message);
-
-        const privateKey = await this[_keyLoader].loadLocalPrivateKey();
-        if (!privateKey) throw new RegisterRequiredError();
-
-        const publicKeysArray = this._addOwnPublicKey(privateKey, publicKeys);
-
-        const res: Data = this.virgilCrypto.signThenEncrypt(message, privateKey, publicKeysArray);
-        if (isMessageString) return res.toString('base64');
-        return res;
-    }
-
-    /**
-     * Decrypts data and verify signature of sender by his public key. If message is self-encrypted,
-     * omit public key parameter.
-     */
-    async decrypt(message: string, publicKey?: VirgilPublicKey): Promise<string>;
-    async decrypt(message: Buffer, publicKey?: VirgilPublicKey): Promise<Buffer>;
-    async decrypt(message: ArrayBuffer, publicKey?: VirgilPublicKey): Promise<Buffer>;
-    async decrypt(message: Data, publicKey?: VirgilPublicKey): Promise<Data> {
-        const isMessageString = isString(message);
-
-        const privateKey = await this[_keyLoader].loadLocalPrivateKey();
-        if (!privateKey) throw new RegisterRequiredError();
-        if (!publicKey) publicKey = this.virgilCrypto.extractPublicKey(privateKey);
-
-        const res: Data = this.virgilCrypto.decryptThenVerify(message, privateKey, publicKey);
-        if (isMessageString) return res.toString('utf8') as string;
-        return res as Buffer;
-    }
-
-    /**
      * Signs and encrypts File or Blob for recipient public key or `LookupResult` dictionary for multiple
      * recipients. If there is no recipient and the message is encrypted for the current user, omit the
      * public key parameter. You can define chunk size and a callback, that will be invoked on each chunk.
@@ -277,21 +88,21 @@ export default class EThree {
      */
     async encryptFile(
         file: File | Blob,
-        publicKeys?: EncryptVirgilPublicKeyArg,
+        publicKeys?: EncryptPublicKeyArg,
         options: EncryptFileOptions = {},
     ): Promise<File | Blob> {
         const chunkSize = options.chunkSize ? options.chunkSize : 64 * 1024;
         if (!Number.isInteger(chunkSize)) throw TypeError('chunkSize should be an integer value');
         const fileSize = file.size;
 
-        const privateKey = await this[_keyLoader].loadLocalPrivateKey();
+        const privateKey = await this.keyLoader.loadLocalPrivateKey();
         if (!privateKey) throw new RegisterRequiredError();
 
-        const publicKeysArray = this._addOwnPublicKey(privateKey, publicKeys);
+        const publicKeysArray = this.addOwnPublicKey(privateKey, publicKeys) as VirgilPublicKey[];
 
-        const streamSigner = this.virgilCrypto.createStreamSigner();
+        const streamSigner = (this.virgilCrypto as VirgilCrypto).createStreamSigner();
 
-        const signaturePromise = new Promise<Buffer>((resolve, reject) => {
+        const signaturePromise = new Promise<NodeBuffer>((resolve, reject) => {
             const onChunkCallback: onChunkCallback = (chunk, offset) => {
                 if (options.onProgress) {
                     options.onProgress({
@@ -300,10 +111,11 @@ export default class EThree {
                         fileSize: fileSize,
                     });
                 }
-                streamSigner.update(chunk);
+                streamSigner.update(this.toData(chunk));
             };
 
-            const onFinishCallback = () => resolve(streamSigner.sign(privateKey));
+            const onFinishCallback = () =>
+                resolve(streamSigner.sign(privateKey as VirgilPrivateKey));
 
             const onErrorCallback = (err: any) => {
                 streamSigner.dispose();
@@ -320,16 +132,17 @@ export default class EThree {
             });
         });
 
-        const streamCipher = this.virgilCrypto.createStreamCipher(publicKeysArray, {
-            signature: await signaturePromise,
-        });
+        const streamCipher = (this.virgilCrypto as VirgilCrypto).createStreamCipher(
+            publicKeysArray,
+            await signaturePromise,
+        );
 
-        const encryptedChunksPromise = new Promise<Buffer[]>((resolve, reject) => {
-            const encryptedChunks: Buffer[] = [];
+        const encryptedChunksPromise = new Promise<NodeBuffer[]>((resolve, reject) => {
+            const encryptedChunks: NodeBuffer[] = [];
             encryptedChunks.push(streamCipher.start());
 
             const onChunkCallback: onChunkCallback = (chunk, offset) => {
-                encryptedChunks.push(streamCipher.update(chunk));
+                encryptedChunks.push(streamCipher.update(this.toData(chunk)));
                 if (options.onProgress) {
                     options.onProgress({
                         state: VIRGIL_STREAM_ENCRYPTING_STATE,
@@ -363,6 +176,7 @@ export default class EThree {
         if (isFile(file)) return new File(encryptedChunks, file.name, { type: file.type });
         return new Blob(encryptedChunks, { type: file.type });
     }
+
     /**
      * Decrypts and verifies integrity of File or Blob for recipient public key. If there is no recipient
      * and the message is encrypted for the current user, omit the public key parameter. You can define
@@ -374,25 +188,26 @@ export default class EThree {
      */
     async decryptFile(
         file: File | Blob,
-        publicKey?: VirgilPublicKey,
+        publicKey?: IPublicKey,
         options: DecryptFileOptions = {},
     ): Promise<File | Blob> {
         const fileSize = file.size;
         const chunkSize = options.chunkSize ? options.chunkSize : 64 * 1024;
         if (!Number.isInteger(chunkSize)) throw TypeError('chunkSize should be an integer value');
 
-        const privateKey = await this[_keyLoader].loadLocalPrivateKey();
+        const privateKey = (await this.keyLoader.loadLocalPrivateKey()) as VirgilPrivateKey;
         if (!privateKey) throw new RegisterRequiredError();
-        if (!publicKey) publicKey = this.virgilCrypto.extractPublicKey(privateKey);
+        if (!publicKey)
+            publicKey = this.virgilCrypto.extractPublicKey(privateKey) as VirgilPublicKey;
 
-        const streamDecipher = this.virgilCrypto.createStreamDecipher(privateKey);
+        const streamDecipher = (this.virgilCrypto as VirgilCrypto).createStreamDecipher(privateKey);
 
-        type decryptStreamResult = { signature: Buffer; decryptedChunks: Buffer[] };
+        type decryptStreamResult = { signature: NodeBuffer; decryptedChunks: NodeBuffer[] };
         const decryptedChunksPromise = new Promise<decryptStreamResult>((resolve, reject) => {
-            const decryptedChunks: Buffer[] = [];
+            const decryptedChunks: NodeBuffer[] = [];
 
             const onChunkCallback: onChunkCallback = (chunk, offset) => {
-                decryptedChunks.push(streamDecipher.update(chunk));
+                decryptedChunks.push(streamDecipher.update(this.toData(chunk)));
                 if (options.onProgress) {
                     options.onProgress({
                         state: VIRGIL_STREAM_DECRYPTING_STATE,
@@ -426,7 +241,7 @@ export default class EThree {
         });
 
         const { decryptedChunks, signature } = await decryptedChunksPromise;
-        const streamVerifier = this.virgilCrypto.createStreamVerifier(signature, 'utf8');
+        const streamVerifier = (this.virgilCrypto as VirgilCrypto).createStreamVerifier(signature);
 
         let decryptedFile: File | Blob;
         if (isFile(file)) decryptedFile = new File(decryptedChunks, file.name, { type: file.type });
@@ -435,7 +250,7 @@ export default class EThree {
 
         const verifyPromise = new Promise<boolean>((resolve, reject) => {
             const onChunkCallback: onChunkCallback = (chunk, offset) => {
-                streamVerifier.update(chunk);
+                streamVerifier.update(this.toData(chunk));
                 if (options.onProgress) {
                     options.onProgress({
                         state: VIRGIL_STREAM_VERIFYING_STATE,
@@ -445,7 +260,8 @@ export default class EThree {
                 }
             };
 
-            const onFinishCallback = () => resolve(streamVerifier.verify(publicKey!));
+            const onFinishCallback = () =>
+                resolve(streamVerifier.verify(publicKey! as VirgilPublicKey));
             const onErrorCallback = (err: any) => {
                 streamVerifier.dispose();
                 reject(err);
@@ -471,120 +287,19 @@ export default class EThree {
     }
 
     /**
-     * Find public keys for user identities registered on Virgil Cloud.
+     * @hidden
      */
-    async lookupPublicKeys(identity: string): Promise<VirgilPublicKey>;
-    async lookupPublicKeys(identities: string[]): Promise<LookupResult>;
-    async lookupPublicKeys(identities: string[] | string): Promise<LookupResult | VirgilPublicKey> {
-        const argument = isArray(identities) ? identities : [identities];
-        if (argument.length === 0) throw new Error(EMPTY_ARRAY);
-        if (hasDuplicates(argument)) throw new Error(DUPLICATE_IDENTITIES);
-
-        const cards = await this.cardManager.searchCards(argument);
-
-        let result: LookupResult = {},
-            resultWithErrors: { [identity: string]: Error } = {};
-
-        for (let identity of argument) {
-            const filteredCards = cards.filter(card => card.identity === identity);
-            if (filteredCards.length === 0) {
-                resultWithErrors[identity] = new LookupNotFoundError(identity);
-            } else if (filteredCards.length > 1) {
-                resultWithErrors[identity] = new MultipleCardsError(identity);
-            } else {
-                result[identity] = filteredCards[0].publicKey as VirgilPublicKey;
-            }
-        }
-
-        if (getObjectValues(resultWithErrors).length !== 0) {
-            throw new LookupError({ ...resultWithErrors, ...result });
-        }
-
-        if (Array.isArray(identities)) return result;
-
-        return result[identities];
+    protected isPublicKey(publicKey: IPublicKey) {
+        return publicKey instanceof VirgilPublicKey;
     }
 
     /**
-     * Changes password for access to current user private key backup.
-     * @param oldPwd users old password
-     * @param newPwd users new password
+     * @hidden
      */
-    async changePassword(oldPwd: string, newPwd: string) {
-        return await this[_keyLoader].changePassword(oldPwd, newPwd);
-    }
-
-    /**
-     * Uploads current user private key to Virgil Keyknox Storage.
-     */
-    async backupPrivateKey(pwd: string): Promise<void> {
-        const privateKey = await this[_keyLoader].loadLocalPrivateKey();
-        if (!privateKey) throw new RegisterRequiredError();
-        await this[_keyLoader].savePrivateKeyRemote(privateKey, pwd);
-        return;
-    }
-
-    /**
-     * Checks if current user has private key saved locally.
-     */
-    hasLocalPrivateKey(): Promise<Boolean> {
-        return this[_keyLoader].hasPrivateKey();
-    }
-
-    /**
-     * Unregister current user. Revokes public key in Virgil Cloud and deletes local private key.
-     *
-     * @throws {RegisterRequiredError} If current user is not registered (i.e.
-     *                                 there is no Virgil Card for this identity)
-     * @throws {MultipleCardsError} If there is more than one Virgil Card for this identity
-     */
-    async unregister(): Promise<void> {
-        if (this[_inProcess]) throwIllegalInvocationError('unregister');
-        this[_inProcess] = true;
-        try {
-            const cards = await this.cardManager.searchCards(this.identity);
-
-            if (cards.length > 1) throw new MultipleCardsError(this.identity);
-            if (cards.length === 0) throw new RegisterRequiredError();
-
-            await this.cardManager.revokeCard(cards[0].id);
-            await this[_keyLoader].resetLocalPrivateKey();
-        } finally {
-            this[_inProcess] = false;
+    private toData = (value: ArrayBuffer | string): Data => {
+        if (value instanceof ArrayBuffer) {
+            return new Uint8Array(value);
         }
-    }
-
-    private async _publishCard(keyPair: KeyPair, previousCardId?: string) {
-        const card = await this.cardManager.publishCard({
-            privateKey: keyPair.privateKey,
-            publicKey: keyPair.publicKey,
-            previousCardId,
-        });
-
-        return { keyPair, card };
-    }
-
-    private _isOwnPublicKeysIncluded(ownPublicKey: VirgilPublicKey, publicKeys: VirgilPublicKey[]) {
-        const selfPublicKey = this.virgilCrypto.exportPublicKey(ownPublicKey).toString('base64');
-
-        const stringKeys = publicKeys.map(key =>
-            this.virgilCrypto.exportPublicKey(key).toString('base64'),
-        );
-        return stringKeys.some((key, i) => key === selfPublicKey);
-    }
-
-    private _addOwnPublicKey(privateKey: VirgilPrivateKey, publicKeys?: EncryptVirgilPublicKeyArg) {
-        let argument: VirgilPublicKey[];
-
-        if (publicKeys == null) argument = [];
-        else if (isVirgilPublicKey(publicKeys)) argument = [publicKeys];
-        else argument = getObjectValues(publicKeys) as VirgilPublicKey[];
-
-        const ownPublicKey = this.virgilCrypto.extractPublicKey(privateKey);
-
-        if (!this._isOwnPublicKeysIncluded(ownPublicKey, argument)) {
-            argument.push(ownPublicKey);
-        }
-        return argument;
-    }
+        return value;
+    };
 }
