@@ -16,3 +16,5 @@
 |-|-|
 |browser.umd.js|1622507|
 |e3kit.browser.umd.min.js|3961059|
+## Performance
+You can find benchmarks for underlying crypto library [here](https://github.com/VirgilSecurity/virgil-crypto-javascript/tree/master/packages/benchmark)
