@@ -1,3 +1,4 @@
+export type VirgilCrypto = import('@virgilsecurity/base-crypto').VirgilCrypto;
 export type VirgilPrivateKey = import('@virgilsecurity/base-crypto').VirgilPrivateKey;
 export type VirgilPublicKey = import('@virgilsecurity/base-crypto').VirgilPublicKey;
 

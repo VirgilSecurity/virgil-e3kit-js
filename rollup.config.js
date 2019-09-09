@@ -133,7 +133,7 @@ const createNodeJsEntry = (cryptoType, format) => {
     const tsconfigOverride = format === FORMAT.ES ? { compilerOptions: { target: 'es2015' } } : {};
 
     return {
-        input: path.join(sourceDir, 'index.ts'),
+        input: path.join(sourceDir, 'index.node.ts'),
         output: {
             format,
             file: path.join(outputDir, outputFileName)

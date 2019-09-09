@@ -2,22 +2,20 @@ import initFoundation from '@virgilsecurity/core-foundation';
 import {
     getFoundationModules,
     setFoundationModules,
-    VirgilCrypto,
     VirgilPublicKey,
 } from '@virgilsecurity/base-crypto';
-import { initPythia, getPythiaModules, VirgilBrainKeyCrypto } from '@virgilsecurity/pythia-crypto';
-import { VirgilCardCrypto } from '@virgilsecurity/sdk-crypto';
-import { CachingJwtProvider, CardManager, KeyEntryStorage, VirgilCardVerifier } from 'virgil-sdk';
+import { initPythia, getPythiaModules } from '@virgilsecurity/pythia-crypto';
+import { CachingJwtProvider } from 'virgil-sdk';
 
 import {
     VIRGIL_STREAM_SIGNING_STATE,
     VIRGIL_STREAM_ENCRYPTING_STATE,
     VIRGIL_STREAM_DECRYPTING_STATE,
     VIRGIL_STREAM_VERIFYING_STATE,
-    DEFAULT_API_URL,
-    STORAGE_NAME,
 } from './utils/constants';
+import { cryptoModulesLoaded } from './utils/cryptoModulesLoaded';
 import { withDefaults } from './utils/object';
+import { prepareBaseConstructorParams } from './utils/prepareBaseConstructorParams';
 import { onChunkCallback, processFile } from './utils/processFile';
 import { isFile } from './utils/typeguards';
 import { AbstractEThree } from './AbstractEThree';
@@ -26,8 +24,8 @@ import {
     RegisterRequiredError,
     throwGetTokenNotAFunction,
 } from './errors';
-import { PrivateKeyLoader } from './PrivateKeyLoader';
 import {
+    VirgilCrypto,
     VirgilPrivateKey,
     NodeBuffer,
     Data,
@@ -38,62 +36,6 @@ import {
     EncryptFileOptions,
     DecryptFileOptions,
 } from './types';
-
-function cryptoModulesLoaded(getFn: () => any) {
-    try {
-        getFn();
-    } catch (_) {
-        return false;
-    }
-    return true;
-}
-
-function prepareBaseConstructorParams(identity, options: EThreeCtorOptions) {
-    const opts = withDefaults(options, {
-        apiUrl: DEFAULT_API_URL,
-        storageName: STORAGE_NAME,
-        useSha256Identifiers: false,
-    });
-
-    const accessTokenProvider = opts.accessTokenProvider;
-
-    const keyEntryStorage = opts.keyEntryStorage || new KeyEntryStorage(opts.storageName);
-    const virgilCrypto = new VirgilCrypto({ useSha256Identifiers: opts.useSha256Identifiers });
-    const cardCrypto = new VirgilCardCrypto(virgilCrypto);
-    const brainKeyCrypto = new VirgilBrainKeyCrypto();
-
-    const cardVerifier = new VirgilCardVerifier(cardCrypto, {
-        verifySelfSignature: opts.apiUrl === DEFAULT_API_URL,
-        verifyVirgilSignature: opts.apiUrl === DEFAULT_API_URL,
-    });
-
-    const keyLoader = new PrivateKeyLoader(identity, {
-        accessTokenProvider,
-        virgilCrypto,
-        brainKeyCrypto,
-        keyEntryStorage,
-        apiUrl: opts.apiUrl,
-    });
-
-    const cardManager = new CardManager({
-        cardCrypto,
-        cardVerifier,
-        accessTokenProvider,
-        retryOnUnauthorized: true,
-        apiUrl: opts.apiUrl,
-    });
-
-    return {
-        identity,
-        virgilCrypto,
-        cardCrypto,
-        cardVerifier,
-        cardManager,
-        accessTokenProvider,
-        keyEntryStorage,
-        keyLoader,
-    };
-}
 
 export class EThree extends AbstractEThree {
     /**
