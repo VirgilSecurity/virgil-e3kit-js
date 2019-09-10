@@ -13,7 +13,7 @@ const umdOldPath = path.join(e3kitOldPath, 'dist', 'e3kit.browser.umd.min.js');
 
 const base = filePath => path.parse(filePath).base;
 
-const size = filePath => fs.statSync(filePath).size;
+const size = filePath => Math.round(fs.statSync(filePath).size / 1000);
 
 const fileToTable = filePath => `|${base(filePath)}|${size(filePath)}|`;
 
@@ -29,14 +29,14 @@ const getSizeLines = () => [
     '## File sizes',
 
     '### asm.js: old vs new',
-    '|File|Size (bytes)|',
+    '|File|Size (KB)|',
     '|-|-|',
     fileToTable(umdOldPath),
     fileToTable(umdAsmjsPath),
     '',
 
     '### WebAssembly',
-    '|File|Size (bytes)|',
+    '|File|Size (KB)|',
     '|-|-|',
     fileToTable(umdWasmPath),
     fileToTable(foundationPath),
@@ -44,7 +44,7 @@ const getSizeLines = () => [
     '',
 
     '### WebAssembly overall vs old',
-    '|File|Size (bytes)|',
+    '|File|Size (KB)|',
     '|-|-|',
     `|${base(umdWasmPath)}|${totalSize(umdWasmPath, foundationPath, pythiaPath)}|`,
     fileToTable(umdOldPath),
