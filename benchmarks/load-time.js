@@ -22,16 +22,42 @@ const copy = [
     path.join(__dirname, 'node_modules', '@virgilsecurity', 'e3kit-old', 'dist', 'e3kit.browser.umd.min.js'),
 ];
 
+const copyFiles = filePaths => {
+    filePaths.forEach(filePath => {
+        const copyPath = path.join(__dirname, path.parse(filePath).base);
+        if (fs.existsSync(copyPath)) {
+            fs.unlinkSync(copyPath);
+        }
+        fs.copyFileSync(filePath, copyPath);
+    });
+};
+
+const runLighthouse = async () => {
+    const chrome = await chromeLauncher.launch();
+    const { lhr: wasm } = await lighthouse(`http://localhost:${PORT}/new-wasm`, {
+        onlyCategories: ['performance'],
+        port: chrome.port,
+    });
+    const { lhr: newAsmjs } = await lighthouse(`http://localhost:${PORT}/new-asmjs`, {
+        onlyCategories: ['performance'],
+        port: chrome.port,
+    });
+    const { lhr: oldAsmjs } = await lighthouse(`http://localhost:${PORT}/old-asmjs`, {
+        onlyCategories: ['performance'],
+        port: chrome.port,
+    });
+    await chrome.kill();
+    return {
+        wasm,
+        newAsmjs,
+        oldAsmjs,
+    };
+};
+
 const getLoadTimeLines = () => new Promise(async resolve => {
     await initCrypto();
 
-    copy.forEach(sourcePath => {
-        const copiedPath = path.join(__dirname, path.parse(sourcePath).base);
-        if (fs.existsSync(copiedPath)) {
-            fs.unlinkSync(copiedPath);
-        }
-        fs.copyFileSync(sourcePath, copiedPath);
-    });
+    copyFiles(copy);
 
     const virgilCrypto = new VirgilCrypto();
     const virgilAccessTokenSigner = new VirgilAccessTokenSigner(virgilCrypto);
@@ -65,28 +91,15 @@ const getLoadTimeLines = () => new Promise(async resolve => {
 
     server.listen(PORT, async () => {
         console.log(`Server is running at port ${PORT}`);
-        const chrome = await chromeLauncher.launch();
-        const { lhr: newWasmResults } = await lighthouse(`http://localhost:${PORT}/new-wasm`, {
-            onlyCategories: ['performance'],
-            port: chrome.port,
-        });
-        const { lhr: newAsmjsResults } = await lighthouse(`http://localhost:${PORT}/new-asmjs`, {
-            onlyCategories: ['performance'],
-            port: chrome.port,
-        });
-        const { lhr: oldAsmjsResults } = await lighthouse(`http://localhost:${PORT}/old-asmjs`, {
-            onlyCategories: ['performance'],
-            port: chrome.port,
-        });
-        await chrome.kill();
+        const { wasm, newAsmjs, oldAsmjs } = await runLighthouse();
         server.close(() => {
             resolve([
                 '## Load time',
-                '|File|Load time (seconds)|',
+                '|Type|Load time (seconds)|',
                 '|-|-|',
-                `|browser.umd.js|${newWasmResults.audits['first-contentful-paint'].displayValue}|`,
-                `|browser.asmjs.umd.js|${newAsmjsResults.audits['first-contentful-paint'].displayValue}|`,
-                `|e3kit.browser.umd.min.js|${oldAsmjsResults.audits['first-contentful-paint'].displayValue}|`,
+                `|WebAssembly|${wasm.audits['first-contentful-paint'].displayValue}|`,
+                `|new asm.js|${newAsmjs.audits['first-contentful-paint'].displayValue}|`,
+                `|old asm.js|${oldAsmjs.audits['first-contentful-paint'].displayValue}|`,
             ]);
         });
     });

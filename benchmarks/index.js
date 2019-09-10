@@ -12,8 +12,6 @@ const OUTPUT_FILE = 'README.md';
     const sizeLines = getSizeLines();
     const performanceLines = getPerformanceLines();
     const lines = [
-        '# Result',
-        '',
         ...sizeLines,
         '',
         ...loadTimeLines,
