@@ -11,6 +11,12 @@
     },
     "dependencies": {
         "@virgilsecurity/e3kit": "next",
-        "@virgilsecurity/e3kit-old": "npm:@virgilsecurity/e3kit@^0.5.3"
+        "@virgilsecurity/e3kit-old": "npm:@virgilsecurity/e3kit@^0.5.3",
+        "chrome-launcher": "^0.11.2",
+        "dotenv": "^8.1.0",
+        "lighthouse": "^5.2.0",
+        "serve-handler": "^6.1.1",
+        "virgil-crypto": "next",
+        "virgil-sdk": "next"
     }
 }

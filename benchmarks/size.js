@@ -34,6 +34,7 @@ const getSizeLines = () => {
         '|-|-|',
         fileToTable(umdOldPath),
         fileToTable(umdAsmjsPath),
+        '',
 
         '### WebAssembly',
         '|File|Size (bytes)|',
@@ -41,6 +42,7 @@ const getSizeLines = () => {
         fileToTable(umdWasmPath),
         fileToTable(foundationPath),
         fileToTable(pythiaPath),
+        '',
 
         '### WebAssembly overall vs old',
         '|File|Size (bytes)|',
