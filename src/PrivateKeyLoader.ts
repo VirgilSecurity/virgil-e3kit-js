@@ -14,7 +14,7 @@ import {
     IBrainKeyCrypto,
     IAccessTokenProvider,
     IKeyEntryStorage,
-} from './types';
+} from './externalTypes';
 
 /**
  * @hidden

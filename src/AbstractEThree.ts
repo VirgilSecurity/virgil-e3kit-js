@@ -9,11 +9,11 @@ import {
     MultipleCardsError,
     LookupNotFoundError,
     LookupError,
-    DUPLICATE_IDENTITIES,
-    EMPTY_ARRAY,
-    throwIllegalInvocationError,
 } from './errors';
+import { throwIllegalInvocationError } from './utils/error';
+import { DUPLICATE_IDENTITIES, EMPTY_ARRAY } from './constants';
 import { PrivateKeyLoader } from './PrivateKeyLoader';
+import { LookupResult, EncryptPublicKeyArg } from './types';
 import {
     Data,
     ICard,
@@ -24,9 +24,8 @@ import {
     ICardCrypto,
     IAccessTokenProvider,
     IKeyEntryStorage,
-    LookupResult,
-    EncryptPublicKeyArg,
-} from './types';
+    NodeBuffer,
+} from './externalTypes';
 
 export abstract class AbstractEThree {
     /**
@@ -172,7 +171,7 @@ export abstract class AbstractEThree {
      * Encrypts and signs data for recipient public key or `LookupResult` dictionary for multiple recipients.
      * If there is no recipient and message encrypted for the current user, omit public key.
      */
-    async encrypt(message: Data, publicKeys?: EncryptPublicKeyArg): Promise<Data> {
+    async encrypt(message: Data, publicKeys?: EncryptPublicKeyArg): Promise<NodeBuffer | string> {
         const isMessageString = isString(message);
 
         const privateKey = await this.keyLoader.loadLocalPrivateKey();
@@ -180,7 +179,7 @@ export abstract class AbstractEThree {
 
         const publicKeysArray = this.addOwnPublicKey(privateKey, publicKeys);
 
-        const res: Data = this.virgilCrypto.signThenEncrypt(message, privateKey, publicKeysArray);
+        const res = this.virgilCrypto.signThenEncrypt(message, privateKey, publicKeysArray);
         if (isMessageString) return res.toString('base64');
         return res;
     }
@@ -189,7 +188,7 @@ export abstract class AbstractEThree {
      * Decrypts data and verify signature of sender by his public key. If message is self-encrypted,
      * omit public key parameter.
      */
-    async decrypt(message: Data, publicKey?: IPublicKey): Promise<Data> {
+    async decrypt(message: Data, publicKey?: IPublicKey): Promise<NodeBuffer | string> {
         const isMessageString = isString(message);
 
         const privateKey = await this.keyLoader.loadLocalPrivateKey();
@@ -197,7 +196,7 @@ export abstract class AbstractEThree {
         if (!publicKey) publicKey = this.virgilCrypto.extractPublicKey(privateKey);
 
         const res = this.virgilCrypto.decryptThenVerify(message, privateKey, publicKey);
-        if (isMessageString) return res.toString('utf8') as string;
+        if (isMessageString) return res.toString('utf8');
         return res;
     }
 

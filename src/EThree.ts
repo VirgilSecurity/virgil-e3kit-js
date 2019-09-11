@@ -19,23 +19,16 @@ import { prepareBaseConstructorParams } from './utils/prepareBaseConstructorPara
 import { onChunkCallback, processFile } from './utils/processFile';
 import { isFile } from './utils/typeguards';
 import { AbstractEThree } from './AbstractEThree';
+import { IntegrityCheckFailedError, RegisterRequiredError } from './errors';
+import { throwGetTokenNotAFunction } from './utils/error';
 import {
-    IntegrityCheckFailedError,
-    RegisterRequiredError,
-    throwGetTokenNotAFunction,
-} from './errors';
-import {
-    VirgilCrypto,
-    VirgilPrivateKey,
-    NodeBuffer,
-    Data,
-    IPublicKey,
     EThreeInitializeOptions,
     EThreeCtorOptions,
     EncryptPublicKeyArg,
     EncryptFileOptions,
     DecryptFileOptions,
 } from './types';
+import { VirgilCrypto, VirgilPrivateKey, NodeBuffer, Data, IPublicKey } from './externalTypes';
 
 export class EThree extends AbstractEThree {
     /**

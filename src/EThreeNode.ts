@@ -11,8 +11,9 @@ import { cryptoModulesLoaded } from './utils/cryptoModulesLoaded';
 import { withDefaults } from './utils/object';
 import { prepareBaseConstructorParams } from './utils/prepareBaseConstructorParams';
 import { AbstractEThree } from './AbstractEThree';
-import { throwGetTokenNotAFunction } from './errors';
-import { IPublicKey, EThreeInitializeOptions, EThreeCtorOptions } from './types';
+import { throwGetTokenNotAFunction } from './utils/error';
+import { EThreeInitializeOptions, EThreeCtorOptions } from './types';
+import { IPublicKey } from './externalTypes';
 
 export class EThreeNode extends AbstractEThree {
     /**
