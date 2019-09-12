@@ -31,11 +31,10 @@ import {
     WrongKeyknoxPasswordError,
     PrivateKeyAlreadyExistsError,
     PrivateKeyNoBackupError,
-    DUPLICATE_IDENTITIES,
-    EMPTY_ARRAY,
 } from '../errors';
+import { DUPLICATE_IDENTITIES, EMPTY_ARRAY } from '../constants';
 import { EThree } from '../EThree';
-import { VirgilPublicKey, IKeyEntry } from '../types';
+import { VirgilPublicKey, IKeyEntry } from '../externalTypes';
 
 describe('EThree', () => {
     let virgilCrypto: VirgilCrypto;

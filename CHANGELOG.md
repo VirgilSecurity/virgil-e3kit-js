@@ -1,5 +1,15 @@
 # Changelog
 
+## 2019-09-12
+
+* Fix: added missing exports for custom error classes and TypeScript type definitions
+
+## 2019-09-09 0.6.0-beta.1
+
+* Switched to WebAssembly-based JS crypto library
+* Started using native crypto libraries in React Native via JS bridge
+* Added Node.js support
+
 ## 2019-08-28 0.5.3
 
 * Caching the private key in memory to improve performace.

@@ -3,11 +3,12 @@ import createNativeKeyEntryStorage from '@virgilsecurity/key-storage-rn/native';
 import { VirgilCardCrypto } from '@virgilsecurity/sdk-crypto';
 import { CachingJwtProvider, CardManager, VirgilCardVerifier } from 'virgil-sdk';
 import { AbstractEThree } from './AbstractEThree';
-import { IPublicKey, EThreeCtorOptions, EThreeInitializeOptions } from './types';
+import { EThreeCtorOptions, EThreeInitializeOptions } from './types';
+import { IPublicKey } from './externalTypes';
 import { withDefaults } from './utils/object';
 import { DEFAULT_API_URL, STORAGE_NAME } from './utils/constants';
 import { PrivateKeyLoader } from './PrivateKeyLoader';
-import { throwGetTokenNotAFunction } from './errors';
+import { throwGetTokenNotAFunction } from './utils/error';
 
 export class EThreeNative extends AbstractEThree {
     constructor(identity: string, options: EThreeCtorOptions) {
