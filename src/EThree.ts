@@ -1,10 +1,10 @@
 import initFoundation from '@virgilsecurity/core-foundation';
 import {
-    getFoundationModules,
     setFoundationModules,
+    hasFoundationModules,
     VirgilPublicKey,
 } from '@virgilsecurity/base-crypto';
-import { initPythia, getPythiaModules } from '@virgilsecurity/pythia-crypto';
+import { initPythia, hasPythiaModules } from '@virgilsecurity/pythia-crypto';
 import { CachingJwtProvider } from 'virgil-sdk';
 
 import {
@@ -13,7 +13,6 @@ import {
     VIRGIL_STREAM_DECRYPTING_STATE,
     VIRGIL_STREAM_VERIFYING_STATE,
 } from './utils/constants';
-import { cryptoModulesLoaded } from './utils/cryptoModulesLoaded';
 import { withDefaults } from './utils/object';
 import { prepareBaseConstructorParams } from './utils/prepareBaseConstructorParams';
 import { onChunkCallback, processFile } from './utils/processFile';
@@ -49,10 +48,10 @@ export class EThree extends AbstractEThree {
         options: EThreeInitializeOptions = {},
     ): Promise<EThree> {
         const modulesToLoad: Promise<void>[] = [];
-        if (!cryptoModulesLoaded(getFoundationModules)) {
+        if (!hasFoundationModules()) {
             modulesToLoad.push(initFoundation().then(setFoundationModules));
         }
-        if (!cryptoModulesLoaded(getPythiaModules)) {
+        if (!hasPythiaModules()) {
             modulesToLoad.push(initPythia());
         }
         await Promise.all(modulesToLoad);
