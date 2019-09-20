@@ -9,12 +9,12 @@ dotenv.config();
 
 const app = express();
 const virgilCrypto = new VirgilCrypto();
-const { APP_ID, API_KEY_ID, API_KEY } = process.env;
+const { APP_ID, APP_KEY_ID, APP_KEY } = process.env;
 
 const generator = new JwtGenerator({
     appId: APP_ID,
-    apiKeyId: API_KEY_ID,
-    apiKey: virgilCrypto.importPrivateKey(API_KEY),
+    apiKeyId: APP_KEY_ID,
+    apiKey: virgilCrypto.importPrivateKey(APP_KEY),
     accessTokenSigner: new VirgilAccessTokenSigner(virgilCrypto)
 });
 
