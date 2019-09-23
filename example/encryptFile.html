@@ -24,15 +24,15 @@
         </ol>
         <fieldset>
             <label>
-                app id
+                App ID
                 <input id="app-id" />
             </label>
             <label>
-                api key
+                App Key
                 <input id="api-key" />
             </label>
             <label>
-                api key id
+                App Key id
                 <input id="api-key-id" />
             </label>
         </fieldset>
@@ -139,16 +139,16 @@
 
             function initializeE3kit() {
                 const APP_ID = document.getElementById('app-id').value;
-                const API_KEY = document.getElementById('api-key').value;
-                const API_KEY_ID = document.getElementById('api-key-id').value;
+                const APP_KEY = document.getElementById('api-key').value;
+                const APP_KEY_ID = document.getElementById('api-key-id').value;
 
                 const virgilCrypto = new VirgilCrypto.VirgilCrypto();
                 const accessTokenSigner = new VirgilCrypto.VirgilAccessTokenSigner(virgilCrypto);
 
                 const jwtGenerator = new Virgil.JwtGenerator({
                     appId: APP_ID,
-                    apiKey: virgilCrypto.importPrivateKey(API_KEY),
-                    apiKeyId: API_KEY_ID,
+                    apiKey: virgilCrypto.importPrivateKey(APP_KEY),
+                    apiKeyId: APP_KEY_ID,
                     accessTokenSigner: accessTokenSigner,
                 });
 
