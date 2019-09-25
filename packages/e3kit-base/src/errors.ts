@@ -3,7 +3,6 @@ import { IPublicKey } from './externalTypes';
 /**
  * Custom error class for errors specific to Virgil E3kit.
  */
-
 export class SdkError extends Error {
     constructor(m: string, name = 'SdkError') {
         super(m);

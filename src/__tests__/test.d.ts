@@ -107,8 +107,8 @@ declare module 'expect' {
     interface SnapshotSerializerPlugin {
         print(
             val: any,
-            serialize: ((val: any) => string),
-            indent: ((str: string) => string),
+            serialize: (val: any) => string,
+            indent: (str: string) => string,
             opts: SnapshotSerializerOptions,
             colors: SnapshotSerializerColors,
         ): string;

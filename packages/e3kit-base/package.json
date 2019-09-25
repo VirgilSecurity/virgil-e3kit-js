@@ -1,0 +1,36 @@
+{
+    "name": "@virgilsecurity/e3kit-base",
+    "version": "0.6.0-beta.3",
+    "description": "End-to-end encryption with multiple device support powered by Virgil Security",
+    "main": "./dist/e3kit-base.cjs.js",
+    "module": "./dist/e3kit-base.es.js",
+    "typings": "./dist/types/index.d.ts",
+    "files": [
+        "dist"
+    ],
+    "repository": "https://github.com/VirgilSecurity/virgil-e3kit-js/tree/master/packages/e3kit-base",
+    "author": "Virgil Security Inc. <support@virgilsecurity.com>",
+    "license": "BSD-3-Clause",
+    "scripts": {
+        "test": "echo 'test'",
+        "build": "rollup -c",
+        "clean": "rimraf .rpt2_cache dist",
+        "prepare": "npm run clean && npm run build"
+    },
+    "dependencies": {
+        "@virgilsecurity/crypto-types": "^0.1.4",
+        "@virgilsecurity/keyknox": "next",
+        "@virgilsecurity/sdk-crypto": "^0.4.4",
+        "virgil-pythia": "^0.3.0",
+        "virgil-sdk": "next"
+    },
+    "devDependencies": {
+        "rimraf": "^3.0.0",
+        "rollup": "^1.21.4",
+        "rollup-plugin-typescript2": "^0.24.2",
+        "typescript": "^3.6.3"
+    },
+    "publishConfig": {
+        "access": "public"
+    }
+}

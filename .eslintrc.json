@@ -1,0 +1,42 @@
+{
+  "overrides": [
+    {
+      "files": "*.js",
+      "env": {
+        "es6": true,
+        "node": true
+      },
+      "extends": [
+        "eslint:recommended",
+        "prettier"
+      ],
+      "parser": "babel-eslint",
+      "plugins": [
+        "prettier"
+      ],
+      "rules": {
+        "prettier/prettier": "error"
+      }
+    },
+    {
+      "files": "*.ts",
+      "extends": [
+        "eslint:recommended",
+        "plugin:@typescript-eslint/eslint-recommended",
+        "plugin:@typescript-eslint/recommended",
+        "prettier",
+        "prettier/@typescript-eslint"
+      ],
+      "parser": "@typescript-eslint/parser",
+      "plugins": [
+        "@typescript-eslint",
+        "prettier"
+      ],
+      "rules": {
+        "@typescript-eslint/explicit-function-return-type": "off",
+        "@typescript-eslint/explicit-member-accessibility": "off",
+        "prettier/prettier": "error"
+      }
+    }
+  ]
+}
