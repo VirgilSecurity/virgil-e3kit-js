@@ -24,7 +24,14 @@ const createEntry = format => ({
     plugins: [
         nodeResolve({ browser: true }),
         commonjs(),
-        typescript({ useTsconfigDeclarationDir: true }),
+        typescript({
+            useTsconfigDeclarationDir: true,
+            tsconfigOverride: {
+                compilerOptions: {
+                    noImplicitAny: false,
+                },
+            },
+        }),
     ],
 });
 

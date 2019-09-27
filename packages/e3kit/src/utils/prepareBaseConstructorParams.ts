@@ -1,9 +1,9 @@
 import { VirgilCrypto } from '@virgilsecurity/base-crypto';
+import { PrivateKeyLoader } from '@virgilsecurity/e3kit-base';
 import { VirgilBrainKeyCrypto } from '@virgilsecurity/pythia-crypto';
 import { VirgilCardCrypto } from '@virgilsecurity/sdk-crypto';
 import { CardManager, KeyEntryStorage, VirgilCardVerifier } from 'virgil-sdk';
 
-import { PrivateKeyLoader } from '../PrivateKeyLoader';
 import { EThreeCtorOptions } from '../types';
 import { DEFAULT_API_URL, STORAGE_NAME } from './constants';
 import { withDefaults } from './object';

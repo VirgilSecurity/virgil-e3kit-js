@@ -18,11 +18,11 @@ import {
     VIRGIL_STREAM_DECRYPTING_STATE,
     VIRGIL_STREAM_VERIFYING_STATE,
 } from './utils/constants';
+import { throwGetTokenNotAFunction } from './utils/error';
 import { withDefaults } from './utils/object';
 import { prepareBaseConstructorParams } from './utils/prepareBaseConstructorParams';
 import { onChunkCallback, processFile } from './utils/processFile';
 import { isFile } from './utils/typeguards';
-import { throwGetTokenNotAFunction } from './utils/error';
 import {
     NodeBuffer,
     Data,

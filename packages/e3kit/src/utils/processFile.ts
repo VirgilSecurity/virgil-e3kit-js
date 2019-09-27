@@ -1,4 +1,4 @@
-import { AbortError } from '../errors';
+import { AbortError } from '@virgilsecurity/e3kit-base';
 
 /**
  * @hidden

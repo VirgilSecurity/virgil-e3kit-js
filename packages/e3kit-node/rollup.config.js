@@ -1,6 +1,8 @@
 const path = require('path');
 
 const builtinModules = require('builtin-modules');
+const commonjs = require('rollup-plugin-commonjs');
+const nodeResolve = require('rollup-plugin-node-resolve');
 const replace = require('rollup-plugin-re');
 const typescript = require('rollup-plugin-typescript2');
 
@@ -49,6 +51,8 @@ const createEntry = (cryptoType, format) => {
             file: path.join(outputPath, outputFileName),
         },
         plugins: [
+            nodeResolve(),
+            commonjs(),
             replace({
                 patterns: [
                     {
@@ -63,7 +67,14 @@ const createEntry = (cryptoType, format) => {
                     },
                 ],
             }),
-            typescript({ useTsconfigDeclarationDir: true }),
+            typescript({
+                useTsconfigDeclarationDir: true,
+                tsconfigOverride: {
+                    compilerOptions: {
+                        noImplicitAny: false,
+                    },
+                },
+            }),
         ],
     };
 };
