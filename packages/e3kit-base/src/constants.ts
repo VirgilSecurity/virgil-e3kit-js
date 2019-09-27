@@ -1,8 +1,9 @@
 /**
  * @hidden
  */
-export const DUPLICATE_IDENTITIES = 'Identities in array should be unique';
+export const DEFAULT_STORAGE_NAME = '.virgil-local-storage';
+
 /**
  * @hidden
  */
-export const EMPTY_ARRAY = 'Array should be non empty';
+export const DEFAULT_API_URL = 'https://api.virgilsecurity.com';

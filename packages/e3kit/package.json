@@ -23,7 +23,6 @@
     "dependencies": {
         "@virgilsecurity/base-crypto": "^0.5.2",
         "@virgilsecurity/core-foundation": "^0.2.0",
-        "@virgilsecurity/crypto-types": "^0.1.4",
         "@virgilsecurity/e3kit-base": "^0.6.0-beta.3",
         "@virgilsecurity/pythia-crypto": "^0.2.0",
         "virgil-sdk": "next"

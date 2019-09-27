@@ -1,4 +1,4 @@
-import { AbortError } from '../errors';
+import { AbortError } from '@virgilsecurity/e3kit-base';
 
 /**
  * @hidden
@@ -14,6 +14,7 @@ export type processFileOptions = {
     signal?: AbortSignal;
     onChunkCallback: onChunkCallback;
     onFinishCallback: () => void;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     onErrorCallback: (err: any) => void;
 };
 

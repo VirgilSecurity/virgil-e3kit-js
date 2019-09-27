@@ -1,0 +1,17 @@
+{
+    "name": "@virgilsecurity/e3kit-tests",
+    "version": "0.6.0-beta.3",
+    "description": "Virgil E3Kit SDK tests",
+    "repository": "https://github.com/VirgilSecurity/virgil-e3kit-js/tree/master/packages/e3kit-tests",
+    "author": "Virgil Security Inc. <support@virgilsecurity.com>",
+    "license": "BSD-3-Clause",
+    "private": true,
+    "scripts": {
+        "test": "echo 'test'"
+    },
+    "dependencies": {
+        "@virgilsecurity/e3kit": "^0.6.0-beta.3",
+        "@virgilsecurity/e3kit-native": "^0.6.0-beta.3",
+        "@virgilsecurity/e3kit-node": "^0.6.0-beta.3"
+    }
+}

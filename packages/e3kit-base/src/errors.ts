@@ -1,4 +1,4 @@
-import { IPublicKey } from './externalTypes';
+import { IPublicKey } from './types';
 
 /**
  * Custom error class for errors specific to Virgil E3kit.

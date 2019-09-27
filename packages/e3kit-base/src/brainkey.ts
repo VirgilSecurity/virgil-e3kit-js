@@ -1,6 +1,6 @@
 import { createBrainKey } from 'virgil-pythia';
 
-import { IKeyPair, ICrypto, IBrainKeyCrypto, IAccessTokenProvider } from '../externalTypes';
+import { IKeyPair, ICrypto, IBrainKeyCrypto, IAccessTokenProvider } from './types';
 
 const BRAIN_KEY_RATE_LIMIT_DELAY = 2000;
 const BRAIN_KEY_THROTTLING_ERROR_CODE = 60007;

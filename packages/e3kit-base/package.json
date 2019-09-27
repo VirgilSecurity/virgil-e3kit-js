@@ -12,7 +12,6 @@
     "author": "Virgil Security Inc. <support@virgilsecurity.com>",
     "license": "BSD-3-Clause",
     "scripts": {
-        "test": "echo 'test'",
         "build": "rollup -c",
         "clean": "rimraf .rpt2_cache dist",
         "prepare": "npm run clean && npm run build"

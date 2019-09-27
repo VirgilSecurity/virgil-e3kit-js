@@ -1,7 +1,6 @@
 import { CardManager, KeyEntryAlreadyExistsError, VirgilCardVerifier } from 'virgil-sdk';
 
-import { getObjectValues, hasDuplicates } from './utils/array';
-import { isArray, isString } from './utils/typeguards';
+import { getObjectValues, hasDuplicates } from './array';
 import {
     RegisterRequiredError,
     IdentityAlreadyExistsError,
@@ -10,10 +9,8 @@ import {
     LookupNotFoundError,
     LookupError,
 } from './errors';
-import { throwIllegalInvocationError } from './utils/error';
-import { DUPLICATE_IDENTITIES, EMPTY_ARRAY } from './constants';
 import { PrivateKeyLoader } from './PrivateKeyLoader';
-import { LookupResult, EncryptPublicKeyArg } from './types';
+import { isArray, isString } from './typeguards';
 import {
     Data,
     ICard,
@@ -25,7 +22,9 @@ import {
     IAccessTokenProvider,
     IKeyEntryStorage,
     NodeBuffer,
-} from './externalTypes';
+    LookupResult,
+    EncryptPublicKeyArg,
+} from './types';
 
 export abstract class AbstractEThree {
     /**
@@ -93,7 +92,9 @@ export abstract class AbstractEThree {
      * Register current user in Virgil Cloud. Saves private key locally and uploads public key to cloud.
      */
     async register(keyPair?: IKeyPair) {
-        if (this.inProcess) throwIllegalInvocationError('register');
+        if (this.inProcess) {
+            this.throwIllegalInvocationError('register');
+        }
         this.inProcess = true;
         try {
             const [cards, privateKey] = await Promise.all([
@@ -116,7 +117,9 @@ export abstract class AbstractEThree {
      * Used in case if old private key is lost.
      */
     async rotatePrivateKey(): Promise<void> {
-        if (this.inProcess) throwIllegalInvocationError('rotatePrivateKey');
+        if (this.inProcess) {
+            this.throwIllegalInvocationError('rotatePrivateKey');
+        }
         this.inProcess = true;
         try {
             const [cards, privateKey] = await Promise.all([
@@ -207,8 +210,12 @@ export abstract class AbstractEThree {
     async lookupPublicKeys(identities: string[]): Promise<LookupResult>;
     async lookupPublicKeys(identities: string[] | string): Promise<LookupResult | IPublicKey> {
         const argument = isArray(identities) ? identities : [identities];
-        if (argument.length === 0) throw new Error(EMPTY_ARRAY);
-        if (hasDuplicates(argument)) throw new Error(DUPLICATE_IDENTITIES);
+        if (argument.length === 0) {
+            throw new Error('Array should be non empty');
+        }
+        if (hasDuplicates(argument)) {
+            throw new Error('Identities in array should be unique');
+        }
 
         const cards = await this.cardManager.searchCards(argument);
 
@@ -269,7 +276,9 @@ export abstract class AbstractEThree {
      * @throws {MultipleCardsError} If there is more than one Virgil Card for this identity
      */
     async unregister(): Promise<void> {
-        if (this.inProcess) throwIllegalInvocationError('unregister');
+        if (this.inProcess) {
+            this.throwIllegalInvocationError('unregister');
+        }
         this.inProcess = true;
         try {
             const cards = await this.cardManager.searchCards(this.identity);
@@ -310,6 +319,10 @@ export abstract class AbstractEThree {
             this.virgilCrypto.exportPublicKey(key).toString('base64'),
         );
         return stringKeys.some(key => key === selfPublicKey);
+    }
+
+    private throwIllegalInvocationError(method: string) {
+        throw new Error(`Calling ${method} two or more times in a row is not allowed.`);
     }
 
     /**

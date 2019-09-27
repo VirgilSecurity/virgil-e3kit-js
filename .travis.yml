@@ -10,3 +10,6 @@ install:
     - yarn --no-lockfile
 before_script:
     - yarn lerna bootstrap
+script:
+    - yarn lint
+    - yarn test

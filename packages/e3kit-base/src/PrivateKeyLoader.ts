@@ -6,7 +6,7 @@ import {
     KeyknoxClient,
 } from '@virgilsecurity/keyknox';
 
-import { generateBrainPair } from './utils/brainkey';
+import { generateBrainPair } from './brainkey';
 import { WrongKeyknoxPasswordError, PrivateKeyNoBackupError } from './errors';
 import {
     IPrivateKey,
@@ -14,11 +14,12 @@ import {
     IBrainKeyCrypto,
     IAccessTokenProvider,
     IKeyEntryStorage,
-} from './externalTypes';
+} from './types';
 
 /**
  * @hidden
  */
+// eslint-disable-next-line @typescript-eslint/interface-name-prefix
 export interface IPrivateKeyLoaderOptions {
     virgilCrypto: ICrypto;
     brainKeyCrypto: IBrainKeyCrypto;
