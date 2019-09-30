@@ -5,6 +5,7 @@ node_js:
     - "11"
     - "12"
 before_install:
+    - npm config set scripts-prepend-node-path true
     - yarn cache clean
 install:
     - yarn --no-lockfile
