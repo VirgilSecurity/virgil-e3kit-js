@@ -25,6 +25,7 @@
         "@virgilsecurity/core-foundation": "^0.2.0",
         "@virgilsecurity/e3kit-base": "^0.6.0-beta.3",
         "@virgilsecurity/pythia-crypto": "^0.2.0",
+        "@virgilsecurity/sdk-crypto": "^0.4.4",
         "virgil-sdk": "next"
     },
     "devDependencies": {
