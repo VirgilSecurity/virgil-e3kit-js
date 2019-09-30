@@ -1,9 +1,19 @@
-import expect from 'expect';
-import uuid from 'uuid/v4';
+import { expect } from 'chai';
 import isBuffer from 'is-buffer';
+import uuid from 'uuid/v4';
 
 import { setFoundationModules, VirgilCrypto } from '@virgilsecurity/base-crypto';
 import initFoundation from '@virgilsecurity/core-foundation';
+import {
+    IdentityAlreadyExistsError,
+    RegisterRequiredError,
+    LookupError,
+    LookupNotFoundError,
+    WrongKeyknoxPasswordError,
+    PrivateKeyAlreadyExistsError,
+    PrivateKeyNoBackupError,
+    EThree,
+} from '@virgilsecurity/e3kit-node';
 import {
     KeyknoxManager,
     KeyknoxClient,
@@ -12,6 +22,7 @@ import {
 } from '@virgilsecurity/keyknox';
 import { initPythia, VirgilBrainKeyCrypto } from '@virgilsecurity/pythia-crypto';
 import { VirgilCardCrypto, VirgilAccessTokenSigner } from '@virgilsecurity/sdk-crypto';
+import { createBrainKey } from 'virgil-pythia';
 import {
     VirgilCardVerifier,
     JwtGenerator,
@@ -21,20 +32,15 @@ import {
     KeyEntryStorage,
 } from 'virgil-sdk';
 
-import { getObjectValues } from '../utils/array';
-import { generateBrainPair } from '../utils/brainkey';
-import {
-    IdentityAlreadyExistsError,
-    RegisterRequiredError,
-    LookupError,
-    LookupNotFoundError,
-    WrongKeyknoxPasswordError,
-    PrivateKeyAlreadyExistsError,
-    PrivateKeyNoBackupError,
-} from '../errors';
-import { DUPLICATE_IDENTITIES, EMPTY_ARRAY } from '../constants';
-import { EThree } from '../EThree';
-import { VirgilPublicKey, IKeyEntry } from '../externalTypes';
+type VirgilPublicKey = import('@virgilsecurity/base-crypto').VirgilPublicKey;
+type IKeyEntry = import('virgil-sdk').IKeyEntry;
+
+const BRAIN_KEY_RATE_LIMIT_DELAY = 2000;
+
+const sleep = (ms: number) =>
+    new Promise(resolve => {
+        setTimeout(resolve, ms);
+    });
 
 describe('EThree', () => {
     let virgilCrypto: VirgilCrypto;
@@ -85,25 +91,23 @@ describe('EThree', () => {
         EThree.initialize(fetchToken, { apiUrl: process.env.API_URL });
 
     const createSyncStorage = async (identity: string, password: string) => {
+        await sleep(BRAIN_KEY_RATE_LIMIT_DELAY);
         const fetchToken = createFetchToken(identity);
-
-        const keyPair = await generateBrainPair(password, {
+        const brainKey = createBrainKey({
             virgilCrypto: virgilCrypto,
-            pythiaCrypto: new VirgilBrainKeyCrypto(),
+            virgilBrainKeyCrypto: new VirgilBrainKeyCrypto(),
             accessTokenProvider: new CachingJwtProvider(fetchToken),
             apiUrl: process.env.API_URL,
         });
-
+        const keyPair = await brainKey.generateKeyPair(password);
         const storage = new CloudKeyStorage(
             new KeyknoxManager(
-                new CachingJwtProvider(fetchToken),
-                keyPair.privateKey,
-                keyPair.publicKey,
                 new KeyknoxCrypto(virgilCrypto),
-                new KeyknoxClient(process.env.API_URL),
+                new KeyknoxClient(new CachingJwtProvider(fetchToken), process.env.API_URL),
             ),
+            keyPair.privateKey,
+            keyPair.publicKey,
         );
-
         await storage.retrieveCloudEntries();
         return storage;
     };
@@ -113,15 +117,15 @@ describe('EThree', () => {
             const identity = uuid();
             const fetchToken = createFetchToken(identity);
             const prevCards = await cardManager.searchCards(identity);
-            expect(prevCards.length).toBe(0);
+            expect(prevCards.length).to.equal(0);
             const sdk = await initializeEThree(fetchToken);
             await sdk.register();
             const [cards, key] = await Promise.all([
                 cardManager.searchCards(identity),
                 keyEntryStorage.load(identity),
             ]);
-            expect(cards.length).toBe(1);
-            expect(key).not.toBe(null);
+            expect(cards).to.have.length(1);
+            expect(key).not.to.be.null;
         });
 
         it('has local key, has no card', async () => {
@@ -135,7 +139,7 @@ describe('EThree', () => {
             });
             await sdk.register();
             const cards = await cardManager.searchCards(identity);
-            expect(cards.length).toEqual(1);
+            expect(cards).to.have.length(1);
         });
 
         it('STE-10 has card', async () => {
@@ -148,36 +152,36 @@ describe('EThree', () => {
             });
             const fetchToken = createFetchToken(identity);
             const prevCards = await cardManager.searchCards(identity);
-
-            expect(prevCards.length).toEqual(1);
-
+            expect(prevCards).to.have.length(1);
             const sdk = await initializeEThree(fetchToken);
             try {
                 await sdk.register();
             } catch (e) {
-                expect(e).toBeInstanceOf(IdentityAlreadyExistsError);
+                expect(e).to.be.instanceOf(IdentityAlreadyExistsError);
+                return;
             }
+            expect.fail();
         });
 
         it('STE-11 call 2 times', async () => {
             const identity = uuid();
             const fetchToken = createFetchToken(identity);
             const prevCards = await cardManager.searchCards(identity);
-            expect(prevCards.length).toBe(0);
+            expect(prevCards).to.have.length(0);
             const sdk = await initializeEThree(fetchToken);
             const promise = sdk.register();
             try {
                 await sdk.register();
             } catch (e) {
-                expect(e).toBeInstanceOf(Error);
+                expect(e).to.be.instanceOf(Error);
             }
             await promise;
             const [cards, key] = await Promise.all([
                 cardManager.searchCards(identity),
                 keyEntryStorage.load(identity),
             ]);
-            expect(cards.length).toBe(1);
-            expect(key).not.toBe(null);
+            expect(cards).to.have.length(1);
+            expect(key).not.to.be.null;
         });
 
         it('STE-44 registers with provided key pair', async () => {
@@ -187,9 +191,9 @@ describe('EThree', () => {
             const keyPair = sdk.virgilCrypto.generateKeys();
             await sdk.register(keyPair);
             const cards = await cardManager.searchCards(identity);
-            expect(cards[0].identity).toBe(identity);
+            expect(cards[0].identity).to.equal(identity);
             const keyEntry = await keyEntryStorage.load(identity);
-            expect(keyEntry).toBeDefined();
+            expect(keyEntry).not.to.be.undefined;
         });
     });
 
@@ -202,8 +206,8 @@ describe('EThree', () => {
             const prevCard = await cardManager.publishCard({ identity: identity, ...keypair });
             await sdk.rotatePrivateKey();
             const newCards = await cardManager.searchCards(identity);
-            expect(newCards.length).toBe(1);
-            expect(newCards[0].previousCardId).toBe(prevCard.id);
+            expect(newCards).to.have.length(1);
+            expect(newCards[0].previousCardId).to.equal(prevCard.id);
         });
 
         it('STE-12 has no card', async () => {
@@ -211,15 +215,14 @@ describe('EThree', () => {
             const fetchToken = createFetchToken(identity);
             const sdk = await initializeEThree(fetchToken);
             const cards = await cardManager.searchCards(identity);
-            expect(cards.length).toEqual(0);
+            expect(cards).to.have.length(0);
             try {
                 await sdk.rotatePrivateKey();
             } catch (e) {
-                expect(e).toBeInstanceOf(RegisterRequiredError);
-
+                expect(e).to.be.instanceOf(RegisterRequiredError);
                 return;
             }
-            throw 'should throw';
+            expect.fail();
         });
 
         it('STE-10 rotate 2 times', async () => {
@@ -228,18 +231,18 @@ describe('EThree', () => {
             const sdk = await initializeEThree(fetchToken);
             await sdk.register();
             const cards = await cardManager.searchCards(identity);
-            expect(cards.length).toEqual(1);
+            expect(cards).to.have.length(1);
             await sdk.cleanup();
             const promise = sdk.rotatePrivateKey();
             try {
                 await sdk.rotatePrivateKey();
             } catch (e) {
-                expect(e).toBeInstanceOf(Error);
+                expect(e).to.be.instanceOf(Error);
             }
             await promise;
             const newCards = await cardManager.searchCards(identity);
-            expect(newCards.length).toBe(1);
-            expect(newCards[0].previousCardId).toBe(cards[0].id);
+            expect(newCards).to.have.length(1);
+            expect(newCards[0].previousCardId).to.equal(cards[0].id);
         });
     });
 
@@ -252,13 +255,12 @@ describe('EThree', () => {
             const keypair = virgilCrypto.generateKeys();
             await cardManager.publishCard({ identity: identity2, ...keypair });
             const lookupResult = (await sdk.lookupPublicKeys(identity2)) as VirgilPublicKey;
-
-            expect(Array.isArray(lookupResult)).not.toBeTruthy();
+            expect(Array.isArray(lookupResult)).to.be.false;
             expect(
                 virgilCrypto
                     .exportPublicKey(lookupResult)
                     .equals(virgilCrypto.exportPublicKey(keypair.publicKey)),
-            ).toBeTruthy();
+            ).to.be.true;
         });
 
         it('STE-1 lookupKeys success', async () => {
@@ -269,24 +271,22 @@ describe('EThree', () => {
             const identity2 = uuid();
             const keypair1 = virgilCrypto.generateKeys();
             const keypair2 = virgilCrypto.generateKeys();
-
             await Promise.all([
                 cardManager.publishCard({ identity: identity1, ...keypair1 }),
                 cardManager.publishCard({ identity: identity2, ...keypair2 }),
             ]);
             const publicKeys = await sdk.lookupPublicKeys([identity1, identity2]);
-
-            expect(getObjectValues(publicKeys).length).toBe(2);
+            expect(Object.values(publicKeys)).to.have.length(2);
             expect(
                 virgilCrypto
                     .exportPublicKey(publicKeys[identity1] as VirgilPublicKey)
                     .equals(virgilCrypto.exportPublicKey(keypair1.publicKey)),
-            ).toBeTruthy();
+            ).to.be.true;
             expect(
                 virgilCrypto
                     .exportPublicKey(publicKeys[identity2] as VirgilPublicKey)
                     .equals(virgilCrypto.exportPublicKey(keypair2.publicKey)),
-            ).toBeTruthy();
+            ).to.be.true;
         });
 
         it('STE-2 lookupKeys nonexistent identity', async () => {
@@ -298,45 +298,38 @@ describe('EThree', () => {
             try {
                 await sdk.lookupPublicKeys([identity1, identity2]);
             } catch (e) {
-                expect(e).toBeInstanceOf(LookupError);
-                if (e instanceof LookupError) {
-                    expect(e.lookupResult[identity1]).toBeInstanceOf(LookupNotFoundError);
-                    expect(e.lookupResult[identity2]).toBeInstanceOf(LookupNotFoundError);
-                }
+                expect(e).to.be.instanceOf(LookupError);
+                expect(e.lookupResult[identity1]).to.be.instanceOf(LookupNotFoundError);
+                expect(e.lookupResult[identity2]).to.be.instanceOf(LookupNotFoundError);
                 return;
             }
-
-            throw 'should throw';
+            expect.fail();
         });
 
         it('STE-2 lookupKeys with empty array of identities', async () => {
             const identity = uuid();
             const fetchToken = createFetchToken(identity);
-
             const sdk = await initializeEThree(fetchToken);
             try {
                 await sdk.lookupPublicKeys([]);
             } catch (e) {
-                expect(e).toBeInstanceOf(Error);
-                expect(e.message).toEqual(EMPTY_ARRAY);
+                expect(e).to.be.instanceOf(Error);
                 return;
             }
-            throw 'should throw';
+            expect.fail();
         });
 
         it('lookupKeys with duplicate identites', async () => {
             const identity = uuid();
             const fetchToken = createFetchToken(identity);
-
             const sdk = await initializeEThree(fetchToken);
             try {
                 await sdk.lookupPublicKeys([identity, identity, 'random']);
             } catch (e) {
-                expect(e).toBeInstanceOf(Error);
-                expect(e.message).toEqual(DUPLICATE_IDENTITIES);
+                expect(e).to.be.instanceOf(Error);
                 return;
             }
-            throw 'should throw';
+            expect.fail();
         });
     });
 
@@ -354,7 +347,7 @@ describe('EThree', () => {
             await sdk.changePassword(oldPwd, newPwd);
             await sdk.restorePrivateKey(newPwd);
             const hasKey = await sdk.hasLocalPrivateKey();
-            expect(hasKey).toEqual(true);
+            expect(hasKey).to.be.true;
         });
 
         it('wrong old password', async () => {
@@ -370,10 +363,10 @@ describe('EThree', () => {
                 await sdk.backupPrivateKey(oldPwd);
                 await sdk.changePassword(wrongPwd, newPwd);
             } catch (e) {
-                expect(e).toBeInstanceOf(WrongKeyknoxPasswordError);
+                expect(e).to.be.instanceOf(WrongKeyknoxPasswordError);
                 return;
             }
-            throw 'should throw';
+            expect.fail();
         });
     });
 
@@ -385,22 +378,20 @@ describe('EThree', () => {
             const pwd = 'secret_password';
             const sdk = await initializeEThree(fetchToken);
             const storage = await createSyncStorage(identity, pwd);
-
             try {
                 storage.retrieveEntry(identity);
             } catch (e) {
-                expect(e).toBeInstanceOf(Error);
+                expect(e).to.be.instanceOf(Error);
             }
-
             try {
                 await sdk.register();
                 await sdk.backupPrivateKey(pwd);
             } catch (e) {
-                expect(e).not.toBeDefined();
+                expect(e).to.be.undefined;
             }
             await storage.retrieveCloudEntries();
             const key = storage.retrieveEntry(identity);
-            expect(key).not.toBeNull();
+            expect(key).not.to.be.null;
         });
 
         it('No local private key', async () => {
@@ -411,10 +402,10 @@ describe('EThree', () => {
             try {
                 await sdk.backupPrivateKey('secret_pass');
             } catch (e) {
-                expect(e).toBeInstanceOf(RegisterRequiredError);
+                expect(e).to.be.instanceOf(RegisterRequiredError);
                 return;
             }
-            throw 'should throw';
+            expect.fail();
         });
     });
 
@@ -424,14 +415,12 @@ describe('EThree', () => {
             const identity = uuid();
             const fetchToken = () =>
                 Promise.resolve(jwtGenerator.generateToken(identity).toString());
-
             const sdk = await initializeEThree(fetchToken);
             const storage = await createSyncStorage(identity, pwd);
-
             try {
                 storage.retrieveEntry(identity);
             } catch (e) {
-                expect(e).toBeInstanceOf(Error);
+                expect(e).to.be.instanceOf(Error);
             }
             let privateKey: IKeyEntry | null;
             try {
@@ -440,13 +429,13 @@ describe('EThree', () => {
                 await sdk.backupPrivateKey(pwd);
                 await sdk.cleanup();
             } catch (e) {
-                expect(e).not.toBeDefined();
+                expect(e).to.be.undefined;
             }
             const noPrivateKey = await keyEntryStorage.load(identity);
-            expect(noPrivateKey).toBeFalsy();
+            expect(noPrivateKey).to.be.null;
             await sdk.restorePrivateKey(pwd);
             const restoredPrivateKey = await keyEntryStorage.load(identity);
-            expect(restoredPrivateKey!.value).toEqual(privateKey!.value);
+            expect(restoredPrivateKey!.value).to.equal(privateKey!.value);
         });
 
         it('has private key', async () => {
@@ -454,32 +443,28 @@ describe('EThree', () => {
             const identity = uuid();
             const fetchToken = () =>
                 Promise.resolve(jwtGenerator.generateToken(identity).toString());
-
             const sdk = await initializeEThree(fetchToken);
             const storage = await createSyncStorage(identity, pwd);
-
             try {
                 storage.retrieveEntry(identity);
             } catch (e) {
-                expect(e).toBeInstanceOf(Error);
+                expect(e).to.be.instanceOf(Error);
             }
             try {
                 await sdk.register();
                 await sdk.backupPrivateKey(pwd);
             } catch (e) {
-                expect(e).not.toBeDefined();
+                expect(e).to.be.undefined;
             }
-
-            const noPrivateKey = await keyEntryStorage.load(identity);
-            expect(noPrivateKey).toBeTruthy();
+            const privateKey = await keyEntryStorage.load(identity);
+            expect(privateKey).not.to.be.undefined;
             try {
                 await sdk.restorePrivateKey(pwd);
             } catch (e) {
-                expect(e).toBeInstanceOf(PrivateKeyAlreadyExistsError);
-
+                expect(e).to.be.instanceOf(PrivateKeyAlreadyExistsError);
                 return;
             }
-            throw 'should throw';
+            expect.fail();
         });
     });
 
@@ -487,17 +472,14 @@ describe('EThree', () => {
         it('STE-3 ', async () => {
             const identity1 = uuid();
             const identity2 = uuid();
-
             const fetchToken1 = () =>
                 Promise.resolve(jwtGenerator.generateToken(identity1).toString());
             const fetchToken2 = () =>
                 Promise.resolve(jwtGenerator.generateToken(identity2).toString());
-
             const [sdk1, sdk2] = await Promise.all([
                 initializeEThree(fetchToken1),
                 initializeEThree(fetchToken2),
             ]);
-
             await Promise.all([sdk1.register(), sdk2.register()]);
             const message = 'encrypt, decrypt, repeat';
             const sdk1PublicKeys = await sdk1.lookupPublicKeys([identity1]);
@@ -506,48 +488,42 @@ describe('EThree', () => {
             try {
                 await sdk2.decrypt(encryptedMessage);
             } catch (e) {
-                expect(e).toBeInstanceOf(Error);
+                expect(e).to.be.instanceOf(Error);
             }
             const decryptedMessage = await sdk2.decrypt(
                 encryptedMessage,
                 sdk1PublicKeys[identity1],
             );
-            expect(decryptedMessage).toEqual(message);
+            expect(decryptedMessage).to.equal(message);
         });
 
         it('STE-5 encrypt for one public key', async () => {
             const identity = uuid();
             const fetchToken = () =>
                 Promise.resolve(jwtGenerator.generateToken(identity).toString());
-
             const sdk = await initializeEThree(fetchToken);
             const { publicKey } = virgilCrypto.generateKeys();
             await sdk.register();
-            try {
-                await sdk.encrypt('privet', publicKey);
-            } catch (e) {
-                expect(e).not.toBeDefined();
-            }
+            const result = await sdk.encrypt('privet', publicKey);
+            expect(typeof result === 'string').to.be.true;
         });
 
         it('STE-6 encrypt and decrypt without public keys', async () => {
             const identity = uuid();
             const fetchToken = () =>
                 Promise.resolve(jwtGenerator.generateToken(identity).toString());
-
             const sdk = await initializeEThree(fetchToken);
             await sdk.register();
             const message = 'secret message';
             const encryptedMessage = await sdk.encrypt(message);
             const decryptedMessage = await sdk.decrypt(encryptedMessage);
-            expect(decryptedMessage).toEqual(message);
+            expect(decryptedMessage).to.equal(message);
         });
 
         it('STE-7 decrypt message without sign', async () => {
             const identity = uuid();
             const fetchToken = () =>
                 Promise.resolve(jwtGenerator.generateToken(identity).toString());
-
             const sdk = await initializeEThree(fetchToken);
             await sdk.register();
             const receiverPublicKey = await sdk.lookupPublicKeys([identity]);
@@ -559,48 +535,45 @@ describe('EThree', () => {
             try {
                 await sdk.decrypt(encryptedMessage, senderPublicKey);
             } catch (e) {
-                expect(e).toBeDefined();
-
+                expect(e).not.to.be.undefined;
                 return;
             }
-            throw 'should throw';
+            expect.fail();
         });
 
         it('STE-8 no decrypt/encrypt before register', async () => {
             const identity = uuid();
             const fetchToken = () =>
                 Promise.resolve(jwtGenerator.generateToken(identity).toString());
-
             await keyEntryStorage.clear();
             const sdk = await initializeEThree(fetchToken);
             try {
                 await sdk.encrypt('message');
             } catch (e) {
-                expect(e).toBeInstanceOf(RegisterRequiredError);
+                expect(e).to.be.instanceOf(RegisterRequiredError);
             }
             try {
                 await sdk.decrypt('message');
             } catch (e) {
-                expect(e).toBeInstanceOf(RegisterRequiredError);
+                expect(e).to.be.instanceOf(RegisterRequiredError);
+                return;
             }
+            expect.fail();
         });
 
         it('should return buffer', async () => {
             const identity = uuid();
             const fetchToken = () =>
                 Promise.resolve(jwtGenerator.generateToken(identity).toString());
-
             const buf = new Uint8Array(32);
-
             const recipient = virgilCrypto.generateKeys();
             const sdk = await initializeEThree(fetchToken);
             await sdk.register();
             const publicKey = (await sdk.lookupPublicKeys([identity]))[0];
             const encryptedMessage = await sdk.encrypt(buf, recipient.publicKey);
-            expect(isBuffer(encryptedMessage)).toBe(true);
-
+            expect(isBuffer(encryptedMessage)).to.be.true;
             const resp = await sdk.decrypt(encryptedMessage, publicKey);
-            expect(isBuffer(resp)).toBe(true);
+            expect(isBuffer(resp)).to.be.true;
         });
     });
 
@@ -609,12 +582,11 @@ describe('EThree', () => {
             const identity = uuid();
             const fetchToken = () =>
                 Promise.resolve(jwtGenerator.generateToken(identity).toString());
-
             const sdk = await initializeEThree(fetchToken);
             await sdk.register();
             await sdk.cleanup();
             const privateKeyFromLocalStorage = await keyEntryStorage.load(identity);
-            expect(privateKeyFromLocalStorage).toEqual(null);
+            expect(privateKeyFromLocalStorage).to.be.null;
         });
     });
 
@@ -628,18 +600,18 @@ describe('EThree', () => {
             const sdk = await initializeEThree(fetchToken);
             await sdk.register();
             await sdk.backupPrivateKey(pwd);
-
             try {
                 await sdk.resetPrivateKeyBackup(pwd);
             } catch (e) {
-                expect(e).not.toBeDefined();
+                expect(e).to.be.undefined;
             }
-
             try {
                 cloudStorage.retrieveEntry(identity);
             } catch (e) {
-                expect(e).toBeTruthy();
+                expect(e).not.to.be.undefined;
+                return;
             }
+            expect.fail();
         });
 
         it('reset backup private key when no backup', async () => {
@@ -649,19 +621,16 @@ describe('EThree', () => {
                 Promise.resolve(jwtGenerator.generateToken(identity).toString());
             const sdk = await initializeEThree(fetchToken);
             await sdk.register();
-
             try {
                 await sdk.resetPrivateKeyBackup(pwd);
             } catch (e) {
-                expect(e).toBeInstanceOf(PrivateKeyNoBackupError);
-
+                expect(e).to.be.instanceOf(PrivateKeyNoBackupError);
                 return;
             }
-            throw 'should throw';
+            expect.fail();
         });
 
         it('reset backup private without password', async () => {
-            expect.assertions(2);
             const pwd = 'secure_password';
             const identity = uuid();
             const fetchToken = () =>
@@ -671,11 +640,11 @@ describe('EThree', () => {
             await sdk.backupPrivateKey(pwd);
             const cloudStorage = await createSyncStorage(identity, pwd);
             let isExisting = cloudStorage.existsEntry(identity);
-            expect(isExisting).toBe(true);
+            expect(isExisting).to.be.true;
             await sdk.resetPrivateKeyBackup();
             await cloudStorage.retrieveCloudEntries();
             isExisting = cloudStorage.existsEntry(identity);
-            expect(isExisting).toBe(false);
+            expect(isExisting).to.be.false;
         });
     });
 
@@ -687,9 +656,7 @@ describe('EThree', () => {
             const sdk = await initializeEThree(fetchToken);
             await sdk.register();
             const hasPrivateKey = await sdk.hasLocalPrivateKey();
-            expect(hasPrivateKey).toEqual(true);
-
-            return;
+            expect(hasPrivateKey).to.be.true;
         });
 
         it('has no private key', async () => {
@@ -698,9 +665,7 @@ describe('EThree', () => {
                 Promise.resolve(jwtGenerator.generateToken(identity).toString());
             const sdk = await initializeEThree(fetchToken);
             const hasPrivateKey = await sdk.hasLocalPrivateKey();
-            expect(hasPrivateKey).toEqual(false);
-
-            return;
+            expect(hasPrivateKey).to.be.false;
         });
     });
 
@@ -710,18 +675,19 @@ describe('EThree', () => {
             const fetchToken = () =>
                 Promise.resolve(jwtGenerator.generateToken(identity).toString());
             const sdk = await initializeEThree(fetchToken);
-
-            await expect(sdk.unregister()).rejects.toBeInstanceOf(RegisterRequiredError);
-
+            try {
+                await sdk.unregister();
+            } catch (error) {
+                expect(error).to.be.instanceOf(RegisterRequiredError);
+            }
             await sdk.register();
             await sdk.unregister();
-
             const [cards, key] = await Promise.all([
                 cardManager.searchCards(identity),
                 keyEntryStorage.load(identity),
             ]);
-            expect(cards).toHaveLength(0);
-            expect(key).toBe(null);
+            expect(cards).to.have.length(0);
+            expect(key).to.be.null;
         });
     });
 });

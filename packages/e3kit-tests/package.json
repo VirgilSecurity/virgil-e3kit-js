@@ -7,11 +7,42 @@
     "license": "BSD-3-Clause",
     "private": true,
     "scripts": {
-        "test": "echo 'test'"
+        "test:node": "mocha -t 0 -r dotenv/config -r ts-node/register src/EThree.test.ts",
+        "test:browser": "karma start",
+        "test": "npm run test:node && npm run test:browser"
     },
     "dependencies": {
+        "@types/chai": "^4.2.3",
+        "@types/is-buffer": "^2.0.0",
+        "@types/mocha": "^5.2.7",
+        "@types/uuid": "^3.4.5",
+        "@virgilsecurity/base-crypto": "^0.5.2",
+        "@virgilsecurity/core-foundation": "^0.2.0",
         "@virgilsecurity/e3kit": "^0.6.0-beta.3",
         "@virgilsecurity/e3kit-native": "^0.6.0-beta.3",
-        "@virgilsecurity/e3kit-node": "^0.6.0-beta.3"
+        "@virgilsecurity/e3kit-node": "^0.6.0-beta.3",
+        "@virgilsecurity/keyknox": "next",
+        "@virgilsecurity/pythia-crypto": "^0.2.0",
+        "@virgilsecurity/sdk-crypto": "^0.4.4",
+        "chai": "^4.2.0",
+        "dotenv": "^8.1.0",
+        "is-buffer": "^2.0.3",
+        "karma": "^4.3.0",
+        "karma-chai": "^0.1.0",
+        "karma-chrome-launcher": "^3.1.0",
+        "karma-mocha": "^1.3.0",
+        "karma-rollup-preprocessor": "^7.0.2",
+        "mocha": "^6.2.1",
+        "rollup": "^1.21.4",
+        "rollup-plugin-commonjs": "^10.1.0",
+        "rollup-plugin-node-resolve": "^5.2.0",
+        "rollup-plugin-replace": "^1.0.7",
+        "rollup-plugin-typescript2": "^0.24.2",
+        "rollup-plugin-wasm": "^3.0.0",
+        "ts-node": "^8.4.1",
+        "typescript": "^3.6.3",
+        "uuid": "^3.3.3",
+        "virgil-pythia": "^0.3.0",
+        "virgil-sdk": "next"
     }
 }
