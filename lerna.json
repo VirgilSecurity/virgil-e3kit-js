@@ -10,6 +10,6 @@
   "packages": [
     "packages/*"
   ],
-  "useWorkspaces": true,
+  "useWorkspaces": false,
   "version": "0.6.0-beta.3"
 }
