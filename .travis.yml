@@ -5,8 +5,8 @@ node_js:
     - "11"
     - "12"
 before_install:
-    - npm config set scripts-prepend-node-path true
-    - yarn cache clean
+    - curl -o- -L https://yarnpkg.com/install.sh | bash
+    - export PATH="$HOME/.yarn/bin:$PATH"
 install:
     - yarn --no-lockfile
 before_script:
