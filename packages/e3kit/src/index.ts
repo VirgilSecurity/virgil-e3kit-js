@@ -28,6 +28,7 @@ export {
     LookupResult,
     EncryptPublicKeyArg,
 } from '@virgilsecurity/e3kit-base';
+export * from './constants';
 export { EThree } from './EThree';
 export {
     onEncryptProgressCallback,
