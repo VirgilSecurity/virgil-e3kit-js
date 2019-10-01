@@ -16,3 +16,28 @@ export function getObjectValues(obj: { [x: string]: any }) {
         return obj[e];
     });
 }
+
+/**
+ * @hidden
+ *
+ * Splits the `array` into separate chunks of the specified `size`
+ *
+ * @param array
+ * @param size
+ */
+export function chunkArray(array: any[], size: number): any[][] {
+    size = Math.max(size, 0);
+    const length = array == null ? 0 : array.length;
+    if (!length || size < 1) {
+        return [];
+    }
+    let index = 0;
+    let resIndex = 0;
+    const result = Array(Math.ceil(length / size));
+
+    while (index < length) {
+        result[resIndex++] = array.slice(index, (index += size));
+    }
+
+    return result;
+}

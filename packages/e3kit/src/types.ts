@@ -7,10 +7,12 @@ import {
 
 export type NodeBuffer = import('@virgilsecurity/e3kit-base').NodeBuffer;
 export type Data = import('@virgilsecurity/e3kit-base').Data;
+export type ICard = import('@virgilsecurity/e3kit-base').ICard;
 export type IPublicKey = import('@virgilsecurity/e3kit-base').IPublicKey;
 export type EThreeInitializeOptions = import('@virgilsecurity/e3kit-base').EThreeInitializeOptions;
 export type EThreeCtorOptions = import('@virgilsecurity/e3kit-base').EThreeCtorOptions;
-export type EncryptPublicKeyArg = import('@virgilsecurity/e3kit-base').EncryptPublicKeyArg;
+export type FindUsersResult = import('@virgilsecurity/e3kit-base').FindUsersResult;
+export type LookupResult = import('@virgilsecurity/e3kit-base').LookupResult;
 
 export type VirgilCrypto = import('@virgilsecurity/base-crypto').VirgilCrypto;
 export type VirgilPrivateKey = import('@virgilsecurity/base-crypto').VirgilPrivateKey;
@@ -87,4 +89,5 @@ export interface DecryptFileOptions extends FileOptions {
      * `onDecryptProgressCallback` parameter.
      */
     onProgress?: onDecryptProgressCallback;
+    encryptedOn?: Date;
 }

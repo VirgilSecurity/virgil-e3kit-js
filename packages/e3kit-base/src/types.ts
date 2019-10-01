@@ -44,6 +44,9 @@ export interface EThreeCtorOptions extends EThreeInitializeOptions {
 
 /**
  * Dictionary returned from lookupPublicKey method
+ *
+ * @deprecated since version 0.7.0
+ * Will be removed in version 0.8.0
  */
 export type LookupResult = {
     [identity: string]: IPublicKey;
@@ -51,5 +54,15 @@ export type LookupResult = {
 
 /**
  * Argument for encrypt function can be single IPublicKey or LookupResult
+ *
+ * @deprecated since version 0.7.0
+ * Will be removed in version 0.8.0
  */
 export type EncryptPublicKeyArg = LookupResult | IPublicKey;
+
+/**
+ * Dictionary returned from {@link Ethree.findUsers} method when searching for multiple users.
+ */
+export type FindUsersResult = {
+    [identity: string]: ICard;
+};

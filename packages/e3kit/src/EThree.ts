@@ -28,13 +28,15 @@ import { isFile } from './typeguards';
 import {
     NodeBuffer,
     Data,
+    ICard,
     IPublicKey,
     VirgilPrivateKey,
     EThreeInitializeOptions,
     EThreeCtorOptions,
-    EncryptPublicKeyArg,
     EncryptFileOptions,
     DecryptFileOptions,
+    LookupResult,
+    FindUsersResult,
 } from './types';
 import { withDefaults } from './withDefaults';
 
@@ -92,7 +94,7 @@ export class EThree extends AbstractEThree {
      */
     async encryptFile(
         file: File | Blob,
-        publicKeys?: EncryptPublicKeyArg,
+        recipients?: ICard | FindUsersResult | IPublicKey | LookupResult,
         options: EncryptFileOptions = {},
     ): Promise<File | Blob> {
         const chunkSize = options.chunkSize ? options.chunkSize : 64 * 1024;
@@ -102,7 +104,14 @@ export class EThree extends AbstractEThree {
         const privateKey = await this.keyLoader.loadLocalPrivateKey();
         if (!privateKey) throw new RegisterRequiredError();
 
-        const publicKeysArray = this.addOwnPublicKey(privateKey, publicKeys) as VirgilPublicKey[];
+        const publicKeys = this.getPublicKeysForEncryption(privateKey, recipients);
+        if (!publicKeys) {
+            throw new TypeError(
+                'Could not get public keys from the second argument.\n' +
+                    'Make sure you pass the resolved value of "EThree.findUsers" or "EThree.lookupPublicKeys" methods ' +
+                    'when encrypting for other users, or nothing when encrypting for the current user only.',
+            );
+        }
 
         const streamSigner = (this.virgilCrypto as VirgilCrypto).createStreamSigner();
 
@@ -138,7 +147,7 @@ export class EThree extends AbstractEThree {
         });
 
         const streamCipher = (this.virgilCrypto as VirgilCrypto).createStreamCipher(
-            publicKeysArray,
+            publicKeys as VirgilPublicKey[],
             await signaturePromise,
         );
 
@@ -194,7 +203,7 @@ export class EThree extends AbstractEThree {
      */
     async decryptFile(
         file: File | Blob,
-        publicKey?: IPublicKey,
+        senderCardOrPublicKey?: IPublicKey,
         options: DecryptFileOptions = {},
     ): Promise<File | Blob> {
         const fileSize = file.size;
@@ -203,8 +212,19 @@ export class EThree extends AbstractEThree {
 
         const privateKey = (await this.keyLoader.loadLocalPrivateKey()) as VirgilPrivateKey;
         if (!privateKey) throw new RegisterRequiredError();
-        if (!publicKey)
-            publicKey = this.virgilCrypto.extractPublicKey(privateKey) as VirgilPublicKey;
+
+        const publicKey = this.getPublicKeyForVerification(
+            privateKey,
+            senderCardOrPublicKey,
+            options.encryptedOn,
+        );
+        if (!publicKey) {
+            throw new TypeError(
+                'Could not get public key from the second argument.' +
+                    'Expected a Virgil Card or a Public Key object. Got ' +
+                    typeof senderCardOrPublicKey,
+            );
+        }
 
         const streamDecipher = (this.virgilCrypto as VirgilCrypto).createStreamDecipher(privateKey);
 
@@ -231,8 +251,7 @@ export class EThree extends AbstractEThree {
                 resolve({ decryptedChunks, signature });
             };
 
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const onErrorCallback = (err: any) => {
+            const onErrorCallback = (err: Error) => {
                 streamDecipher.dispose();
                 reject(err);
             };
@@ -268,11 +287,9 @@ export class EThree extends AbstractEThree {
             };
 
             const onFinishCallback = () =>
-                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                resolve(streamVerifier.verify(publicKey! as VirgilPublicKey));
+                resolve(streamVerifier.verify(publicKey as VirgilPublicKey));
 
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const onErrorCallback = (err: any) => {
+            const onErrorCallback = (err: Error) => {
                 streamVerifier.dispose();
                 reject(err);
             };

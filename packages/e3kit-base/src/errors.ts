@@ -86,12 +86,19 @@ export class MultipleCardsError extends Error {
     }
 }
 
+/**
+ * @deprecated since version 0.7.0
+ * Will be removed in version 0.8.0
+ */
 export type LookupResultWithErrors = {
     [identity: string]: IPublicKey | Error;
 };
 
 /**
  * Error thrown by {@link EThree.lookupPublicKeys} in case if some identity missing or has multiple cards.
+ *
+ * @deprecated since version 0.7.0
+ * Will be removed in version 0.8.0
  */
 export class LookupError extends Error {
     /**
@@ -110,6 +117,9 @@ export class LookupError extends Error {
 
 /**
  * Error thrown by {@link EThree.lookupPublicKeys} in case if sought identity is not registered.
+ *
+ * @deprecated since version 0.7.0
+ * Will be removed in version 0.8.0
  */
 export class LookupNotFoundError extends Error {
     constructor(public identity: string) {
@@ -138,5 +148,34 @@ export class AbortError extends Error {
         super('Operation aborted by user');
         Object.setPrototypeOf(this, new.target.prototype);
         this.name = 'AbortError';
+    }
+}
+
+/**
+ * Error thrown by {@link EThree.findUsers} when some of the users's Virgil Cards weren't found.
+ */
+export class UsersNotFoundError extends Error {
+    constructor(public identities: string[]) {
+        super(
+            "Virgil Cards of some of the users weren't found in Virgil Cloud.\n" +
+                'Check the "identities" property of this error to see their identites',
+        );
+        Object.setPrototypeOf(this, new.target.prototype);
+        this.name = 'UsersNotFoundError';
+    }
+}
+
+/**
+ * Error thrown by {@link EThree.findUsers} when some of the users found have more than one Virgil Card,
+ * which is not allowed.
+ */
+export class UsersFoundWithMultipleCardsError extends Error {
+    constructor(public identities: string[]) {
+        super(
+            'Some of the users have multiple Virgil Cards in Virgil Cloud, which is not allowed.' +
+                'Check the "identities" property of this error to see their identities',
+        );
+        Object.setPrototypeOf(this, new.target.prototype);
+        this.name = 'UsersFoundWithMultipleCardsError';
     }
 }

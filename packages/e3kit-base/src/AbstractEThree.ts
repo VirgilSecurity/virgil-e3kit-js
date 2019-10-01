@@ -1,6 +1,6 @@
 import { CardManager, KeyEntryAlreadyExistsError, VirgilCardVerifier } from 'virgil-sdk';
 
-import { getObjectValues, hasDuplicates } from './array';
+import { chunkArray, getObjectValues, hasDuplicates } from './array';
 import {
     RegisterRequiredError,
     IdentityAlreadyExistsError,
@@ -8,9 +8,11 @@ import {
     MultipleCardsError,
     LookupNotFoundError,
     LookupError,
+    UsersNotFoundError,
+    UsersFoundWithMultipleCardsError,
 } from './errors';
 import { PrivateKeyLoader } from './PrivateKeyLoader';
-import { isArray, isString } from './typeguards';
+import { isArray, isString, isVirgilCard, isFindUsersResult, isLookupResult } from './typeguards';
 import {
     Data,
     ICard,
@@ -23,8 +25,10 @@ import {
     IKeyEntryStorage,
     NodeBuffer,
     LookupResult,
-    EncryptPublicKeyArg,
+    FindUsersResult,
 } from './types';
+import { MAX_IDENTITIES_TO_SEARCH } from './constants';
+import { warn } from './log';
 
 export abstract class AbstractEThree {
     /**
@@ -171,44 +175,266 @@ export abstract class AbstractEThree {
     }
 
     /**
-     * Encrypts and signs data for recipient public key or `LookupResult` dictionary for multiple recipients.
-     * If there is no recipient and message encrypted for the current user, omit public key.
+     * Encrypts and signs the message for the current user.
+     * @param {Data} message - Message to sign and encrypt.
+     * @returns {Promise<NodeBuffer | string>} Promise that is that resolves to a string if `message`
+     * was a string and `Buffer` otherwise
      */
-    async encrypt(message: Data, publicKeys?: EncryptPublicKeyArg): Promise<NodeBuffer | string> {
-        const isMessageString = isString(message);
+    async encrypt(message: Data): Promise<NodeBuffer | string>;
+
+    /**
+     * Encrypts and signs the message for the current user and a single recipient user.
+     * @param {Data} message - Message to sign and encrypt.
+     * @param {ICard} card - Virgil Card of the encrypted message recipient.
+     * @returns {Promise<NodeBuffer | string>} Promise that is that resolves to a string if `message`
+     * was a string and `Buffer` otherwise.
+     */
+    async encrypt(message: Data, card: ICard): Promise<NodeBuffer | string>;
+
+    /**
+     * Encrypts and signs the message for the current user and multiple recipient users.
+     * @param {Data} message - Message to sign and encrypt.
+     * @param {FindUsersResult} users - Result of the {@link AbstractEThree.findUsers} method.
+     * Specifies multiple recipients.
+     * @returns {Promise<NodeBuffer | string>} Promise that is that resolves to a string if `message`
+     * was a string and `Buffer` otherwise.
+     */
+    async encrypt(message: Data, users: FindUsersResult): Promise<NodeBuffer | string>;
+
+    /**
+     * Encrypts and signs the message for the current user and a single recipient user.
+     *
+     * @deprecated since version 0.7.0
+     * Will be removed in version 0.8.0
+     *
+     * Use the overload that accepts `ICard` object instead.
+     *
+     * @param {Data} message - Message to sign and encrypt.
+     * @param {IPublicKey} publicKey - Public key of the encrypted message recipient.
+     * @returns {Promise<NodeBuffer | string>} Promise that is that resolves to a string if `message`
+     * was a string and `Buffer` otherwise.
+     */
+    async encrypt(message: Data, publicKey: IPublicKey): Promise<NodeBuffer | string>;
+
+    /**
+     * Encrypts and signs the message for the current user and multiple recipient users.
+     *
+     * @deprecated since version 0.7.0
+     * Will be removed in version 0.8.0
+     *
+     * Use the overload that accepts `FindUsersResult` object instead.
+     *
+     *
+     * @param {Data} message - Message to sign and encrypt.
+     * @param {LookupResult} users - Result of the {@link AbstractEThree.lookupPublicKeys} method.
+     * Specifies multiple recipients.
+     * @returns {Promise<NodeBuffer | string>} Promise that is that resolves to a string if `message`
+     * was a string and `Buffer` otherwise.
+     */
+    async encrypt(message: Data, publicKeys: LookupResult): Promise<NodeBuffer | string>;
+    async encrypt(
+        message: Data,
+        recipients?: ICard | FindUsersResult | IPublicKey | LookupResult,
+    ): Promise<NodeBuffer | string> {
+        const shouldReturnString = isString(message);
 
         const privateKey = await this.keyLoader.loadLocalPrivateKey();
         if (!privateKey) throw new RegisterRequiredError();
 
-        const publicKeysArray = this.addOwnPublicKey(privateKey, publicKeys);
+        const publicKeys = this.getPublicKeysForEncryption(privateKey, recipients);
+        if (!publicKeys) {
+            throw new TypeError(
+                'Could not get public keys from the second argument.\n' +
+                    'Make sure you pass the resolved value of "EThree.findUsers" or "EThree.lookupPublicKeys" methods ' +
+                    'when encrypting for other users, or nothing when encrypting for the current user only.',
+            );
+        }
 
-        const res = this.virgilCrypto.signThenEncrypt(message, privateKey, publicKeysArray);
-        if (isMessageString) return res.toString('base64');
+        const res = this.virgilCrypto.signThenEncrypt(message, privateKey, publicKeys);
+        if (shouldReturnString) return res.toString('base64');
         return res;
     }
 
     /**
-     * Decrypts data and verify signature of sender by his public key. If message is self-encrypted,
-     * omit public key parameter.
+     * Decrypts and verifies the data encrypted by the current user for the current user.
+     * @param {Data} message - Message to decrypt
+     * @returns {Promise<NodeBuffer | string>} Promise that is that resolves to a string if `message`
+     * was a string and `Buffer` otherwise.
      */
-    async decrypt(message: Data, publicKey?: IPublicKey): Promise<NodeBuffer | string> {
-        const isMessageString = isString(message);
+    async decrypt(message: Data): Promise<NodeBuffer | string>;
+
+    /**
+     * Decrypts and verifies the data encrypted by the user identified by `senderCard` for the
+     * current user.
+     * @param {Data} message - Message to decrypt
+     * @param {ICard} senderCard - Virgil Card of the user who encrypted and signed the message.
+     * @returns {Promise<NodeBuffer | string>} Promise that is that resolves to a string if `message`
+     * was a string and `Buffer` otherwise.
+     */
+    async decrypt(message: Data, senderCard: ICard): Promise<NodeBuffer | string>;
+    /**
+     * Decrypts and verifies the data encrypted by the user identified by `senderCard` for the
+     * current user. If the sender had ever rotated their keys (e.g. by using the
+     * {@link EThree.rotatePrivateKey} method), then the `encryptedOn` date is used to find the
+     * public key that was current at the time of encryption.
+     * @param {Data} message - Message to decrypt
+     * @param {ICard} senderCard - Virgil Card of the user who encrypted and signed the message.
+     * @param {Date} encryptedOn - The date the message was encrypted on.
+     * @returns {Promise<NodeBuffer | string>} Promise that is that resolves to a string if `message`
+     * was a string and `Buffer` otherwise.
+     */
+    async decrypt(
+        message: Data,
+        senderCard: ICard,
+        encryptedOn: Date,
+    ): Promise<NodeBuffer | string>;
+    /**
+     * Decrypts and verifies the data encrypted by the user identified by `senderPublicKey` for the
+     * current user.
+     *
+     * @deprecated since version 0.7.0
+     * Will be removed in version 0.8.0
+     *
+     * Use the overload that accepts Virgil Card object instead.
+     *
+     * @param {Data} message - Message to decrypt
+     * @param {IPublicKey} senderPublicKey - Public key of the user who encrypted and signed the message.
+     * @returns {Promise<NodeBuffer | string>} Promise that is that resolves to a string if `message`
+     * was a string and `Buffer` otherwise.
+     */
+    async decrypt(message: Data, senderPublicKey: IPublicKey): Promise<NodeBuffer | string>;
+    async decrypt(
+        message: Data,
+        senderCardOrPublicKey?: ICard | IPublicKey,
+        encryptedOn?: Date,
+    ): Promise<NodeBuffer | string> {
+        const shouldReturnString = isString(message);
 
         const privateKey = await this.keyLoader.loadLocalPrivateKey();
         if (!privateKey) throw new RegisterRequiredError();
-        if (!publicKey) publicKey = this.virgilCrypto.extractPublicKey(privateKey);
 
-        const res = this.virgilCrypto.decryptThenVerify(message, privateKey, publicKey);
-        if (isMessageString) return res.toString('utf8');
+        const senderPublicKey = this.getPublicKeyForVerification(
+            privateKey,
+            senderCardOrPublicKey,
+            encryptedOn,
+        );
+        if (!senderPublicKey) {
+            throw new TypeError(
+                'Could not get public key from the second argument.' +
+                    'Expected a Virgil Card or a Public Key object. Got ' +
+                    typeof senderCardOrPublicKey,
+            );
+        }
+
+        const res = this.virgilCrypto.decryptThenVerify(message, privateKey, senderPublicKey);
+        if (shouldReturnString) return res.toString('utf8');
         return res;
     }
 
     /**
-     * Find public keys for user identities registered on Virgil Cloud.
+     * Finds Virgil Card for user identity registered on Virgil Cloud.
+     *
+     * @param {string} - Identity of the user to find the Virgil Card of.
+     *
+     * @returns {Promise<ICard>} - Promise that resolves to the Virgil Card object.
+     *
+     * @throws {UsersNotFoundError} in case the Virgil Card wasn't found for the
+     * given identity.
+     *
+     * @throws {UsersFoundWithMultipleCardsError} in case the given user has more than
+     * one Virgil Card, which is not allowed with E3kit.
+     */
+    async findUsers(identity: string): Promise<ICard>;
+    /**
+     * Finds Virgil Cards for user identities registered on Virgil Cloud.
+     *
+     * @param {string[]} - A list of user identities to find the Virgil Cards of.
+     *
+     * @returns {Promise<FindUsersResult>} - Promise that resolves to a hash with
+     * identities as keys and Virgil Card objects as values.
+     *
+     * @throws {UsersNotFoundError} in case the Virgil Card wasn't found for any one of the
+     * given identities.
+     *
+     * @throws {UsersFoundWithMultipleCardsError} in case any one of the given users have
+     * more than one Virgil Card, which is not allowed with E3kit.
+     */
+    async findUsers(identities: string[]): Promise<FindUsersResult>;
+    async findUsers(identities: string[] | string): Promise<ICard | FindUsersResult> {
+        if (!identities) throw new TypeError('Argument "identities" is required');
+
+        let identitySet;
+        if (typeof identities === 'string') identitySet = new Set([identities]);
+        else if (isArray(identities)) identitySet = new Set(identities);
+        else
+            throw new TypeError(
+                `Expected "identities" to be a string or an array of strings. Got: "${typeof identities}"`,
+            );
+
+        if (identitySet.size === 0) throw new TypeError('"identities" array must not be empty');
+
+        const result: FindUsersResult = Object.create({});
+        const identitiesWithMultipleCards: Set<string> = new Set();
+
+        const identityChunks = chunkArray(Array.from(identitySet), MAX_IDENTITIES_TO_SEARCH);
+        for (const identityChunk of identityChunks) {
+            const cards = await this.cardManager.searchCards(identityChunk);
+            for (const card of cards) {
+                if (result[card.identity]) {
+                    identitiesWithMultipleCards.add(card.identity);
+                }
+                result[card.identity] = card;
+            }
+        }
+
+        const identitiesFound = new Set(Object.keys(result));
+        const identitiesNotFound = new Set([...identitySet].filter(i => !identitiesFound.has(i)));
+        if (identitiesNotFound.size > 0) {
+            throw new UsersNotFoundError([...identitiesNotFound]);
+        }
+
+        if (identitiesWithMultipleCards.size > 0) {
+            throw new UsersFoundWithMultipleCardsError([...identitiesWithMultipleCards]);
+        }
+
+        if (Array.isArray(identities)) return result;
+
+        return result[identities];
+    }
+
+    /**
+     * Finds public key for user identity registered on Virgil Cloud.
+     *
+     * @deprecated since version 0.7.0
+     * Will be removed in version 0.8.0
+     *
+     * Use the {@link EThree.findUsers} instead, which returns Virgil Cards instead
+     * of just the public keys. You can get a public key out of the Virgil Card object
+     * via the `publicKey` property.
+     *
+     * @param {string} - Identity of the user to lookup the public key of.
+     *
+     * @returns {Promise<IPublicKey>} - Promise that resolves to a public key object.
      */
     async lookupPublicKeys(identity: string): Promise<IPublicKey>;
+    /**
+     * Finds public keys for user identities registered on Virgil Cloud.
+     *
+     * @deprecated since version 0.7.0
+     * Will be removed in version 0.8.0
+     *
+     * Use the {@link EThree.findUsers} instead, which returns Virgil Cards instead
+     * of just the public keys. You can get a public key out of the Virgil Card object
+     * via the `publicKey` property.
+     *
+     * @param {string[]} - A list of user identities to lookup the public keys of.
+     *
+     * @returns {Promise<LookupResult | IPublicKey>} - Promise that resolves to a hash with
+     * identities as keys and public key objects as values.
+     */
     async lookupPublicKeys(identities: string[]): Promise<LookupResult>;
     async lookupPublicKeys(identities: string[] | string): Promise<LookupResult | IPublicKey> {
+        warn('Warning! Method "lookupPublicKeys" has been deprecated, use "findUsers" instead');
         const argument = isArray(identities) ? identities : [identities];
         if (argument.length === 0) {
             throw new Error('Array should be non empty');
@@ -312,7 +538,7 @@ export abstract class AbstractEThree {
     /**
      * @hidden
      */
-    private isOwnPublicKeysIncluded(ownPublicKey: IPublicKey, publicKeys: IPublicKey[]) {
+    private isOwnPublicKeyIncluded(ownPublicKey: IPublicKey, publicKeys: IPublicKey[]) {
         const selfPublicKey = this.virgilCrypto.exportPublicKey(ownPublicKey).toString('base64');
 
         const stringKeys = publicKeys.map(key =>
@@ -328,22 +554,80 @@ export abstract class AbstractEThree {
     /**
      * @hidden
      */
-    protected addOwnPublicKey(
-        privateKey: IPrivateKey,
-        publicKeys?: EncryptPublicKeyArg,
-    ): IPublicKey[] {
-        let argument: IPublicKey[];
-
-        if (publicKeys == null) argument = [];
-        else if (this.isPublicKey(publicKeys)) argument = [publicKeys];
-        else argument = getObjectValues(publicKeys) as IPublicKey[];
-
+    private addOwnPublicKey(privateKey: IPrivateKey, publicKeys: IPublicKey[]): void {
         const ownPublicKey = this.virgilCrypto.extractPublicKey(privateKey);
-
-        if (!this.isOwnPublicKeysIncluded(ownPublicKey, argument)) {
-            argument.push(ownPublicKey);
+        if (!this.isOwnPublicKeyIncluded(ownPublicKey, publicKeys)) {
+            publicKeys.push(ownPublicKey);
         }
-        return argument;
+    }
+
+    /**
+     * @hidden
+     */
+    protected getPublicKeysForEncryption(
+        ownPrivateKey: IPrivateKey,
+        recipients?: ICard | FindUsersResult | IPublicKey | LookupResult,
+    ) {
+        let publicKeys: IPublicKey[];
+        if (recipients == null) {
+            publicKeys = [];
+        } else if (isVirgilCard(recipients)) {
+            publicKeys = [recipients.publicKey];
+        } else if (isFindUsersResult(recipients)) {
+            publicKeys = getObjectValues(recipients).map((card: ICard) => card.publicKey);
+        } else if (this.isPublicKey(recipients)) {
+            warn(
+                'Warning! Calling `encrypt` with the result of `lookupPublicKeys` method has been deprecared. ' +
+                    'Please use the result of `findUsers` call instead',
+            );
+            publicKeys = [recipients];
+        } else if (isLookupResult(recipients, this.isPublicKey.bind(this))) {
+            warn(
+                'Warning! Calling `encrypt` with the result of `lookupPublicKeys` method has been deprecared. ' +
+                    'Please use the result of `findUsers` call instead',
+            );
+            publicKeys = getObjectValues(recipients).map((publicKey: IPublicKey) => publicKey);
+        } else {
+            return null;
+        }
+
+        this.addOwnPublicKey(ownPrivateKey, publicKeys);
+        return publicKeys;
+    }
+
+    /**
+     * @hidden
+     */
+    protected getPublicKeyForVerification(
+        ownPrivateKey: IPrivateKey,
+        senderCardOrPublicKey?: ICard | IPublicKey,
+        encryptedOn?: Date,
+    ) {
+        if (senderCardOrPublicKey == null) {
+            return this.virgilCrypto.extractPublicKey(ownPrivateKey);
+        }
+
+        if (isVirgilCard(senderCardOrPublicKey)) {
+            let actualCard: ICard | undefined = senderCardOrPublicKey;
+            if (encryptedOn) {
+                while (actualCard && actualCard.createdAt > encryptedOn) {
+                    actualCard = actualCard.previousCard;
+                }
+
+                if (!actualCard) {
+                    throw new Error(
+                        "The given sender's Virgil Card is newer than the encrypted data",
+                    );
+                }
+            }
+            return actualCard.publicKey;
+        }
+
+        if (this.isPublicKey(senderCardOrPublicKey)) {
+            return senderCardOrPublicKey;
+        }
+
+        return null;
     }
 
     /**
