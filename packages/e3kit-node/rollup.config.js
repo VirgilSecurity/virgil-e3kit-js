@@ -61,7 +61,7 @@ const createEntry = (cryptoType, format) => {
                         replace: foundationEntryPoint,
                     },
                     {
-                        match: /(EThree|prepareBaseConstructorParams)\.ts$/,
+                        match: /EThree\.ts$/,
                         test: pythiaModuleName,
                         replace: pythiaEntryPoint,
                     },
