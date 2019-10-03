@@ -690,4 +690,40 @@ describe('EThree', () => {
             expect(key).to.be.null;
         });
     });
+
+    describe('findUsers', () => {
+        it('returns single card when given a single identity', async () => {
+            const identity = uuid();
+            const fetchToken = createFetchToken(identity);
+            const sdk = await initializeEThree(fetchToken);
+            const keypair = virgilCrypto.generateKeys();
+            await cardManager.publishCard({ identity, ...keypair });
+            const card = await sdk.findUsers(identity);
+            expect(card).to.be.ok;
+            expect(card.identity).to.eq(identity);
+            expect(
+                virgilCrypto
+                    .exportPublicKey(card.publicKey as VirgilPublicKey)
+                    .equals(virgilCrypto.exportPublicKey(keypair.publicKey)),
+            ).to.be.true;
+        });
+
+        it('returns dictionary of cards keyed by identity when given an array of identities', async () => {
+            const myIdentity = uuid();
+            const fetchToken = createFetchToken(myIdentity);
+            const sdk = await initializeEThree(fetchToken);
+
+            const theirIdentity = uuid();
+            const theirKeypair = virgilCrypto.generateKeys();
+            await cardManager.publishCard({ identity: theirIdentity, ...theirKeypair });
+            const result = await sdk.findUsers([theirIdentity]);
+            expect(result).to.be.ok;
+            expect(result[theirIdentity]).to.be.ok;
+            expect(
+                virgilCrypto
+                    .exportPublicKey(result[theirIdentity].publicKey as VirgilPublicKey)
+                    .equals(virgilCrypto.exportPublicKey(theirKeypair.publicKey)),
+            ).to.be.true;
+        });
+    });
 });
