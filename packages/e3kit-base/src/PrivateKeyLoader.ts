@@ -14,6 +14,7 @@ import {
     IBrainKeyCrypto,
     IAccessTokenProvider,
     IKeyEntryStorage,
+    IKeyPair,
 } from './types';
 
 /**
@@ -40,7 +41,7 @@ export class PrivateKeyLoader {
     private keyknoxCrypto = new KeyknoxCrypto(this.options.virgilCrypto);
     private cachedPrivateKey: IPrivateKey | null = null;
 
-    constructor(private identity: string, public options: IPrivateKeyLoaderOptions) {
+    constructor(public identity: string, public options: IPrivateKeyLoaderOptions) {
         this.localStorage = options.keyEntryStorage;
     }
 
@@ -65,6 +66,13 @@ export class PrivateKeyLoader {
         const privateKeyData = await this.localStorage.load(this.identity);
         if (!privateKeyData) return null;
         return this.importAndCachePrivateKey(privateKeyData.value);
+    }
+
+    async loadLocalKeyPair(): Promise<IKeyPair | null> {
+        const privateKey = await this.loadLocalPrivateKey();
+        if (!privateKey) return null;
+        const publicKey = this.options.virgilCrypto.extractPublicKey(privateKey);
+        return { privateKey, publicKey };
     }
 
     async resetLocalPrivateKey() {

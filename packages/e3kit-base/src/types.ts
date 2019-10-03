@@ -6,6 +6,8 @@ export type IPublicKey = import('@virgilsecurity/crypto-types').IPublicKey;
 export type ICrypto = import('@virgilsecurity/crypto-types').ICrypto;
 export type ICardCrypto = import('@virgilsecurity/crypto-types').ICardCrypto;
 export type IBrainKeyCrypto = import('@virgilsecurity/crypto-types').IBrainKeyCrypto;
+export type IGroupSession = import('@virgilsecurity/crypto-types').IGroupSession;
+export type IGroupSessionMessageInfo = import('@virgilsecurity/crypto-types').IGroupSessionMessageInfo;
 
 export type IAccessTokenProvider = import('virgil-sdk').IAccessTokenProvider;
 export type IKeyEntryStorage = import('virgil-sdk').IKeyEntryStorage;

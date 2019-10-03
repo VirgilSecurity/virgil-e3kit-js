@@ -28,6 +28,9 @@ import {
 } from './types';
 import { MAX_IDENTITIES_TO_SEARCH } from './constants';
 import { warn } from './log';
+import { Group } from './groups/Group';
+import { Ticket } from './groups/Ticket';
+import { GroupManager } from './GroupManager';
 
 export abstract class AbstractEThree {
     /**
@@ -55,6 +58,7 @@ export abstract class AbstractEThree {
      */
     keyEntryStorage: IKeyEntryStorage;
 
+    protected groupManager: GroupManager;
     protected keyLoader: PrivateKeyLoader;
     protected inProcess = false;
 
@@ -75,6 +79,7 @@ export abstract class AbstractEThree {
         this.accessTokenProvider = options.accessTokenProvider;
         this.keyEntryStorage = options.keyEntryStorage;
         this.keyLoader = options.keyLoader;
+        this.groupManager = new GroupManager(options.keyLoader);
     }
 
     /**
@@ -504,6 +509,44 @@ export abstract class AbstractEThree {
         }
     }
 
+    async createGroup(groupId: Data, participant: ICard): Promise<Group>;
+    async createGroup(groupId: Data, participants: FindUsersResult): Promise<Group>;
+    async createGroup(groupId: Data, participants: ICard | FindUsersResult): Promise<Group> {
+        let participantIdentities: Set<string>;
+        let participantCards: ICard[];
+        if (isVirgilCard(participants)) {
+            participantIdentities = new Set([participants.identity]);
+            participantCards = [participants];
+        } else if (isFindUsersResult(participants)) {
+            participantIdentities = new Set(Object.keys(participants));
+            participantCards = getObjectValues(participants);
+        } else {
+            throw new TypeError(
+                'Expected participants to be the result of "findUsers" method call',
+            );
+        }
+        const groupSession = this.virgilCrypto.generateGroupSession(groupId);
+        const ticket = new Ticket(
+            {
+                epochNumber: groupSession.getCurrentEpochNumber(),
+                sessionId: groupSession.getSessionId(),
+                data: groupSession.export()[0],
+            },
+            [...participantIdentities],
+        );
+        return this.groupManager.store(ticket, participantCards);
+    }
+
+    async loadGroup(groupId: Data, initiatorCard: ICard) {
+        const sessionId = this.computeGroupSessionId(groupId).toString('hex');
+        return this.groupManager.pull(sessionId, initiatorCard);
+    }
+
+    async getGroup(groupId: Data) {
+        const sessionId = this.computeGroupSessionId(groupId).toString('hex');
+        return this.groupManager.retrieve(sessionId);
+    }
+
     /**
      * @hidden
      */
@@ -544,6 +587,12 @@ export abstract class AbstractEThree {
         if (!this.isOwnPublicKeyIncluded(ownPublicKey, publicKeys)) {
             publicKeys.push(ownPublicKey);
         }
+    }
+
+    // TODO move into crypto library
+    private computeGroupSessionId(groupId: Data) {
+        // TODO check that it's at least 10 bytes
+        return this.virgilCrypto.calculateHash(groupId).slice(0, 32);
     }
 
     /**
