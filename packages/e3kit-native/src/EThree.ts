@@ -44,8 +44,6 @@ export class EThree extends AbstractEThree {
         super({
             identity,
             virgilCrypto,
-            cardCrypto,
-            cardVerifier,
             cardManager,
             accessTokenProvider,
             keyEntryStorage,
