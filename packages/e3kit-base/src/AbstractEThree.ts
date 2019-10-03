@@ -1,4 +1,4 @@
-import { CardManager, KeyEntryAlreadyExistsError, VirgilCardVerifier } from 'virgil-sdk';
+import { CardManager, KeyEntryAlreadyExistsError } from 'virgil-sdk';
 
 import { chunkArray, getObjectValues, hasDuplicates } from './array';
 import {
@@ -20,7 +20,6 @@ import {
     IPrivateKey,
     IPublicKey,
     ICrypto,
-    ICardCrypto,
     IAccessTokenProvider,
     IKeyEntryStorage,
     NodeBuffer,
@@ -40,16 +39,6 @@ export abstract class AbstractEThree {
      * Instance of implementation of [ICrypto](https://github.com/VirgilSecurity/virgil-crypto-javascript/blob/master/packages/crypto-types/index.d.ts#L23) interface.
      */
     virgilCrypto: ICrypto;
-
-    /**
-     * Instance of implementation of [ICardCrypto](https://github.com/VirgilSecurity/virgil-crypto-javascript/blob/master/packages/crypto-types/index.d.ts#L66) interface.
-     */
-    cardCrypto: ICardCrypto;
-
-    /**
-     * Instance of VirgilCardVerifier.
-     */
-    cardVerifier: VirgilCardVerifier;
 
     /**
      * Instance of CardManager. Used to create cards with user public keys.
@@ -75,8 +64,6 @@ export abstract class AbstractEThree {
     constructor(options: {
         identity: string;
         virgilCrypto: ICrypto;
-        cardCrypto: ICardCrypto;
-        cardVerifier: VirgilCardVerifier;
         cardManager: CardManager;
         accessTokenProvider: IAccessTokenProvider;
         keyEntryStorage: IKeyEntryStorage;
@@ -84,8 +71,6 @@ export abstract class AbstractEThree {
     }) {
         this.identity = options.identity;
         this.virgilCrypto = options.virgilCrypto;
-        this.cardCrypto = options.cardCrypto;
-        this.cardVerifier = options.cardVerifier;
         this.cardManager = options.cardManager;
         this.accessTokenProvider = options.accessTokenProvider;
         this.keyEntryStorage = options.keyEntryStorage;
@@ -397,7 +382,7 @@ export abstract class AbstractEThree {
             throw new UsersFoundWithMultipleCardsError([...identitiesWithMultipleCards]);
         }
 
-        if (Array.isArray(identities)) return result;
+        if (isArray(identities)) return result;
 
         return result[identities];
     }
