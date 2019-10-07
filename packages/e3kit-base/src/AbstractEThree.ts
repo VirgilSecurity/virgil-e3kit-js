@@ -530,7 +530,7 @@ export abstract class AbstractEThree {
             {
                 epochNumber: groupSession.getCurrentEpochNumber(),
                 sessionId: groupSession.getSessionId(),
-                data: groupSession.export()[0],
+                data: groupSession.export()[0].toString('base64'),
             },
             [...participantIdentities],
         );
@@ -538,12 +538,12 @@ export abstract class AbstractEThree {
     }
 
     async loadGroup(groupId: Data, initiatorCard: ICard) {
-        const sessionId = this.computeGroupSessionId(groupId).toString('hex');
+        const sessionId = this.virgilCrypto.calculateGroupSessionId(groupId);
         return this.groupManager.pull(sessionId, initiatorCard);
     }
 
     async getGroup(groupId: Data) {
-        const sessionId = this.computeGroupSessionId(groupId).toString('hex');
+        const sessionId = this.virgilCrypto.calculateGroupSessionId(groupId);
         return this.groupManager.retrieve(sessionId);
     }
 
@@ -587,12 +587,6 @@ export abstract class AbstractEThree {
         if (!this.isOwnPublicKeyIncluded(ownPublicKey, publicKeys)) {
             publicKeys.push(ownPublicKey);
         }
-    }
-
-    // TODO move into crypto library
-    private computeGroupSessionId(groupId: Data) {
-        // TODO check that it's at least 10 bytes
-        return this.virgilCrypto.calculateHash(groupId).slice(0, 32);
     }
 
     /**

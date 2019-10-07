@@ -42,14 +42,7 @@ export class GroupManager {
         );
         const group = new Group({
             initiator: initiatorCard.identity,
-            tickets: cloudTickets.map(
-                ct =>
-                    // TODO change Buffer to string in crypto library
-                    new Ticket(
-                        (ct.groupSessionMessageInfo as unknown) as IGroupSessionMessageInfo,
-                        ct.identities,
-                    ),
-            ),
+            tickets: cloudTickets.map(ct => new Ticket(ct.groupSessionMessageInfo, ct.identities)),
             privateKeyLoader: this._privateKeyLoader,
         });
         // TODO store the group in device's persistent storage
