@@ -17,11 +17,11 @@
         "prepare": "npm run clean && npm run build"
     },
     "dependencies": {
-        "@virgilsecurity/base-crypto": "^0.5.2",
+        "@virgilsecurity/base-crypto": "^0.6.0",
         "@virgilsecurity/core-foundation": "^0.2.0",
         "@virgilsecurity/e3kit-base": "^0.6.0-beta.3",
-        "@virgilsecurity/pythia-crypto": "^0.2.0",
-        "@virgilsecurity/sdk-crypto": "^0.4.4",
+        "@virgilsecurity/pythia-crypto": "^0.2.1",
+        "@virgilsecurity/sdk-crypto": "^0.4.5",
         "virgil-sdk": "next"
     },
     "devDependencies": {
