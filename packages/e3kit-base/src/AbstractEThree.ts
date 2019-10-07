@@ -547,6 +547,18 @@ export abstract class AbstractEThree {
         return this.groupManager.retrieve(sessionId);
     }
 
+    async deleteGroup(groupId: Data) {
+        const sessionId = this.virgilCrypto.calculateGroupSessionId(groupId);
+        const group = await this.groupManager.retrieve(sessionId);
+        if (!group) {
+            throw new Error(
+                `Group with ID "${groupId}" was not found in local storage. Try to load it first.`,
+            );
+        }
+        // TODO check that current user is allowed to delete the group
+        return this.groupManager.delete(sessionId);
+    }
+
     /**
      * @hidden
      */
