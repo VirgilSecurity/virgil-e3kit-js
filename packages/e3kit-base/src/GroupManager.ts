@@ -10,13 +10,16 @@ import { Ticket } from './groups/Ticket';
 import { PrivateKeyLoader } from './PrivateKeyLoader';
 import { RegisterRequiredError } from './errors';
 import { Group } from './groups/Group';
+import { CardManager } from 'virgil-sdk';
 
 export class GroupManager {
     private _privateKeyLoader: PrivateKeyLoader;
+    private _cardManager: CardManager;
     private _localGroupStorage = new Map<string, Group>();
 
-    constructor(privateKeyLoader: PrivateKeyLoader) {
+    constructor(privateKeyLoader: PrivateKeyLoader, cardManager: CardManager) {
         this._privateKeyLoader = privateKeyLoader;
+        this._cardManager = cardManager;
     }
 
     async store(ticket: Ticket, cards: ICard[]) {
@@ -26,6 +29,8 @@ export class GroupManager {
             initiator: this.selfIdentity,
             tickets: [ticket],
             privateKeyLoader: this._privateKeyLoader,
+            cardManager: this._cardManager,
+            groupManager: this,
         });
         // TODO store the group in device's persistent storage
         this._localGroupStorage.set(ticket.groupSessionMessage.sessionId, group);
@@ -43,6 +48,8 @@ export class GroupManager {
             initiator: initiatorCard.identity,
             tickets: cloudTickets.map(ct => new Ticket(ct.groupSessionMessageInfo, ct.identities)),
             privateKeyLoader: this._privateKeyLoader,
+            cardManager: this._cardManager,
+            groupManager: this,
         });
         // TODO store the group in device's persistent storage
         this._localGroupStorage.set(sessionId, group);
@@ -52,6 +59,20 @@ export class GroupManager {
     async retrieve(sessionId: string) {
         // TODO get the group from the device's persistent storage
         return this._localGroupStorage.get(sessionId);
+    }
+
+    async addAccess(sessionId: string, allowedCards: ICard[]) {
+        const cloudTicketStorage = await this.getCloudTicketStorage();
+        await cloudTicketStorage.addRecipients(sessionId, allowedCards);
+    }
+
+    async removeAccess(sessionId: string, forbiddenIdentities: string[]) {
+        const cloudTicketStorage = await this.getCloudTicketStorage();
+        await Promise.all(
+            forbiddenIdentities.map(identity =>
+                cloudTicketStorage.removeRecipient(sessionId, identity),
+            ),
+        );
     }
 
     async delete(sessionId: string) {
