@@ -29,7 +29,7 @@
         "prepare": "npm run clean && npm run build",
         "prettier": "prettier 'src/**/*.ts' --write",
         "precommit": "lint-staged",
-        "test:node": "mocha -t 0 -r dotenv/config -r ts-node/register src/__tests__/EThree.test.ts",
+        "test:node": "mocha -t 0 -r dotenv/config -r ts-node/register -r setup-mocha src/__tests__/EThree.test.ts",
         "test:browser": "karma start",
         "test": "npm run test:node && npm run test:browser",
         "docs": "typedoc src && npm run build && copy example/*.html docs"

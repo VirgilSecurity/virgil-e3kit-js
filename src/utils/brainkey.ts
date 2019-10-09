@@ -1,7 +1,6 @@
 import { BrainKey, PythiaClient } from 'virgil-pythia';
 import { VirgilAgent } from 'virgil-sdk';
 
-import { PRODUCT_NAME, PRODUCT_VERSION } from '../constants';
 import { IKeyPair, ICrypto, IBrainKeyCrypto, IAccessTokenProvider } from '../externalTypes';
 
 const BRAIN_KEY_RATE_LIMIT_DELAY = 2000;
@@ -24,7 +23,8 @@ export async function generateBrainPair(pwd: string, options: BrainkeyOptions): 
     const pythiaClient = new PythiaClient(
         options.accessTokenProvider,
         options.apiUrl,
-        new VirgilAgent(PRODUCT_NAME, PRODUCT_VERSION),
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        new VirgilAgent(process.env.PRODUCT_NAME!, process.env.PRODUCT_VERSION!),
     );
     const brainKey = new BrainKey({
         pythiaClient,

@@ -41,8 +41,10 @@ export class EThreeNative extends AbstractEThree {
             retryOnUnauthorized: true,
             apiUrl: opts.apiUrl,
             productInfo: {
-                product: PRODUCT_NAME,
-                version: PRODUCT_VERSION,
+                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                product: process.env.PRODUCT_NAME!,
+                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                version: process.env.PRODUCT_VERSION!,
             },
         });
 

@@ -6,6 +6,9 @@ const replace = require('rollup-plugin-replace');
 const typescript = require('rollup-plugin-typescript2');
 const wasm = require('rollup-plugin-wasm');
 
+const { version } = require('./package.json');
+
+const PRODUCT_NAME = 'e3kit';
 
 module.exports = function (config) {
     config.set({
@@ -55,6 +58,8 @@ module.exports = function (config) {
                 }),
                 commonjs(),
                 replace({
+                    'process.env.PRODUCT_NAME': JSON.stringify(PRODUCT_NAME),
+                    'process.env.PRODUCT_VERSION': JSON.stringify(version),
                     'process.env.API_KEY_ID': JSON.stringify(process.env.API_KEY_ID),
                     'process.env.API_KEY': JSON.stringify(process.env.API_KEY),
                     'process.env.APP_ID': JSON.stringify(process.env.APP_ID),
