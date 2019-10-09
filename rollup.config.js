@@ -1,4 +1,5 @@
 const path = require('path');
+const json = require('rollup-plugin-json');
 const nodeResolve = require('rollup-plugin-node-resolve');
 const commonjs = require('rollup-plugin-commonjs');
 const replace = require('rollup-plugin-re');
@@ -42,6 +43,7 @@ const createNativeEntry = () => {
         },
         external,
         plugins: [
+            json({ compact: true }),
             nodeResolve({ browser: true }),
             commonjs(),
             typescript({
@@ -83,6 +85,7 @@ const createBrowserEntry = (target, cryptoType, format) => {
             name: umdName
         },
         plugins: [
+            json({ compact: true }),
             replace({
                 patterns: [
                     {
@@ -140,6 +143,7 @@ const createNodeJsEntry = (cryptoType, format) => {
         },
         external,
         plugins: [
+            json({ compact: true }),
             replace({
                 patterns: [
                     {

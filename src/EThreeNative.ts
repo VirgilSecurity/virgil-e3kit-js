@@ -3,6 +3,7 @@ import createNativeKeyEntryStorage from '@virgilsecurity/key-storage-rn/native';
 import { VirgilCardCrypto } from '@virgilsecurity/sdk-crypto';
 import { CachingJwtProvider, CardManager, VirgilCardVerifier } from 'virgil-sdk';
 import { AbstractEThree } from './AbstractEThree';
+import { PRODUCT_NAME, PRODUCT_VERSION } from './constants';
 import { EThreeCtorOptions, EThreeInitializeOptions } from './types';
 import { IPublicKey } from './externalTypes';
 import { withDefaults } from './utils/object';
@@ -39,6 +40,10 @@ export class EThreeNative extends AbstractEThree {
             accessTokenProvider,
             retryOnUnauthorized: true,
             apiUrl: opts.apiUrl,
+            productInfo: {
+                product: PRODUCT_NAME,
+                version: PRODUCT_VERSION,
+            },
         });
 
         super({

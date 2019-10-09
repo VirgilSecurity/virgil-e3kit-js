@@ -5,8 +5,10 @@ import {
     CloudEntryDoesntExistError,
     KeyknoxClient,
 } from '@virgilsecurity/keyknox';
+import { VirgilAgent } from 'virgil-sdk';
 
 import { generateBrainPair } from './utils/brainkey';
+import { PRODUCT_NAME, PRODUCT_VERSION } from './constants';
 import { WrongKeyknoxPasswordError, PrivateKeyNoBackupError } from './errors';
 import {
     IPrivateKey,
@@ -32,7 +34,11 @@ export interface IPrivateKeyLoaderOptions {
  */
 export class PrivateKeyLoader {
     private localStorage: IKeyEntryStorage;
-    private keyknoxClient = new KeyknoxClient(this.options.apiUrl);
+    private keyknoxClient = new KeyknoxClient(
+        this.options.apiUrl,
+        undefined,
+        new VirgilAgent(PRODUCT_NAME, PRODUCT_VERSION),
+    );
     private keyknoxCrypto = new KeyknoxCrypto(this.options.virgilCrypto);
     private cachedPrivateKey: IPrivateKey | null = null;
 

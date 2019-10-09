@@ -3,6 +3,7 @@ import { VirgilBrainKeyCrypto } from '@virgilsecurity/pythia-crypto';
 import { VirgilCardCrypto } from '@virgilsecurity/sdk-crypto';
 import { CardManager, KeyEntryStorage, VirgilCardVerifier } from 'virgil-sdk';
 
+import { PRODUCT_NAME, PRODUCT_VERSION } from '../constants';
 import { PrivateKeyLoader } from '../PrivateKeyLoader';
 import { EThreeCtorOptions } from '../types';
 import { DEFAULT_API_URL, STORAGE_NAME } from './constants';
@@ -44,6 +45,10 @@ export function prepareBaseConstructorParams(identity: string, options: EThreeCt
         accessTokenProvider,
         retryOnUnauthorized: true,
         apiUrl: opts.apiUrl,
+        productInfo: {
+            product: PRODUCT_NAME,
+            version: PRODUCT_VERSION,
+        },
     });
 
     return {

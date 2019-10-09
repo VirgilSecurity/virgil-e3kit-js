@@ -1,4 +1,4 @@
-import { createBrainKey } from 'virgil-pythia';
+import { BrainKey, PythiaClient } from 'virgil-pythia';
 
 import { IKeyPair, ICrypto, IBrainKeyCrypto, IAccessTokenProvider } from '../externalTypes';
 
@@ -19,13 +19,12 @@ export type BrainkeyOptions = {
  * @hidden
  */
 export async function generateBrainPair(pwd: string, options: BrainkeyOptions): Promise<IKeyPair> {
-    const brainKey = createBrainKey({
-        virgilCrypto: options.virgilCrypto,
-        virgilBrainKeyCrypto: options.pythiaCrypto,
-        accessTokenProvider: options.accessTokenProvider,
-        apiUrl: options.apiUrl,
+    const pythiaClient = new PythiaClient(options.accessTokenProvider, options.apiUrl);
+    const brainKey = new BrainKey({
+        pythiaClient,
+        crypto: options.virgilCrypto,
+        brainKeyCrypto: options.pythiaCrypto,
     });
-
     return await brainKey.generateKeyPair(pwd).catch((e: Error & { code?: number }) => {
         if (typeof e === 'object' && e.code === BRAIN_KEY_THROTTLING_ERROR_CODE) {
             const promise = new Promise((resolve, reject) => {
