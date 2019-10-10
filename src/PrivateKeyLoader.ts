@@ -8,7 +8,6 @@ import {
 import { VirgilAgent } from 'virgil-sdk';
 
 import { generateBrainPair } from './utils/brainkey';
-import { PRODUCT_NAME, PRODUCT_VERSION } from './constants';
 import { WrongKeyknoxPasswordError, PrivateKeyNoBackupError } from './errors';
 import {
     IPrivateKey,
@@ -37,7 +36,8 @@ export class PrivateKeyLoader {
     private keyknoxClient = new KeyknoxClient(
         this.options.apiUrl,
         undefined,
-        new VirgilAgent(PRODUCT_NAME, PRODUCT_VERSION),
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        new VirgilAgent(process.env.PRODUCT_NAME!, process.env.PRODUCT_VERSION!),
     );
     private keyknoxCrypto = new KeyknoxCrypto(this.options.virgilCrypto);
     private cachedPrivateKey: IPrivateKey | null = null;

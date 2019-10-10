@@ -3,7 +3,6 @@ import createNativeKeyEntryStorage from '@virgilsecurity/key-storage-rn/native';
 import { VirgilCardCrypto } from '@virgilsecurity/sdk-crypto';
 import { CachingJwtProvider, CardManager, VirgilCardVerifier } from 'virgil-sdk';
 import { AbstractEThree } from './AbstractEThree';
-import { PRODUCT_NAME, PRODUCT_VERSION } from './constants';
 import { EThreeCtorOptions, EThreeInitializeOptions } from './types';
 import { IPublicKey } from './externalTypes';
 import { withDefaults } from './utils/object';
