@@ -71,7 +71,7 @@
         "lint-staged": "^7.2.2",
         "mocha": "^5.2.0",
         "prettier": "^1.14.2",
-        "react-native-virgil-crypto": "^0.3.0",
+        "react-native-virgil-crypto": "https://github.com/VirgilSecurity/react-native-virgil-crypto#update-crypto-types",
         "rimraf": "^2.6.2",
         "rollup": "^1.15.1",
         "rollup-plugin-commonjs": "^10.0.0",
