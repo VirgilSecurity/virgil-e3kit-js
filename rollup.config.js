@@ -10,6 +10,8 @@ const builtinModules = require('builtin-modules');
 
 const packageJson = require('./package.json');
 
+const PRODUCT_NAME = 'e3kit';
+
 const FORMAT = {
     CJS: 'cjs',
     ES: 'es',
@@ -42,6 +44,10 @@ const createNativeEntry = () => {
         },
         external,
         plugins: [
+            replace({
+              'process.env.PRODUCT_NAME': JSON.stringify(PRODUCT_NAME),
+              'process.env.PRODUCT_VERSION': JSON.stringify(packageJson.version),
+            }),
             nodeResolve({ browser: true }),
             commonjs(),
             typescript({
@@ -83,6 +89,10 @@ const createBrowserEntry = (target, cryptoType, format) => {
             name: umdName
         },
         plugins: [
+            replace({
+              'process.env.PRODUCT_NAME': JSON.stringify(PRODUCT_NAME),
+              'process.env.PRODUCT_VERSION': JSON.stringify(packageJson.version),
+            }),
             replace({
                 patterns: [
                     {
@@ -140,6 +150,10 @@ const createNodeJsEntry = (cryptoType, format) => {
         },
         external,
         plugins: [
+            replace({
+              'process.env.PRODUCT_NAME': JSON.stringify(PRODUCT_NAME),
+              'process.env.PRODUCT_VERSION': JSON.stringify(packageJson.version),
+            }),
             replace({
                 patterns: [
                     {

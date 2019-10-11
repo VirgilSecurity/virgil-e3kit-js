@@ -6,8 +6,6 @@
 
 [Introduction](#introduction) | [SDK Features](#sdk-features) | [Installation](#installation) | [Usage Example](#usage-example) | [Docs](#docs) | [Support](#support)
 
-> Warning! This README is for the beta release of E3kit, if you're here for the latest stable version check out the [v0.5.x branch](https://github.com/VirgilSecurity/virgil-e3kit-js/tree/v0.5.x)
-
 ## Introduction
 
 <a href="https://developer.virgilsecurity.com/docs"><img width="230px" src="https://cdn.virgilsecurity.com/assets/images/github/logos/virgil-logo-red.png" align="left" hspace="10" vspace="6"></a> [Virgil Security](https://virgilsecurity.com) provides an SDK which simplifies work with Virgil services and presents easy to use API for adding security to any application. In a few simple steps you can setup user encryption with multidevice support.
@@ -23,12 +21,12 @@ The most important changes are:
 
 ## Installation
 
-You can install this module from npm specifying the `@next` tag. Another option is to add it via script tag in browser.
+You can install this module from npm. Another option is to add it via script tag in browser.
 
 ### npm
-You will need to install `@virgilsecurity/e3kit@next`. Note the `@next` suffix, it's important.
+You will need to install `@virgilsecurity/e3kit`:
 ```sh
-npm install @virgilsecurity/e3kit@next
+npm install @virgilsecurity/e3kit
 ```
 
 If you develop for browsers and `import` (or `require`) e3kit from the npm package, you will need to tell your module bundler (such as Webpack) to handle the `.wasm` file imports by copying them into the build output directory _preserving_ the original name.
@@ -38,9 +36,9 @@ See an example of how to do this with Webpack in the [example/webpack](example/w
 > To serve WebAssembly in the most efficient way over the network, make sure your web server has the proper MIME type for `.wasm` files, which is `application/wasm`. That will allow streaming compilation, where the browser can start to compile code as it downloads.
 
 ### In browser via `script` tag
-You will need to add `@virgilsecurity/e3kit@next` script.
+You will need to add `@virgilsecurity/e3kit` script.
 ```html
-<script src="https://unpkg.com/@virgilsecurity/e3kit@next/dist/browser.umd.js"></script>
+<script src="https://unpkg.com/@virgilsecurity/e3kit/dist/browser.umd.js"></script>
 ```
 
 ## Usage Example
