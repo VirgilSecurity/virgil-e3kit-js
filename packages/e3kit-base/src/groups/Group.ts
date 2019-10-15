@@ -110,11 +110,17 @@ export class Group {
     async add(participantCard: ICard): Promise<void>;
     async add(participantCards: FindUsersResult): Promise<void>;
     async add(cardOrFindUsersResult: ICard | FindUsersResult): Promise<void> {
-        // TODO check permissions
         const cardsToAdd = getCardsArray(cardOrFindUsersResult);
         if (cardsToAdd.length === 0) {
             throw new TypeError(
                 'Failed to add participants. First argument must be the result of "eThree.findUsers" method',
+            );
+        }
+
+        if (!this.isEditable()) {
+            throw new GroupError(
+                GroupErrorCode.PermissionDenied,
+                'Only group initiator can add participants to the group',
             );
         }
 
@@ -138,11 +144,17 @@ export class Group {
     async remove(participantCard: ICard): Promise<void>;
     async remove(participantCards: FindUsersResult): Promise<void>;
     async remove(cardOrFindUsersResult: ICard | FindUsersResult): Promise<void> {
-        // TODO check permissions
         const cardsToRemove = getCardsArray(cardOrFindUsersResult);
         if (cardsToRemove.length === 0) {
             throw new TypeError(
                 'Failed to remove participants. First argument must be the result of "eThree.findUsers" method',
+            );
+        }
+
+        if (!this.isEditable()) {
+            throw new GroupError(
+                GroupErrorCode.PermissionDenied,
+                'Only group initiator can remove participants from the group',
             );
         }
 
@@ -184,7 +196,22 @@ export class Group {
     }
 
     async reAdd(participantCard: ICard): Promise<void> {
-        // TODO check permissions
+        if (!isVirgilCard(participantCard)) {
+            throw new TypeError(
+                'Failed to re-add participant. First argument must be a Virgil Card object',
+            );
+        }
+        if (!this.isEditable()) {
+            throw new GroupError(
+                GroupErrorCode.PermissionDenied,
+                'Only group initiator can add or remove participants from the group',
+            );
+        }
+
         await this._groupManager.reAddAccess(this._session.getSessionId(), participantCard);
+    }
+
+    isEditable() {
+        return this.initiator === this.selfIdentity;
     }
 }

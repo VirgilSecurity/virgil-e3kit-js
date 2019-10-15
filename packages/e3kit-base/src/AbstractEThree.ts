@@ -565,7 +565,12 @@ export abstract class AbstractEThree {
                 `Group with ID "${groupId}" was not found in local storage. Try to load it first.`,
             );
         }
-        // TODO check that current user is allowed to delete the group
+        if (!group.isEditable()) {
+            throw new GroupError(
+                GroupErrorCode.PermissionDenied,
+                'Only group initiator can delete the group',
+            );
+        }
         return this.groupManager.delete(sessionId);
     }
 
