@@ -33,6 +33,8 @@ import { warn } from './log';
 import { Group, isValidParticipantCount } from './groups/Group';
 import { Ticket } from './groups/Ticket';
 import { GroupManager } from './GroupManager';
+import { getCardActiveAtMoment } from './utils/card';
+import { isValidDate } from './utils/date';
 
 export abstract class AbstractEThree {
     /**
@@ -657,24 +659,31 @@ export abstract class AbstractEThree {
     protected getPublicKeyForVerification(
         ownPrivateKey: IPrivateKey,
         senderCardOrPublicKey?: ICard | IPublicKey,
-        encryptedOn?: Date,
+        encryptedOn?: Date | number,
     ) {
         if (senderCardOrPublicKey == null) {
             return this.virgilCrypto.extractPublicKey(ownPrivateKey);
         }
 
         if (isVirgilCard(senderCardOrPublicKey)) {
-            let actualCard: ICard | undefined = senderCardOrPublicKey;
+            let actualCard;
             if (encryptedOn) {
-                while (actualCard && actualCard.createdAt > encryptedOn) {
-                    actualCard = actualCard.previousCard;
-                }
-
-                if (!actualCard) {
-                    throw new Error(
-                        "The given sender's Virgil Card is newer than the encrypted data",
+                const encryptedOnDate = new Date(encryptedOn);
+                if (!isValidDate(encryptedOnDate)) {
+                    throw new TypeError(
+                        'Cannot decrypt data. Third argument, if provided, must be a Date or a timestamp',
                     );
                 }
+                actualCard = getCardActiveAtMoment(senderCardOrPublicKey, encryptedOnDate);
+                if (!actualCard) {
+                    throw new Error(
+                        'The given sender Virgil Card is newer than the encrypted data.' +
+                            'This may happen if they un-registered and registered again with the same identity.' +
+                            'Try loading their Virgil Card by its ID.',
+                    );
+                }
+            } else {
+                actualCard = senderCardOrPublicKey;
             }
             return actualCard.publicKey;
         }

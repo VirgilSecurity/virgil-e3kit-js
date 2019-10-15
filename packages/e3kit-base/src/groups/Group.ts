@@ -1,4 +1,4 @@
-import { IGroupSession, ICrypto, Data, FindUsersResult } from '../types';
+import { IGroupSession, ICrypto, Data, FindUsersResult, NodeBuffer } from '../types';
 import { PrivateKeyLoader } from '../PrivateKeyLoader';
 import { Ticket } from './Ticket';
 import { RegisterRequiredError, GroupError, GroupErrorCode, UsersNotFoundError } from '../errors';
@@ -7,7 +7,9 @@ import { CardManager } from 'virgil-sdk';
 import { GroupManager } from '../GroupManager';
 import { isVirgilCard, isFindUsersResult } from '../typeguards';
 import { getObjectValues } from '../array';
-import { VALID_GROUP_PARTICIPANT_COUNT_RANGE } from '../constants';
+import { VALID_GROUP_PARTICIPANT_COUNT_RANGE, MAX_EPOCHS_IN_GROUP_SESSION } from '../constants';
+import { getCardActiveAtMoment } from '../utils/card';
+import { isValidDate } from '../utils/date';
 
 const getCardsArray = (cardOrFindUsersResult: ICard | FindUsersResult) => {
     if (isVirgilCard(cardOrFindUsersResult)) {
@@ -88,15 +90,87 @@ export class Group {
         return this._session.encrypt(data, privateKey);
     }
 
-    async decrypt(encryptedData: Data, senderCard: ICard) {
-        // TODO
-        // 1. add third parameter - date of encryption and find card based on it
-        // 2. check that sessionId matches
-        // 3. check if encrypted data's epoch is newer than the current epoch
-        // 4. if encrypted data's epoch is very old - create a temporary group
-        // with that epoch only and decrypt with that
-        // 5. Throw custom error when signature fails verification
-        return this._session.decrypt(encryptedData, senderCard.publicKey);
+    async decrypt(
+        encryptedData: Data,
+        senderCard: ICard,
+        encryptedOn?: Date | number,
+    ): Promise<NodeBuffer> {
+        const {
+            sessionId: messageSessionId,
+            epochNumber: messageEpochNumber,
+            data: messageData,
+        } = this._session.parseMessage(encryptedData);
+
+        if (!isVirgilCard(senderCard)) {
+            throw new TypeError(
+                'Cannot decrypt data. Second argument must be a Virgil Card object.',
+            );
+        }
+
+        let actualCard;
+        if (encryptedOn) {
+            const encryptedOnDate = new Date(encryptedOn);
+            if (!isValidDate(encryptedOnDate)) {
+                throw new TypeError(
+                    'Cannot decrypt data. Third argument, if provided, must be a Date or a timestamp',
+                );
+            }
+            actualCard = getCardActiveAtMoment(senderCard, encryptedOnDate);
+            if (!actualCard) {
+                throw new Error(
+                    'The given sender Virgil Card is newer than the encrypted data.' +
+                        'This may happen if they un-registered and registered again with the same identity.' +
+                        'Try loading their Virgil Card by its ID.',
+                );
+            }
+        } else {
+            actualCard = senderCard;
+        }
+
+        if (messageSessionId !== this._session.getSessionId()) {
+            throw new GroupError(
+                GroupErrorCode.MessageNotFromThisGroup,
+                'The given message was encrypted for different group',
+            );
+        }
+
+        if (messageEpochNumber > this._session.getCurrentEpochNumber()) {
+            throw new GroupError(
+                GroupErrorCode.GroupIsOutdated,
+                'This group is out of date. Call "group.update()" or "e3kitInstance.loadGroup()" to be able to decrypt this message',
+            );
+        }
+
+        try {
+            if (
+                this._session.getCurrentEpochNumber() - messageEpochNumber <
+                MAX_EPOCHS_IN_GROUP_SESSION
+            ) {
+                return this._session.decrypt(messageData, actualCard.publicKey);
+            } else {
+                const tempGroup = await this._groupManager.retrieve(
+                    messageSessionId,
+                    messageEpochNumber,
+                );
+                if (!tempGroup) {
+                    throw new GroupError(
+                        GroupErrorCode.LocalGroupNotFound,
+                        `Group with given id was not found in local storage. Try to load it first.`,
+                    );
+                }
+
+                return tempGroup.decrypt(encryptedData, actualCard);
+            }
+        } catch (err) {
+            if (err.name === 'FoundationError' && /Invalid signature/.test(err.message)) {
+                throw new GroupError(
+                    GroupErrorCode.DataVerificationFailed,
+                    "Verification of message integrity failed. This may be caused by the sender's public key rotation." +
+                        'Try looking it up again with "e3kitInstance.findUsers()"',
+                );
+            }
+            throw err;
+        }
     }
 
     async update() {

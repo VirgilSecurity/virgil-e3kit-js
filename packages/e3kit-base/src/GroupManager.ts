@@ -6,7 +6,7 @@ import {
     GroupTicket,
 } from '@virgilsecurity/keyknox';
 import { ICard } from './types';
-import { CLOUD_GROUP_SESSIONS_ROOT } from './constants';
+import { CLOUD_GROUP_SESSIONS_ROOT, MAX_EPOCHS_IN_GROUP_SESSION } from './constants';
 import { Ticket } from './groups/Ticket';
 import { PrivateKeyLoader } from './PrivateKeyLoader';
 import { RegisterRequiredError, GroupError, GroupErrorCode } from './errors';
@@ -49,6 +49,8 @@ export class GroupManager {
             );
         } catch (err) {
             if (err.name === 'GroupTicketDoesntExistError') {
+                // TODO remove group from device's persistent storage
+                this._localGroupStorage.delete(sessionId);
                 throw new GroupError(
                     GroupErrorCode.RemoteGroupNotFound,
                     'Group with given id could not be found',
@@ -69,8 +71,10 @@ export class GroupManager {
         return group;
     }
 
-    async retrieve(sessionId: string) {
+    async retrieve(sessionId: string, epochNumber?: number) {
         // TODO get the group from the device's persistent storage
+        // TODO load MAX_EPOCHS_IN_GROUP_SESSION epochs if `epochNumber` is undefined,
+        // or single epoch specified by `epochNumber` otherwise
         return this._localGroupStorage.get(sessionId);
     }
 

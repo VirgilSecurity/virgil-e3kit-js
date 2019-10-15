@@ -22,3 +22,8 @@ export const CLOUD_GROUP_SESSIONS_ROOT = 'group-sessions';
  * @hidden
  */
 export const VALID_GROUP_PARTICIPANT_COUNT_RANGE: [number, number] = [2, 100];
+
+/**
+ * @hidden
+ */
+export const MAX_EPOCHS_IN_GROUP_SESSION = 50;
