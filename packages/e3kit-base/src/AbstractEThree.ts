@@ -561,7 +561,8 @@ export abstract class AbstractEThree {
         const sessionId = this.virgilCrypto.calculateGroupSessionId(groupId);
         const group = await this.groupManager.retrieve(sessionId);
         if (!group) {
-            throw new Error(
+            throw new GroupError(
+                GroupErrorCode.LocalGroupNotFound,
                 `Group with ID "${groupId}" was not found in local storage. Try to load it first.`,
             );
         }

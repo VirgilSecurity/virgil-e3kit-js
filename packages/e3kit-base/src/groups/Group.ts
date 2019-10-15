@@ -1,7 +1,7 @@
 import { IGroupSession, ICrypto, Data, FindUsersResult } from '../types';
 import { PrivateKeyLoader } from '../PrivateKeyLoader';
 import { Ticket } from './Ticket';
-import { RegisterRequiredError, GroupError, GroupErrorCode } from '../errors';
+import { RegisterRequiredError, GroupError, GroupErrorCode, UsersNotFoundError } from '../errors';
 import { ICard } from '../types';
 import { CardManager } from 'virgil-sdk';
 import { GroupManager } from '../GroupManager';
@@ -54,7 +54,10 @@ export class Group {
             .sort((a, b) => a.groupSessionMessage.epochNumber - b.groupSessionMessage.epochNumber);
         const lastTicket = sortedTickets[sortedTickets.length - 1];
         if (!lastTicket) {
-            throw new Error('Failed to construct Group. Group must have at least one ticket.');
+            throw new GroupError(
+                GroupErrorCode.InvalidGroup,
+                'Failed to construct Group. Group must have at least one ticket.',
+            );
         }
 
         if (isValidParticipantCount(lastTicket.participants.length)) {
@@ -100,7 +103,7 @@ export class Group {
         const sessionId = this._session.getSessionId();
         const initiatorCards = await this._cardManager.searchCards(this.initiator);
         if (initiatorCards.length === 0) {
-            throw new Error("Group owner's Virgil Card not found.");
+            throw new UsersNotFoundError([this.initiator]);
         }
         const group = await this._groupManager.pull(sessionId, initiatorCards[0]);
         this._session = group._session;

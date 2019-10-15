@@ -3,12 +3,13 @@ import {
     KeyknoxManager,
     KeyknoxCrypto,
     KeyknoxClient,
+    GroupTicket,
 } from '@virgilsecurity/keyknox';
 import { ICard } from './types';
 import { CLOUD_GROUP_SESSIONS_ROOT } from './constants';
 import { Ticket } from './groups/Ticket';
 import { PrivateKeyLoader } from './PrivateKeyLoader';
-import { RegisterRequiredError } from './errors';
+import { RegisterRequiredError, GroupError, GroupErrorCode } from './errors';
 import { Group } from './groups/Group';
 import { CardManager } from 'virgil-sdk';
 
@@ -39,11 +40,23 @@ export class GroupManager {
 
     async pull(sessionId: string, initiatorCard: ICard) {
         const cloudTicketStorage = await this.getCloudTicketStorage();
-        const cloudTickets = await cloudTicketStorage.retrieve(
-            sessionId,
-            initiatorCard.identity,
-            initiatorCard.publicKey,
-        );
+        let cloudTickets: GroupTicket[];
+        try {
+            cloudTickets = await cloudTicketStorage.retrieve(
+                sessionId,
+                initiatorCard.identity,
+                initiatorCard.publicKey,
+            );
+        } catch (err) {
+            if (err.name === 'GroupTicketDoesntExistError') {
+                throw new GroupError(
+                    GroupErrorCode.RemoteGroupNotFound,
+                    'Group with given id could not be found',
+                );
+            }
+            throw err;
+        }
+
         const group = new Group({
             initiator: initiatorCard.identity,
             tickets: cloudTickets.map(ct => new Ticket(ct.groupSessionMessageInfo, ct.identities)),
