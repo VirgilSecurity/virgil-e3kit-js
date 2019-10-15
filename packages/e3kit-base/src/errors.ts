@@ -179,3 +179,24 @@ export class UsersFoundWithMultipleCardsError extends Error {
         this.name = 'UsersFoundWithMultipleCardsError';
     }
 }
+
+export enum GroupErrorCode {
+    LocalGroupNotFound = 1,
+    PermissionDenied = 2,
+    RemoteGroupNotFound = 3,
+    InvalidGroup = 4,
+    InvalidChangeParticipants = 5,
+    InvalidParticipantsCount = 6,
+    DataVerificationFailed = 7,
+    GroupIdTooShort = 8,
+    MessageNotFromThisGroup = 9,
+    GroupIsOutdated = 10,
+}
+
+export class GroupError extends Error {
+    constructor(public errorCode: GroupErrorCode, message: string) {
+        super(message);
+        Object.setPrototypeOf(this, new.target.prototype);
+        this.name = 'GroupError';
+    }
+}

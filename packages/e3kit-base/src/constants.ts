@@ -17,3 +17,8 @@ export const MAX_IDENTITIES_TO_SEARCH = 50;
  * @hidden
  */
 export const CLOUD_GROUP_SESSIONS_ROOT = 'group-sessions';
+
+/**
+ * @hidden
+ */
+export const VALID_GROUP_PARTICIPANT_COUNT_RANGE: [number, number] = [2, 100];

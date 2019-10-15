@@ -1,12 +1,13 @@
 import { IGroupSession, ICrypto, Data, FindUsersResult } from '../types';
 import { PrivateKeyLoader } from '../PrivateKeyLoader';
 import { Ticket } from './Ticket';
-import { RegisterRequiredError } from '../errors';
+import { RegisterRequiredError, GroupError, GroupErrorCode } from '../errors';
 import { ICard } from '../types';
 import { CardManager } from 'virgil-sdk';
 import { GroupManager } from '../GroupManager';
 import { isVirgilCard, isFindUsersResult } from '../typeguards';
 import { getObjectValues } from '../array';
+import { VALID_GROUP_PARTICIPANT_COUNT_RANGE } from '../constants';
 
 const getCardsArray = (cardOrFindUsersResult: ICard | FindUsersResult) => {
     if (isVirgilCard(cardOrFindUsersResult)) {
@@ -20,6 +21,14 @@ const getCardsArray = (cardOrFindUsersResult: ICard | FindUsersResult) => {
 
 const setDifference = <T>(a: Set<T>, b: Set<T>) => {
     return new Set([...a].filter(it => !b.has(it)));
+};
+
+const isNumberInRange = (num: number, range: [number, number]) => {
+    return typeof num === 'number' && num >= range[0] && num <= range[1];
+};
+
+export const isValidParticipantCount = (count: number) => {
+    return isNumberInRange(count, VALID_GROUP_PARTICIPANT_COUNT_RANGE);
 };
 
 export class Group {
@@ -48,7 +57,12 @@ export class Group {
             throw new Error('Failed to construct Group. Group must have at least one ticket.');
         }
 
-        // TODO validate participants count
+        if (isValidParticipantCount(lastTicket.participants.length)) {
+            throw new GroupError(
+                GroupErrorCode.InvalidParticipantsCount,
+                `Cannot initialize group with ${lastTicket.participants.length} participant(s). Group can have ${VALID_GROUP_PARTICIPANT_COUNT_RANGE[0]} to ${VALID_GROUP_PARTICIPANT_COUNT_RANGE[1]} participants.`,
+            );
+        }
 
         this.selfIdentity = options.privateKeyLoader.identity;
         this.initiator = options.initiator;
@@ -103,11 +117,18 @@ export class Group {
                 'Failed to add participants. First argument must be the result of "eThree.findUsers" method',
             );
         }
-        // TODO validate participants count
+
         const missingIdentities = setDifference(
             new Set(cardsToAdd.map(c => c.identity)),
             new Set(this.participants),
         );
+        const newParicipantCount = missingIdentities.size + this.participants.length;
+        if (!isValidParticipantCount(newParicipantCount)) {
+            throw new GroupError(
+                GroupErrorCode.InvalidChangeParticipants,
+                `Cannot add ${missingIdentities.size} participant(s) to the group that has ${this.participants.length} participants. Group can have ${VALID_GROUP_PARTICIPANT_COUNT_RANGE[0]} to ${VALID_GROUP_PARTICIPANT_COUNT_RANGE[1]} participants.`,
+            );
+        }
         const missingCards = cardsToAdd.filter(c => missingIdentities.has(c.identity));
 
         await this._groupManager.addAccess(this._session.getSessionId(), missingCards);
@@ -130,16 +151,25 @@ export class Group {
             new Set(this.participants),
             new Set(cardsToRemove.map(c => c.identity)),
         );
-        // TODO validate participants count
-        if (newIdentities.size == 0) {
-            // old and new participants are the same set of identities
-            // TODO this will be part of participants count validation
-            throw new Error('Cannot remove all of the group participants');
+
+        if (!isValidParticipantCount(newIdentities.size)) {
+            throw new GroupError(
+                GroupErrorCode.InvalidChangeParticipants,
+                `Cannot remove ${oldIdentities.size -
+                    newIdentities.size} participant(s) from the group that has ${
+                    oldIdentities.size
+                } participants. Group can have ${VALID_GROUP_PARTICIPANT_COUNT_RANGE[0]} to ${
+                    VALID_GROUP_PARTICIPANT_COUNT_RANGE[1]
+                } participants.`,
+            );
         }
 
         if (newIdentities.size === oldIdentities.size) {
             // none of the identities to remove is in the existing participants set
-            throw new Error('Attempted to remove non-existent partipants from the group');
+            throw new GroupError(
+                GroupErrorCode.InvalidChangeParticipants,
+                'Attempted to remove non-existent group participants',
+            );
         }
 
         const newCards = await this._cardManager.searchCards([...newIdentities]);

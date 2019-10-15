@@ -10,6 +10,8 @@ import {
     LookupError,
     UsersNotFoundError,
     UsersFoundWithMultipleCardsError,
+    GroupError,
+    GroupErrorCode,
 } from './errors';
 import { PrivateKeyLoader } from './PrivateKeyLoader';
 import { isArray, isString, isVirgilCard, isFindUsersResult, isLookupResult } from './typeguards';
@@ -26,9 +28,9 @@ import {
     LookupResult,
     FindUsersResult,
 } from './types';
-import { MAX_IDENTITIES_TO_SEARCH } from './constants';
+import { MAX_IDENTITIES_TO_SEARCH, VALID_GROUP_PARTICIPANT_COUNT_RANGE } from './constants';
 import { warn } from './log';
-import { Group } from './groups/Group';
+import { Group, isValidParticipantCount } from './groups/Group';
 import { Ticket } from './groups/Ticket';
 import { GroupManager } from './GroupManager';
 
@@ -79,7 +81,7 @@ export abstract class AbstractEThree {
         this.accessTokenProvider = options.accessTokenProvider;
         this.keyEntryStorage = options.keyEntryStorage;
         this.keyLoader = options.keyLoader;
-        this.groupManager = new GroupManager(options.keyLoader);
+        this.groupManager = new GroupManager(options.keyLoader, options.cardManager);
     }
 
     /**
@@ -526,7 +528,12 @@ export abstract class AbstractEThree {
             );
         }
         participantIdentities.add(this.identity);
-        // TODO validate participants count
+        if (!isValidParticipantCount(participantIdentities.size)) {
+            throw new GroupError(
+                GroupErrorCode.InvalidParticipantsCount,
+                `Cannot create group with ${participantIdentities.size} participant(s). Group can have ${VALID_GROUP_PARTICIPANT_COUNT_RANGE[0]} to ${VALID_GROUP_PARTICIPANT_COUNT_RANGE[1]} participants.`,
+            );
+        }
 
         const groupSession = this.virgilCrypto.generateGroupSession(groupId);
         const ticket = new Ticket(
