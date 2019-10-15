@@ -82,6 +82,11 @@ export class GroupManager {
         this._localGroupStorage.delete(sessionId);
     }
 
+    async reAddAccess(sessionId: string, allowedCard: ICard) {
+        const cloudTicketStorage = await this.getCloudTicketStorage();
+        await cloudTicketStorage.reAddRecipient(sessionId, allowedCard);
+    }
+
     private get selfIdentity() {
         return this._privateKeyLoader.identity;
     }

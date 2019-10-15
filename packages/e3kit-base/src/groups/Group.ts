@@ -152,4 +152,9 @@ export class Group {
         const removedIdentities = setDifference(oldIdentities, newIdentities);
         await this._groupManager.removeAccess(this._session.getSessionId(), [...removedIdentities]);
     }
+
+    async reAdd(participantCard: ICard): Promise<void> {
+        // TODO check permissions
+        await this._groupManager.reAddAccess(this._session.getSessionId(), participantCard);
+    }
 }

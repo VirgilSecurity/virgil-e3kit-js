@@ -525,6 +525,9 @@ export abstract class AbstractEThree {
                 'Expected participants to be the result of "findUsers" method call',
             );
         }
+        participantIdentities.add(this.identity);
+        // TODO validate participants count
+
         const groupSession = this.virgilCrypto.generateGroupSession(groupId);
         const ticket = new Ticket(
             {
