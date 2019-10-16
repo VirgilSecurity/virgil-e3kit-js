@@ -21,7 +21,7 @@
         "@virgilsecurity/key-storage-rn": "^0.2.0",
         "@virgilsecurity/sdk-crypto": "^0.4.5",
         "react-native-keychain": "^4.0.0",
-        "react-native-virgil-crypto": "https://github.com/VirgilSecurity/react-native-virgil-crypto#update-crypto-types",
+        "react-native-virgil-crypto": "^0.3.2",
         "virgil-sdk": "next"
     },
     "devDependencies": {
