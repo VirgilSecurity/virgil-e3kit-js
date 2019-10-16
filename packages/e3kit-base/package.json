@@ -21,7 +21,7 @@
         "@virgilsecurity/crypto-types": "^0.2.0",
         "@virgilsecurity/keyknox": "next",
         "@virgilsecurity/sdk-crypto": "^0.4.5",
-        "virgil-pythia": "^0.3.1",
+        "virgil-pythia": "^0.3.4",
         "virgil-sdk": "next"
     },
     "devDependencies": {
