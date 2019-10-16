@@ -62,7 +62,7 @@ export class Group {
             );
         }
 
-        if (isValidParticipantCount(lastTicket.participants.length)) {
+        if (!isValidParticipantCount(lastTicket.participants.length)) {
             throw new GroupError(
                 GroupErrorCode.InvalidParticipantsCount,
                 `Cannot initialize group with ${lastTicket.participants.length} participant(s). Group can have ${VALID_GROUP_PARTICIPANT_COUNT_RANGE[0]} to ${VALID_GROUP_PARTICIPANT_COUNT_RANGE[1]} participants.`,
