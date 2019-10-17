@@ -63,6 +63,11 @@ module.exports = config => {
             plugins: [
                 replace({
                     '@virgilsecurity/e3kit-node': '@virgilsecurity/e3kit',
+                    'process.env.API_KEY_ID': JSON.stringify(process.env.API_KEY_ID),
+                    'process.env.API_KEY': JSON.stringify(process.env.API_KEY),
+                    'process.env.APP_ID': JSON.stringify(process.env.APP_ID),
+                    'process.env.API_URL': JSON.stringify(process.env.API_URL),
+                    'process.env.NODE_ENV': process.env.NODE_ENV || JSON.stringify('production'),
                 }),
                 nodeResolve({
                     browser: true,
@@ -70,13 +75,6 @@ module.exports = config => {
                 }),
                 commonjs({
                     namedExports: { chai: ['expect'] },
-                }),
-                replace({
-                    'process.env.API_KEY_ID': JSON.stringify(process.env.API_KEY_ID),
-                    'process.env.API_KEY': JSON.stringify(process.env.API_KEY),
-                    'process.env.APP_ID': JSON.stringify(process.env.APP_ID),
-                    'process.env.API_URL': JSON.stringify(process.env.API_URL),
-                    'process.env.NODE_ENV': process.env.NODE_ENV || JSON.stringify('production'),
                 }),
                 typescript(),
                 wasm(),

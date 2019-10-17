@@ -32,15 +32,12 @@ import {
     KeyEntryStorage,
 } from 'virgil-sdk';
 
+import { sleep } from '../utils';
+
 type VirgilPublicKey = import('@virgilsecurity/base-crypto').VirgilPublicKey;
 type IKeyEntry = import('virgil-sdk').IKeyEntry;
 
 const BRAIN_KEY_RATE_LIMIT_DELAY = 2000;
-
-const sleep = (ms: number) =>
-    new Promise(resolve => {
-        setTimeout(resolve, ms);
-    });
 
 describe('EThree', () => {
     let virgilCrypto: VirgilCrypto;
@@ -724,74 +721,6 @@ describe('EThree', () => {
                     .exportPublicKey(result[theirIdentity].publicKey as VirgilPublicKey)
                     .equals(virgilCrypto.exportPublicKey(theirKeypair.publicKey)),
             ).to.be.true;
-        });
-    });
-
-    describe('group encryption', () => {
-        let aliceEThree: EThree;
-        let bobEThree: EThree;
-        let charlesEThree: EThree;
-        let ourGroupId: string;
-
-        beforeEach(async () => {
-            ourGroupId =
-                'group_id_' +
-                Math.random()
-                    .toString(36)
-                    .slice(2);
-
-            const aliceIdentity =
-                'alice_identity_' +
-                Math.random()
-                    .toString(36)
-                    .slice(2);
-            aliceEThree = await initializeEThree(createFetchToken(aliceIdentity));
-
-            const bobIdentity =
-                'bob_identity_' +
-                Math.random()
-                    .toString(36)
-                    .slice(2);
-            bobEThree = await initializeEThree(createFetchToken(bobIdentity));
-
-            const charlesIdentity =
-                'charles_identity_' +
-                Math.random()
-                    .toString(36)
-                    .slice(2);
-            charlesEThree = await initializeEThree(createFetchToken(charlesIdentity));
-
-            await aliceEThree.register();
-            await bobEThree.register();
-            await charlesEThree.register();
-        });
-
-        it('can create, share and load group to encrypt / decrypt messages', async () => {
-            const bobAndCharlesCards = await aliceEThree.findUsers([
-                bobEThree.identity,
-                charlesEThree.identity,
-            ]);
-            const aliceGroup = await aliceEThree.createGroup(ourGroupId, bobAndCharlesCards);
-            expect(aliceGroup).to.be.ok;
-
-            const message = 'Hello everyone! This is the beginning of our group chat!';
-            const encryptedMessage = await aliceGroup.encrypt(message);
-
-            const aliceCardForBob = await bobEThree.findUsers(aliceEThree.identity);
-            const bobGroup = await bobEThree.loadGroup(ourGroupId, aliceCardForBob);
-            const decryptedMessageForBob = await bobGroup.decrypt(
-                encryptedMessage,
-                aliceCardForBob,
-            );
-            expect(decryptedMessageForBob.toString('utf8')).to.eq(message);
-
-            const aliceCardForCharles = await charlesEThree.findUsers(aliceEThree.identity);
-            const charlesGroup = await charlesEThree.loadGroup(ourGroupId, aliceCardForCharles);
-            const decryptedMessageForCharles = await charlesGroup.decrypt(
-                encryptedMessage,
-                aliceCardForCharles,
-            );
-            expect(decryptedMessageForCharles.toString('utf8')).to.eq(message);
         });
     });
 });
