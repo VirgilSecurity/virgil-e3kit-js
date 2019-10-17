@@ -7,9 +7,7 @@ node_js:
 before_install:
     - yarn cache clean
 install:
-    - yarn --no-lockfile
-before_script:
-    - yarn bootstrap
+    - yarn install
 script:
     - yarn lint
     - yarn test
