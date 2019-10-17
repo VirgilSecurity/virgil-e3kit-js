@@ -5,22 +5,41 @@ import {
     KeyknoxClient,
     GroupTicket,
 } from '@virgilsecurity/keyknox';
-import { ICard } from './types';
+import { CardManager } from 'virgil-sdk';
+import { ICard, Ticket } from './types';
 import { CLOUD_GROUP_SESSIONS_ROOT, MAX_EPOCHS_IN_GROUP_SESSION } from './constants';
-import { Ticket } from './groups/Ticket';
 import { PrivateKeyLoader } from './PrivateKeyLoader';
 import { RegisterRequiredError, GroupError, GroupErrorCode } from './errors';
 import { Group } from './groups/Group';
-import { CardManager } from 'virgil-sdk';
+import { GroupLocalStorage, RetrieveOptions } from './GroupLocalStorage';
+
+export interface GroupManagerConstructorParams {
+    keyLoader: PrivateKeyLoader;
+    cardManager: CardManager;
+    groupLocalStorage: GroupLocalStorage;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const isInteger = (val: any): val is number => {
+    if (Number.isInteger) return Number.isInteger(val);
+    return typeof val === 'number' && isFinite(val) && Math.floor(val) === val;
+};
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const isSafeInteger = (val: any): val is number => {
+    if (Number.isSafeInteger) return Number.isSafeInteger(val);
+    return isInteger(val) && Math.abs(val) <= Number.MAX_SAFE_INTEGER;
+};
 
 export class GroupManager {
     private _privateKeyLoader: PrivateKeyLoader;
     private _cardManager: CardManager;
-    private _localGroupStorage = new Map<string, Group>();
+    private _localGroupStorage: GroupLocalStorage;
 
-    constructor(privateKeyLoader: PrivateKeyLoader, cardManager: CardManager) {
-        this._privateKeyLoader = privateKeyLoader;
+    constructor({ keyLoader, cardManager, groupLocalStorage }: GroupManagerConstructorParams) {
+        this._privateKeyLoader = keyLoader;
         this._cardManager = cardManager;
+        this._localGroupStorage = groupLocalStorage;
     }
 
     async store(ticket: Ticket, cards: ICard[]) {
@@ -33,8 +52,8 @@ export class GroupManager {
             cardManager: this._cardManager,
             groupManager: this,
         });
-        // TODO store the group in device's persistent storage
-        this._localGroupStorage.set(ticket.groupSessionMessage.sessionId, group);
+        const rawGroup = { info: { initiator: this.selfIdentity }, tickets: [ticket] };
+        this._localGroupStorage.store(rawGroup);
         return group;
     }
 
@@ -49,8 +68,7 @@ export class GroupManager {
             );
         } catch (err) {
             if (err.name === 'GroupTicketDoesntExistError') {
-                // TODO remove group from device's persistent storage
-                this._localGroupStorage.delete(sessionId);
+                await this._localGroupStorage.delete(sessionId);
                 throw new GroupError(
                     GroupErrorCode.RemoteGroupNotFound,
                     'Group with given id could not be found',
@@ -59,23 +77,38 @@ export class GroupManager {
             throw err;
         }
 
+        const initiator = initiatorCard.identity;
+        const tickets = cloudTickets.map(ct => ({
+            groupSessionMessage: ct.groupSessionMessageInfo,
+            participants: ct.identities,
+        }));
         const group = new Group({
-            initiator: initiatorCard.identity,
-            tickets: cloudTickets.map(ct => new Ticket(ct.groupSessionMessageInfo, ct.identities)),
+            initiator,
+            tickets,
             privateKeyLoader: this._privateKeyLoader,
             cardManager: this._cardManager,
             groupManager: this,
         });
-        // TODO store the group in device's persistent storage
-        this._localGroupStorage.set(sessionId, group);
+        this._localGroupStorage.store({ info: { initiator }, tickets });
         return group;
     }
 
     async retrieve(sessionId: string, epochNumber?: number) {
-        // TODO get the group from the device's persistent storage
-        // TODO load MAX_EPOCHS_IN_GROUP_SESSION epochs if `epochNumber` is undefined,
-        // or single epoch specified by `epochNumber` otherwise
-        return this._localGroupStorage.get(sessionId);
+        const options: RetrieveOptions = isSafeInteger(epochNumber)
+            ? { epochNumber }
+            : { ticketCount: MAX_EPOCHS_IN_GROUP_SESSION };
+
+        const rawGroup = await this._localGroupStorage.retrieve(sessionId, options);
+
+        if (!rawGroup) return null;
+
+        return new Group({
+            initiator: rawGroup.info.initiator,
+            tickets: rawGroup.tickets,
+            privateKeyLoader: this._privateKeyLoader,
+            cardManager: this._cardManager,
+            groupManager: this,
+        });
     }
 
     async addAccess(sessionId: string, allowedCards: ICard[]) {
@@ -95,8 +128,7 @@ export class GroupManager {
     async delete(sessionId: string) {
         const cloudTicketStorage = await this.getCloudTicketStorage();
         await cloudTicketStorage.delete(sessionId);
-        // TODO remove from the device's persistent storage
-        this._localGroupStorage.delete(sessionId);
+        await this._localGroupStorage.delete(sessionId);
     }
 
     async reAddAccess(sessionId: string, allowedCard: ICard) {
