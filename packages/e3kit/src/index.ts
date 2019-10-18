@@ -12,6 +12,8 @@ export {
     LookupNotFoundError,
     IntegrityCheckFailedError,
     AbortError,
+    GroupErrorCode,
+    GroupError,
     // types
     NodeBuffer,
     Data,
