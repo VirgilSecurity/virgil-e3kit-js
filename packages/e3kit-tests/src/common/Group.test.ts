@@ -411,7 +411,8 @@ describe('EThree', () => {
             const message4 = 'message4';
             const encryptedData4 = await group1.encrypt(message4);
 
-            await group1.reAdd(cards[charlesEThree.identity]);
+            const charlesCard = await charlesEThree.findUsers(charlesEThree.identity);
+            await group1.reAdd(charlesCard);
             const group5 = await charlesEThree.loadGroup(groupId, cards[aliceEThree.identity]);
             const charlesDecryptedData4 = await group5.decrypt(
                 encryptedData4,
