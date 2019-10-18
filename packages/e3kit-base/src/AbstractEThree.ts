@@ -31,10 +31,10 @@ import {
 import { MAX_IDENTITIES_TO_SEARCH, VALID_GROUP_PARTICIPANT_COUNT_RANGE } from './constants';
 import { warn } from './log';
 import { Group, isValidParticipantCount } from './groups/Group';
-import { Ticket } from './groups/Ticket';
 import { GroupManager } from './GroupManager';
 import { getCardActiveAtMoment } from './utils/card';
 import { isValidDate } from './utils/date';
+import { GroupLocalStorage } from './GroupLocalStorage';
 
 export abstract class AbstractEThree {
     /**
@@ -76,6 +76,7 @@ export abstract class AbstractEThree {
         accessTokenProvider: IAccessTokenProvider;
         keyEntryStorage: IKeyEntryStorage;
         keyLoader: PrivateKeyLoader;
+        groupLocalStorage: GroupLocalStorage;
     }) {
         this.identity = options.identity;
         this.virgilCrypto = options.virgilCrypto;
@@ -83,7 +84,7 @@ export abstract class AbstractEThree {
         this.accessTokenProvider = options.accessTokenProvider;
         this.keyEntryStorage = options.keyEntryStorage;
         this.keyLoader = options.keyLoader;
-        this.groupManager = new GroupManager(options.keyLoader, options.cardManager);
+        this.groupManager = new GroupManager(options);
     }
 
     /**
@@ -538,14 +539,14 @@ export abstract class AbstractEThree {
         }
 
         const groupSession = this.virgilCrypto.generateGroupSession(groupId);
-        const ticket = new Ticket(
-            {
+        const ticket = {
+            groupSessionMessage: {
                 epochNumber: groupSession.getCurrentEpochNumber(),
                 sessionId: groupSession.getSessionId(),
                 data: groupSession.export()[0].toString('base64'),
             },
-            [...participantIdentities],
-        );
+            participants: [...participantIdentities],
+        };
         return this.groupManager.store(ticket, participantCards);
     }
 

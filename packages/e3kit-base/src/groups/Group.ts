@@ -1,6 +1,5 @@
-import { IGroupSession, ICrypto, Data, FindUsersResult, NodeBuffer } from '../types';
+import { IGroupSession, ICrypto, Data, FindUsersResult, NodeBuffer, Ticket } from '../types';
 import { PrivateKeyLoader } from '../PrivateKeyLoader';
-import { Ticket } from './Ticket';
 import { RegisterRequiredError, GroupError, GroupErrorCode, UsersNotFoundError } from '../errors';
 import { ICard } from '../types';
 import { CardManager } from 'virgil-sdk';
@@ -263,7 +262,7 @@ export class Group {
 
         const newCards = await this._cardManager.searchCards([...newIdentities]);
         const epochMessage = this._session.addNewEpoch();
-        const ticket = new Ticket(epochMessage, [...newIdentities]);
+        const ticket = { groupSessionMessage: epochMessage, participants: [...newIdentities] };
         await this._groupManager.store(ticket, newCards);
         newIdentities.add(this.initiator);
         this.participants = [...newIdentities];

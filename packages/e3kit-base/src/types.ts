@@ -68,3 +68,17 @@ export type EncryptPublicKeyArg = LookupResult | IPublicKey;
 export type FindUsersResult = {
     [identity: string]: ICard;
 };
+
+export interface Ticket {
+    groupSessionMessage: IGroupSessionMessageInfo;
+    participants: string[];
+}
+
+export interface GroupInfo {
+    initiator: string;
+}
+
+export interface RawGroup {
+    info: GroupInfo;
+    tickets: Ticket[];
+}

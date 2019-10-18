@@ -18,20 +18,26 @@
         "test": "mocha -r ts-node/register src/__tests__/*.test.ts"
     },
     "dependencies": {
+        "@types/abstract-leveldown": "^5.0.1",
+        "@types/levelup": "^3.1.1",
         "@virgilsecurity/crypto-types": "^0.2.0",
         "@virgilsecurity/keyknox": "next",
         "@virgilsecurity/sdk-crypto": "^0.4.5",
+        "levelup": "^4.3.2",
+        "subleveldown": "^4.1.4",
         "virgil-pythia": "^0.3.4",
         "virgil-sdk": "next"
     },
     "devDependencies": {
         "@types/chai": "^4.2.3",
         "@types/chai-as-promised": "^7.1.2",
+        "@types/memdown": "^3.0.0",
         "@types/mocha": "^5.2.7",
         "@types/sinon": "^7.5.0",
         "@virgilsecurity/base-crypto": "^0.6.1",
         "chai": "^4.2.0",
         "chai-as-promised": "^7.1.1",
+        "memdown": "^5.1.0",
         "mocha": "^6.2.1",
         "rimraf": "^3.0.0",
         "rollup": "^1.21.4",

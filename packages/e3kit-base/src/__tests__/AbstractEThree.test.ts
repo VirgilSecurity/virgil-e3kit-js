@@ -1,3 +1,4 @@
+// eslint-disable @typescript-eslint/no-explicit-any
 import { expect, use } from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 import sinon from 'sinon';
@@ -6,6 +7,7 @@ import { VirgilCrypto } from '@virgilsecurity/base-crypto';
 import { PrivateKeyLoader } from '../PrivateKeyLoader';
 import { AbstractEThree } from '../AbstractEThree';
 import { UsersNotFoundError, UsersFoundWithMultipleCardsError } from '../errors';
+import { GroupLocalStorage } from '../GroupLocalStorage';
 
 use(chaiAsPromised);
 
@@ -14,6 +16,7 @@ let cardManagerStub: sinon.SinonStubbedInstance<CardManager>;
 let keyLoaderStub: sinon.SinonStubbedInstance<PrivateKeyLoader>;
 let accessTokenProviderStub: sinon.SinonStubbedInstance<CachingJwtProvider>;
 let keyEntryStorageStub: sinon.SinonStubbedInstance<KeyEntryStorage>;
+let groupLocalStorageStub: sinon.SinonStubbedInstance<GroupLocalStorage>;
 
 class MyEThree extends AbstractEThree {
     constructor(identity: string) {
@@ -22,6 +25,7 @@ class MyEThree extends AbstractEThree {
             virgilCrypto: virgilCryptoStub,
             cardManager: cardManagerStub as any,
             keyLoader: keyLoaderStub as any,
+            groupLocalStorage: groupLocalStorageStub as any,
             // the following aren't actually used in the code and tests
             accessTokenProvider: accessTokenProviderStub,
             keyEntryStorage: keyEntryStorageStub,
@@ -37,6 +41,7 @@ beforeEach(() => {
     keyLoaderStub = sinon.createStubInstance(PrivateKeyLoader);
     accessTokenProviderStub = sinon.createStubInstance(CachingJwtProvider);
     keyEntryStorageStub = sinon.createStubInstance(KeyEntryStorage);
+    groupLocalStorageStub = sinon.createStubInstance(GroupLocalStorage);
 });
 
 afterEach(() => {
