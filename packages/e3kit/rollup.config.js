@@ -1,11 +1,8 @@
 const fs = require('fs');
 const path = require('path');
 
-const commonjs = require('rollup-plugin-commonjs');
 const copy = require('rollup-plugin-copy');
-const nodeResolve = require('rollup-plugin-node-resolve');
 const replace = require('rollup-plugin-re');
-const { terser } = require('rollup-plugin-terser');
 const typescript = require('rollup-plugin-typescript2');
 
 const packageJson = require('./package.json');
@@ -13,7 +10,6 @@ const packageJson = require('./package.json');
 const FORMAT = {
     CJS: 'cjs',
     ES: 'es',
-    UMD: 'umd',
 };
 
 const CRYPTO_TYPE = {
@@ -62,12 +58,11 @@ const createEntry = (target, cryptoType, format) => {
     const pythiaWasmPath = path.join(pythiaPath, 'dist', `libpythia.${target}.wasm`);
 
     return {
-        external: format !== FORMAT.UMD && Object.keys(packageJson.dependencies),
+        external: Object.keys(packageJson.dependencies),
         input: path.join(sourcePath, 'index.ts'),
         output: {
             format,
             file: path.join(outputPath, getCryptoEntryPointName(target, cryptoType, format)),
-            name: 'E3kit',
         },
         plugins: [
             replace({
@@ -84,8 +79,6 @@ const createEntry = (target, cryptoType, format) => {
                     },
                 ],
             }),
-            nodeResolve({ browser: true }),
-            commonjs(),
             typescript({
                 useTsconfigDeclarationDir: true,
                 objectHashIgnoreUnknownHack: true,
@@ -102,7 +95,6 @@ const createEntry = (target, cryptoType, format) => {
                         { src: pythiaWasmPath, dest: outputPath },
                     ],
                 }),
-            format === FORMAT.UMD && terser(),
         ],
     };
 };
@@ -112,13 +104,9 @@ module.exports = [
     createEntry(TARGET.BROWSER, CRYPTO_TYPE.WASM, FORMAT.CJS),
     createEntry(TARGET.BROWSER, CRYPTO_TYPE.ASMJS, FORMAT.ES),
     createEntry(TARGET.BROWSER, CRYPTO_TYPE.WASM, FORMAT.ES),
-    createEntry(TARGET.BROWSER, CRYPTO_TYPE.ASMJS, FORMAT.UMD),
-    createEntry(TARGET.BROWSER, CRYPTO_TYPE.WASM, FORMAT.UMD),
 
     createEntry(TARGET.WORKER, CRYPTO_TYPE.ASMJS, FORMAT.CJS),
     createEntry(TARGET.WORKER, CRYPTO_TYPE.WASM, FORMAT.CJS),
     createEntry(TARGET.WORKER, CRYPTO_TYPE.ASMJS, FORMAT.ES),
     createEntry(TARGET.WORKER, CRYPTO_TYPE.WASM, FORMAT.ES),
-    createEntry(TARGET.WORKER, CRYPTO_TYPE.ASMJS, FORMAT.UMD),
-    createEntry(TARGET.WORKER, CRYPTO_TYPE.WASM, FORMAT.UMD),
 ];
