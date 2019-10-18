@@ -52,7 +52,7 @@ export class GroupLocalStorage {
         await this._db.batch([insertInfo, ...insertTickets]);
     }
 
-    async retrieve(sessionId: string, options: RetrieveOptions) {
+    async retrieve(sessionId: string, options: RetrieveOptions): Promise<RawGroup | null> {
         const hasTicketCount = typeof options.ticketCount === 'number';
         const hasEpochNumber = typeof options.epochNumber === 'number';
 
@@ -109,7 +109,7 @@ export class GroupLocalStorage {
                     reverse: true,
                     limit: ticketCount,
                 })
-                .on('data', data => tickets.push(data.value))
+                .on('data', data => tickets.unshift(data.value))
                 .on('error', err => (error = err))
                 .on('end', () => (error ? reject(error) : resolve(tickets)));
         });
