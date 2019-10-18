@@ -3,7 +3,7 @@ import uuid from 'uuid/v4';
 
 import { setFoundationModules, VirgilCrypto } from '@virgilsecurity/base-crypto';
 import initFoundation from '@virgilsecurity/core-foundation';
-import { EThree } from '@virgilsecurity/e3kit-node';
+import { EThree, GroupError } from '@virgilsecurity/e3kit-node';
 import { initPythia } from '@virgilsecurity/pythia-crypto';
 import { VirgilAccessTokenSigner } from '@virgilsecurity/sdk-crypto';
 import { JwtGenerator } from 'virgil-sdk';
@@ -83,13 +83,13 @@ describe('EThree', () => {
                 await aliceEThree.createGroup(groupId, aliceCard);
                 expect.fail();
             } catch (error) {
-                expect(error).to.be.instanceOf(Error);
+                expect(error).to.be.instanceOf(GroupError);
             }
             try {
                 await aliceEThree.createGroup(groupId, { [aliceCard.identity]: aliceCard });
                 expect.fail();
             } catch (error) {
-                expect(error).to.be.instanceOf(Error);
+                expect(error).to.be.instanceOf(GroupError);
             }
         });
 
@@ -151,7 +151,7 @@ describe('EThree', () => {
                 await bobEThree.loadGroup(groupId, aliceCard);
                 expect.fail();
             } catch (error) {
-                expect(error).to.be.instanceOf(Error);
+                expect(error).to.be.instanceOf(GroupError);
             }
             const charlesCard = await aliceEThree.findUsers(charlesEThree.identity);
             await aliceEThree.createGroup(groupId, charlesCard);
@@ -159,7 +159,7 @@ describe('EThree', () => {
                 await bobEThree.loadGroup(groupId, aliceCard);
                 expect.fail();
             } catch (error) {
-                expect(error).to.be.instanceOf(Error);
+                expect(error).to.be.instanceOf(GroupError);
             }
         });
 
@@ -178,27 +178,23 @@ describe('EThree', () => {
                 await aliceEThree.loadGroup(groupId, aliceCard);
                 expect.fail();
             } catch (error) {
-                expect(error).to.be.instanceOf(Error);
+                expect(error).to.be.instanceOf(GroupError);
             }
             try {
                 await group.update();
                 expect.fail();
             } catch (error) {
-                expect(error).to.be.instanceOf(Error);
+                expect(error).to.be.instanceOf(GroupError);
             }
             try {
                 await bobEThree.loadGroup(groupId, aliceCard);
                 expect.fail();
             } catch (error) {
-                expect(error).to.be.instanceOf(Error);
+                expect(error).to.be.instanceOf(GroupError);
             }
             const group2 = await bobEThree.getGroup(groupId);
             expect(group2).to.be.undefined;
         });
-
-        // it('STE-33', async () => {
-        //     expect.fail();
-        // });
 
         it('STE-34 `remove` throws if trying to remove last participant', async () => {
             const aliceEThree = await createEThree();
@@ -209,7 +205,7 @@ describe('EThree', () => {
                 await group.remove(bobCard);
                 expect.fail();
             } catch (error) {
-                expect(error).to.be.instanceOf(Error);
+                expect(error).to.be.instanceOf(GroupError);
             }
         });
 
@@ -234,13 +230,13 @@ describe('EThree', () => {
                 await group2.update();
                 expect.fail();
             } catch (error) {
-                expect(error).to.be.instanceOf(Error);
+                expect(error).to.be.instanceOf(GroupError);
             }
             try {
                 await bobEThree.loadGroup(groupId, aliceCard);
                 expect.fail();
             } catch (error) {
-                expect(error).to.be.instanceOf(Error);
+                expect(error).to.be.instanceOf(GroupError);
             }
             const group = await bobEThree.getGroup(groupId);
             expect(group).to.be.undefined;
@@ -263,20 +259,20 @@ describe('EThree', () => {
                 await bobEThree.deleteGroup(groupId);
                 expect.fail();
             } catch (error) {
-                expect(error).to.be.instanceOf(Error);
+                expect(error).to.be.instanceOf(GroupError);
             }
             try {
                 await group.remove(bobAndCharlesCards[charlesEThree.identity]);
                 expect.fail();
             } catch (error) {
-                expect(error).to.be.instanceOf(Error);
+                expect(error).to.be.instanceOf(GroupError);
             }
             try {
                 const steveCard = await bobEThree.findUsers(steveEThree.identity);
                 await group.add(steveCard);
                 expect.fail();
             } catch (error) {
-                expect(error).to.be.instanceOf(Error);
+                expect(error).to.be.instanceOf(GroupError);
             }
         });
 
@@ -318,7 +314,7 @@ describe('EThree', () => {
                 await group2.decrypt(encryptedData, bobCard);
                 expect.fail();
             } catch (error) {
-                expect(error).to.be.instanceOf(Error);
+                expect(error).to.be.instanceOf(GroupError);
             }
         });
 
@@ -384,7 +380,7 @@ describe('EThree', () => {
                 await group2.decrypt(encryptedData3, cards[aliceEThree.identity]);
                 expect.fail();
             } catch (error) {
-                expect(error).to.be.instanceOf(Error);
+                expect(error).to.be.instanceOf(GroupError);
             }
 
             await group3.update();
@@ -401,15 +397,15 @@ describe('EThree', () => {
                 await group3.update();
                 expect.fail();
             } catch (error) {
-                expect(error).to.be.instanceOf(Error);
+                expect(error).to.be.instanceOf(GroupError);
             }
-            // const group4 = await charlesEThree.getGroup(groupId);
-            // expect(group4).to.be.undefined;
+            const group4 = await charlesEThree.getGroup(groupId);
+            expect(group4).to.be.undefined;
 
             try {
                 await charlesEThree.loadGroup(groupId, cards[aliceEThree.identity]);
             } catch (error) {
-                expect(error).to.be.instanceOf(Error);
+                expect(error).to.be.instanceOf(GroupError);
             }
 
             const message4 = 'message4';
@@ -442,7 +438,7 @@ describe('EThree', () => {
                 await group2.decrypt(encryptedData, aliceCard);
                 expect.fail();
             } catch (error) {
-                expect(error).to.be.instanceOf(Error);
+                expect(error).to.be.instanceOf(GroupError);
             }
         });
 
@@ -468,13 +464,13 @@ describe('EThree', () => {
                 await group1.decrypt(encryptedData1, newBobCard);
                 expect.fail();
             } catch (error) {
-                expect(error).to.be.instanceOf(Error);
+                expect(error).to.be.instanceOf(GroupError);
             }
             try {
                 await group1.decrypt(encryptedData1, newBobCard, date2);
                 expect.fail();
             } catch (error) {
-                expect(error).to.be.instanceOf(Error);
+                expect(error).to.be.instanceOf(GroupError);
             }
             const decryptedData1 = await group1.decrypt(encryptedData1, newBobCard, date1);
             expect(decryptedData1.toString('utf8')).to.equal(message1);
@@ -482,27 +478,27 @@ describe('EThree', () => {
                 await group2.decrypt(encryptedData2, newBobCard, date1);
                 expect.fail();
             } catch (error) {
-                expect(error).to.be.instanceOf(Error);
+                expect(error).to.be.instanceOf(GroupError);
             }
             const decryptedData2 = await group1.decrypt(encryptedData2, newBobCard, date2);
             expect(decryptedData2.toString('utf8')).to.equal(message2);
         });
 
-        // it('STE-45', async () => {
-        //     expect.fail();
-        // });
+        it('STE-45', async () => {
+            // TODO: not sure how to properly do something similar
+        });
 
-        // it('STE-46', async () => {
-        //     const aliceEThree = await createEThree();
-        //     const bobEThree = await createEThree();
-        //     const groupId = uuid();
-        //     const bobCard = await aliceEThree.findUsers(bobEThree.identity);
-        //     await aliceEThree.createGroup(groupId, bobCard);
-        //     const aliceCard = await bobEThree.findUsers(bobEThree.identity);
-        //     await bobEThree.loadGroup(groupId, aliceCard);
-        //     await aliceEThree.getGroup(groupId);
-        //     await bobEThree.getGroup(groupId);
-        //     await aliceEThree.deleteGroup(groupId);
-        // });
+        it('STE-46', async () => {
+            const aliceEThree = await createEThree();
+            const bobEThree = await createEThree();
+            const groupId = uuid();
+            const bobCard = await aliceEThree.findUsers(bobEThree.identity);
+            await aliceEThree.createGroup(groupId, bobCard);
+            const aliceCard = await bobEThree.findUsers(bobEThree.identity);
+            await bobEThree.loadGroup(groupId, aliceCard);
+            await aliceEThree.getGroup(groupId);
+            await bobEThree.getGroup(groupId);
+            await aliceEThree.deleteGroup(groupId);
+        });
     });
 });

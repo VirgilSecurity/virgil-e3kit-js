@@ -7,7 +7,7 @@
     "license": "BSD-3-Clause",
     "private": true,
     "scripts": {
-        "test:node": "mocha -t 0 -r dotenv/config -r ts-node/register src/common/**/Group.test.ts",
+        "test:node": "mocha -t 0 -r dotenv/config -r ts-node/register src/common/**/*.test.ts",
         "test:browser": "karma start",
         "test": "npm run test:node && npm run test:browser"
     },
