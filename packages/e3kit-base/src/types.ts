@@ -29,9 +29,14 @@ export interface EThreeInitializeOptions {
      */
     useSha256Identifiers?: boolean;
     /**
-     * Name of the IndexedDB database. Default `.virgil-local-storage`.
+     * Name of the key storage. Default `.virgil-local-storage`.
      */
     storageName?: string;
+
+    /**
+     * Name of the group storage. Default `.virgil-group-storage`.
+     */
+    groupStorageName?: string;
 }
 
 /**

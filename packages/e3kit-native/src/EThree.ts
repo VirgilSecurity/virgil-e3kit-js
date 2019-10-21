@@ -1,6 +1,7 @@
 import {
     DEFAULT_API_URL,
     DEFAULT_STORAGE_NAME,
+    DEFAULT_GROUP_STORAGE_NAME,
     AbstractEThree,
     PrivateKeyLoader,
     GroupLocalStorage,
@@ -23,6 +24,7 @@ export class EThree extends AbstractEThree {
         const opts = withDefaults(options, {
             apiUrl: DEFAULT_API_URL,
             storageName: DEFAULT_STORAGE_NAME,
+            groupStorageName: DEFAULT_GROUP_STORAGE_NAME,
             useSha256Identifiers: false,
         });
         const accessTokenProvider = opts.accessTokenProvider;
@@ -46,7 +48,7 @@ export class EThree extends AbstractEThree {
         });
         const groupLocalStorage = new GroupLocalStorage(
             identity,
-            asyncstorageDown('VIRGIL-E3KIT', { AsyncStorage }),
+            asyncstorageDown(opts.groupStorageName!, { AsyncStorage }),
         );
         super({
             identity,
