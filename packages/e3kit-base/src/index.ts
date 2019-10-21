@@ -18,3 +18,4 @@ export {
     LookupResult,
     EncryptPublicKeyArg,
 } from './types';
+export { GroupLocalStorage } from './GroupLocalStorage';

@@ -12,10 +12,12 @@ import {
     PrivateKeyLoader,
     IntegrityCheckFailedError,
     RegisterRequiredError,
+    GroupLocalStorage,
 } from '@virgilsecurity/e3kit-base';
 import { initPythia, hasPythiaModules, VirgilBrainKeyCrypto } from '@virgilsecurity/pythia-crypto';
 import { VirgilCardCrypto } from '@virgilsecurity/sdk-crypto';
 import { CachingJwtProvider, CardManager, KeyEntryStorage, VirgilCardVerifier } from 'virgil-sdk';
+import leveljs from 'level-js';
 
 import {
     VIRGIL_STREAM_SIGNING_STATE,
@@ -345,6 +347,7 @@ export class EThree extends AbstractEThree {
             retryOnUnauthorized: true,
             apiUrl: opts.apiUrl,
         });
+        const groupLocalStorage = new GroupLocalStorage(identity, leveljs('VIRGIL-E3KIT'));
         return {
             identity,
             virgilCrypto,
@@ -352,6 +355,7 @@ export class EThree extends AbstractEThree {
             accessTokenProvider,
             keyEntryStorage,
             keyLoader,
+            groupLocalStorage,
         };
     }
 

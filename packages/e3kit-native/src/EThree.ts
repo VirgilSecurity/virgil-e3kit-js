@@ -3,11 +3,14 @@ import {
     DEFAULT_STORAGE_NAME,
     AbstractEThree,
     PrivateKeyLoader,
+    GroupLocalStorage,
 } from '@virgilsecurity/e3kit-base';
 import createNativeKeyEntryStorage from '@virgilsecurity/key-storage-rn/native';
 import { VirgilCardCrypto } from '@virgilsecurity/sdk-crypto';
 import { virgilCrypto, virgilBrainKeyCrypto } from 'react-native-virgil-crypto';
 import { CachingJwtProvider, CardManager, VirgilCardVerifier } from 'virgil-sdk';
+import asyncstorageDown from 'asyncstorage-down';
+import AsyncStorage from '@react-native-community/async-storage';
 
 import { IPublicKey, EThreeCtorOptions, EThreeInitializeOptions } from './types';
 import { withDefaults } from './withDefaults';
@@ -41,6 +44,10 @@ export class EThree extends AbstractEThree {
             retryOnUnauthorized: true,
             apiUrl: opts.apiUrl,
         });
+        const groupLocalStorage = new GroupLocalStorage(
+            identity,
+            asyncstorageDown('VIRGIL-E3KIT', { AsyncStorage }),
+        );
         super({
             identity,
             virgilCrypto,
@@ -48,6 +55,7 @@ export class EThree extends AbstractEThree {
             accessTokenProvider,
             keyEntryStorage,
             keyLoader,
+            groupLocalStorage,
         });
     }
 

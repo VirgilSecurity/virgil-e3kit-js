@@ -16,28 +16,31 @@
     "author": "Virgil Security Inc. <support@virgilsecurity.com>",
     "license": "BSD-3-Clause",
     "scripts": {
-        "build": "node --max-old-space-size=4096 node_modules/.bin/rollup -c",
+        "build:modules": "node --max-old-space-size=4096 node_modules/.bin/rollup -c",
+        "build:umd": "webpack --config webpack.config.js",
+        "build": "npm run build:modules && npm run build:umd",
         "clean": "rimraf .rpt2_cache dist",
         "prepare": "npm run clean && npm run build"
     },
     "dependencies": {
+        "@types/level-js": "^4.0.1",
         "@virgilsecurity/base-crypto": "^0.6.1",
         "@virgilsecurity/core-foundation": "^0.3.0",
         "@virgilsecurity/e3kit-base": "^0.6.0-beta.3",
         "@virgilsecurity/pythia-crypto": "^0.2.2",
         "@virgilsecurity/sdk-crypto": "^0.4.5",
+        "level-js": "^5.0.0",
         "virgil-sdk": "next"
     },
     "devDependencies": {
         "rimraf": "^3.0.0",
         "rollup": "^1.21.4",
-        "rollup-plugin-commonjs": "^10.1.0",
         "rollup-plugin-copy": "^3.1.0",
-        "rollup-plugin-node-resolve": "^5.2.0",
         "rollup-plugin-re": "^1.0.7",
-        "rollup-plugin-terser": "^5.1.2",
         "rollup-plugin-typescript2": "^0.24.2",
-        "typescript": "^3.6.3"
+        "typescript": "^3.6.3",
+        "webpack": "^4.41.2",
+        "webpack-cli": "^3.3.9"
     },
     "publishConfig": {
         "access": "public"
