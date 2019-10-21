@@ -1,9 +1,13 @@
 // eslint-disable @typescript-eslint/no-non-null-assertion
 import { expect, use } from 'chai';
 import chaiAsPromised from 'chai-as-promised';
+import sinon from 'sinon';
 import memdown from 'memdown';
-import { GroupInfo, Ticket } from '../types';
+import { VirgilCrypto } from '@virgilsecurity/base-crypto';
+
+import { GroupInfo, Ticket, IKeyPair, ICrypto } from '../types';
 import { GroupLocalStorage } from '../GroupLocalStorage';
+import { AbstractLevelDOWN } from 'abstract-leveldown';
 
 use(chaiAsPromised);
 
@@ -37,11 +41,38 @@ const createTickets = (sessionId: string, count: number): Ticket[] => {
     return result;
 };
 
+const createKeyPairStub = () => ({ privateKey: {}, publicKey: {} });
+const createVirgilCryptoStub = () => {
+    const virgilCryptoStub = sinon.createStubInstance(VirgilCrypto);
+    virgilCryptoStub.signThenEncrypt.callsFake((value: any, privateKey: any, publicKey: any) => {
+        const valueStr = Buffer.isBuffer(value) ? value.toString('utf8') : value;
+        return Buffer.from(`encrypted_${valueStr}`);
+    });
+    virgilCryptoStub.decryptThenVerify.callsFake((value: any, privateKey: any, publicKey: any) => {
+        const valueStr = Buffer.isBuffer(value) ? value.toString('utf8') : value;
+        return Buffer.from(valueStr.replace(/encrypted_/, ''));
+    });
+    return virgilCryptoStub as ICrypto;
+};
+
+const createGroupLocalStorage = (
+    identity: string,
+    leveldown: AbstractLevelDOWN = memdown(),
+    virgilCrypto: ICrypto = createVirgilCryptoStub(),
+    keyPair: IKeyPair = createKeyPairStub(),
+) => {
+    return new GroupLocalStorage({ identity, leveldown, virgilCrypto, keyPair });
+};
+
+afterEach(() => {
+    sinon.restore();
+});
+
 describe('GroupLocalStorage', () => {
     describe('store', () => {
         it('rejects if given a group without tickets', async () => {
             const identity = 'test';
-            const storage = new GroupLocalStorage(identity, memdown());
+            const storage = createGroupLocalStorage(identity);
             const rawGroup = {
                 info: createGroupInfo(),
                 tickets: [],
@@ -52,7 +83,7 @@ describe('GroupLocalStorage', () => {
         it('stores group with tickets', async () => {
             const identity = 'test';
             const sessionId = getRandomString('session');
-            const storage = new GroupLocalStorage(identity, memdown());
+            const storage = createGroupLocalStorage(identity);
             const rawGroup = {
                 info: createGroupInfo(),
                 tickets: createTickets(sessionId, 10),
@@ -64,7 +95,7 @@ describe('GroupLocalStorage', () => {
     describe('retrieve', () => {
         it('rejects if neither "ticketCount" nor "epochNumber" is provided', async () => {
             const identity = 'test';
-            const storage = new GroupLocalStorage(identity, memdown());
+            const storage = createGroupLocalStorage(identity);
             expect(storage.retrieve('some_session', {} as any)).eventually.rejectedWith(
                 /(ticketCount)|(epochNumber)/,
             );
@@ -72,7 +103,7 @@ describe('GroupLocalStorage', () => {
 
         it('rejects if both "ticketCount" and "epochNumber" is provided', async () => {
             const identity = 'test';
-            const storage = new GroupLocalStorage(identity, memdown());
+            const storage = createGroupLocalStorage(identity);
             expect(
                 storage.retrieve('some_session', { ticketCount: 1, epochNumber: 1 }),
             ).eventually.rejectedWith(/(ticketCount)|(epochNumber)/);
@@ -80,14 +111,14 @@ describe('GroupLocalStorage', () => {
 
         it('returns null if session does not exist', async () => {
             const identity = 'test';
-            const storage = new GroupLocalStorage(identity, memdown());
+            const storage = createGroupLocalStorage(identity);
             expect(storage.retrieve('non-existent', { ticketCount: 20 })).eventually.eq(null);
         });
 
         it('returns null if session info exists but ticket specified by "epochNumber" does not', async () => {
             const identity = 'test';
             const sessionId = getRandomString('session');
-            const storage = new GroupLocalStorage(identity, memdown());
+            const storage = createGroupLocalStorage(identity);
             const rawGroup = {
                 info: createGroupInfo(identity),
                 tickets: createTickets(sessionId, 10),
@@ -100,7 +131,7 @@ describe('GroupLocalStorage', () => {
         it('returns session with one ticket when given "epochNumber" option', async () => {
             const identity = 'test';
             const sessionId = getRandomString('session');
-            const storage = new GroupLocalStorage(identity, memdown());
+            const storage = createGroupLocalStorage(identity);
             const rawGroup = {
                 info: createGroupInfo(identity),
                 tickets: createTickets(sessionId, 100),
@@ -118,7 +149,7 @@ describe('GroupLocalStorage', () => {
         it('returns session with latest N tickets when given "ticketCount" option', async () => {
             const identity = 'test';
             const sessionId = getRandomString('session');
-            const storage = new GroupLocalStorage(identity, memdown());
+            const storage = createGroupLocalStorage(identity);
             const rawGroup = {
                 info: createGroupInfo(identity),
                 tickets: createTickets(sessionId, 100),
@@ -138,7 +169,7 @@ describe('GroupLocalStorage', () => {
         it('returns all tickets if there are fewer than requested', async () => {
             const identity = 'test';
             const sessionId = getRandomString('session');
-            const storage = new GroupLocalStorage(identity, memdown());
+            const storage = createGroupLocalStorage(identity);
             const rawGroup = {
                 info: createGroupInfo(identity),
                 tickets: createTickets(sessionId, 10),
@@ -155,8 +186,8 @@ describe('GroupLocalStorage', () => {
             const identity2 = getRandomString('identity');
 
             const commonStorageBackend = memdown();
-            const storage1 = new GroupLocalStorage(identity1, commonStorageBackend);
-            const storage2 = new GroupLocalStorage(identity2, commonStorageBackend);
+            const storage1 = createGroupLocalStorage(identity1, commonStorageBackend);
+            const storage2 = createGroupLocalStorage(identity2, commonStorageBackend);
 
             const sessionId = getRandomString('session');
             const rawGroup = {
@@ -178,7 +209,7 @@ describe('GroupLocalStorage', () => {
         it('removes the session and its tickets', async () => {
             const identity = 'test';
             const sessionId = getRandomString('session');
-            const storage = new GroupLocalStorage(identity, memdown());
+            const storage = createGroupLocalStorage(identity);
             const rawGroup = {
                 info: createGroupInfo(identity),
                 tickets: createTickets(sessionId, 10),
@@ -193,7 +224,7 @@ describe('GroupLocalStorage', () => {
 
         it('does nothing if session does not exist', async () => {
             const identity = 'test';
-            const storage = new GroupLocalStorage(identity, memdown());
+            const storage = createGroupLocalStorage(identity);
             expect(storage.delete('non-existend')).eventually.fulfilled;
         });
 
@@ -202,8 +233,8 @@ describe('GroupLocalStorage', () => {
             const identity2 = getRandomString('identity');
 
             const commonStorageBackend = memdown();
-            const storage1 = new GroupLocalStorage(identity1, commonStorageBackend);
-            const storage2 = new GroupLocalStorage(identity2, commonStorageBackend);
+            const storage1 = createGroupLocalStorage(identity1, commonStorageBackend);
+            const storage2 = createGroupLocalStorage(identity2, commonStorageBackend);
 
             const sessionId = getRandomString('session');
             const rawGroup = {
@@ -227,7 +258,7 @@ describe('GroupLocalStorage', () => {
     describe('reset', () => {
         it('deletes all sessions', async () => {
             const identity = 'test';
-            const storage = new GroupLocalStorage(identity, memdown());
+            const storage = createGroupLocalStorage(identity);
 
             const sessionIds = [];
             for (let i = 0; i < 10; i++) {
@@ -254,8 +285,8 @@ describe('GroupLocalStorage', () => {
             const identity2 = getRandomString('identity');
 
             const commonStorageBackend = memdown();
-            const storage1 = new GroupLocalStorage(identity1, commonStorageBackend);
-            const storage2 = new GroupLocalStorage(identity2, commonStorageBackend);
+            const storage1 = createGroupLocalStorage(identity1, commonStorageBackend);
+            const storage2 = createGroupLocalStorage(identity2, commonStorageBackend);
 
             const sessionIds = [];
             for (let i = 0; i < 10; i++) {

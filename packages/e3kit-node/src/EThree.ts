@@ -11,7 +11,6 @@ import {
     DEFAULT_GROUP_STORAGE_NAME,
     AbstractEThree,
     PrivateKeyLoader,
-    GroupLocalStorage,
 } from '@virgilsecurity/e3kit-base';
 import { initPythia, hasPythiaModules, VirgilBrainKeyCrypto } from '@virgilsecurity/pythia-crypto';
 import { VirgilCardCrypto } from '@virgilsecurity/sdk-crypto';
@@ -56,10 +55,7 @@ export class EThree extends AbstractEThree {
             retryOnUnauthorized: true,
             apiUrl: opts.apiUrl,
         });
-        const groupLocalStorage = new GroupLocalStorage(
-            identity,
-            leveldown(opts.groupStorageName!),
-        );
+        const groupStorageLeveldown = leveldown(opts.groupStorageName!);
 
         super({
             identity,
@@ -68,7 +64,7 @@ export class EThree extends AbstractEThree {
             accessTokenProvider,
             keyEntryStorage,
             keyLoader,
-            groupLocalStorage,
+            groupStorageLeveldown,
         });
     }
 

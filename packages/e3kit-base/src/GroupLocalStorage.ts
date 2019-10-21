@@ -8,7 +8,8 @@ import {
     AbstractIteratorOptions,
     ErrorCallback,
 } from 'abstract-leveldown';
-import { Ticket, RawGroup, GroupInfo } from './types';
+import { Ticket, RawGroup, GroupInfo, IKeyPair, ICrypto } from './types';
+import VirgilEncryptDown from './virgil-encrypt-down';
 
 declare module 'levelup' {
     interface LevelUp {
@@ -22,11 +23,24 @@ export interface RetrieveOptions {
     epochNumber?: number;
 }
 
+export interface GroupLocalStorageConstructorParams {
+    identity: string;
+    keyPair: IKeyPair;
+    leveldown: AbstractLevelDOWN;
+    virgilCrypto: ICrypto;
+}
+
 export class GroupLocalStorage {
     private _db: LevelUp;
 
-    constructor(identity: string, leveldown: AbstractLevelDOWN) {
-        const rootLevel = levelup(leveldown);
+    constructor({
+        identity,
+        keyPair,
+        virgilCrypto,
+        leveldown,
+    }: GroupLocalStorageConstructorParams) {
+        const encryptLevel = new VirgilEncryptDown(leveldown, { virgilCrypto, keyPair });
+        const rootLevel = levelup(encryptLevel);
         const identityLevel = sub(rootLevel, identity);
         this._db = sub(identityLevel, 'GROUPS', { valueEncoding: 'json' });
     }

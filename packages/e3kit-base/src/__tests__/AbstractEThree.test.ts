@@ -4,10 +4,11 @@ import chaiAsPromised from 'chai-as-promised';
 import sinon from 'sinon';
 import { CardManager, CachingJwtProvider, KeyEntryStorage, ICard } from 'virgil-sdk';
 import { VirgilCrypto } from '@virgilsecurity/base-crypto';
+import { AbstractLevelDOWN } from 'abstract-leveldown';
+
 import { PrivateKeyLoader } from '../PrivateKeyLoader';
 import { AbstractEThree } from '../AbstractEThree';
 import { UsersNotFoundError, UsersFoundWithMultipleCardsError } from '../errors';
-import { GroupLocalStorage } from '../GroupLocalStorage';
 
 use(chaiAsPromised);
 
@@ -16,7 +17,7 @@ let cardManagerStub: sinon.SinonStubbedInstance<CardManager>;
 let keyLoaderStub: sinon.SinonStubbedInstance<PrivateKeyLoader>;
 let accessTokenProviderStub: sinon.SinonStubbedInstance<CachingJwtProvider>;
 let keyEntryStorageStub: sinon.SinonStubbedInstance<KeyEntryStorage>;
-let groupLocalStorageStub: sinon.SinonStubbedInstance<GroupLocalStorage>;
+let groupStorageLeveldownStub: sinon.SinonStubbedInstance<AbstractLevelDOWN>;
 
 class MyEThree extends AbstractEThree {
     constructor(identity: string) {
@@ -25,7 +26,7 @@ class MyEThree extends AbstractEThree {
             virgilCrypto: virgilCryptoStub,
             cardManager: cardManagerStub as any,
             keyLoader: keyLoaderStub as any,
-            groupLocalStorage: groupLocalStorageStub as any,
+            groupStorageLeveldown: groupStorageLeveldownStub as any,
             // the following aren't actually used in the code and tests
             accessTokenProvider: accessTokenProviderStub,
             keyEntryStorage: keyEntryStorageStub,
@@ -41,7 +42,7 @@ beforeEach(() => {
     keyLoaderStub = sinon.createStubInstance(PrivateKeyLoader);
     accessTokenProviderStub = sinon.createStubInstance(CachingJwtProvider);
     keyEntryStorageStub = sinon.createStubInstance(KeyEntryStorage);
-    groupLocalStorageStub = sinon.createStubInstance(GroupLocalStorage);
+    groupStorageLeveldownStub = sinon.createStubInstance(AbstractLevelDOWN);
 });
 
 afterEach(() => {
