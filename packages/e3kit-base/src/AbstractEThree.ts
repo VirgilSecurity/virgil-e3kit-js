@@ -62,9 +62,11 @@ export abstract class AbstractEThree {
      */
     keyEntryStorage: IKeyEntryStorage;
 
-    protected groupManager: GroupManager;
     protected keyLoader: PrivateKeyLoader;
     protected inProcess = false;
+
+    private groupManager: GroupManager | undefined;
+    private groupStorageLeveldown: AbstractLevelDOWN;
 
     /**
      * @hidden
@@ -84,7 +86,7 @@ export abstract class AbstractEThree {
         this.accessTokenProvider = options.accessTokenProvider;
         this.keyEntryStorage = options.keyEntryStorage;
         this.keyLoader = options.keyLoader;
-        this.groupManager = new GroupManager(options);
+        this.groupStorageLeveldown = options.groupStorageLeveldown;
     }
 
     /**
@@ -157,6 +159,7 @@ export abstract class AbstractEThree {
      */
     async cleanup() {
         await this.keyLoader.resetLocalPrivateKey();
+        await this.onPrivateKeyDeleted();
     }
 
     /**
@@ -509,6 +512,7 @@ export abstract class AbstractEThree {
 
             await this.cardManager.revokeCard(cards[0].id);
             await this.keyLoader.resetLocalPrivateKey();
+            await this.onPrivateKeyDeleted();
         } finally {
             this.inProcess = false;
         }
@@ -547,22 +551,26 @@ export abstract class AbstractEThree {
             },
             participants: [...participantIdentities],
         };
-        return this.groupManager.store(ticket, participantCards);
+        const groupManager = await this.getGroupManager();
+        return await groupManager.store(ticket, participantCards);
     }
 
     async loadGroup(groupId: Data, initiatorCard: ICard) {
         const sessionId = this.virgilCrypto.calculateGroupSessionId(groupId);
-        return this.groupManager.pull(sessionId, initiatorCard);
+        const groupManager = await this.getGroupManager();
+        return await groupManager.pull(sessionId, initiatorCard);
     }
 
     async getGroup(groupId: Data) {
         const sessionId = this.virgilCrypto.calculateGroupSessionId(groupId);
-        return this.groupManager.retrieve(sessionId);
+        const groupManager = await this.getGroupManager();
+        return await groupManager.retrieve(sessionId);
     }
 
     async deleteGroup(groupId: Data) {
         const sessionId = this.virgilCrypto.calculateGroupSessionId(groupId);
-        const group = await this.groupManager.retrieve(sessionId);
+        const groupManager = await this.getGroupManager();
+        const group = await groupManager.retrieve(sessionId);
         if (!group) {
             throw new GroupError(
                 GroupErrorCode.LocalGroupNotFound,
@@ -575,7 +583,8 @@ export abstract class AbstractEThree {
                 'Only group initiator can delete the group',
             );
         }
-        return this.groupManager.delete(sessionId);
+
+        await groupManager.delete(sessionId);
     }
 
     /**
@@ -618,6 +627,40 @@ export abstract class AbstractEThree {
         if (!this.isOwnPublicKeyIncluded(ownPublicKey, publicKeys)) {
             publicKeys.push(ownPublicKey);
         }
+    }
+
+    /**
+     * @hidden
+     */
+    private async onPrivateKeyDeleted() {
+        if (this.groupManager) {
+            await this.groupManager.cleanup();
+            this.groupManager = undefined;
+        }
+    }
+
+    /**
+     * @hidden
+     */
+    protected async getGroupManager() {
+        if (this.groupManager) {
+            return this.groupManager;
+        }
+        const keyPair = await this.keyLoader.loadLocalKeyPair();
+        if (!keyPair) {
+            // TODO replace with PrivateKeyMissingError
+            throw new RegisterRequiredError();
+        }
+
+        this.groupManager = new GroupManager({
+            keyPair,
+            identity: this.identity,
+            privateKeyLoader: this.keyLoader,
+            cardManager: this.cardManager,
+            groupStorageLeveldown: this.groupStorageLeveldown,
+        });
+
+        return this.groupManager;
     }
 
     /**

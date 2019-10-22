@@ -99,6 +99,10 @@ export class GroupLocalStorage {
         await this._db.clear();
     }
 
+    async close() {
+        await this._db.close();
+    }
+
     private async retrieveGroupInfo(sessionId: string): Promise<GroupInfo | null> {
         try {
             return await this._db.get(sessionId);
