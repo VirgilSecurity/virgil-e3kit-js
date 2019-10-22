@@ -146,6 +146,20 @@ export class GroupLocalStorage {
     }
 
     private getTicketKey(sessionId: string, epochNumber: number) {
+        // The structure of the ticket key:
+        // `<session_id>!<number_of_digits_in_epoch_number_encoded_as_single_char>!<epoch_number>`
+        // The reasoning:
+        // keys in LevelDB are stored in alphabetical (lexicographic) order,
+        // which means that if we just put the epoch number in the key we'll
+        // start getting wrong results when reading a stream of tickets because
+        // '11' is less than '2', for example.
+        // Storing the number of digits in the key allows us to only compare
+        // epochs with the same number of digits to each other and have tickets
+        // with larger number of digits always be greater than the ones with fewer digits.
+        // Since number of digits is also a number and hence susceptible to the
+        // same problem, we encode it in base 36 to get a single character so we
+        // can handle epoch numbers with up to 35 digits in them (which is more than
+        // necessary since epoch number is uint32 in the virgil crypto library)
         const epochNumberStr = String(epochNumber);
         const epochNumberEncodedLength = epochNumberStr.length.toString(36);
         return `${sessionId}!${epochNumberEncodedLength}!${epochNumberStr}`;
