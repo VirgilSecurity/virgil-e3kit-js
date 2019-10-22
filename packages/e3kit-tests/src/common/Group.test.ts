@@ -124,7 +124,7 @@ describe('EThree', () => {
             const groupId = uuid();
             const aliceGroup = await aliceEThree.createGroup(groupId, bobCard);
             const group = await aliceEThree.getGroup(groupId);
-            expect(group).not.to.be.undefined;
+            expect(group).not.to.be.null;
             expect(group!.initiator).to.equal(aliceGroup.initiator);
             expect(new Set(group!.participants)).to.eql(new Set(aliceGroup.participants));
         });
@@ -173,7 +173,7 @@ describe('EThree', () => {
             const group = await bobEThree.loadGroup(groupId, aliceCard);
             await aliceEThree.deleteGroup(groupId);
             const group1 = await aliceEThree.getGroup(groupId);
-            expect(group1).to.be.undefined;
+            expect(group1).to.be.null;
             try {
                 await aliceEThree.loadGroup(groupId, aliceCard);
                 expect.fail();
@@ -193,7 +193,7 @@ describe('EThree', () => {
                 expect(error).to.be.instanceOf(GroupError);
             }
             const group2 = await bobEThree.getGroup(groupId);
-            expect(group2).to.be.undefined;
+            expect(group2).to.be.null;
         });
 
         it('STE-34 `remove` throws if trying to remove last participant', async () => {
@@ -239,7 +239,7 @@ describe('EThree', () => {
                 expect(error).to.be.instanceOf(GroupError);
             }
             const group = await bobEThree.getGroup(groupId);
-            expect(group).to.be.undefined;
+            expect(group).to.be.null;
         });
 
         it('STE-36 throws if user has no rights to manage a group', async () => {
@@ -400,7 +400,7 @@ describe('EThree', () => {
                 expect(error).to.be.instanceOf(GroupError);
             }
             const group4 = await charlesEThree.getGroup(groupId);
-            expect(group4).to.be.undefined;
+            expect(group4).to.be.null;
 
             try {
                 await charlesEThree.loadGroup(groupId, cards[aliceEThree.identity]);
@@ -483,10 +483,6 @@ describe('EThree', () => {
             }
             const decryptedData2 = await group1.decrypt(encryptedData2, newBobCard, date2);
             expect(decryptedData2.toString('utf8')).to.equal(message2);
-        });
-
-        it('STE-45', async () => {
-            // TODO: not sure how to properly do something similar
         });
 
         it('STE-46', async () => {
