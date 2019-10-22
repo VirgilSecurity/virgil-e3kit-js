@@ -1,3 +1,5 @@
+/// <reference path="index.d.ts" />
+
 import {
     hasFoundationModules,
     setFoundationModules,
@@ -16,6 +18,8 @@ import { initPythia, hasPythiaModules, VirgilBrainKeyCrypto } from '@virgilsecur
 import { VirgilCardCrypto } from '@virgilsecurity/sdk-crypto';
 import { CachingJwtProvider, CardManager, KeyEntryStorage, VirgilCardVerifier } from 'virgil-sdk';
 import leveldown from 'leveldown';
+import isInvalidPath from 'is-invalid-path';
+import mkdirp from 'mkdirp';
 
 import { IPublicKey, EThreeInitializeOptions, EThreeCtorOptions } from './types';
 import { withDefaults } from './withDefaults';
@@ -55,6 +59,10 @@ export class EThree extends AbstractEThree {
             retryOnUnauthorized: true,
             apiUrl: opts.apiUrl,
         });
+        if (isInvalidPath(opts.groupStorageName!)) {
+            throw new TypeError('`groupStorageName` is not a valid path');
+        }
+        mkdirp.sync(opts.groupStorageName!);
         const groupStorageLeveldown = leveldown(opts.groupStorageName!);
 
         super({
