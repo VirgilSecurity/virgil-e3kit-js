@@ -18,12 +18,15 @@
     },
     "dependencies": {
         "@types/leveldown": "^4.0.0",
+        "@types/mkdirp": "^0.5.2",
         "@virgilsecurity/base-crypto": "^0.6.1",
         "@virgilsecurity/core-foundation": "^0.3.0",
         "@virgilsecurity/e3kit-base": "^0.6.0-beta.3",
         "@virgilsecurity/pythia-crypto": "^0.2.2",
         "@virgilsecurity/sdk-crypto": "^0.4.5",
+        "is-invalid-path": "^1.0.2",
         "leveldown": "^5.3.0",
+        "mkdirp": "^0.5.1",
         "virgil-sdk": "next"
     },
     "devDependencies": {
