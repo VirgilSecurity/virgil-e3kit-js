@@ -85,7 +85,10 @@ describe('EThree', () => {
         Promise.resolve(jwtGenerator.generateToken(identity).toString());
 
     const initializeEThree = (fetchToken: () => Promise<string>) =>
-        EThree.initialize(fetchToken, { apiUrl: process.env.API_URL });
+        EThree.initialize(fetchToken, {
+            apiUrl: process.env.API_URL,
+            groupStorageName: `.virgil-group-storage/${uuid()}`,
+        });
 
     const createSyncStorage = async (identity: string, password: string) => {
         await sleep(BRAIN_KEY_RATE_LIMIT_DELAY);

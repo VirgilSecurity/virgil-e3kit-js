@@ -32,7 +32,10 @@ describe('EThree', () => {
         Promise.resolve(jwtGenerator.generateToken(identity).toString());
 
     const initializeEThree = (fetchToken: () => Promise<string>) =>
-        EThree.initialize(fetchToken, { apiUrl: process.env.API_URL });
+        EThree.initialize(fetchToken, {
+            apiUrl: process.env.API_URL,
+            groupStorageName: `.virgil-group-storage/${uuid()}`,
+        });
 
     describe('group encryption', () => {
         const createEThree = async (identity?: string) => {
@@ -491,7 +494,7 @@ describe('EThree', () => {
             const groupId = uuid();
             const bobCard = await aliceEThree.findUsers(bobEThree.identity);
             await aliceEThree.createGroup(groupId, bobCard);
-            const aliceCard = await bobEThree.findUsers(bobEThree.identity);
+            const aliceCard = await bobEThree.findUsers(aliceEThree.identity);
             await bobEThree.loadGroup(groupId, aliceCard);
             await aliceEThree.getGroup(groupId);
             await bobEThree.getGroup(groupId);
