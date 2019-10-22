@@ -4,7 +4,6 @@ import {
     DEFAULT_GROUP_STORAGE_NAME,
     AbstractEThree,
     PrivateKeyLoader,
-    GroupLocalStorage,
 } from '@virgilsecurity/e3kit-base';
 import createNativeKeyEntryStorage from '@virgilsecurity/key-storage-rn/native';
 import { VirgilCardCrypto } from '@virgilsecurity/sdk-crypto';
@@ -46,10 +45,8 @@ export class EThree extends AbstractEThree {
             retryOnUnauthorized: true,
             apiUrl: opts.apiUrl,
         });
-        const groupLocalStorage = new GroupLocalStorage(
-            identity,
-            asyncstorageDown(opts.groupStorageName!, { AsyncStorage }),
-        );
+        const groupStorageLeveldown = asyncstorageDown(opts.groupStorageName!, { AsyncStorage });
+
         super({
             identity,
             virgilCrypto,
@@ -57,7 +54,7 @@ export class EThree extends AbstractEThree {
             accessTokenProvider,
             keyEntryStorage,
             keyLoader,
-            groupLocalStorage,
+            groupStorageLeveldown,
         });
     }
 

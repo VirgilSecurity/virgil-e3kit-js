@@ -1,4 +1,5 @@
 import { CardManager, KeyEntryAlreadyExistsError } from 'virgil-sdk';
+import { AbstractLevelDOWN } from 'abstract-leveldown';
 
 import { chunkArray, getObjectValues, hasDuplicates } from './array';
 import {
@@ -34,7 +35,6 @@ import { Group, isValidParticipantCount } from './groups/Group';
 import { GroupManager } from './GroupManager';
 import { getCardActiveAtMoment } from './utils/card';
 import { isValidDate } from './utils/date';
-import { GroupLocalStorage } from './GroupLocalStorage';
 
 export abstract class AbstractEThree {
     /**
@@ -76,7 +76,7 @@ export abstract class AbstractEThree {
         accessTokenProvider: IAccessTokenProvider;
         keyEntryStorage: IKeyEntryStorage;
         keyLoader: PrivateKeyLoader;
-        groupLocalStorage: GroupLocalStorage;
+        groupStorageLeveldown: AbstractLevelDOWN;
     }) {
         this.identity = options.identity;
         this.virgilCrypto = options.virgilCrypto;

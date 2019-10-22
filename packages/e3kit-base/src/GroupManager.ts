@@ -6,6 +6,8 @@ import {
     GroupTicket,
 } from '@virgilsecurity/keyknox';
 import { CardManager } from 'virgil-sdk';
+import { AbstractLevelDOWN } from 'abstract-leveldown';
+
 import { ICard, Ticket } from './types';
 import { CLOUD_GROUP_SESSIONS_ROOT, MAX_EPOCHS_IN_GROUP_SESSION } from './constants';
 import { PrivateKeyLoader } from './PrivateKeyLoader';
@@ -16,7 +18,7 @@ import { GroupLocalStorage, RetrieveOptions } from './GroupLocalStorage';
 export interface GroupManagerConstructorParams {
     keyLoader: PrivateKeyLoader;
     cardManager: CardManager;
-    groupLocalStorage: GroupLocalStorage;
+    groupStorageLeveldown: AbstractLevelDOWN;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -34,12 +36,12 @@ const isSafeInteger = (val: any): val is number => {
 export class GroupManager {
     private _privateKeyLoader: PrivateKeyLoader;
     private _cardManager: CardManager;
-    private _localGroupStorage: GroupLocalStorage;
+    private _groupStorageLeveldown: AbstractLevelDOWN;
 
-    constructor({ keyLoader, cardManager, groupLocalStorage }: GroupManagerConstructorParams) {
+    constructor({ keyLoader, cardManager, groupStorageLeveldown }: GroupManagerConstructorParams) {
         this._privateKeyLoader = keyLoader;
         this._cardManager = cardManager;
-        this._localGroupStorage = groupLocalStorage;
+        this._groupStorageLeveldown = groupStorageLeveldown;
     }
 
     async store(ticket: Ticket, cards: ICard[]) {
@@ -52,8 +54,9 @@ export class GroupManager {
             cardManager: this._cardManager,
             groupManager: this,
         });
+        const localGroupStorage = await this.getLocalGroupStorage();
         const rawGroup = { info: { initiator: this.selfIdentity }, tickets: [ticket] };
-        this._localGroupStorage.store(rawGroup);
+        localGroupStorage.store(rawGroup);
         return group;
     }
 
@@ -68,7 +71,8 @@ export class GroupManager {
             );
         } catch (err) {
             if (err.name === 'GroupTicketDoesntExistError') {
-                await this._localGroupStorage.delete(sessionId);
+                const localGroupStorage = await this.getLocalGroupStorage();
+                await localGroupStorage.delete(sessionId);
                 throw new GroupError(
                     GroupErrorCode.RemoteGroupNotFound,
                     'Group with given id could not be found',
@@ -89,7 +93,8 @@ export class GroupManager {
             cardManager: this._cardManager,
             groupManager: this,
         });
-        this._localGroupStorage.store({ info: { initiator }, tickets });
+        const localGroupStorage = await this.getLocalGroupStorage();
+        localGroupStorage.store({ info: { initiator }, tickets });
         return group;
     }
 
@@ -98,7 +103,8 @@ export class GroupManager {
             ? { epochNumber }
             : { ticketCount: MAX_EPOCHS_IN_GROUP_SESSION };
 
-        const rawGroup = await this._localGroupStorage.retrieve(sessionId, options);
+        const localGroupStorage = await this.getLocalGroupStorage();
+        const rawGroup = await localGroupStorage.retrieve(sessionId, options);
 
         if (!rawGroup) return null;
 
@@ -128,7 +134,8 @@ export class GroupManager {
     async delete(sessionId: string) {
         const cloudTicketStorage = await this.getCloudTicketStorage();
         await cloudTicketStorage.delete(sessionId);
-        await this._localGroupStorage.delete(sessionId);
+        const localGroupStorage = await this.getLocalGroupStorage();
+        await localGroupStorage.delete(sessionId);
     }
 
     async reAddAccess(sessionId: string, allowedCard: ICard) {
@@ -145,6 +152,7 @@ export class GroupManager {
         const { virgilCrypto, accessTokenProvider, apiUrl } = this._privateKeyLoader.options;
         const keyPair = await this._privateKeyLoader.loadLocalKeyPair();
         if (!keyPair) {
+            // TODO replace with PrivateKeyMissingError
             throw new RegisterRequiredError();
         }
 
@@ -158,6 +166,23 @@ export class GroupManager {
             identity,
             ...keyPair,
             root: CLOUD_GROUP_SESSIONS_ROOT,
+        });
+    }
+
+    private async getLocalGroupStorage() {
+        const identity = this._privateKeyLoader.identity;
+        const { virgilCrypto } = this._privateKeyLoader.options;
+        const keyPair = await this._privateKeyLoader.loadLocalKeyPair();
+        if (!keyPair) {
+            // TODO replace with PrivateKeyMissingError
+            throw new RegisterRequiredError();
+        }
+
+        return new GroupLocalStorage({
+            identity,
+            virgilCrypto,
+            keyPair,
+            leveldown: this._groupStorageLeveldown,
         });
     }
 }

@@ -1,3 +1,5 @@
+/// <reference path="index.d.ts" />
+
 import {
     hasFoundationModules,
     setFoundationModules,
@@ -11,12 +13,13 @@ import {
     DEFAULT_GROUP_STORAGE_NAME,
     AbstractEThree,
     PrivateKeyLoader,
-    GroupLocalStorage,
 } from '@virgilsecurity/e3kit-base';
 import { initPythia, hasPythiaModules, VirgilBrainKeyCrypto } from '@virgilsecurity/pythia-crypto';
 import { VirgilCardCrypto } from '@virgilsecurity/sdk-crypto';
 import { CachingJwtProvider, CardManager, KeyEntryStorage, VirgilCardVerifier } from 'virgil-sdk';
 import leveldown from 'leveldown';
+import isInvalidPath from 'is-invalid-path';
+import mkdirp from 'mkdirp';
 
 import { IPublicKey, EThreeInitializeOptions, EThreeCtorOptions } from './types';
 import { withDefaults } from './withDefaults';
@@ -56,10 +59,11 @@ export class EThree extends AbstractEThree {
             retryOnUnauthorized: true,
             apiUrl: opts.apiUrl,
         });
-        const groupLocalStorage = new GroupLocalStorage(
-            identity,
-            leveldown(opts.groupStorageName!),
-        );
+        if (isInvalidPath(opts.groupStorageName!)) {
+            throw new TypeError('`groupStorageName` is not a valid path');
+        }
+        mkdirp.sync(opts.groupStorageName!);
+        const groupStorageLeveldown = leveldown(opts.groupStorageName!);
 
         super({
             identity,
@@ -68,7 +72,7 @@ export class EThree extends AbstractEThree {
             accessTokenProvider,
             keyEntryStorage,
             keyLoader,
-            groupLocalStorage,
+            groupStorageLeveldown,
         });
     }
 

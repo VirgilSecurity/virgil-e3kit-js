@@ -23,6 +23,7 @@
         "@virgilsecurity/crypto-types": "^0.2.0",
         "@virgilsecurity/keyknox": "next",
         "@virgilsecurity/sdk-crypto": "^0.4.5",
+        "abstract-leveldown": "^6.2.1",
         "levelup": "^4.3.2",
         "subleveldown": "^4.1.4",
         "virgil-pythia": "^0.3.4",
