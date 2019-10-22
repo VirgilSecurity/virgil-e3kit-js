@@ -4,29 +4,12 @@ import { RegisterRequiredError, GroupError, GroupErrorCode, UsersNotFoundError }
 import { ICard } from '../types';
 import { CardManager } from 'virgil-sdk';
 import { GroupManager } from '../GroupManager';
-import { isVirgilCard, isFindUsersResult } from '../typeguards';
-import { getObjectValues } from '../array';
+import { isVirgilCard } from '../typeguards';
 import { VALID_GROUP_PARTICIPANT_COUNT_RANGE, MAX_EPOCHS_IN_GROUP_SESSION } from '../constants';
-import { getCardActiveAtMoment } from '../utils/card';
+import { getCardActiveAtMoment, getCardsArray } from '../utils/card';
 import { isValidDate } from '../utils/date';
-
-const getCardsArray = (cardOrFindUsersResult: ICard | FindUsersResult) => {
-    if (isVirgilCard(cardOrFindUsersResult)) {
-        return [cardOrFindUsersResult];
-    }
-    if (isFindUsersResult(cardOrFindUsersResult)) {
-        return getObjectValues(cardOrFindUsersResult);
-    }
-    return [];
-};
-
-const setDifference = <T>(a: Set<T>, b: Set<T>) => {
-    return new Set([...a].filter(it => !b.has(it)));
-};
-
-const isNumberInRange = (num: number, range: [number, number]) => {
-    return typeof num === 'number' && num >= range[0] && num <= range[1];
-};
+import { isNumberInRange } from '../utils/number';
+import { setDifference } from '../utils/set';
 
 export const isValidParticipantCount = (count: number) => {
     return isNumberInRange(count, VALID_GROUP_PARTICIPANT_COUNT_RANGE);
@@ -157,7 +140,6 @@ export class Group {
                         `Group with given id was not found in local storage. Try to load it first.`,
                     );
                 }
-
                 return tempGroup.decrypt(encryptedData, actualCard);
             }
         } catch (err) {

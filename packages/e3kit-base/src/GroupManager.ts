@@ -8,45 +8,47 @@ import {
 import { CardManager } from 'virgil-sdk';
 import { AbstractLevelDOWN } from 'abstract-leveldown';
 
-import { ICard, Ticket } from './types';
+import { ICard, Ticket, IKeyPair } from './types';
 import { CLOUD_GROUP_SESSIONS_ROOT, MAX_EPOCHS_IN_GROUP_SESSION } from './constants';
 import { PrivateKeyLoader } from './PrivateKeyLoader';
-import { RegisterRequiredError, GroupError, GroupErrorCode } from './errors';
+import { GroupError, GroupErrorCode } from './errors';
 import { Group } from './groups/Group';
 import { GroupLocalStorage, RetrieveOptions } from './GroupLocalStorage';
+import { isSafeInteger } from './utils/number';
 
 export interface GroupManagerConstructorParams {
-    keyLoader: PrivateKeyLoader;
+    identity: string;
+    keyPair: IKeyPair;
+    privateKeyLoader: PrivateKeyLoader;
     cardManager: CardManager;
     groupStorageLeveldown: AbstractLevelDOWN;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const isInteger = (val: any): val is number => {
-    if (Number.isInteger) return Number.isInteger(val);
-    return typeof val === 'number' && isFinite(val) && Math.floor(val) === val;
-};
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const isSafeInteger = (val: any): val is number => {
-    if (Number.isSafeInteger) return Number.isSafeInteger(val);
-    return isInteger(val) && Math.abs(val) <= Number.MAX_SAFE_INTEGER;
-};
-
 export class GroupManager {
+    private _selfIdentity: string;
+    private _localGroupStorage: GroupLocalStorage;
+    private _cloudTicketStorage: CloudGroupTicketStorage;
     private _privateKeyLoader: PrivateKeyLoader;
     private _cardManager: CardManager;
     private _groupStorageLeveldown: AbstractLevelDOWN;
 
-    constructor({ keyLoader, cardManager, groupStorageLeveldown }: GroupManagerConstructorParams) {
-        this._privateKeyLoader = keyLoader;
+    constructor({
+        identity,
+        keyPair,
+        privateKeyLoader,
+        cardManager,
+        groupStorageLeveldown,
+    }: GroupManagerConstructorParams) {
+        this._selfIdentity = identity;
+        this._privateKeyLoader = privateKeyLoader;
         this._cardManager = cardManager;
         this._groupStorageLeveldown = groupStorageLeveldown;
+        this._cloudTicketStorage = this.getCloudTicketStorage(keyPair);
+        this._localGroupStorage = this.getLocalGroupStorage(keyPair);
     }
 
     async store(ticket: Ticket, cards: ICard[]) {
-        const cloudTicketStorage = await this.getCloudTicketStorage();
-        await cloudTicketStorage.store(ticket.groupSessionMessage, cards);
+        await this._cloudTicketStorage.store(ticket.groupSessionMessage, cards);
         const group = new Group({
             initiator: this.selfIdentity,
             tickets: [ticket],
@@ -54,28 +56,27 @@ export class GroupManager {
             cardManager: this._cardManager,
             groupManager: this,
         });
-        const localGroupStorage = await this.getLocalGroupStorage();
-        const rawGroup = { info: { initiator: this.selfIdentity }, tickets: [ticket] };
-        localGroupStorage.store(rawGroup);
+        this._localGroupStorage.store({
+            info: { initiator: this.selfIdentity },
+            tickets: [ticket],
+        });
         return group;
     }
 
     async pull(sessionId: string, initiatorCard: ICard) {
-        const cloudTicketStorage = await this.getCloudTicketStorage();
         let cloudTickets: GroupTicket[];
         try {
-            cloudTickets = await cloudTicketStorage.retrieve(
+            cloudTickets = await this._cloudTicketStorage.retrieve(
                 sessionId,
                 initiatorCard.identity,
                 initiatorCard.publicKey,
             );
         } catch (err) {
             if (err.name === 'GroupTicketDoesntExistError') {
-                const localGroupStorage = await this.getLocalGroupStorage();
-                await localGroupStorage.delete(sessionId);
+                await this._localGroupStorage.delete(sessionId);
                 throw new GroupError(
                     GroupErrorCode.RemoteGroupNotFound,
-                    'Group with given id could not be found',
+                    'Group with given id and initiator could not be found',
                 );
             }
             throw err;
@@ -93,8 +94,7 @@ export class GroupManager {
             cardManager: this._cardManager,
             groupManager: this,
         });
-        const localGroupStorage = await this.getLocalGroupStorage();
-        localGroupStorage.store({ info: { initiator }, tickets });
+        this._localGroupStorage.store({ info: { initiator }, tickets });
         return group;
     }
 
@@ -103,8 +103,7 @@ export class GroupManager {
             ? { epochNumber }
             : { ticketCount: MAX_EPOCHS_IN_GROUP_SESSION };
 
-        const localGroupStorage = await this.getLocalGroupStorage();
-        const rawGroup = await localGroupStorage.retrieve(sessionId, options);
+        const rawGroup = await this._localGroupStorage.retrieve(sessionId, options);
 
         if (!rawGroup) return null;
 
@@ -118,43 +117,37 @@ export class GroupManager {
     }
 
     async addAccess(sessionId: string, allowedCards: ICard[]) {
-        const cloudTicketStorage = await this.getCloudTicketStorage();
-        await cloudTicketStorage.addRecipients(sessionId, allowedCards);
+        await this._cloudTicketStorage.addRecipients(sessionId, allowedCards);
     }
 
     async removeAccess(sessionId: string, forbiddenIdentities: string[]) {
-        const cloudTicketStorage = await this.getCloudTicketStorage();
         await Promise.all(
             forbiddenIdentities.map(identity =>
-                cloudTicketStorage.removeRecipient(sessionId, identity),
+                this._cloudTicketStorage.removeRecipient(sessionId, identity),
             ),
         );
     }
 
     async delete(sessionId: string) {
-        const cloudTicketStorage = await this.getCloudTicketStorage();
-        await cloudTicketStorage.delete(sessionId);
-        const localGroupStorage = await this.getLocalGroupStorage();
-        await localGroupStorage.delete(sessionId);
+        await this._cloudTicketStorage.delete(sessionId);
+        await this._localGroupStorage.delete(sessionId);
     }
 
     async reAddAccess(sessionId: string, allowedCard: ICard) {
-        const cloudTicketStorage = await this.getCloudTicketStorage();
-        await cloudTicketStorage.reAddRecipient(sessionId, allowedCard);
+        await this._cloudTicketStorage.reAddRecipient(sessionId, allowedCard);
+    }
+
+    async cleanup() {
+        await this._localGroupStorage.reset();
+        await this._localGroupStorage.close();
     }
 
     private get selfIdentity() {
-        return this._privateKeyLoader.identity;
+        return this._selfIdentity;
     }
 
-    private async getCloudTicketStorage() {
-        const identity = this._privateKeyLoader.identity;
+    private getCloudTicketStorage(keyPair: IKeyPair) {
         const { virgilCrypto, accessTokenProvider, apiUrl } = this._privateKeyLoader.options;
-        const keyPair = await this._privateKeyLoader.loadLocalKeyPair();
-        if (!keyPair) {
-            // TODO replace with PrivateKeyMissingError
-            throw new RegisterRequiredError();
-        }
 
         const keyknoxManager = new KeyknoxManager(
             new KeyknoxCrypto(virgilCrypto),
@@ -162,27 +155,21 @@ export class GroupManager {
         );
 
         return new CloudGroupTicketStorage({
-            keyknoxManager,
-            identity,
-            ...keyPair,
             root: CLOUD_GROUP_SESSIONS_ROOT,
+            identity: this.selfIdentity,
+            keyknoxManager,
+            ...keyPair,
         });
     }
 
-    private async getLocalGroupStorage() {
-        const identity = this._privateKeyLoader.identity;
+    private getLocalGroupStorage(keyPair: IKeyPair) {
         const { virgilCrypto } = this._privateKeyLoader.options;
-        const keyPair = await this._privateKeyLoader.loadLocalKeyPair();
-        if (!keyPair) {
-            // TODO replace with PrivateKeyMissingError
-            throw new RegisterRequiredError();
-        }
 
         return new GroupLocalStorage({
-            identity,
-            virgilCrypto,
-            keyPair,
+            identity: this.selfIdentity,
             leveldown: this._groupStorageLeveldown,
+            keyPair,
+            virgilCrypto,
         });
     }
 }

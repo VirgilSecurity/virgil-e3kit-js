@@ -1,4 +1,3 @@
-// eslint-disable @typescript-eslint/no-explicit-any
 import {
     AbstractLevelDOWN,
     AbstractIterator,
@@ -18,17 +17,19 @@ export interface VirgilEncryptDownOptions {
     keyPair: IKeyPair;
 }
 
-class VirgilEncryptDownIterator extends AbstractIterator {
-    options: AbstractIteratorOptions;
-    it: AbstractIterator<string, Buffer>;
+export type ValueType = string | Buffer;
 
-    constructor(db: VirgilEncryptDown, options: AbstractIteratorOptions) {
+class VirgilEncryptDownIterator<K> extends AbstractIterator<K, ValueType> {
+    options: AbstractIteratorOptions;
+    it: AbstractIterator<K, Buffer>;
+
+    constructor(db: VirgilEncryptDown<K>, options: AbstractIteratorOptions) {
         super(db);
         this.options = options;
         this.it = db.db.iterator({ ...options, valueAsBuffer: true });
     }
 
-    _next(callback: ErrorKeyValueCallback<string, string | Buffer>) {
+    _next(callback: ErrorKeyValueCallback<K, ValueType>) {
         this.it.next((err, key, encrypted) => {
             if (err) {
                 return callback(err, undefined!, undefined!);
@@ -56,12 +57,12 @@ class VirgilEncryptDownIterator extends AbstractIterator {
     }
 }
 
-class VirgilEncryptDown extends AbstractLevelDOWN {
+class VirgilEncryptDown<K> extends AbstractLevelDOWN<K, ValueType> {
     db: AbstractLevelDOWN;
     crypto: ICrypto;
     keyPair: IKeyPair;
 
-    constructor(db: AbstractLevelDOWN, options: VirgilEncryptDownOptions) {
+    constructor(db: AbstractLevelDOWN<K, ValueType>, options: VirgilEncryptDownOptions) {
         super('ignored');
         this.db = db;
         this.crypto = options.virgilCrypto;
@@ -76,22 +77,22 @@ class VirgilEncryptDown extends AbstractLevelDOWN {
         this.db.close(callback);
     }
 
-    _get(key: string, options: AbstractGetOptions, callback: ErrorValueCallback<any>) {
+    _get(key: K, options: AbstractGetOptions, callback: ErrorValueCallback<ValueType>) {
         this.db.get(key, { ...options, asBuffer: true }, (err, encrypted) => {
             if (err) {
-                return callback(err, undefined);
+                return callback(err, undefined!);
             }
 
             try {
                 const decrypted = this.decrypt(encrypted);
                 callback(undefined, options.asBuffer ? decrypted : decrypted.toString('utf8'));
             } catch (error) {
-                callback(error, undefined);
+                callback(error, undefined!);
             }
         });
     }
 
-    _put(key: string, value: any, options: AbstractOptions, callback: ErrorCallback) {
+    _put(key: K, value: ValueType, options: AbstractOptions, callback: ErrorCallback) {
         let encrypted;
         try {
             encrypted = this.encrypt(value);
@@ -102,11 +103,15 @@ class VirgilEncryptDown extends AbstractLevelDOWN {
         this._db.put(key, encrypted, options, callback);
     }
 
-    _del(key: string, options: AbstractOptions, callback: ErrorCallback) {
+    _del(key: K, options: AbstractOptions, callback: ErrorCallback) {
         this.db.del(key, options, callback);
     }
 
-    _batch(ops: ReadonlyArray<AbstractBatch>, options: AbstractOptions, callback: ErrorCallback) {
+    _batch(
+        ops: ReadonlyArray<AbstractBatch<K, ValueType>>,
+        options: AbstractOptions,
+        callback: ErrorCallback,
+    ) {
         let operations;
         try {
             operations = ops.map(op => {
@@ -126,15 +131,15 @@ class VirgilEncryptDown extends AbstractLevelDOWN {
         this.db.clear(options, callback);
     }
 
-    _iterator(options: AbstractIteratorOptions) {
-        return new VirgilEncryptDownIterator(this, options);
+    _iterator(options: AbstractIteratorOptions<K>) {
+        return new VirgilEncryptDownIterator<K>(this, options);
     }
 
-    encrypt(value: any) {
+    encrypt(value: ValueType) {
         return this.crypto.signThenEncrypt(value, this.keyPair.privateKey, this.keyPair.publicKey);
     }
 
-    decrypt(encryptedValue: any) {
+    decrypt(encryptedValue: ValueType) {
         return this.crypto.decryptThenVerify(
             encryptedValue,
             this.keyPair.privateKey,
