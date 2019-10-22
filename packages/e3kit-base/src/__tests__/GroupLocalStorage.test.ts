@@ -52,7 +52,7 @@ const createVirgilCryptoStub = () => {
         const valueStr = Buffer.isBuffer(value) ? value.toString('utf8') : value;
         return Buffer.from(valueStr.replace(/encrypted_/, ''));
     });
-    return virgilCryptoStub as ICrypto;
+    return virgilCryptoStub;
 };
 
 const createGroupLocalStorage = (
@@ -89,6 +89,68 @@ describe('GroupLocalStorage', () => {
                 tickets: createTickets(sessionId, 10),
             };
             expect(storage.store(rawGroup)).eventually.to.be.undefined;
+        });
+
+        it('encrypts the stored group info and tickets', async () => {
+            const identity = 'test';
+            const sessionId = getRandomString('session');
+            const virgilCryptoStub = createVirgilCryptoStub();
+            const keyPairStub = createKeyPairStub();
+            const storage = createGroupLocalStorage(
+                identity,
+                memdown(),
+                virgilCryptoStub,
+                keyPairStub,
+            );
+            const rawGroup = {
+                info: createGroupInfo(),
+                tickets: createTickets(sessionId, 1),
+            };
+
+            await storage.store(rawGroup);
+
+            // must have encrypted the group info and the ticket
+            expect(virgilCryptoStub.signThenEncrypt.callCount).to.eq(2);
+            expect(virgilCryptoStub.signThenEncrypt.firstCall.args[0]).to.eq(
+                JSON.stringify(rawGroup.info),
+            );
+            expect(virgilCryptoStub.signThenEncrypt.firstCall.args[1]).to.eq(
+                keyPairStub.privateKey as any,
+            );
+            expect(virgilCryptoStub.signThenEncrypt.firstCall.args[2]).to.eq(
+                keyPairStub.publicKey as any,
+            );
+
+            expect(virgilCryptoStub.signThenEncrypt.secondCall.args[0]).to.eq(
+                JSON.stringify(rawGroup.tickets[0]),
+            );
+            expect(virgilCryptoStub.signThenEncrypt.secondCall.args[1]).to.eq(
+                keyPairStub.privateKey as any,
+            );
+            expect(virgilCryptoStub.signThenEncrypt.secondCall.args[2]).to.eq(
+                keyPairStub.publicKey as any,
+            );
+        });
+
+        it('rejects if encryption fails', () => {
+            const identity = 'test';
+            const sessionId = getRandomString('session');
+            const keyPairStub = createKeyPairStub();
+            const virgilCryptoStub = createVirgilCryptoStub();
+            virgilCryptoStub.signThenEncrypt.throwsException(new Error('failed to encrypt'));
+
+            const storage = createGroupLocalStorage(
+                identity,
+                memdown(),
+                virgilCryptoStub,
+                keyPairStub,
+            );
+            const rawGroup = {
+                info: createGroupInfo(),
+                tickets: createTickets(sessionId, 1),
+            };
+
+            expect(storage.store(rawGroup)).eventually.to.be.rejectedWith('failed to encrypt');
         });
     });
 
@@ -202,6 +264,74 @@ describe('GroupLocalStorage', () => {
 
             const group2 = await storage2.retrieve(sessionId, { ticketCount: 10 });
             expect(group2).to.be.null;
+        });
+
+        it('decrypts the stored group info and tickets', async () => {
+            const identity = 'test';
+            const sessionId = getRandomString('session');
+            const virgilCryptoStub = createVirgilCryptoStub();
+            const keyPairStub = createKeyPairStub();
+            const storage = createGroupLocalStorage(
+                identity,
+                memdown(),
+                virgilCryptoStub,
+                keyPairStub,
+            );
+            const rawGroup = {
+                info: createGroupInfo(),
+                tickets: createTickets(sessionId, 1),
+            };
+
+            await storage.store(rawGroup);
+
+            await storage.retrieve(sessionId, { ticketCount: 1 });
+
+            // must have decrypted the group info and the ticket
+            expect(virgilCryptoStub.decryptThenVerify.callCount).to.eq(2);
+            expect(virgilCryptoStub.decryptThenVerify.firstCall.args[0].toString()).to.eq(
+                `encrypted_${JSON.stringify(rawGroup.info)}`,
+            );
+            expect(virgilCryptoStub.decryptThenVerify.firstCall.args[1]).to.eq(
+                keyPairStub.privateKey as any,
+            );
+            expect(virgilCryptoStub.decryptThenVerify.firstCall.args[2]).to.eq(
+                keyPairStub.publicKey as any,
+            );
+
+            expect(virgilCryptoStub.decryptThenVerify.secondCall.args[0].toString()).to.eq(
+                `encrypted_${JSON.stringify(rawGroup.tickets[0])}`,
+            );
+            expect(virgilCryptoStub.decryptThenVerify.secondCall.args[1]).to.eq(
+                keyPairStub.privateKey as any,
+            );
+            expect(virgilCryptoStub.decryptThenVerify.secondCall.args[2]).to.eq(
+                keyPairStub.publicKey as any,
+            );
+        });
+
+        it('rejects if decryption fails', async () => {
+            const identity = 'test';
+            const sessionId = getRandomString('session');
+            const keyPairStub = createKeyPairStub();
+            const virgilCryptoStub = createVirgilCryptoStub();
+            virgilCryptoStub.decryptThenVerify.throwsException(new Error('failed to decrypt'));
+
+            const storage = createGroupLocalStorage(
+                identity,
+                memdown(),
+                virgilCryptoStub,
+                keyPairStub,
+            );
+            const rawGroup = {
+                info: createGroupInfo(),
+                tickets: createTickets(sessionId, 1),
+            };
+
+            await storage.store(rawGroup);
+
+            expect(storage.retrieve(sessionId, { ticketCount: 1 })).eventually.to.be.rejectedWith(
+                'failed to decrypt',
+            );
         });
     });
 
