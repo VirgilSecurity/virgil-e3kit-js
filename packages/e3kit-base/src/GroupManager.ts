@@ -14,24 +14,13 @@ import { PrivateKeyLoader } from './PrivateKeyLoader';
 import { RegisterRequiredError, GroupError, GroupErrorCode } from './errors';
 import { Group } from './groups/Group';
 import { GroupLocalStorage, RetrieveOptions } from './GroupLocalStorage';
+import { isSafeInteger } from './utils/number';
 
 export interface GroupManagerConstructorParams {
     keyLoader: PrivateKeyLoader;
     cardManager: CardManager;
     groupStorageLeveldown: AbstractLevelDOWN;
 }
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const isInteger = (val: any): val is number => {
-    if (Number.isInteger) return Number.isInteger(val);
-    return typeof val === 'number' && isFinite(val) && Math.floor(val) === val;
-};
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const isSafeInteger = (val: any): val is number => {
-    if (Number.isSafeInteger) return Number.isSafeInteger(val);
-    return isInteger(val) && Math.abs(val) <= Number.MAX_SAFE_INTEGER;
-};
 
 export class GroupManager {
     private _privateKeyLoader: PrivateKeyLoader;
