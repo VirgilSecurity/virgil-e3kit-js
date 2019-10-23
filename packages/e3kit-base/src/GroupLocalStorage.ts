@@ -25,22 +25,17 @@ export interface RetrieveOptions {
 
 export interface GroupLocalStorageConstructorParams {
     identity: string;
-    keyPair: IKeyPair;
     leveldown: AbstractLevelDOWN;
     virgilCrypto: ICrypto;
 }
 
 export class GroupLocalStorage {
     private _db: LevelUp;
+    private _encryptionLevel: VirgilEncryptDown<string>;
 
-    constructor({
-        identity,
-        keyPair,
-        virgilCrypto,
-        leveldown,
-    }: GroupLocalStorageConstructorParams) {
-        const encryptLevel = new VirgilEncryptDown(leveldown, { virgilCrypto, keyPair });
-        const rootLevel = levelup(encryptLevel);
+    constructor({ identity, virgilCrypto, leveldown }: GroupLocalStorageConstructorParams) {
+        this._encryptionLevel = new VirgilEncryptDown(leveldown, { virgilCrypto });
+        const rootLevel = levelup(this._encryptionLevel);
         const identityLevel = sub(rootLevel, identity);
         this._db = sub(identityLevel, 'GROUPS', { valueEncoding: 'json' });
     }
@@ -97,6 +92,10 @@ export class GroupLocalStorage {
 
     async reset() {
         await this._db.clear();
+    }
+
+    setEncryptionKeyPair(keyPair: IKeyPair) {
+        this._encryptionLevel.setKeyPair(keyPair);
     }
 
     private async retrieveGroupInfo(sessionId: string): Promise<GroupInfo | null> {
