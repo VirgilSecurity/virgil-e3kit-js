@@ -11,7 +11,7 @@ import { AbstractLevelDOWN } from 'abstract-leveldown';
 import { ICard, Ticket, IKeyPair } from './types';
 import { CLOUD_GROUP_SESSIONS_ROOT, MAX_EPOCHS_IN_GROUP_SESSION } from './constants';
 import { PrivateKeyLoader } from './PrivateKeyLoader';
-import { GroupError, GroupErrorCode } from './errors';
+import { GroupError, GroupErrorCode, RegisterRequiredError } from './errors';
 import { Group } from './groups/Group';
 import { GroupLocalStorage, RetrieveOptions } from './GroupLocalStorage';
 import { isSafeInteger } from './utils/number';
@@ -27,10 +27,8 @@ export interface GroupManagerConstructorParams {
 export class GroupManager {
     private _selfIdentity: string;
     private _localGroupStorage: GroupLocalStorage;
-    private _cloudTicketStorage: CloudGroupTicketStorage;
     private _privateKeyLoader: PrivateKeyLoader;
     private _cardManager: CardManager;
-    private _groupStorageLeveldown: AbstractLevelDOWN;
 
     constructor({
         identity,
@@ -42,13 +40,17 @@ export class GroupManager {
         this._selfIdentity = identity;
         this._privateKeyLoader = privateKeyLoader;
         this._cardManager = cardManager;
-        this._groupStorageLeveldown = groupStorageLeveldown;
-        this._cloudTicketStorage = this.getCloudTicketStorage(keyPair);
-        this._localGroupStorage = this.getLocalGroupStorage(keyPair);
+        this._localGroupStorage = new GroupLocalStorage({
+            identity,
+            keyPair,
+            leveldown: groupStorageLeveldown,
+            virgilCrypto: privateKeyLoader.options.virgilCrypto,
+        });
     }
 
     async store(ticket: Ticket, cards: ICard[]) {
-        await this._cloudTicketStorage.store(ticket.groupSessionMessage, cards);
+        const cloudTicketStorage = await this.getCloudTicketStorage();
+        await cloudTicketStorage.store(ticket.groupSessionMessage, cards);
         const group = new Group({
             initiator: this.selfIdentity,
             tickets: [ticket],
@@ -66,7 +68,8 @@ export class GroupManager {
     async pull(sessionId: string, initiatorCard: ICard) {
         let cloudTickets: GroupTicket[];
         try {
-            cloudTickets = await this._cloudTicketStorage.retrieve(
+            const cloudTicketStorage = await this.getCloudTicketStorage();
+            cloudTickets = await cloudTicketStorage.retrieve(
                 sessionId,
                 initiatorCard.identity,
                 initiatorCard.publicKey,
@@ -117,36 +120,45 @@ export class GroupManager {
     }
 
     async addAccess(sessionId: string, allowedCards: ICard[]) {
-        await this._cloudTicketStorage.addRecipients(sessionId, allowedCards);
+        const cloudTicketStorage = await this.getCloudTicketStorage();
+        await cloudTicketStorage.addRecipients(sessionId, allowedCards);
     }
 
     async removeAccess(sessionId: string, forbiddenIdentities: string[]) {
+        const cloudTicketStorage = await this.getCloudTicketStorage();
         await Promise.all(
             forbiddenIdentities.map(identity =>
-                this._cloudTicketStorage.removeRecipient(sessionId, identity),
+                cloudTicketStorage.removeRecipient(sessionId, identity),
             ),
         );
     }
 
     async delete(sessionId: string) {
-        await this._cloudTicketStorage.delete(sessionId);
+        const cloudTicketStorage = await this.getCloudTicketStorage();
+        await cloudTicketStorage.delete(sessionId);
         await this._localGroupStorage.delete(sessionId);
     }
 
     async reAddAccess(sessionId: string, allowedCard: ICard) {
-        await this._cloudTicketStorage.reAddRecipient(sessionId, allowedCard);
+        const cloudTicketStorage = await this.getCloudTicketStorage();
+        await cloudTicketStorage.reAddRecipient(sessionId, allowedCard);
     }
 
     async cleanup() {
         await this._localGroupStorage.reset();
-        await this._localGroupStorage.close();
     }
 
     private get selfIdentity() {
         return this._selfIdentity;
     }
 
-    private getCloudTicketStorage(keyPair: IKeyPair) {
+    private async getCloudTicketStorage() {
+        const keyPair = await this._privateKeyLoader.loadLocalKeyPair();
+        if (!keyPair) {
+            // TODO replace with PrivateKeyMissingError
+            throw new RegisterRequiredError();
+        }
+
         const { virgilCrypto, accessTokenProvider, apiUrl } = this._privateKeyLoader.options;
 
         const keyknoxManager = new KeyknoxManager(
@@ -159,17 +171,6 @@ export class GroupManager {
             identity: this.selfIdentity,
             keyknoxManager,
             ...keyPair,
-        });
-    }
-
-    private getLocalGroupStorage(keyPair: IKeyPair) {
-        const { virgilCrypto } = this._privateKeyLoader.options;
-
-        return new GroupLocalStorage({
-            identity: this.selfIdentity,
-            leveldown: this._groupStorageLeveldown,
-            keyPair,
-            virgilCrypto,
         });
     }
 }
