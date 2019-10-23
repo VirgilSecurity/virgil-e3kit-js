@@ -75,14 +75,20 @@ export class GroupManager {
                 initiatorCard.publicKey,
             );
         } catch (err) {
-            if (err.name === 'GroupTicketDoesntExistError') {
-                await this._localGroupStorage.delete(sessionId);
-                throw new GroupError(
-                    GroupErrorCode.RemoteGroupNotFound,
-                    'Group with given id and initiator could not be found',
-                );
+            switch (err.name) {
+                case 'GroupTicketDoesntExistError':
+                    throw new GroupError(
+                        GroupErrorCode.NoAccess,
+                        'Current user has no access to the group ticket',
+                    );
+                case 'GroupTicketNoAccessError':
+                    throw new GroupError(
+                        GroupErrorCode.RemoteGroupNotFound,
+                        'Group with given id and initiator could not be found',
+                    );
+                default:
+                    throw err;
             }
-            throw err;
         }
 
         const initiator = initiatorCard.identity;
@@ -106,22 +112,40 @@ export class GroupManager {
             ? { epochNumber }
             : { ticketCount: MAX_EPOCHS_IN_GROUP_SESSION };
 
-        const rawGroup = await this._localGroupStorage.retrieve(sessionId, options);
-
-        if (!rawGroup) return null;
-
-        return new Group({
-            initiator: rawGroup.info.initiator,
-            tickets: rawGroup.tickets,
-            privateKeyLoader: this._privateKeyLoader,
-            cardManager: this._cardManager,
-            groupManager: this,
-        });
+        try {
+            const rawGroup = await this._localGroupStorage.retrieve(sessionId, options);
+            if (!rawGroup) return null;
+            return new Group({
+                initiator: rawGroup.info.initiator,
+                tickets: rawGroup.tickets,
+                privateKeyLoader: this._privateKeyLoader,
+                cardManager: this._cardManager,
+                groupManager: this,
+            });
+        } catch (error) {
+            if (error.name === 'GroupTicketNoAccessError') {
+                throw new GroupError(
+                    GroupErrorCode.NoAccess,
+                    'Current user has no access to the group ticket',
+                );
+            }
+            throw error;
+        }
     }
 
     async addAccess(sessionId: string, allowedCards: ICard[]) {
         const cloudTicketStorage = await this.getCloudTicketStorage();
-        await cloudTicketStorage.addRecipients(sessionId, allowedCards);
+        try {
+            await cloudTicketStorage.addRecipients(sessionId, allowedCards);
+        } catch (error) {
+            if (error.name === 'GroupTicketNoAccessError') {
+                throw new GroupError(
+                    GroupErrorCode.NoAccess,
+                    'Current user has no access to the group ticket',
+                );
+            }
+            throw error;
+        }
     }
 
     async removeAccess(sessionId: string, forbiddenIdentities: string[]) {
@@ -141,7 +165,17 @@ export class GroupManager {
 
     async reAddAccess(sessionId: string, allowedCard: ICard) {
         const cloudTicketStorage = await this.getCloudTicketStorage();
-        await cloudTicketStorage.reAddRecipient(sessionId, allowedCard);
+        try {
+            await cloudTicketStorage.reAddRecipient(sessionId, allowedCard);
+        } catch (error) {
+            if (error.name === 'GroupTicketNoAccessError') {
+                throw new GroupError(
+                    GroupErrorCode.NoAccess,
+                    'Current user has no access to the group ticket',
+                );
+            }
+            throw error;
+        }
     }
 
     async cleanup() {
