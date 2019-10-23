@@ -191,6 +191,7 @@ export enum GroupErrorCode {
     GroupIdTooShort = 8,
     MessageNotFromThisGroup = 9,
     GroupIsOutdated = 10,
+    NoAccess = 11,
 }
 
 export class GroupError extends Error {
