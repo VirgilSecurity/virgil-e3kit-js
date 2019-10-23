@@ -75,6 +75,12 @@ export class GroupManager {
                 initiatorCard.publicKey,
             );
         } catch (err) {
+            if (
+                err.name === 'GroupTicketDoesntExistError' ||
+                err.name === 'GroupTicketNoAccessError'
+            ) {
+                await this._localGroupStorage.delete(sessionId);
+            }
             switch (err.name) {
                 case 'GroupTicketDoesntExistError':
                     throw new GroupError(
