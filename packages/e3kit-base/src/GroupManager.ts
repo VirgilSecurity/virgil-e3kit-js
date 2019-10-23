@@ -139,7 +139,6 @@ export class GroupManager {
 
     async cleanup() {
         await this._localGroupStorage.reset();
-        await this._localGroupStorage.close();
     }
 
     private get selfIdentity() {
