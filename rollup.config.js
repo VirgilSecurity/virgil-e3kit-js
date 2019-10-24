@@ -45,8 +45,10 @@ const createNativeEntry = () => {
         external,
         plugins: [
             replace({
-              'process.env.PRODUCT_NAME': JSON.stringify(PRODUCT_NAME),
-              'process.env.PRODUCT_VERSION': JSON.stringify(packageJson.version),
+                replaces: {
+                    'process.env.PRODUCT_NAME': JSON.stringify(PRODUCT_NAME),
+                    'process.env.PRODUCT_VERSION': JSON.stringify(packageJson.version),
+                }
             }),
             nodeResolve({ browser: true }),
             commonjs(),
@@ -90,8 +92,10 @@ const createBrowserEntry = (target, cryptoType, format) => {
         },
         plugins: [
             replace({
-              'process.env.PRODUCT_NAME': JSON.stringify(PRODUCT_NAME),
-              'process.env.PRODUCT_VERSION': JSON.stringify(packageJson.version),
+                replaces: {
+                    'process.env.PRODUCT_NAME': JSON.stringify(PRODUCT_NAME),
+                    'process.env.PRODUCT_VERSION': JSON.stringify(packageJson.version),
+                }
             }),
             replace({
                 patterns: [
@@ -151,8 +155,10 @@ const createNodeJsEntry = (cryptoType, format) => {
         external,
         plugins: [
             replace({
-              'process.env.PRODUCT_NAME': JSON.stringify(PRODUCT_NAME),
-              'process.env.PRODUCT_VERSION': JSON.stringify(packageJson.version),
+                replaces: {
+                    'process.env.PRODUCT_NAME': JSON.stringify(PRODUCT_NAME),
+                    'process.env.PRODUCT_VERSION': JSON.stringify(packageJson.version),
+                }
             }),
             replace({
                 patterns: [
