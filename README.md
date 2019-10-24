@@ -38,7 +38,7 @@ See an example of how to do this with Webpack in the [example/webpack](example/w
 ### In browser via `script` tag
 You will need to add `@virgilsecurity/e3kit` script.
 ```html
-<script src="https://unpkg.com/@virgilsecurity/e3kit/dist/browser.umd.js"></script>
+<script src="https://unpkg.com/@virgilsecurity/e3kit@0.6.2/dist/browser.umd.js"></script>
 ```
 
 ## Usage Example
