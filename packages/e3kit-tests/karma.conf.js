@@ -2,11 +2,7 @@ const fs = require('fs');
 const path = require('path');
 
 const dotenv = require('dotenv');
-const commonjs = require('rollup-plugin-commonjs');
-const nodeResolve = require('rollup-plugin-node-resolve');
-const replace = require('rollup-plugin-replace');
-const typescript = require('rollup-plugin-typescript2');
-const wasm = require('rollup-plugin-wasm');
+const webpack = require('webpack');
 
 dotenv.config();
 
@@ -29,7 +25,7 @@ module.exports = config => {
         frameworks: ['mocha'],
         autoWatch: false,
         files: [
-            { pattern: 'src/**/*.test.ts' },
+            'src/browser.test.ts',
             { pattern: path.join(foundationPath, 'libfoundation.browser.wasm'), included: false },
             { pattern: path.join(pythiaPath, 'libpythia.browser.wasm'), included: false },
         ],
@@ -47,37 +43,46 @@ module.exports = config => {
             'application/wasm': ['wasm'],
         },
         preprocessors: {
-            'src/**/*.ts': ['rollup'],
+            'src/browser.test.ts': ['webpack'],
         },
         client: {
             mocha: {
                 timeout: 15000,
             },
         },
-        rollupPreprocessor: {
-            output: {
-                format: 'iife',
-                name: 'virgil',
-                sourcemap: false,
+        webpack: {
+            mode: 'production',
+            resolve: {
+                extensions: ['.js', '.ts'],
+            },
+            module: {
+                rules: [
+                    {
+                        test: /\.ts$/,
+                        loader: 'ts-loader',
+                    },
+                    {
+                        test: /\.wasm$/,
+                        type: 'javascript/auto',
+                        loader: 'file-loader',
+                        options: {
+                            name: '[name].[ext]',
+                        },
+                    },
+                ],
             },
             plugins: [
-                replace({
-                    '@virgilsecurity/e3kit-node': '@virgilsecurity/e3kit',
-                    'process.env.API_KEY_ID': JSON.stringify(process.env.API_KEY_ID),
-                    'process.env.API_KEY': JSON.stringify(process.env.API_KEY),
-                    'process.env.APP_ID': JSON.stringify(process.env.APP_ID),
-                    'process.env.API_URL': JSON.stringify(process.env.API_URL),
-                    'process.env.NODE_ENV': process.env.NODE_ENV || JSON.stringify('production'),
+                new webpack.NormalModuleReplacementPlugin(
+                    /@virgilsecurity\/e3kit-node/,
+                    '@virgilsecurity/e3kit',
+                ),
+                new webpack.EnvironmentPlugin({
+                    API_KEY_ID: JSON.stringify(process.env.API_KEY_ID),
+                    API_KEY: JSON.stringify(process.env.API_KEY),
+                    APP_ID: JSON.stringify(process.env.APP_ID),
+                    API_URL: JSON.stringify(process.env.API_URL),
+                    NODE_ENV: process.env.NODE_ENV || JSON.stringify('production'),
                 }),
-                nodeResolve({
-                    browser: true,
-                    extensions: ['.js', '.ts'],
-                }),
-                commonjs({
-                    namedExports: { chai: ['expect'] },
-                }),
-                typescript(),
-                wasm(),
             ],
         },
     });
