@@ -192,11 +192,9 @@ export class GroupManager {
 
     private async getLocalGroupStorage() {
         const keyPair = await this._privateKeyLoader.loadLocalKeyPair();
-        if (!keyPair) {
-            // TODO replace with PrivateKeyMissingError
-            throw new RegisterRequiredError();
+        if (keyPair) {
+            this._localGroupStorage.setEncryptionKeyPair(keyPair);
         }
-        this._localGroupStorage.setEncryptionKeyPair(keyPair);
         return this._localGroupStorage;
     }
 
