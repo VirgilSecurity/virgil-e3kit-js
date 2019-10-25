@@ -14,7 +14,7 @@ import { ICrypto, IKeyPair } from '../types';
 
 export interface VirgilEncryptDownOptions {
     virgilCrypto: ICrypto;
-    keyPair: IKeyPair;
+    keyPair?: IKeyPair;
 }
 
 export type ValueType = string | Buffer;
@@ -60,7 +60,7 @@ class VirgilEncryptDownIterator<K> extends AbstractIterator<K, ValueType> {
 class VirgilEncryptDown<K> extends AbstractLevelDOWN<K, ValueType> {
     db: AbstractLevelDOWN;
     crypto: ICrypto;
-    keyPair: IKeyPair;
+    keyPair?: IKeyPair;
 
     constructor(db: AbstractLevelDOWN<K, ValueType>, options: VirgilEncryptDownOptions) {
         super('ignored');
@@ -135,11 +135,21 @@ class VirgilEncryptDown<K> extends AbstractLevelDOWN<K, ValueType> {
         return new VirgilEncryptDownIterator<K>(this, options);
     }
 
+    setKeyPair(keyPair: IKeyPair) {
+        this.keyPair = keyPair;
+    }
+
     encrypt(value: ValueType) {
+        if (!this.keyPair) {
+            throw new Error('Cannot encrypt value. Key pair is not set. Call "setKeyPair" first.');
+        }
         return this.crypto.signThenEncrypt(value, this.keyPair.privateKey, this.keyPair.publicKey);
     }
 
     decrypt(encryptedValue: ValueType) {
+        if (!this.keyPair) {
+            throw new Error('Cannot decrypt value. Key pair is not set. Call "setKeyPair" first.');
+        }
         return this.crypto.decryptThenVerify(
             encryptedValue,
             this.keyPair.privateKey,

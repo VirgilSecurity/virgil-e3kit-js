@@ -61,7 +61,9 @@ const createGroupLocalStorage = (
     virgilCrypto: ICrypto = createVirgilCryptoStub(),
     keyPair: IKeyPair = createKeyPairStub(),
 ) => {
-    return new GroupLocalStorage({ identity, leveldown, virgilCrypto, keyPair });
+    const storage = new GroupLocalStorage({ identity, leveldown, virgilCrypto });
+    storage.setEncryptionKeyPair(keyPair);
+    return storage;
 };
 
 afterEach(() => {
@@ -132,7 +134,7 @@ describe('GroupLocalStorage', () => {
             );
         });
 
-        it('rejects if encryption fails', () => {
+        it('rejects if encryption fails', async () => {
             const identity = 'test';
             const sessionId = getRandomString('session');
             const keyPairStub = createKeyPairStub();
@@ -151,6 +153,20 @@ describe('GroupLocalStorage', () => {
             };
 
             expect(storage.store(rawGroup)).eventually.to.be.rejectedWith('failed to encrypt');
+        });
+
+        it('rejects if encryption key pair is not set', async () => {
+            const storage = new GroupLocalStorage({
+                identity: 'test',
+                leveldown: memdown(),
+                virgilCrypto: createVirgilCryptoStub(),
+            });
+            const sessionId = getRandomString('session');
+            const rawGroup = {
+                info: createGroupInfo(),
+                tickets: createTickets(sessionId, 1),
+            };
+            expect(storage.store(rawGroup)).eventually.to.be.rejectedWith('Key pair is not set');
         });
     });
 
@@ -332,6 +348,31 @@ describe('GroupLocalStorage', () => {
             expect(storage.retrieve(sessionId, { ticketCount: 1 })).eventually.to.be.rejectedWith(
                 'failed to decrypt',
             );
+        });
+
+        it('rejects if encryption key pair is not set', async () => {
+            const commonStorageBackend = memdown();
+            const validStorage = new GroupLocalStorage({
+                identity: 'test',
+                leveldown: commonStorageBackend,
+                virgilCrypto: createVirgilCryptoStub(),
+            });
+            const invalidStorage = new GroupLocalStorage({
+                identity: 'test',
+                leveldown: commonStorageBackend,
+                virgilCrypto: createVirgilCryptoStub(),
+            });
+            const sessionId = getRandomString('session');
+            const rawGroup = {
+                info: createGroupInfo(),
+                tickets: createTickets(sessionId, 1),
+            };
+            validStorage.setEncryptionKeyPair(createKeyPairStub());
+            await validStorage.store(rawGroup);
+
+            expect(
+                invalidStorage.retrieve(sessionId, { ticketCount: 1 }),
+            ).eventually.to.be.rejectedWith('Key pair is not set');
         });
     });
 

@@ -6,9 +6,8 @@ import {
     GroupTicket,
 } from '@virgilsecurity/keyknox';
 import { CardManager } from 'virgil-sdk';
-import { AbstractLevelDOWN } from 'abstract-leveldown';
 
-import { ICard, Ticket, IKeyPair } from './types';
+import { ICard, Ticket } from './types';
 import { CLOUD_GROUP_SESSIONS_ROOT, MAX_EPOCHS_IN_GROUP_SESSION } from './constants';
 import { PrivateKeyLoader } from './PrivateKeyLoader';
 import { GroupError, GroupErrorCode, RegisterRequiredError } from './errors';
@@ -18,10 +17,9 @@ import { isSafeInteger } from './utils/number';
 
 export interface GroupManagerConstructorParams {
     identity: string;
-    keyPair: IKeyPair;
     privateKeyLoader: PrivateKeyLoader;
     cardManager: CardManager;
-    groupStorageLeveldown: AbstractLevelDOWN;
+    groupLocalStorage: GroupLocalStorage;
 }
 
 export class GroupManager {
@@ -32,20 +30,14 @@ export class GroupManager {
 
     constructor({
         identity,
-        keyPair,
         privateKeyLoader,
         cardManager,
-        groupStorageLeveldown,
+        groupLocalStorage,
     }: GroupManagerConstructorParams) {
         this._selfIdentity = identity;
         this._privateKeyLoader = privateKeyLoader;
         this._cardManager = cardManager;
-        this._localGroupStorage = new GroupLocalStorage({
-            identity,
-            keyPair,
-            leveldown: groupStorageLeveldown,
-            virgilCrypto: privateKeyLoader.options.virgilCrypto,
-        });
+        this._localGroupStorage = groupLocalStorage;
     }
 
     async store(ticket: Ticket, cards: ICard[]) {
@@ -58,7 +50,8 @@ export class GroupManager {
             cardManager: this._cardManager,
             groupManager: this,
         });
-        this._localGroupStorage.store({
+        const localGroupStorage = await this.getLocalGroupStorage();
+        localGroupStorage.store({
             info: { initiator: this.selfIdentity },
             tickets: [ticket],
         });
@@ -66,6 +59,7 @@ export class GroupManager {
     }
 
     async pull(sessionId: string, initiatorCard: ICard) {
+        const localGroupStorage = await this.getLocalGroupStorage();
         let cloudTickets: GroupTicket[];
         try {
             const cloudTicketStorage = await this.getCloudTicketStorage();
@@ -75,6 +69,12 @@ export class GroupManager {
                 initiatorCard.publicKey,
             );
         } catch (err) {
+            if (
+                err.name === 'GroupTicketDoesntExistError' ||
+                err.name === 'GroupTicketNoAccessError'
+            ) {
+                await localGroupStorage.delete(sessionId);
+            }
             switch (err.name) {
                 case 'GroupTicketDoesntExistError':
                     throw new GroupError(
@@ -103,7 +103,7 @@ export class GroupManager {
             cardManager: this._cardManager,
             groupManager: this,
         });
-        this._localGroupStorage.store({ info: { initiator }, tickets });
+        localGroupStorage.store({ info: { initiator }, tickets });
         return group;
     }
 
@@ -112,8 +112,10 @@ export class GroupManager {
             ? { epochNumber }
             : { ticketCount: MAX_EPOCHS_IN_GROUP_SESSION };
 
+        const localGroupStorage = await this.getLocalGroupStorage();
+
         try {
-            const rawGroup = await this._localGroupStorage.retrieve(sessionId, options);
+            const rawGroup = await localGroupStorage.retrieve(sessionId, options);
             if (!rawGroup) return null;
             return new Group({
                 initiator: rawGroup.info.initiator,
@@ -160,7 +162,8 @@ export class GroupManager {
     async delete(sessionId: string) {
         const cloudTicketStorage = await this.getCloudTicketStorage();
         await cloudTicketStorage.delete(sessionId);
-        await this._localGroupStorage.delete(sessionId);
+        const localGroupStorage = await this.getLocalGroupStorage();
+        await localGroupStorage.delete(sessionId);
     }
 
     async reAddAccess(sessionId: string, allowedCard: ICard) {
@@ -179,11 +182,22 @@ export class GroupManager {
     }
 
     async cleanup() {
-        await this._localGroupStorage.reset();
+        const localGroupStorage = await this.getLocalGroupStorage();
+        await localGroupStorage.reset();
     }
 
     private get selfIdentity() {
         return this._selfIdentity;
+    }
+
+    private async getLocalGroupStorage() {
+        const keyPair = await this._privateKeyLoader.loadLocalKeyPair();
+        if (!keyPair) {
+            // TODO replace with PrivateKeyMissingError
+            throw new RegisterRequiredError();
+        }
+        this._localGroupStorage.setEncryptionKeyPair(keyPair);
+        return this._localGroupStorage;
     }
 
     private async getCloudTicketStorage() {
