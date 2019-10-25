@@ -13,6 +13,7 @@ yarn.lock
 .rpt2_cache
 .virgil_key_entries
 .virgil-keyknox-storage
+.virgil-group-storage
 .virgil-local-storage
 coverage
 dist
