@@ -1,6 +1,7 @@
 const path = require('path');
 
 const commonjs = require('rollup-plugin-commonjs');
+const license = require('rollup-plugin-license');
 const nodeResolve = require('rollup-plugin-node-resolve');
 const typescript = require('rollup-plugin-typescript2');
 
@@ -32,6 +33,13 @@ const createEntry = format => ({
             tsconfigOverride: {
                 compilerOptions: {
                     noImplicitAny: false,
+                },
+            },
+        }),
+        license({
+            banner: {
+                content: {
+                    file: path.join(__dirname, '..', '..', 'LICENSE'),
                 },
             },
         }),

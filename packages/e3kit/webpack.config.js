@@ -1,3 +1,8 @@
+const fs = require('fs');
+const path = require('path');
+
+const webpack = require('webpack');
+
 module.exports = {
     mode: 'production',
     entry: {
@@ -11,4 +16,9 @@ module.exports = {
         libraryTarget: 'umd',
         filename: '[name].umd.js',
     },
+    plugins: [
+        new webpack.BannerPlugin({
+            banner: fs.readFileSync(path.join(__dirname, '..', '..', 'LICENSE')).toString(),
+        }),
+    ],
 };

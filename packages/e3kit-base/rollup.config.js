@@ -1,5 +1,6 @@
 const path = require('path');
 
+const license = require('rollup-plugin-license');
 const typescript = require('rollup-plugin-typescript2');
 
 const packageJson = require('./package.json');
@@ -19,7 +20,16 @@ const createEntry = format => ({
         format,
         file: path.join(outputPath, `e3kit-base.${format}.js`),
     },
-    plugins: [typescript({ useTsconfigDeclarationDir: true })],
+    plugins: [
+        typescript({ useTsconfigDeclarationDir: true }),
+        license({
+            banner: {
+                content: {
+                    file: path.join(__dirname, '..', '..', 'LICENSE'),
+                },
+            },
+        }),
+    ],
 });
 
 module.exports = [createEntry(FORMAT.CJS), createEntry(FORMAT.ES)];

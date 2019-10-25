@@ -2,6 +2,7 @@ const fs = require('fs');
 const path = require('path');
 
 const copy = require('rollup-plugin-copy');
+const license = require('rollup-plugin-license');
 const replace = require('rollup-plugin-re');
 const typescript = require('rollup-plugin-typescript2');
 
@@ -85,6 +86,13 @@ const createEntry = (target, cryptoType, format) => {
                 tsconfigOverride: {
                     compilerOptions: {
                         noImplicitAny: false,
+                    },
+                },
+            }),
+            license({
+                banner: {
+                    content: {
+                        file: path.join(__dirname, '..', '..', 'LICENSE'),
                     },
                 },
             }),
