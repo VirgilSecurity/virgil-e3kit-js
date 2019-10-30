@@ -4,6 +4,8 @@ const commonjs = require('rollup-plugin-commonjs');
 const license = require('rollup-plugin-license');
 const nodeResolve = require('rollup-plugin-node-resolve');
 const typescript = require('rollup-plugin-typescript2');
+const builtins = require('rollup-plugin-node-builtins');
+const globals = require('rollup-plugin-node-globals');
 
 const FORMAT = {
     CJS: 'cjs',
@@ -16,6 +18,7 @@ const outputPath = path.join(__dirname, 'dist');
 const createEntry = format => ({
     external: [
         '@react-native-community/async-storage',
+        '@virgilsecurity/key-storage-rn/native',
         'react-native',
         'react-native-virgil-crypto',
         'react-native-keychain',
@@ -28,6 +31,8 @@ const createEntry = format => ({
     plugins: [
         nodeResolve({ browser: true, preferBuiltins: false }),
         commonjs(),
+        globals(),
+        builtins(),
         typescript({
             useTsconfigDeclarationDir: true,
             tsconfigOverride: {

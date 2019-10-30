@@ -19,8 +19,15 @@
         "prettier": "1.18.2",
         "typescript": "^3.6.3"
     },
-    "workspaces": [
-        "examples/*",
-        "packages/*"
-    ]
+    "workspaces": {
+        "packages": [
+            "examples/*",
+            "packages/*"
+        ],
+        "nohoist": [
+            "**/react-native",
+            "**/react-native/**",
+            "**/abstract-leveldown"
+        ]
+    }
 }
