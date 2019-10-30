@@ -93,7 +93,7 @@ const createEntry = (target, cryptoType, format) => {
                     },
                 ],
             }),
-            nodeResolve({ browser: true }),
+            nodeResolve({ browser: true, preferBuiltins: true }),
             commonjs(),
             typescript({
                 useTsconfigDeclarationDir: true,
