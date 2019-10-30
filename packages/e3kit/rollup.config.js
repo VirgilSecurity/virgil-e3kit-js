@@ -72,7 +72,7 @@ const createEntry = (target, cryptoType, format) => {
             replace({
                 patterns: [
                     {
-                        match: /node_modules\/level-js\/index.js/,
+                        match: /node_modules\/level-js\/(util\/clear|index|iterator)\.js/,
                         test: "var setImmediate = require('./util/immediate')",
                         replace: "var setImmediate = require('immediate')",
                     },
