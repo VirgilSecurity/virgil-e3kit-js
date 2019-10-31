@@ -1,16 +1,19 @@
 const fs = require('fs');
 const path = require('path');
 
+const commonjs = require('rollup-plugin-commonjs');
 const copy = require('rollup-plugin-copy');
 const license = require('rollup-plugin-license');
+const nodeBuiltins = require('rollup-plugin-node-builtins');
+const nodeGlobals = require('rollup-plugin-node-globals');
+const nodeResolve = require('rollup-plugin-node-resolve');
 const replace = require('rollup-plugin-re');
 const typescript = require('rollup-plugin-typescript2');
-
-const packageJson = require('./package.json');
 
 const FORMAT = {
     CJS: 'cjs',
     ES: 'es',
+    UMD: 'umd',
 };
 
 const CRYPTO_TYPE = {
@@ -59,15 +62,39 @@ const createEntry = (target, cryptoType, format) => {
     const pythiaWasmPath = path.join(pythiaPath, 'dist', `libpythia.${target}.wasm`);
 
     return {
-        external: Object.keys(packageJson.dependencies),
+        external:
+            format !== FORMAT.umd
+                ? [
+                      foundationEntryPoint,
+                      pythiaEntryPoint,
+                      '@virgilsecurity/base-crypto',
+                      '@virgilsecurity/sdk-crypto',
+                  ]
+                : [],
         input: path.join(sourcePath, 'index.ts'),
         output: {
             format,
             file: path.join(outputPath, getCryptoEntryPointName(target, cryptoType, format)),
+            name: 'E3kit',
         },
         plugins: [
             replace({
                 patterns: [
+                    {
+                        match: /node_modules\/level-js\/(index|iterator)\.js/,
+                        test: "var setImmediate = require('./util/immediate')",
+                        replace: "var setImmediate = require('immediate')",
+                    },
+                    {
+                        match: /node_modules\/level-js\/util\/clear\.js/,
+                        test: "var setImmediate = require('./immediate')",
+                        replace: "var setImmediate = require('immediate')",
+                    },
+                    {
+                        match: /node_modules\/level-js\/util\/immediate-browser.js/,
+                        test: "module.exports = require('immediate')",
+                        replace: 'module.exports = {}',
+                    },
                     {
                         match: /EThree\.ts$/,
                         test: foundationModuleName,
@@ -80,6 +107,8 @@ const createEntry = (target, cryptoType, format) => {
                     },
                 ],
             }),
+            nodeResolve({ browser: true, preferBuiltins: true }),
+            commonjs(),
             typescript({
                 useTsconfigDeclarationDir: true,
                 objectHashIgnoreUnknownHack: true,
@@ -89,6 +118,8 @@ const createEntry = (target, cryptoType, format) => {
                     },
                 },
             }),
+            nodeGlobals(),
+            nodeBuiltins(),
             license({
                 banner: {
                     content: {
@@ -112,9 +143,13 @@ module.exports = [
     createEntry(TARGET.BROWSER, CRYPTO_TYPE.WASM, FORMAT.CJS),
     createEntry(TARGET.BROWSER, CRYPTO_TYPE.ASMJS, FORMAT.ES),
     createEntry(TARGET.BROWSER, CRYPTO_TYPE.WASM, FORMAT.ES),
+    createEntry(TARGET.BROWSER, CRYPTO_TYPE.ASMJS, FORMAT.UMD),
+    createEntry(TARGET.BROWSER, CRYPTO_TYPE.WASM, FORMAT.UMD),
 
     createEntry(TARGET.WORKER, CRYPTO_TYPE.ASMJS, FORMAT.CJS),
     createEntry(TARGET.WORKER, CRYPTO_TYPE.WASM, FORMAT.CJS),
     createEntry(TARGET.WORKER, CRYPTO_TYPE.ASMJS, FORMAT.ES),
     createEntry(TARGET.WORKER, CRYPTO_TYPE.WASM, FORMAT.ES),
+    createEntry(TARGET.WORKER, CRYPTO_TYPE.ASMJS, FORMAT.UMD),
+    createEntry(TARGET.WORKER, CRYPTO_TYPE.WASM, FORMAT.UMD),
 ];

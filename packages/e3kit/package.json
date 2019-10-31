@@ -16,9 +16,7 @@
     "author": "Virgil Security Inc. <support@virgilsecurity.com>",
     "license": "BSD-3-Clause",
     "scripts": {
-        "build:modules": "node --max-old-space-size=4096 node_modules/.bin/rollup -c",
-        "build:umd": "webpack --config webpack.config.js",
-        "build": "npm run build:modules && npm run build:umd",
+        "build": "node --max-old-space-size=4096 node_modules/.bin/rollup -c",
         "clean": "rimraf .rpt2_cache dist",
         "prepare": "npm run clean && npm run build"
     },
@@ -35,13 +33,15 @@
     "devDependencies": {
         "rimraf": "^3.0.0",
         "rollup": "^1.21.4",
+        "rollup-plugin-commonjs": "^10.1.0",
         "rollup-plugin-copy": "^3.1.0",
         "rollup-plugin-license": "^0.12.1",
+        "rollup-plugin-node-builtins": "^2.1.2",
+        "rollup-plugin-node-globals": "^1.4.0",
+        "rollup-plugin-node-resolve": "^5.2.0",
         "rollup-plugin-re": "^1.0.7",
         "rollup-plugin-typescript2": "^0.24.2",
-        "typescript": "^3.6.3",
-        "webpack": "^4.41.2",
-        "webpack-cli": "^3.3.9"
+        "typescript": "^3.6.3"
     },
     "publishConfig": {
         "access": "public"
