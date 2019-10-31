@@ -18,7 +18,7 @@
         "@types/uuid": "^3.4.5",
         "@virgilsecurity/base-crypto": "^0.6.1",
         "@virgilsecurity/core-foundation": "^0.3.0",
-        "@virgilsecurity/e3kit": "^0.6.0-beta.3",
+        "@virgilsecurity/e3kit-browser": "^0.6.0-beta.3",
         "@virgilsecurity/e3kit-native": "^0.6.0-beta.3",
         "@virgilsecurity/e3kit-node": "^0.6.0-beta.3",
         "@virgilsecurity/keyknox": "next",

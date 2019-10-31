@@ -11,7 +11,7 @@
         "build": "webpack"
     },
     "dependencies": {
-        "@virgilsecurity/e3kit": "^0.6.0-beta.3"
+        "@virgilsecurity/e3kit-browser": "^0.6.0-beta.3"
     },
     "devDependencies": {
         "dotenv": "^8.1.0",
