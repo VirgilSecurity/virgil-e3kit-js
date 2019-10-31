@@ -15,76 +15,120 @@ import {
     Text,
     StatusBar,
     Platform,
+    Button,
 } from 'react-native';
 
 import { Header, Colors } from 'react-native/Libraries/NewAppScreen';
 
 import { EThree } from '@virgilsecurity/e3kit-native';
-import AsyncStorage from '@react-native-community/async-storage';
 
-// variable that will hold the initialized EThree instance
-let sdk;
+const apiUrl = `http://${
+    Platform.OS === 'android' ? '10.0.2.2' : 'localhost'
+}:8080`;
+
+const getRandomString = (prefix = '') =>
+    `${prefix}${Math.random()
+        .toString(36)
+        .substr(2)}`;
+
+const getTokenFactory = identity => {
+    return () =>
+        fetch(`${apiUrl}/virgil-jwt?identity=${encodeURIComponent(identity)}`)
+            .then(res => res.json())
+            .then(data => data.virgil_jwt);
+};
+
+const initializeUser = () => {
+    const identity = getRandomString('E3kitReactNativeTestIdenity');
+    const getToken = getTokenFactory(identity);
+    return EThree.initialize(getToken);
+};
 
 export default class App extends Component {
     state = {
-        message: null,
-        keysBefore: null,
-        keysAfter: null,
+        steps: [],
+        error: null,
     };
 
-    componentDidMount() {
-        const identity =
-            'E3kitReactNativeTestIdenity' +
-            Math.random()
-                .toString(36)
-                .substr(2);
-        const apiUrl = `http://${
-            Platform.OS === 'android' ? '10.0.2.2' : 'localhost'
-        }:8080`;
-        const getToken = () =>
-            fetch(
-                `${apiUrl}/virgil-jwt?identity=${encodeURIComponent(identity)}`,
-            )
-                .then(res => res.json())
-                .then(data => data.virgil_jwt);
+    reportStep(step) {
+        this.setState(({ steps }) => ({ steps: steps.concat(step) }));
+    }
 
-        const existingUserIdentity = 'E3kitReactNativeTestIdenity9fux8ceis86';
-        const groupId =
-            'E3kitReactNativeTestGroup' +
-            Math.random()
-                .toString(36)
-                .substr(2);
-        let group;
+    async runDemo() {
+        try {
+            this.reportStep('Initializing...');
+            const [alice, bob] = await Promise.all([
+                initializeUser(),
+                initializeUser(),
+            ]);
 
-        EThree.initialize(getToken)
-            .then(client => (sdk = client))
-            .then(() => sdk.register())
-            .then(() => sdk.backupPrivateKey('pa$$w0rd'))
-            .then(() => sdk.encrypt('success!'))
-            .then(encryptedMessage => sdk.decrypt(encryptedMessage))
-            .then(message => this.setState({ message: message }))
-            .then(() => sdk.findUsers(existingUserIdentity))
-            .then(existingUser => sdk.createGroup(groupId, existingUser))
-            .then(created => (group = created))
-            .then(() => group.encrypt('group success!'))
-            .then(encrypted =>
-                sdk
-                    .findUsers(identity)
-                    .then(selfCard => ({ encrypted, selfCard })),
-            )
-            .then(({ encrypted, selfCard }) =>
-                group.decrypt(encrypted, selfCard),
-            )
-            .then(message => this.setState({ message: message.toString() }))
-            .then(() => AsyncStorage.getAllKeys())
-            .then(keys => console.log('KEYS BEFORE', keys))
-            .then(() => sdk.resetPrivateKeyBackup('pa$$w0rd'))
-            .then(() => sdk.cleanup())
-            .then(() => AsyncStorage.getAllKeys())
-            .then(keys => console.log('KEYS AFTER', keys))
-            .catch(error => {
-                this.setState({ message: error.toString() });
-            });
+            this.reportStep('Alice registers...');
+            await alice.register();
+
+            this.reportStep('Alice creates private key backup...');
+            await alice.backupPrivateKey('alice_pa$$w0rd');
+
+            this.reportStep('Bob registers...');
+            await bob.register();
+
+            this.reportStep('Bob creates private key backup...');
+            await bob.backupPrivateKey('bob_pa$$w0rd');
+
+            this.reportStep("Alice searches for Bob's card...");
+            const bobCard = await alice.findUsers(bob.identity);
+
+            this.reportStep('Alice encrypts message for Bob...');
+            const encryptedForBob = await alice.encrypt('Hello Bob!', bobCard);
+
+            this.reportStep("Bob searches for Alice's card...");
+            const aliceCard = await bob.findUsers(alice.identity);
+
+            this.reportStep('Bob decrypts the message...');
+            const decryptedByBob = await bob.decrypt(
+                encryptedForBob,
+                aliceCard,
+            );
+
+            this.reportStep('Decrypted message: ' + decryptedByBob);
+            this.setState({ message: decryptedByBob });
+
+            const groupId = getRandomString('E3kitReactNativeTestGroup');
+
+            this.reportStep('Alice creates a group with Bob...');
+            const aliceGroup = await alice.createGroup(groupId, bobCard);
+
+            this.reportStep('Alice encrypts message for the group...');
+            const encryptedForGroup = await aliceGroup.encrypt('Hello group!');
+
+            this.reportStep('Bob loads the group by ID from the Cloud...');
+            const bobGroup = await bob.loadGroup(groupId, aliceCard);
+
+            this.reportStep('Bob decrypts the group message...');
+            const decryptedByGroup = await bobGroup.decrypt(
+                encryptedForGroup,
+                aliceCard,
+            );
+
+            this.reportStep('Decrypted group message: ' + decryptedByGroup);
+
+            this.reportStep('Alice deletes group...');
+            await alice.deleteGroup(groupId);
+
+            this.reportStep('Alice deletes private key backup...');
+            await alice.resetPrivateKeyBackup('alice_pa$$w0rd');
+
+            this.reportStep('Alice unregisters...');
+            await alice.unregister();
+
+            this.reportStep('Bob deletes private key backup...');
+            await bob.resetPrivateKeyBackup('bob_pa$$w0rd');
+
+            this.reportStep('Bob unregisters...');
+            await bob.unregister();
+        } catch (err) {
+            console.error(err);
+            this.setState({ error: err.toString() });
+        }
     }
 
     render() {
@@ -109,20 +153,22 @@ export default class App extends Component {
                                     E3kit React Native
                                 </Text>
                                 <Text style={styles.sectionDescription}>
-                                    If all goes well, you should see "success!"
-                                    message printed below...
+                                    Tap the button below to run the demo. If
+                                    goes well, you should see status messages
+                                    printed below...
                                 </Text>
-                                <Text style={styles.highlight}>
-                                    {this.state.message}
-                                </Text>
-                                {this.state.keysBefore && (
-                                    <Text>
-                                        {this.state.keysBefore.join(', ')}
+                                <Button
+                                    title="Run demo"
+                                    onPress={() => this.runDemo()}
+                                />
+                                {this.state.steps.map((step, i) => (
+                                    <Text key={i} style={styles.highlight}>
+                                        {step}
                                     </Text>
-                                )}
-                                {this.state.keysAfter && (
-                                    <Text>
-                                        {this.state.keysAfter.join(', ')}
+                                ))}
+                                {this.state.error && (
+                                    <Text style={styles.highlight}>
+                                        {this.state.error}
                                     </Text>
                                 )}
                             </View>

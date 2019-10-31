@@ -1,6 +1,7 @@
 /**
  * Metro configuration for React Native
  * https://github.com/facebook/react-native
+ * Borrows heavily from https://github.com/invertase/react-native-firebase/blob/master/tests/metro.config.js
  *
  * @format
  */
@@ -23,11 +24,6 @@ const config = {
     projectRoot: __dirname,
     resolver: {
         blackListRE: createBlacklist([
-            new RegExp(
-                `^${escape(
-                    resolve(rootDir, 'examples/ReactNativeSample/__tests__'),
-                )}\\/.*$`,
-            ),
             new RegExp(
                 `^${escape(
                     resolve(rootDir, 'examples/ReactNativeSample/android'),
