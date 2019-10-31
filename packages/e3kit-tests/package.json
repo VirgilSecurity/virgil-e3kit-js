@@ -39,6 +39,23 @@
         "typescript": "^3.6.3",
         "uuid": "^3.3.3",
         "virgil-pythia": "^0.3.4",
-        "virgil-sdk": "next"
+        "virgil-sdk": "next",
+        "webpack": "^4.41.2"
+    },
+    "workspaces": {
+        "nohoist": [
+            "@types/chai",
+            "@types/mocha",
+            "chai",
+            "karma",
+            "karma-chai",
+            "karma-chrome-launcher",
+            "karma-mocha",
+            "karma-webpack",
+            "mocha",
+            "ts-loader",
+            "ts-node",
+            "webpack"
+        ]
     }
 }

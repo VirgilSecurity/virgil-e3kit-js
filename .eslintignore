@@ -1,3 +1,4 @@
+examples/ionic
 examples/*/dist
 examples/*/node_modules
 packages/*/dist
