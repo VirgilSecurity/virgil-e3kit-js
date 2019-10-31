@@ -90,7 +90,6 @@ export default class App extends Component {
             );
 
             this.reportStep('Decrypted message: ' + decryptedByBob);
-            this.setState({ message: decryptedByBob });
 
             const groupId = getRandomString('E3kitReactNativeTestGroup');
 
