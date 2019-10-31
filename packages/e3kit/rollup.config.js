@@ -62,6 +62,15 @@ const createEntry = (target, cryptoType, format) => {
     const pythiaWasmPath = path.join(pythiaPath, 'dist', `libpythia.${target}.wasm`);
 
     return {
+        external:
+            format !== FORMAT.umd
+                ? [
+                      foundationEntryPoint,
+                      pythiaEntryPoint,
+                      '@virgilsecurity/base-crypto',
+                      '@virgilsecurity/sdk-crypto',
+                  ]
+                : [],
         input: path.join(sourcePath, 'index.ts'),
         output: {
             format,
@@ -130,17 +139,17 @@ const createEntry = (target, cryptoType, format) => {
 };
 
 module.exports = [
-    createEntry(TARGET.BROWSER, CRYPTO_TYPE.ASMJS, FORMAT.CJS),
+    // createEntry(TARGET.BROWSER, CRYPTO_TYPE.ASMJS, FORMAT.CJS),
     createEntry(TARGET.BROWSER, CRYPTO_TYPE.WASM, FORMAT.CJS),
-    createEntry(TARGET.BROWSER, CRYPTO_TYPE.ASMJS, FORMAT.ES),
+    // createEntry(TARGET.BROWSER, CRYPTO_TYPE.ASMJS, FORMAT.ES),
     createEntry(TARGET.BROWSER, CRYPTO_TYPE.WASM, FORMAT.ES),
-    createEntry(TARGET.BROWSER, CRYPTO_TYPE.ASMJS, FORMAT.UMD),
-    createEntry(TARGET.BROWSER, CRYPTO_TYPE.WASM, FORMAT.UMD),
-
-    createEntry(TARGET.WORKER, CRYPTO_TYPE.ASMJS, FORMAT.CJS),
-    createEntry(TARGET.WORKER, CRYPTO_TYPE.WASM, FORMAT.CJS),
-    createEntry(TARGET.WORKER, CRYPTO_TYPE.ASMJS, FORMAT.ES),
-    createEntry(TARGET.WORKER, CRYPTO_TYPE.WASM, FORMAT.ES),
-    createEntry(TARGET.WORKER, CRYPTO_TYPE.ASMJS, FORMAT.UMD),
-    createEntry(TARGET.WORKER, CRYPTO_TYPE.WASM, FORMAT.UMD),
+    // createEntry(TARGET.BROWSER, CRYPTO_TYPE.ASMJS, FORMAT.UMD),
+    // createEntry(TARGET.BROWSER, CRYPTO_TYPE.WASM, FORMAT.UMD),
+    //
+    // createEntry(TARGET.WORKER, CRYPTO_TYPE.ASMJS, FORMAT.CJS),
+    // createEntry(TARGET.WORKER, CRYPTO_TYPE.WASM, FORMAT.CJS),
+    // createEntry(TARGET.WORKER, CRYPTO_TYPE.ASMJS, FORMAT.ES),
+    // createEntry(TARGET.WORKER, CRYPTO_TYPE.WASM, FORMAT.ES),
+    // createEntry(TARGET.WORKER, CRYPTO_TYPE.ASMJS, FORMAT.UMD),
+    // createEntry(TARGET.WORKER, CRYPTO_TYPE.WASM, FORMAT.UMD),
 ];
