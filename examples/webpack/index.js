@@ -1,4 +1,4 @@
-import { EThree } from '@virgilsecurity/e3kit';
+import { EThree } from '@virgilsecurity/e3kit-browser';
 
 const getToken = async () => {
     const myIdentity = 'my-identity';

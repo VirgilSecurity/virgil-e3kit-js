@@ -32,7 +32,7 @@
               },
               {
                 "glob": "{libfoundation,libpythia}.browser.wasm",
-                "input": "../../node_modules/@virgilsecurity/e3kit/dist",
+                "input": "../../node_modules/@virgilsecurity/e3kit-browser/dist",
                 "output": "."
               }
             ],

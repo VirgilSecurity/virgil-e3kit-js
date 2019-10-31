@@ -13,7 +13,7 @@ const getModulePath = request => {
 };
 
 const htmlPath = path.join(__dirname, 'index.html');
-const e3kitPath = getModulePath('@virgilsecurity/e3kit');
+const e3kitPath = getModulePath('@virgilsecurity/e3kit-browser');
 const e3kitJsPath = path.join(e3kitPath, 'dist', 'browser.umd.js');
 const foundationWasmPath = path.join(e3kitPath, 'dist', 'libfoundation.browser.wasm');
 const pythiaWasmPath = path.join(e3kitPath, 'dist', 'libpythia.browser.wasm');

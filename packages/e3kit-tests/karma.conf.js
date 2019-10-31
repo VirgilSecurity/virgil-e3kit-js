@@ -74,7 +74,7 @@ module.exports = config => {
             plugins: [
                 new webpack.NormalModuleReplacementPlugin(
                     /@virgilsecurity\/e3kit-node/,
-                    '@virgilsecurity/e3kit',
+                    '@virgilsecurity/e3kit-browser',
                 ),
                 new webpack.EnvironmentPlugin({
                     API_KEY_ID: JSON.stringify(process.env.API_KEY_ID),
