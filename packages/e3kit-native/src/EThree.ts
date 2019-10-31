@@ -15,59 +15,7 @@ import AsyncStorage from '@react-native-community/async-storage';
 import { IPublicKey, EThreeCtorOptions, EThreeInitializeOptions } from './types';
 import { withDefaults } from './withDefaults';
 
-const ensureClearable = (leveldown: any) => {
-    if (typeof (leveldown as any).clear !== 'undefined') {
-        return leveldown;
-    }
-
-    leveldown.clear = function(opts?: any, cb?: (err?: Error) => void) {
-        let options;
-        let callback: (err?: Error) => void;
-        if (typeof opts === 'function') {
-            options = {};
-            callback = opts;
-        } else {
-            options = opts;
-            callback = cb!;
-        }
-
-        if (typeof callback !== 'function') {
-            throw new Error('clear() requires a callback argument');
-        }
-
-        options.reverse = !!options.reverse;
-        options.limit = 'limit' in options ? options.limit : -1;
-        options.keys = true;
-        options.values = false;
-        options.keyAsBuffer = false;
-        options.valueAsBuffer = false;
-
-        const iterator = leveldown.iterator(options);
-        const emptyOptions = {};
-
-        const next = function(err?: Error) {
-            if (err) {
-                return iterator.end(function() {
-                    callback(err);
-                });
-            }
-
-            iterator.next(function(err: Error | undefined, key: string) {
-                if (err) return next(err);
-                if (key === undefined) return iterator.end(callback);
-
-                // This could be optimized by using a batch, but the default _clear
-                // is not meant to be fast. Implementations have more room to optimize
-                // if they override _clear. Note: using _del bypasses key serialization.
-                leveldown.del(key, emptyOptions, next);
-            });
-        };
-
-        next();
-    };
-
-    return leveldown;
-};
+import './asyncstoragedown-clear-polyfill';
 
 export class EThree extends AbstractEThree {
     /**
@@ -99,9 +47,7 @@ export class EThree extends AbstractEThree {
             retryOnUnauthorized: true,
             apiUrl: opts.apiUrl,
         });
-        const groupStorageLeveldown = ensureClearable(
-            asyncstorageDown(opts.groupStorageName!, { AsyncStorage }),
-        );
+        const groupStorageLeveldown = asyncstorageDown(opts.groupStorageName!, { AsyncStorage });
 
         super({
             identity,
