@@ -15,6 +15,8 @@ import AsyncStorage from '@react-native-community/async-storage';
 import { IPublicKey, EThreeCtorOptions, EThreeInitializeOptions } from './types';
 import { withDefaults } from './withDefaults';
 
+import './asyncstoragedown-clear-polyfill';
+
 export class EThree extends AbstractEThree {
     /**
      * @hidden

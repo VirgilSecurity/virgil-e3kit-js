@@ -4,7 +4,7 @@ import { RegisterRequiredError, GroupError, GroupErrorCode, UsersNotFoundError }
 import { ICard } from '../types';
 import { CardManager } from 'virgil-sdk';
 import { GroupManager } from '../GroupManager';
-import { isVirgilCard } from '../typeguards';
+import { isVirgilCard, isString } from '../typeguards';
 import { VALID_GROUP_PARTICIPANT_COUNT_RANGE, MAX_EPOCHS_IN_GROUP_SESSION } from '../constants';
 import { getCardActiveAtMoment, getCardsArray } from '../utils/card';
 import { isValidDate } from '../utils/date';
@@ -65,18 +65,21 @@ export class Group {
     }
 
     async encrypt(data: Data) {
+        const shouldReturnString = isString(data);
         const privateKey = await this._privateKeyLoader.loadLocalPrivateKey();
         if (!privateKey) {
             throw new RegisterRequiredError();
         }
-        return this._session.encrypt(data, privateKey);
+
+        const encrypted = this._session.encrypt(data, privateKey);
+        return shouldReturnString ? encrypted.toString('base64') : encrypted;
     }
 
     async decrypt(
         encryptedData: Data,
         senderCard: ICard,
         encryptedOn?: Date | number,
-    ): Promise<NodeBuffer> {
+    ): Promise<NodeBuffer | string> {
         const {
             sessionId: messageSessionId,
             epochNumber: messageEpochNumber,
@@ -88,6 +91,8 @@ export class Group {
                 'Cannot decrypt data. Second argument must be a Virgil Card object.',
             );
         }
+
+        const shouldReturnString = isString(encryptedData);
 
         let actualCard;
         if (encryptedOn) {
@@ -124,11 +129,12 @@ export class Group {
         }
 
         try {
+            let decrypted;
             if (
                 this._session.getCurrentEpochNumber() - messageEpochNumber <
                 MAX_EPOCHS_IN_GROUP_SESSION
             ) {
-                return this._session.decrypt(messageData, actualCard.publicKey);
+                decrypted = this._session.decrypt(messageData, actualCard.publicKey);
             } else {
                 const tempGroup = await this._groupManager.retrieve(
                     messageSessionId,
@@ -140,8 +146,9 @@ export class Group {
                         `Group with given id was not found in local storage. Try to load it first.`,
                     );
                 }
-                return tempGroup.decrypt(encryptedData, actualCard);
+                decrypted = tempGroup.decrypt(encryptedData, actualCard);
             }
+            return shouldReturnString ? decrypted.toString('utf8') : decrypted;
         } catch (err) {
             if (err.name === 'FoundationError' && /Invalid signature/.test(err.message)) {
                 throw new GroupError(
