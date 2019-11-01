@@ -30,4 +30,4 @@ export {
     LookupResult,
     EncryptPublicKeyArg,
 } from '@virgilsecurity/e3kit-base';
-export { EThree } from './EThree';
+export { EThree, EThreeNativeInitializeOptions } from './EThree';

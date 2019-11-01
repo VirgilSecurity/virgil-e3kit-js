@@ -10,18 +10,25 @@ import { VirgilCardCrypto } from '@virgilsecurity/sdk-crypto';
 import { virgilCrypto, virgilBrainKeyCrypto } from 'react-native-virgil-crypto';
 import { CachingJwtProvider, CardManager, VirgilCardVerifier } from 'virgil-sdk';
 import asyncstorageDown from 'asyncstorage-down';
-import AsyncStorage from '@react-native-community/async-storage';
 
 import { IPublicKey, EThreeCtorOptions, EThreeInitializeOptions } from './types';
 import { withDefaults } from './withDefaults';
 
 import './asyncstoragedown-clear-polyfill';
 
+export interface EThreeNativeInitializeOptions extends EThreeInitializeOptions {
+    AsyncStorage: import('react-native').AsyncStorageStatic;
+}
+
+export interface EThreeNativeCtorOptions extends EThreeCtorOptions {
+    AsyncStorage: import('react-native').AsyncStorageStatic;
+}
+
 export class EThree extends AbstractEThree {
     /**
      * @hidden
      */
-    constructor(identity: string, options: EThreeCtorOptions) {
+    constructor(identity: string, options: EThreeNativeCtorOptions) {
         const opts = withDefaults(options, {
             apiUrl: DEFAULT_API_URL,
             storageName: DEFAULT_STORAGE_NAME,
@@ -47,7 +54,9 @@ export class EThree extends AbstractEThree {
             retryOnUnauthorized: true,
             apiUrl: opts.apiUrl,
         });
-        const groupStorageLeveldown = asyncstorageDown(opts.groupStorageName!, { AsyncStorage });
+        const groupStorageLeveldown = asyncstorageDown(opts.groupStorageName!, {
+            AsyncStorage: opts.AsyncStorage,
+        });
 
         super({
             identity,
@@ -66,7 +75,7 @@ export class EThree extends AbstractEThree {
      */
     static async initialize(
         getToken: () => Promise<string>,
-        options: EThreeInitializeOptions = {},
+        options: EThreeNativeInitializeOptions,
     ): Promise<EThree> {
         if (typeof getToken !== 'function') {
             throw new TypeError(
@@ -74,7 +83,7 @@ export class EThree extends AbstractEThree {
             );
         }
 
-        const opts = withDefaults(options as EThreeCtorOptions, {
+        const opts = withDefaults(options as EThreeNativeCtorOptions, {
             accessTokenProvider: new CachingJwtProvider(getToken),
         });
         const token = await opts.accessTokenProvider.getToken({
