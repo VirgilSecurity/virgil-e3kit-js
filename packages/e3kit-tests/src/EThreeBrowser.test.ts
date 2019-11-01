@@ -13,7 +13,7 @@ import {
     onEncryptProgressSnapshot,
     onDecryptProgressSnapshot,
     EThree,
-} from '@virgilsecurity/e3kit';
+} from '@virgilsecurity/e3kit-browser';
 import { initPythia } from '@virgilsecurity/pythia-crypto';
 import { VirgilAccessTokenSigner } from '@virgilsecurity/sdk-crypto';
 import { JwtGenerator } from 'virgil-sdk';

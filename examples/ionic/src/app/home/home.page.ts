@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { EThree } from '@virgilsecurity/e3kit/dist/browser.es';
+import { EThree } from '@virgilsecurity/e3kit-browser/dist/browser.es';
 
 const API_URL = 'http://localhost:8080';
 const VIRGIL_API_URL: string | undefined = 'https://api.virgilsecurity.com';
