@@ -17,9 +17,8 @@ import {
     Platform,
     Button,
 } from 'react-native';
-
 import { Header, Colors } from 'react-native/Libraries/NewAppScreen';
-
+import AsyncStorage from '@react-native-community/async-storage';
 import { EThree } from '@virgilsecurity/e3kit-native';
 
 const apiUrl = `http://${
@@ -41,7 +40,7 @@ const getTokenFactory = identity => {
 const initializeUser = () => {
     const identity = getRandomString('E3kitReactNativeTestIdenity');
     const getToken = getTokenFactory(identity);
-    return EThree.initialize(getToken);
+    return EThree.initialize(getToken, { AsyncStorage });
 };
 
 export default class App extends Component {

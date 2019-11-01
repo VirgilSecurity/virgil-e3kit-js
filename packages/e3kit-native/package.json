@@ -18,13 +18,13 @@
     },
     "dependencies": {
         "@types/abstract-leveldown": "^5.0.1",
+        "@types/react-native": "^0.60.22",
         "@virgilsecurity/e3kit-base": "^0.6.0-beta.3",
         "@virgilsecurity/sdk-crypto": "^0.4.5",
         "asyncstorage-down": "^4.2.0",
         "virgil-sdk": "next"
     },
     "devDependencies": {
-        "@react-native-community/async-storage": "^1.6.2",
         "@virgilsecurity/key-storage-rn": "^0.2.1",
         "react-native-keychain": "^4.0.1",
         "react-native-virgil-crypto": "^0.4.0",
@@ -39,7 +39,6 @@
         "typescript": "^3.6.3"
     },
     "peerDependencies": {
-        "@react-native-community/async-storage": "1.x",
         "@virgilsecurity/key-storage-rn": "0.2.x",
         "react-native-virgil-crypto": "0.4.x"
     },
