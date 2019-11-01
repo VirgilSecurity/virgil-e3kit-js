@@ -23,6 +23,24 @@ const copyFiles = (sources, outputPath) => {
     });
 };
 
+const copyDir = (sourceDir, outputDir) => {
+    const stack = [sourceDir];
+    while (stack.length) {
+        const entry = stack.pop();
+        const parsedPath = path.parse(entry);
+        const relativeDir = path.relative(sourceDir, parsedPath.dir);
+        if (fs.lstatSync(entry).isDirectory()) {
+            if (entry !== sourceDir) {
+                mkdirp.sync(path.join(outputDir, relativeDir, parsedPath.base));
+            }
+            const files = fs.readdirSync(entry).map(base => path.join(entry, base));
+            stack.push(...files);
+        } else {
+            fs.copyFileSync(entry, path.join(outputDir, relativeDir, parsedPath.base));
+        }
+    }
+};
+
 const browserDir = getModulePath('@virgilsecurity/e3kit-browser');
 const browserDistFiles = createPaths(path.join(browserDir, 'dist'), [
     'browser.asmjs.cjs.js',
@@ -42,6 +60,7 @@ const browserDistFiles = createPaths(path.join(browserDir, 'dist'), [
     'worker.es.js',
     'worker.umd.js',
 ]);
+const browserTypesDir = path.join(browserDir, 'dist', 'types');
 const browserExtraFiles = createPaths(browserDir, [
     'browser.cjs.js',
     'browser.es.js',
@@ -62,9 +81,12 @@ const nodeDistFiles = createPaths(path.join(nodeDir, 'dist'), [
 ]);
 const outputDir = __dirname;
 const outputDistDir = path.join(outputDir, 'dist');
+const outputTypesDir = path.join(outputDistDir, 'types');
 
 mkdirp.sync(outputDistDir);
+mkdirp.sync(outputTypesDir);
 copyFiles(browserDistFiles, outputDistDir);
 copyFiles(browserExtraFiles, outputDir);
 copyFiles(nativeDistFiles, outputDistDir);
 copyFiles(nodeDistFiles, outputDistDir);
+copyDir(browserTypesDir, outputTypesDir);
