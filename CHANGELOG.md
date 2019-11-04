@@ -1,6 +1,18 @@
 # Changelog
 
-## 2019-09-12
+## 2019-10-24 0.6.2
+
+* Fixed: references to `process.env` remained in bundles due to a misconfiguration of Rollup plugin that was meant to replace them with actual values. This caused `ReferenceError: process is not defined` when using UMD bundle in a browser. And it also caused VirgilAgent header to not include the product and version info.
+
+## 2019-10-15 0.6.1
+
+* Fixed errors during construction of custom error objects in React Native
+
+## 2019-10-11 0.6.0
+
+* The only change comparing to beta version is that we now send users' e3kit version and platform information (not personal information or anything that can be used to track users online) in an HTTP header with each request to Virgil Cloud to help us improve our services and provide better support.
+
+## 2019-09-12 0.6.0-beta.2
 
 * Fix: added missing exports for custom error classes and TypeScript type definitions
 
