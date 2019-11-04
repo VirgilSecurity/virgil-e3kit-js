@@ -4,8 +4,6 @@ const dotenv = require('dotenv');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const { DefinePlugin } = require('webpack');
 
-const DEFAULT_API_URL = 'http://localhost:8080';
-
 dotenv.config();
 
 module.exports = {
@@ -23,8 +21,7 @@ module.exports = {
     },
     plugins: [
         new DefinePlugin({
-            'process.env.API_URL': JSON.stringify(process.env.API_URL || DEFAULT_API_URL),
-            'process.env.VIRGIL_API_URL': JSON.stringify(process.env.VIRGIL_API_URL),
+            'process.env.API_URL': JSON.stringify(process.env.API_URL),
         }),
         new HtmlWebpackPlugin({ template: path.join(__dirname, 'index.html') }),
     ],
