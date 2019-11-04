@@ -26,9 +26,9 @@ export class IdentityAlreadyExistsError extends SdkError {
 }
 
 /**
- * Error thrown by {@link EThree.encrypt}, {@link EThree.decrypt},
- * {@link Ethree.unregister} and {@link EThree.backupPrivateKey}
- * when current identity of E3kit instance is not registered.
+ * Error thrown by  {@link Ethree.unregister} and {@link EThree.rotatePrivateKey}
+ * when current identity of E3kit instance is not registered (i.e. there is
+ * no Virgil Card for the current identity in Virgil Cloud).
  */
 export class RegisterRequiredError extends SdkError {
     constructor() {
@@ -195,5 +195,24 @@ export enum GroupErrorCode {
 export class GroupError extends SdkError {
     constructor(public errorCode: GroupErrorCode, message: string) {
         super(message, 'GroupError', GroupError);
+    }
+}
+
+/**
+ * Error thrown when an attempt is made to retrieve the private key from the
+ * device's persistent storage, but no private key exists.
+ *
+ * Thrown by {@link EThree.encrypt}, {@link EThree.decrypt}, {@link EThree.backupPrivateKey},
+ * {@link EThree.createGroup}, {@link EThree.loadGroup}, {@link EThree.getGroup},
+ * {@link Group.encrypt}, {@link Group.decrypt}, {@link Group.update}, {@link Group.add},
+ * {@link Group.remove} and {@link Group.reAdd}.
+ */
+export class MissingPrivateKeyError extends SdkError {
+    constructor() {
+        super(
+            'No private key found on the device. You should call "register()" of "restorePrivateKey()"',
+            'MissingPrivateKeyError',
+            MissingPrivateKeyError,
+        );
     }
 }

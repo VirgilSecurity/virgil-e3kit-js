@@ -10,7 +10,7 @@ import { CardManager } from 'virgil-sdk';
 import { ICard, Ticket } from './types';
 import { CLOUD_GROUP_SESSIONS_ROOT, MAX_EPOCHS_IN_GROUP_SESSION } from './constants';
 import { PrivateKeyLoader } from './PrivateKeyLoader';
-import { GroupError, GroupErrorCode, RegisterRequiredError } from './errors';
+import { GroupError, GroupErrorCode, MissingPrivateKeyError } from './errors';
 import { Group } from './groups/Group';
 import { GroupLocalStorage, RetrieveOptions } from './GroupLocalStorage';
 import { isSafeInteger } from './utils/number';
@@ -201,8 +201,7 @@ export class GroupManager {
     private async getCloudTicketStorage() {
         const keyPair = await this._privateKeyLoader.loadLocalKeyPair();
         if (!keyPair) {
-            // TODO replace with PrivateKeyMissingError
-            throw new RegisterRequiredError();
+            throw new MissingPrivateKeyError();
         }
 
         const { virgilCrypto, accessTokenProvider, apiUrl } = this._privateKeyLoader.options;

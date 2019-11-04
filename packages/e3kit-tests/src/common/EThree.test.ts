@@ -12,6 +12,7 @@ import {
     WrongKeyknoxPasswordError,
     PrivateKeyAlreadyExistsError,
     PrivateKeyNoBackupError,
+    MissingPrivateKeyError,
     EThree,
 } from '@virgilsecurity/e3kit-node';
 import {
@@ -402,7 +403,7 @@ describe('EThree', () => {
             try {
                 await sdk.backupPrivateKey('secret_pass');
             } catch (e) {
-                expect(e).to.be.instanceOf(RegisterRequiredError);
+                expect(e).to.be.instanceOf(MissingPrivateKey);
                 return;
             }
             expect.fail();
@@ -550,12 +551,12 @@ describe('EThree', () => {
             try {
                 await sdk.encrypt('message');
             } catch (e) {
-                expect(e).to.be.instanceOf(RegisterRequiredError);
+                expect(e).to.be.instanceOf(MissingPrivateKeyError);
             }
             try {
                 await sdk.decrypt('message');
             } catch (e) {
-                expect(e).to.be.instanceOf(RegisterRequiredError);
+                expect(e).to.be.instanceOf(MissingPrivateKeyError);
                 return;
             }
             expect.fail();

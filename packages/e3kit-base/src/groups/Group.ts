@@ -1,6 +1,6 @@
 import { IGroupSession, ICrypto, Data, FindUsersResult, NodeBuffer, Ticket } from '../types';
 import { PrivateKeyLoader } from '../PrivateKeyLoader';
-import { RegisterRequiredError, GroupError, GroupErrorCode, UsersNotFoundError } from '../errors';
+import { GroupError, GroupErrorCode, UsersNotFoundError, MissingPrivateKeyError } from '../errors';
 import { ICard } from '../types';
 import { CardManager } from 'virgil-sdk';
 import { GroupManager } from '../GroupManager';
@@ -68,7 +68,7 @@ export class Group {
         const shouldReturnString = isString(data);
         const privateKey = await this._privateKeyLoader.loadLocalPrivateKey();
         if (!privateKey) {
-            throw new RegisterRequiredError();
+            throw new MissingPrivateKeyError();
         }
 
         const encrypted = this._session.encrypt(data, privateKey);
