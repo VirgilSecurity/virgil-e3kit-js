@@ -14,6 +14,7 @@ export {
     AbortError,
     GroupErrorCode,
     GroupError,
+    MissingPrivateKeyError,
     // types
     NodeBuffer,
     Data,

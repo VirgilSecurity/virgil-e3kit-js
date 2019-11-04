@@ -13,6 +13,7 @@ import {
     UsersFoundWithMultipleCardsError,
     GroupError,
     GroupErrorCode,
+    MissingPrivateKeyError,
 } from './errors';
 import { PrivateKeyLoader } from './PrivateKeyLoader';
 import { isArray, isString, isVirgilCard, isFindUsersResult, isLookupResult } from './typeguards';
@@ -246,7 +247,7 @@ export abstract class AbstractEThree {
         const shouldReturnString = isString(message);
 
         const privateKey = await this.keyLoader.loadLocalPrivateKey();
-        if (!privateKey) throw new RegisterRequiredError();
+        if (!privateKey) throw new MissingPrivateKeyError();
 
         const publicKeys = this.getPublicKeysForEncryption(privateKey, recipients);
         if (!publicKeys) {
@@ -318,7 +319,7 @@ export abstract class AbstractEThree {
         const shouldReturnString = isString(message);
 
         const privateKey = await this.keyLoader.loadLocalPrivateKey();
-        if (!privateKey) throw new RegisterRequiredError();
+        if (!privateKey) throw new MissingPrivateKeyError();
 
         const senderPublicKey = this.getPublicKeyForVerification(
             privateKey,
@@ -489,7 +490,7 @@ export abstract class AbstractEThree {
      */
     async backupPrivateKey(pwd: string): Promise<void> {
         const privateKey = await this.keyLoader.loadLocalPrivateKey();
-        if (!privateKey) throw new RegisterRequiredError();
+        if (!privateKey) throw new MissingPrivateKeyError();
         await this.keyLoader.savePrivateKeyRemote(privateKey, pwd);
         return;
     }
