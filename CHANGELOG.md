@@ -1,5 +1,25 @@
 # Changelog
 
+## 2019-11-05 0.7.0-beta.0
+
+### Added
+
+* Ability to create secure group chats. See example in [Readme](/README.md)
+* New method to search for other users' public keys - `EThree.findUsers`, which returns Virgil Cards instead of public keys.
+
+### Deprecated
+
+* `EThree.lookupPublicKeys` - new implementations should use `EThree.findUsers` instead.
+* Calling `EThree.encrypt` and `EThree.decrypt` with the result of `EThree.lookupPublicKeys` method. New implementations should pass the result of `EThree.findUsers` instead.
+
+> A warning will be printed to the console if deprecated methods are called.
+
+### Breaking changes
+
+* Starting from this version E3kit is distributed as a monorepo. We've split it up into separate packages for [Browsers](/packages/e3kit-browser), [Node.js](/packages/e3kit-node) and [React Native](/packages/e3kit-native). The [e3kit](/packages/e3kit) package will continue to exist on NPM, so this is actually a backward-compatible change, however we recommend new implementations to depend on a package specific to their platform for faster install times and correct type definitions.
+
+* `EThree.encrypt`, `EThree.decrypt` and `EThree.backupPrivateKey` now throw `MissingPrivateKeyError` instead of `RegisterRequiredError` when private key is not found. That error makes more sense because the identity might be registered even if the key does not exist on the device.
+
 ## 2019-10-24 0.6.2
 
 * Fixed: references to `process.env` remained in bundles due to a misconfiguration of Rollup plugin that was meant to replace them with actual values. This caused `ReferenceError: process is not defined` when using UMD bundle in a browser. And it also caused VirgilAgent header to not include the product and version info.
