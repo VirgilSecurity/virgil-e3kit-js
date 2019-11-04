@@ -5,6 +5,7 @@ import {
     CloudEntryDoesntExistError,
     KeyknoxClient,
 } from '@virgilsecurity/keyknox';
+import { VirgilAgent } from 'virgil-sdk';
 
 import { generateBrainPair } from './brainkey';
 import { WrongKeyknoxPasswordError, PrivateKeyNoBackupError } from './errors';
@@ -37,6 +38,9 @@ export class PrivateKeyLoader {
     private keyknoxClient = new KeyknoxClient(
         this.options.accessTokenProvider,
         this.options.apiUrl,
+        undefined,
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        new VirgilAgent(process.env.PRODUCT_NAME!, process.env.PRODUCT_VERSION!),
     );
     private keyknoxCrypto = new KeyknoxCrypto(this.options.virgilCrypto);
     private cachedPrivateKey: IPrivateKey | null = null;

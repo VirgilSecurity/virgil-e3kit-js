@@ -6,6 +6,10 @@ const nodeResolve = require('rollup-plugin-node-resolve');
 const typescript = require('rollup-plugin-typescript2');
 const builtins = require('rollup-plugin-node-builtins');
 const globals = require('rollup-plugin-node-globals');
+const replace = require('rollup-plugin-re');
+
+const packageJson = require('./package.json');
+const PRODUCT_NAME = 'e3kit';
 
 const FORMAT = {
     CJS: 'cjs',
@@ -29,6 +33,12 @@ const createEntry = format => ({
         file: path.join(outputPath, `e3kit-native.${format}.js`),
     },
     plugins: [
+        replace({
+            replaces: {
+                'process.env.PRODUCT_NAME': JSON.stringify(PRODUCT_NAME),
+                'process.env.PRODUCT_VERSION': JSON.stringify(packageJson.version),
+            },
+        }),
         nodeResolve({ browser: true, preferBuiltins: false }),
         commonjs(),
         globals(),

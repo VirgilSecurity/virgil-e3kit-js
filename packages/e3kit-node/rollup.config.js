@@ -8,6 +8,7 @@ const replace = require('rollup-plugin-re');
 const typescript = require('rollup-plugin-typescript2');
 
 const packageJson = require('./package.json');
+const PRODUCT_NAME = 'e3kit';
 
 const FORMAT = {
     CJS: 'cjs',
@@ -55,6 +56,10 @@ const createEntry = (cryptoType, format) => {
             nodeResolve(),
             commonjs(),
             replace({
+                replaces: {
+                    'process.env.PRODUCT_NAME': JSON.stringify(PRODUCT_NAME),
+                    'process.env.PRODUCT_VERSION': JSON.stringify(packageJson.version),
+                },
                 patterns: [
                     {
                         match: /EThree\.ts$/,

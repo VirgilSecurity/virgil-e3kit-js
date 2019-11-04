@@ -1,4 +1,5 @@
-import { createBrainKey } from 'virgil-pythia';
+import { BrainKey, PythiaClient } from 'virgil-pythia';
+import { VirgilAgent } from 'virgil-sdk';
 
 import { IKeyPair, ICrypto, IBrainKeyCrypto, IAccessTokenProvider } from './types';
 
@@ -19,13 +20,17 @@ export type BrainkeyOptions = {
  * @hidden
  */
 export async function generateBrainPair(pwd: string, options: BrainkeyOptions): Promise<IKeyPair> {
-    const brainKey = createBrainKey({
-        virgilCrypto: options.virgilCrypto,
-        virgilBrainKeyCrypto: options.pythiaCrypto,
-        accessTokenProvider: options.accessTokenProvider,
-        apiUrl: options.apiUrl,
+    const pythiaClient = new PythiaClient(
+        options.accessTokenProvider,
+        options.apiUrl,
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        new VirgilAgent(process.env.PRODUCT_NAME!, process.env.PRODUCT_VERSION!),
+    );
+    const brainKey = new BrainKey({
+        pythiaClient,
+        crypto: options.virgilCrypto,
+        brainKeyCrypto: options.pythiaCrypto,
     });
-
     return await brainKey.generateKeyPair(pwd).catch((e: Error & { code?: number }) => {
         if (typeof e === 'object' && e.code === BRAIN_KEY_THROTTLING_ERROR_CODE) {
             const promise = new Promise((resolve, reject) => {
