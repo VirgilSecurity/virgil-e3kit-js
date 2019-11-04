@@ -5,7 +5,7 @@ const { EThree } = require('@virgilsecurity/e3kit-node');
 const dotenv = require('dotenv');
 
 console.log('Virgil E3Kit SDK + Node.js usage example');
-console.log('If all goes well, you should see "Success" message printed below in a moment...');
+console.log('If all goes well, you should see messages printed below in a moment...');
 
 dotenv.config();
 const API_URL = process.env.API_URL || 'http://localhost:3000';
@@ -26,27 +26,78 @@ const getJson = url =>
         });
     });
 
-const getToken = async () => {
-    const query = querystring.stringify({
-        identity: 'my-identity',
-    });
+const createGetToken = identity => async () => {
+    const query = querystring.stringify({ identity });
     const { virgil_jwt: virgilJwt } = await getJson(`${API_URL}/virgil-jwt?${query}`);
     return virgilJwt;
 };
 
 (async () => {
-    let message;
     try {
-        const sdk = await EThree.initialize(getToken, {
+        const alice = await EThree.initialize(createGetToken('alice'), {
             apiUrl: process.env.VIRGIL_API_URL,
         });
-        await sdk.register();
-        await sdk.backupPrivateKey('pa$$w0rd');
-        const encryptedMessage = await sdk.encrypt('Success');
-        message = await sdk.decrypt(encryptedMessage);
+        const bob = await EThree.initialize(createGetToken('bob'), {
+            apiUrl: process.env.VIRGIL_API_URL,
+        });
+
+        console.log('Alice registers...');
+        await alice.register();
+
+        console.log('Alice creates private key backup...');
+        await alice.backupPrivateKey('alice_pa$$w0rd');
+
+        console.log('Bob registers...');
+        await bob.register();
+
+        console.log('Bob creates private key backup...');
+        await bob.backupPrivateKey('bob_pa$$w0rd');
+
+        console.log("Alice searches for Bob's card...");
+        const bobCard = await alice.findUsers(bob.identity);
+
+        console.log('Alice encrypts message for Bob...');
+        const encryptedForBob = await alice.encrypt('Hello Bob!', bobCard);
+
+        console.log("Bob searches for Alice's card...");
+        const aliceCard = await bob.findUsers(alice.identity);
+
+        console.log('Bob decrypts the message...');
+        const decryptedByBob = await bob.decrypt(encryptedForBob, aliceCard);
+
+        console.log('Decrypted message: ' + decryptedByBob);
+
+        const groupId = 'AliceAndBobGroup';
+
+        console.log('Alice creates a group with Bob...');
+        const aliceGroup = await alice.createGroup(groupId, bobCard);
+
+        console.log('Alice encrypts message for the group...');
+        const encryptedForGroup = await aliceGroup.encrypt('Hello group!');
+
+        console.log('Bob loads the group by ID from the Cloud...');
+        const bobGroup = await bob.loadGroup(groupId, aliceCard);
+
+        console.log('Bob decrypts the group message...');
+        const decryptedByGroup = await bobGroup.decrypt(encryptedForGroup, aliceCard);
+
+        console.log('Decrypted group message: ' + decryptedByGroup);
+
+        console.log('Alice deletes group...');
+        await alice.deleteGroup(groupId);
+
+        console.log('Alice deletes private key backup...');
+        await alice.resetPrivateKeyBackup('alice_pa$$w0rd');
+
+        console.log('Alice unregisters...');
+        await alice.unregister();
+
+        console.log('Bob deletes private key backup...');
+        await bob.resetPrivateKeyBackup('bob_pa$$w0rd');
+
+        console.log('Bob unregisters...');
+        await bob.unregister();
     } catch (error) {
-        message = error.toString();
-    } finally {
-        console.log(message);
+        console.log(error.toString());
     }
 })();
