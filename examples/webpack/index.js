@@ -15,12 +15,8 @@ const report = message => {
 
 (async () => {
     try {
-        const alice = await EThree.initialize(createGetToken('alice'), {
-            apiUrl: process.env.VIRGIL_API_URL,
-        });
-        const bob = await EThree.initialize(createGetToken('bob'), {
-            apiUrl: process.env.VIRGIL_API_URL,
-        });
+        const alice = await EThree.initialize(createGetToken('alice'));
+        const bob = await EThree.initialize(createGetToken('bob'));
 
         report('Alice registers...');
         await alice.register();

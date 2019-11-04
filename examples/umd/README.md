@@ -8,7 +8,7 @@ Sample project demonstrating the usage of `@virgilsecurity/e3kit-browser` UMD bu
   yarn install
   ```
   > You need to use Yarn because we use [Workspaces](https://yarnpkg.com/lang/en/docs/workspaces/) in this repository :)
-3. Make sure that `API_URL` and `VIRGIL_API_URL` in `index.html` values are correct.
+3. Make sure that `API_URL` value in `index.html` is correct.
 4. Run the following command to copy index.html, Virgil E3Kit UMD bundle and WebAssembly files to the `dist` folder.
 4. Run the following command to start the demo(it simply serves the `dist` folder)
   ```sh

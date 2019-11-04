@@ -8,7 +8,7 @@ Sample project demonstrating the usage of `@virgilsecurity/e3kit-browser` in [Io
   yarn install
   ```
   > You need to use Yarn because we use [Workspaces](https://yarnpkg.com/lang/en/docs/workspaces/) in this repository :)
-3. sure that `API_URL` and `VIRGIL_API_URL` values in `e3kit.service.ts` are correct.
+3. Make sure that `API_URL` value in `e3kit.service.ts` is correct.
 4. Run the following command to start the demo
   ```sh
   yarn start

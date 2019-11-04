@@ -10,7 +10,6 @@ interface GetJwtResponse {
 @Injectable()
 export class E3KitService {
     private static API_URL = 'http://localhost:8080';
-    private static VIRGIL_API_URL: string | undefined = 'http://api-stg.virgilsecurity.com';
 
     private httpClient: HttpClient;
 
@@ -27,12 +26,8 @@ export class E3KitService {
     private async runDemoCode(observer: Subscriber<string[]>) {
         const messages = new Array<string>();
         try {
-            const alice = await EThree.initialize(this.createGetToken('alice'), {
-                apiUrl: E3KitService.VIRGIL_API_URL,
-            });
-            const bob = await EThree.initialize(this.createGetToken('bob'), {
-                apiUrl: E3KitService.VIRGIL_API_URL,
-            });
+            const alice = await EThree.initialize(this.createGetToken('alice'));
+            const bob = await EThree.initialize(this.createGetToken('bob'));
 
             messages.push('Alice registers...');
             observer.next(messages);

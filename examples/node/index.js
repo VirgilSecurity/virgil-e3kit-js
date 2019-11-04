@@ -8,7 +8,7 @@ console.log('Virgil E3Kit SDK + Node.js usage example');
 console.log('If all goes well, you should see messages printed below in a moment...');
 
 dotenv.config();
-const API_URL = process.env.API_URL || 'http://localhost:3000';
+const API_URL = process.env.API_URL;
 
 const getJson = url =>
     new Promise((resolve, reject) => {
