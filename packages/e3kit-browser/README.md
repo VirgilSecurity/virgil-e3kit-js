@@ -6,15 +6,15 @@ This package is **ONLY** for browsers. Use the following packages on other platf
 ## Install
 - npm:
   ```sh
-  npm install @virgilsecurity/e3kit-browser
+  npm install @virgilsecurity/e3kit-browser@next
   ```
 - yarn:
   ```sh
-  yarn add @virgilsecurity/e3kit-browser
+  yarn add @virgilsecurity/e3kit-browser@next
   ```
 - UMD:
   ```html
-  <script type="text/javascript" src="https://unpkg.com/@virgilsecurity/e3kit-browser/dist/browser.umd.js"></script>
+  <script type="text/javascript" src="https://unpkg.com/@virgilsecurity/e3kit-browser@next/dist/browser.umd.js"></script>
   ```
 
 ## Further reading
