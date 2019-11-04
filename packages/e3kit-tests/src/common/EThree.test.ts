@@ -403,7 +403,7 @@ describe('EThree', () => {
             try {
                 await sdk.backupPrivateKey('secret_pass');
             } catch (e) {
-                expect(e).to.be.instanceOf(MissingPrivateKey);
+                expect(e).to.be.instanceOf(MissingPrivateKeyError);
                 return;
             }
             expect.fail();
