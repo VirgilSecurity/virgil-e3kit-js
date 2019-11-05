@@ -32,6 +32,10 @@ export {
     EThreeCtorOptions,
     LookupResult,
     EncryptPublicKeyArg,
+    FindUsersResult,
+    Ticket,
+    GroupInfo,
+    RawGroup,
 } from '@virgilsecurity/e3kit-base';
 export * from './constants';
 export { EThree } from './EThree';

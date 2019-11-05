@@ -19,5 +19,9 @@ export {
     EThreeCtorOptions,
     LookupResult,
     EncryptPublicKeyArg,
+    FindUsersResult,
+    Ticket,
+    GroupInfo,
+    RawGroup,
 } from './types';
 export { GroupLocalStorage } from './GroupLocalStorage';
