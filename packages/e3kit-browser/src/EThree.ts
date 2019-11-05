@@ -40,7 +40,6 @@ import {
     LookupResult,
     FindUsersResult,
 } from './types';
-import { withDefaults } from './withDefaults';
 
 export class EThree extends AbstractEThree {
     /**
@@ -74,9 +73,10 @@ export class EThree extends AbstractEThree {
             );
         }
 
-        const opts = withDefaults(options as EThreeCtorOptions, {
+        const opts = {
             accessTokenProvider: new CachingJwtProvider(getToken),
-        });
+            ...options,
+        };
         const token = await opts.accessTokenProvider.getToken({
             service: 'cards',
             operation: '',
@@ -319,12 +319,13 @@ export class EThree extends AbstractEThree {
      * @hidden
      */
     private static prepareConstructorParams(identity: string, options: EThreeCtorOptions) {
-        const opts = withDefaults(options, {
+        const opts = {
             apiUrl: DEFAULT_API_URL,
             storageName: DEFAULT_STORAGE_NAME,
             groupStorageName: DEFAULT_GROUP_STORAGE_NAME,
             useSha256Identifiers: false,
-        });
+            ...options,
+        };
         const accessTokenProvider = opts.accessTokenProvider;
         const keyEntryStorage = opts.keyEntryStorage || new KeyEntryStorage(opts.storageName);
         const virgilCrypto = new VirgilCrypto({ useSha256Identifiers: opts.useSha256Identifiers });
