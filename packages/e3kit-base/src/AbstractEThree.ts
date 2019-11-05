@@ -35,7 +35,6 @@ import { warn } from './log';
 import { Group, isValidParticipantCount } from './groups/Group';
 import { GroupManager } from './GroupManager';
 import { getCardActiveAtMoment } from './utils/card';
-import { isValidDate } from './utils/date';
 import { GroupLocalStorage } from './GroupLocalStorage';
 
 export abstract class AbstractEThree {
@@ -689,26 +688,9 @@ export abstract class AbstractEThree {
         }
 
         if (isVirgilCard(senderCardOrPublicKey)) {
-            let actualCard;
-            if (encryptedOn) {
-                const encryptedOnDate = new Date(encryptedOn);
-                if (!isValidDate(encryptedOnDate)) {
-                    throw new TypeError(
-                        'Cannot decrypt data. Third argument, if provided, must be a Date or a timestamp',
-                    );
-                }
-                actualCard = getCardActiveAtMoment(senderCardOrPublicKey, encryptedOnDate);
-                if (!actualCard) {
-                    throw new Error(
-                        'The given sender Virgil Card is newer than the encrypted data.' +
-                            'This may happen if they un-registered and registered again with the same identity.' +
-                            'Try loading their Virgil Card by its ID.',
-                    );
-                }
-            } else {
-                actualCard = senderCardOrPublicKey;
-            }
-            return actualCard.publicKey;
+            return encryptedOn
+                ? getCardActiveAtMoment(senderCardOrPublicKey, encryptedOn).publicKey
+                : senderCardOrPublicKey.publicKey;
         }
 
         if (this.isPublicKey(senderCardOrPublicKey)) {

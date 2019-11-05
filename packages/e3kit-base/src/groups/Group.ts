@@ -7,7 +7,6 @@ import { GroupManager } from '../GroupManager';
 import { isVirgilCard, isString } from '../typeguards';
 import { VALID_GROUP_PARTICIPANT_COUNT_RANGE, MAX_EPOCHS_IN_GROUP_SESSION } from '../constants';
 import { getCardActiveAtMoment, getCardsArray } from '../utils/card';
-import { isValidDate } from '../utils/date';
 import { isNumberInRange } from '../utils/number';
 import { setDifference } from '../utils/set';
 
@@ -94,25 +93,9 @@ export class Group {
 
         const shouldReturnString = isString(encryptedData);
 
-        let actualCard;
-        if (encryptedOn) {
-            const encryptedOnDate = new Date(encryptedOn);
-            if (!isValidDate(encryptedOnDate)) {
-                throw new TypeError(
-                    'Cannot decrypt data. Third argument, if provided, must be a Date or a timestamp',
-                );
-            }
-            actualCard = getCardActiveAtMoment(senderCard, encryptedOnDate);
-            if (!actualCard) {
-                throw new Error(
-                    'The given sender Virgil Card is newer than the encrypted data.' +
-                        'This may happen if they un-registered and registered again with the same identity.' +
-                        'Try loading their Virgil Card by its ID.',
-                );
-            }
-        } else {
-            actualCard = senderCard;
-        }
+        const actualCard = encryptedOn
+            ? getCardActiveAtMoment(senderCard, encryptedOn)
+            : senderCard;
 
         if (messageSessionId !== this._session.getSessionId()) {
             throw new GroupError(
