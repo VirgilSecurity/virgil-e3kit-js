@@ -77,8 +77,8 @@ module.exports = config => {
                     '@virgilsecurity/e3kit-browser',
                 ),
                 new webpack.EnvironmentPlugin({
-                    API_KEY_ID: JSON.stringify(process.env.API_KEY_ID),
-                    API_KEY: JSON.stringify(process.env.API_KEY),
+                    APP_KEY_ID: JSON.stringify(process.env.APP_KEY_ID),
+                    APP_KEY: JSON.stringify(process.env.APP_KEY),
                     APP_ID: JSON.stringify(process.env.APP_ID),
                     API_URL: JSON.stringify(process.env.API_URL),
                     NODE_ENV: process.env.NODE_ENV || JSON.stringify('production'),

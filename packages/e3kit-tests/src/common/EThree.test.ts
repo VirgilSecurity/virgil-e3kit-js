@@ -62,8 +62,8 @@ describe('EThree', () => {
         });
         jwtGenerator = new JwtGenerator({
             appId: process.env.APP_ID!,
-            apiKeyId: process.env.API_KEY_ID!,
-            apiKey: virgilCrypto.importPrivateKey(process.env.API_KEY!),
+            apiKeyId: process.env.APP_KEY_ID!,
+            apiKey: virgilCrypto.importPrivateKey(process.env.APP_KEY!),
             accessTokenSigner: new VirgilAccessTokenSigner(virgilCrypto),
         });
         generatorJwtProvider = new GeneratorJwtProvider(
