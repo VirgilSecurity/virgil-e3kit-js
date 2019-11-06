@@ -177,7 +177,9 @@ export abstract class AbstractEThree {
      * Keyknox storage.
      */
     async resetPrivateKeyBackup(pwd?: string) {
-        if (!pwd) return await this.keyLoader.resetAll();
+        if (!pwd) {
+            return await this.keyLoader.resetAll();
+        }
         return this.keyLoader.resetPrivateKeyBackup(pwd);
     }
 
@@ -246,7 +248,9 @@ export abstract class AbstractEThree {
         const shouldReturnString = isString(message);
 
         const privateKey = await this.keyLoader.loadLocalPrivateKey();
-        if (!privateKey) throw new MissingPrivateKeyError();
+        if (!privateKey) {
+            throw new MissingPrivateKeyError();
+        }
 
         const publicKeys = this.getPublicKeysForEncryption(privateKey, recipients);
         if (!publicKeys) {
@@ -258,7 +262,9 @@ export abstract class AbstractEThree {
         }
 
         const res = this.virgilCrypto.signThenEncrypt(message, privateKey, publicKeys);
-        if (shouldReturnString) return res.toString('base64');
+        if (shouldReturnString) {
+            return res.toString('base64');
+        }
         return res;
     }
 
@@ -318,7 +324,9 @@ export abstract class AbstractEThree {
         const shouldReturnString = isString(message);
 
         const privateKey = await this.keyLoader.loadLocalPrivateKey();
-        if (!privateKey) throw new MissingPrivateKeyError();
+        if (!privateKey) {
+            throw new MissingPrivateKeyError();
+        }
 
         const senderPublicKey = this.getPublicKeyForVerification(
             privateKey,
@@ -334,7 +342,9 @@ export abstract class AbstractEThree {
         }
 
         const res = this.virgilCrypto.decryptThenVerify(message, privateKey, senderPublicKey);
-        if (shouldReturnString) return res.toString('utf8');
+        if (shouldReturnString) {
+            return res.toString('utf8');
+        }
         return res;
     }
 
@@ -368,17 +378,24 @@ export abstract class AbstractEThree {
      */
     async findUsers(identities: string[]): Promise<FindUsersResult>;
     async findUsers(identities: string[] | string): Promise<ICard | FindUsersResult> {
-        if (!identities) throw new TypeError('Argument "identities" is required');
+        if (!identities) {
+            throw new TypeError('Argument "identities" is required');
+        }
 
         let identitySet;
-        if (typeof identities === 'string') identitySet = new Set([identities]);
-        else if (isArray(identities)) identitySet = new Set(identities);
-        else
+        if (typeof identities === 'string') {
+            identitySet = new Set([identities]);
+        } else if (isArray(identities)) {
+            identitySet = new Set(identities);
+        } else {
             throw new TypeError(
                 `Expected "identities" to be a string or an array of strings. Got: "${typeof identities}"`,
             );
+        }
 
-        if (identitySet.size === 0) throw new TypeError('"identities" array must not be empty');
+        if (identitySet.size === 0) {
+            throw new TypeError('"identities" array must not be empty');
+        }
 
         const result: FindUsersResult = Object.create({});
         const identitiesWithMultipleCards: Set<string> = new Set();
@@ -404,7 +421,9 @@ export abstract class AbstractEThree {
             throw new UsersFoundWithMultipleCardsError([...identitiesWithMultipleCards]);
         }
 
-        if (isArray(identities)) return result;
+        if (isArray(identities)) {
+            return result;
+        }
 
         return result[identities];
     }
@@ -452,8 +471,8 @@ export abstract class AbstractEThree {
 
         const cards = await this.cardManager.searchCards(argument);
 
-        const result: LookupResult = {},
-            resultWithErrors: { [identity: string]: Error } = {};
+        const result: LookupResult = {};
+        const resultWithErrors: { [identity: string]: Error } = {};
 
         for (const identity of argument) {
             const filteredCards = cards.filter(card => card.identity === identity);
@@ -470,7 +489,9 @@ export abstract class AbstractEThree {
             throw new LookupError({ ...resultWithErrors, ...result });
         }
 
-        if (Array.isArray(identities)) return result;
+        if (Array.isArray(identities)) {
+            return result;
+        }
 
         return result[identities];
     }
@@ -489,7 +510,9 @@ export abstract class AbstractEThree {
      */
     async backupPrivateKey(pwd: string): Promise<void> {
         const privateKey = await this.keyLoader.loadLocalPrivateKey();
-        if (!privateKey) throw new MissingPrivateKeyError();
+        if (!privateKey) {
+            throw new MissingPrivateKeyError();
+        }
         await this.keyLoader.savePrivateKeyRemote(privateKey, pwd);
         return;
     }
@@ -516,8 +539,12 @@ export abstract class AbstractEThree {
         try {
             const cards = await this.cardManager.searchCards(this.identity);
 
-            if (cards.length > 1) throw new MultipleCardsError(this.identity);
-            if (cards.length === 0) throw new RegisterRequiredError();
+            if (cards.length > 1) {
+                throw new MultipleCardsError(this.identity);
+            }
+            if (cards.length === 0) {
+                throw new RegisterRequiredError();
+            }
 
             await this.cardManager.revokeCard(cards[0].id);
             await this.keyLoader.resetLocalPrivateKey();
