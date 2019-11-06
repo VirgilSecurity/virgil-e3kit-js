@@ -151,7 +151,7 @@ In the event of changes in the group, e.g. new participant is added or existing 
 
 ```javascript
 await group.update();
-// Group updated
+// Group has been updated
 ```
 
 #### Delete group chat
@@ -160,7 +160,7 @@ To delete a group, the owner has to call `deleteGroup` method and specify the gr
 
 ```javascript
 await eThree.deleteGroup(groupId);
-// Group was deleted
+// Group has been deleted
 ```
 
 ## Samples
