@@ -125,11 +125,11 @@ Note how we provide the result of `findUsers` to `decrypt` method to verify that
 
 ### Manage group chat
 
-E3Kit allows you to add and remove participants to an existing group chat. In this version of E3Kit only the group initiator can change participants or delete group.
+E3Kit allows you to add and remove participants to an existing group chat. In this version of E3Kit only the group initiator can change participants or delete a group.
 
 #### Add new participant
 
-To add new chat member, the chat owner has to call `add` method and specify the new member's Card. New member will be able to decrypt all previous messages history.
+To add a new chat member, the chat owner has to call `add` method and specify the new member's Card. A new member will be able to decrypt all previous messages history.
 
 ```javascript
 const newParticipant = await eThree.findUsers('john@myapp.com');
