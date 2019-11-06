@@ -1,16 +1,14 @@
 /**
  * @hidden
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function hasDuplicates(array: any[]) {
+export function hasDuplicates<T>(array: T[]) {
     return new Set(array).size !== array.length;
 }
 
 /**
  * @hidden
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function getObjectValues(obj: { [x: string]: any }) {
+export function getObjectValues<T = any>(obj: { [x: string]: T }): T[] {
     if (Object.values) return Object.values(obj);
     return Object.keys(obj).map(function(e) {
         return obj[e];
@@ -25,7 +23,7 @@ export function getObjectValues(obj: { [x: string]: any }) {
  * @param array
  * @param size
  */
-export function chunkArray(array: any[], size: number): any[][] {
+export function chunkArray<T>(array: T[], size: number): T[][] {
     size = Math.max(size, 0);
     const length = array == null ? 0 : array.length;
     if (!length || size < 1) {
