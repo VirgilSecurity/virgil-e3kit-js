@@ -94,9 +94,16 @@ export class PrivateKeyLoader {
 
     async restorePrivateKey(password: string): Promise<IPrivateKey> {
         const storage = await this.getStorage(password);
-        const rawKey = storage.retrieveEntry(this.identity);
-        await this.localStorage.save({ name: this.identity, value: rawKey.data });
-        return this.importAndCachePrivateKey(rawKey.data);
+        try {
+            const rawKey = storage.retrieveEntry(this.identity);
+            await this.localStorage.save({ name: this.identity, value: rawKey.data });
+            return this.importAndCachePrivateKey(rawKey.data);
+        } catch (e) {
+            if (e instanceof CloudEntryDoesntExistError) {
+                throw new PrivateKeyNoBackupError();
+            }
+            throw e;
+        }
     }
 
     async changePassword(oldPwd: string, newPwd: string) {
