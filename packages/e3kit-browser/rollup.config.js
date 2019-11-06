@@ -66,7 +66,7 @@ const createEntry = (target, cryptoType, format) => {
 
     return {
         external:
-            format !== FORMAT.umd
+            format !== FORMAT.UMD
                 ? [
                       foundationEntryPoint,
                       pythiaEntryPoint,
