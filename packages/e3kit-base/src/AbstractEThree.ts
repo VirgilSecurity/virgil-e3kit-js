@@ -288,18 +288,18 @@ export abstract class AbstractEThree {
     /**
      * Decrypts and verifies the data encrypted by the user identified by `senderCard` for the
      * current user. If the sender had ever rotated their keys (e.g. by using the
-     * {@link EThree.rotatePrivateKey} method), then the `encryptedOn` date is used to find the
+     * {@link EThree.rotatePrivateKey} method), then the `encryptedAt` date is used to find the
      * public key that was current at the time of encryption.
      * @param {Data} message - Message to decrypt
      * @param {ICard} senderCard - Virgil Card of the user who encrypted and signed the message.
-     * @param {Date} encryptedOn - The date the message was encrypted on.
+     * @param {Date} encryptedAt - The date the message was encrypted on.
      * @returns {Promise<NodeBuffer | string>} Promise that is that resolves to a string if `message`
      * was a string and `Buffer` otherwise.
      */
     async decrypt(
         message: Data,
         senderCard: ICard,
-        encryptedOn: Date,
+        encryptedAt: Date,
     ): Promise<NodeBuffer | string>;
     /**
      * Decrypts and verifies the data encrypted by the user identified by `senderPublicKey` for the
@@ -319,7 +319,7 @@ export abstract class AbstractEThree {
     async decrypt(
         message: Data,
         senderCardOrPublicKey?: ICard | IPublicKey,
-        encryptedOn?: Date,
+        encryptedAt?: Date,
     ): Promise<NodeBuffer | string> {
         const shouldReturnString = isString(message);
 
@@ -331,7 +331,7 @@ export abstract class AbstractEThree {
         const senderPublicKey = this.getPublicKeyForVerification(
             privateKey,
             senderCardOrPublicKey,
-            encryptedOn,
+            encryptedAt,
         );
         if (!senderPublicKey) {
             throw new TypeError(
@@ -684,13 +684,13 @@ export abstract class AbstractEThree {
             publicKeys = getObjectValues(recipients).map((card: ICard) => card.publicKey);
         } else if (this.isPublicKey(recipients)) {
             warn(
-                'Warning! Calling `encrypt` with the result of `lookupPublicKeys` method has been deprecared. ' +
+                'Warning! Calling `encrypt` with the result of `lookupPublicKeys` method has been deprecated. ' +
                     'Please use the result of `findUsers` call instead',
             );
             publicKeys = [recipients];
         } else if (isLookupResult(recipients, this.isPublicKey.bind(this))) {
             warn(
-                'Warning! Calling `encrypt` with the result of `lookupPublicKeys` method has been deprecared. ' +
+                'Warning! Calling `encrypt` with the result of `lookupPublicKeys` method has been deprecated. ' +
                     'Please use the result of `findUsers` call instead',
             );
             publicKeys = getObjectValues(recipients).map((publicKey: IPublicKey) => publicKey);
@@ -708,15 +708,15 @@ export abstract class AbstractEThree {
     protected getPublicKeyForVerification(
         ownPrivateKey: IPrivateKey,
         senderCardOrPublicKey?: ICard | IPublicKey,
-        encryptedOn?: Date | number,
+        encryptedAt?: Date | number,
     ) {
         if (senderCardOrPublicKey == null) {
             return this.virgilCrypto.extractPublicKey(ownPrivateKey);
         }
 
         if (isVirgilCard(senderCardOrPublicKey)) {
-            return encryptedOn
-                ? getCardActiveAtMoment(senderCardOrPublicKey, encryptedOn).publicKey
+            return encryptedAt
+                ? getCardActiveAtMoment(senderCardOrPublicKey, encryptedAt).publicKey
                 : senderCardOrPublicKey.publicKey;
         }
 

@@ -77,7 +77,7 @@ export class Group {
     async decrypt(
         encryptedData: Data,
         senderCard: ICard,
-        encryptedOn?: Date | number,
+        encryptedAt?: Date | number,
     ): Promise<NodeBuffer | string> {
         const {
             sessionId: messageSessionId,
@@ -93,8 +93,8 @@ export class Group {
 
         const shouldReturnString = isString(encryptedData);
 
-        const actualCard = encryptedOn
-            ? getCardActiveAtMoment(senderCard, encryptedOn)
+        const actualCard = encryptedAt
+            ? getCardActiveAtMoment(senderCard, encryptedAt)
             : senderCard;
 
         if (messageSessionId !== this._session.getSessionId()) {
@@ -176,8 +176,8 @@ export class Group {
             new Set(cardsToAdd.map(c => c.identity)),
             new Set(this.participants),
         );
-        const newParicipantCount = missingIdentities.size + this.participants.length;
-        if (!isValidParticipantCount(newParicipantCount)) {
+        const newParticipantCount = missingIdentities.size + this.participants.length;
+        if (!isValidParticipantCount(newParticipantCount)) {
             throw new GroupError(
                 GroupErrorCode.InvalidChangeParticipants,
                 `Cannot add ${missingIdentities.size} participant(s) to the group that has ${this.participants.length} participants. Group can have ${VALID_GROUP_PARTICIPANT_COUNT_RANGE[0]} to ${VALID_GROUP_PARTICIPANT_COUNT_RANGE[1]} participants.`,

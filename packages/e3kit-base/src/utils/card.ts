@@ -6,20 +6,20 @@ import { isValidDate } from './date';
 /**
  * @hidden
  */
-export function getCardActiveAtMoment(card: ICard, activeOn?: Date | number) {
-    if (!activeOn) {
+export function getCardActiveAtMoment(card: ICard, activeAt?: Date | number) {
+    if (!activeAt) {
         return card;
     }
 
-    const activeOnDate = new Date(activeOn);
-    if (!isValidDate(activeOnDate)) {
+    const activeAtDate = new Date(activeAt);
+    if (!isValidDate(activeAtDate)) {
         throw new TypeError(
             'Cannot get active card. Second argument, if provided, must be a Date or a timestamp',
         );
     }
 
     let actualCard: ICard | undefined = card;
-    while (actualCard && actualCard.createdAt > activeOn) {
+    while (actualCard && actualCard.createdAt > activeAt) {
         actualCard = actualCard.previousCard;
     }
 
