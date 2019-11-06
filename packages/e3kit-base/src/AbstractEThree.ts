@@ -114,9 +114,7 @@ export abstract class AbstractEThree {
             if (cards.length > 1) throw new MultipleCardsError(this.identity);
             if (cards.length > 0) throw new IdentityAlreadyExistsError();
             if (privateKey) await this.keyLoader.resetLocalPrivateKey();
-            const myKeyPair = keyPair || this.virgilCrypto.generateKeys();
-            await this.publishCard(myKeyPair);
-            await this.keyLoader.savePrivateKeyLocal(myKeyPair.privateKey);
+            await this.publishCardThenSavePrivateKeyLocal({ keyPair });
         } finally {
             this.inProcess = false;
         }
@@ -139,9 +137,7 @@ export abstract class AbstractEThree {
             if (cards.length === 0) throw new RegisterRequiredError();
             if (cards.length > 1) throw new MultipleCardsError(this.identity);
             if (privateKey) throw new PrivateKeyAlreadyExistsError();
-            const keyPair = this.virgilCrypto.generateKeys();
-            await this.publishCard(keyPair, cards[0].id);
-            await this.keyLoader.savePrivateKeyLocal(keyPair.privateKey);
+            this.publishCardThenSavePrivateKeyLocal({ previousCard: cards[0] });
         } finally {
             this.inProcess = false;
         }
@@ -617,17 +613,22 @@ export abstract class AbstractEThree {
     /**
      * @hidden
      */
-    private async publishCard(
-        keyPair: IKeyPair,
-        previousCardId?: string,
-    ): Promise<{ keyPair: IKeyPair; card: ICard }> {
+    private async publishCardThenSavePrivateKeyLocal(options: {
+        keyPair?: IKeyPair;
+        previousCard?: ICard;
+    }) {
+        const { keyPair, previousCard } = options;
+        const myKeyPair = keyPair || this.virgilCrypto.generateKeys();
         const card = await this.cardManager.publishCard({
-            privateKey: keyPair.privateKey,
-            publicKey: keyPair.publicKey,
-            previousCardId,
+            privateKey: myKeyPair.privateKey,
+            publicKey: myKeyPair.publicKey,
+            previousCardId: previousCard ? previousCard.id : undefined,
         });
-
-        return { keyPair, card };
+        await this.keyLoader.savePrivateKeyLocal(myKeyPair.privateKey);
+        return {
+            card,
+            keyPair: myKeyPair,
+        };
     }
 
     /**
