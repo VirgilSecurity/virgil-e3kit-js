@@ -129,7 +129,7 @@ E3Kit allows you to add and remove participants to an existing group chat. In th
 
 #### Add new participant
 
-To add a new chat member, the chat owner has to call `add` method and specify the new member's Card. A new member will be able to decrypt all previous messages history.
+To add a new chat member, the chat owner has to call the `add` method and specify the new member's Card. A new member will be able to decrypt all previous messages history.
 
 ```javascript
 const newParticipant = await eThree.findUsers('john@myapp.com');
