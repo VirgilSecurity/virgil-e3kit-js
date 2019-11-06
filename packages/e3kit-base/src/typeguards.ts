@@ -1,10 +1,10 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { ICard, FindUsersResult, LookupResult } from './types';
 import { getObjectValues } from './array';
 
 /**
  * @hidden
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const isArray = <T = any>(val: any): val is Array<T> => {
     return Array.isArray(val);
 };
@@ -12,7 +12,6 @@ export const isArray = <T = any>(val: any): val is Array<T> => {
 /**
  * @hidden
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const isString = (val: any): val is string => {
     return typeof val === 'string';
 };
@@ -20,7 +19,6 @@ export const isString = (val: any): val is string => {
 /**
  * @hidden
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function isObject(obj: any) {
     return typeof obj === 'object' && obj !== null;
 }
@@ -28,7 +26,6 @@ export function isObject(obj: any) {
 /**
  * @hidden
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function isVirgilCard(obj: any): obj is ICard {
     return isObject(obj) && 'identity' in obj && 'publicKey' in obj;
 }
@@ -36,7 +33,6 @@ export function isVirgilCard(obj: any): obj is ICard {
 /**
  * @hidden
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function isFindUsersResult(obj: any): obj is FindUsersResult {
     if (!isObject(obj)) return false;
 
@@ -49,7 +45,6 @@ export function isFindUsersResult(obj: any): obj is FindUsersResult {
 /**
  * @hidden
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function isLookupResult(
     obj: any,
     isPublicKeyFn: (obj: any) => boolean,
