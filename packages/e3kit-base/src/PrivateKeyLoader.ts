@@ -21,8 +21,7 @@ import {
 /**
  * @hidden
  */
-// eslint-disable-next-line @typescript-eslint/interface-name-prefix
-export interface IPrivateKeyLoaderOptions {
+export interface PrivateKeyLoaderOptions {
     virgilCrypto: ICrypto;
     brainKeyCrypto: IBrainKeyCrypto;
     accessTokenProvider: IAccessTokenProvider;
@@ -45,7 +44,7 @@ export class PrivateKeyLoader {
     private keyknoxCrypto = new KeyknoxCrypto(this.options.virgilCrypto);
     private cachedPrivateKey: IPrivateKey | null = null;
 
-    constructor(public identity: string, public options: IPrivateKeyLoaderOptions) {
+    constructor(public identity: string, public options: PrivateKeyLoaderOptions) {
         this.localStorage = options.keyEntryStorage;
     }
 
