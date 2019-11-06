@@ -69,7 +69,7 @@ export class GroupLocalStorage {
             throw new Error('Either "ticketCount" or "epochNumber" option must be provided');
         }
 
-        const [info, tickets] = await Promise.all([
+        const [info, tickets] = await Promise.all<GroupInfo | null, Ticket[]>([
             this.retrieveGroupInfo(sessionId),
             options.ticketCount
                 ? this.retrieveNLastTickets(sessionId, options.ticketCount)

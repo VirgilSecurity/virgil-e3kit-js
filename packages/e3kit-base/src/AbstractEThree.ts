@@ -107,7 +107,7 @@ export abstract class AbstractEThree {
         }
         this.inProcess = true;
         try {
-            const [cards, privateKey] = await Promise.all([
+            const [cards, privateKey] = await Promise.all<ICard[], IPrivateKey | null>([
                 this.cardManager.searchCards(this.identity),
                 this.keyLoader.loadLocalPrivateKey(),
             ]);
@@ -132,7 +132,7 @@ export abstract class AbstractEThree {
         }
         this.inProcess = true;
         try {
-            const [cards, privateKey] = await Promise.all([
+            const [cards, privateKey] = await Promise.all<ICard[], IPrivateKey | null>([
                 this.cardManager.searchCards(this.identity),
                 this.keyLoader.loadLocalPrivateKey(),
             ]);
