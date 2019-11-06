@@ -99,7 +99,7 @@ export abstract class AbstractEThree {
     }
 
     /**
-     * Register current user in Virgil Cloud. Saves private key locally and uploads public key to cloud.
+     * Registers current user in Virgil Cloud. Saves private key locally and uploads public key to the cloud.
      */
     async register(keyPair?: IKeyPair) {
         if (this.inProcess) {
@@ -113,7 +113,7 @@ export abstract class AbstractEThree {
             ]);
             if (cards.length > 1) throw new MultipleCardsError(this.identity);
             if (cards.length > 0) throw new IdentityAlreadyExistsError();
-            if (privateKey && cards.length === 0) await this.keyLoader.resetLocalPrivateKey();
+            if (privateKey) await this.keyLoader.resetLocalPrivateKey();
             const myKeyPair = keyPair || this.virgilCrypto.generateKeys();
             await this.publishCard(myKeyPair);
             await this.keyLoader.savePrivateKeyLocal(myKeyPair.privateKey);
@@ -190,7 +190,6 @@ export abstract class AbstractEThree {
      * was a string and `Buffer` otherwise
      */
     async encrypt(message: Data): Promise<NodeBuffer | string>;
-
     /**
      * Encrypts and signs the message for the current user and a single recipient user.
      * @param {Data} message - Message to sign and encrypt.
@@ -199,7 +198,6 @@ export abstract class AbstractEThree {
      * was a string and `Buffer` otherwise.
      */
     async encrypt(message: Data, card: ICard): Promise<NodeBuffer | string>;
-
     /**
      * Encrypts and signs the message for the current user and multiple recipient users.
      * @param {Data} message - Message to sign and encrypt.
@@ -209,7 +207,6 @@ export abstract class AbstractEThree {
      * was a string and `Buffer` otherwise.
      */
     async encrypt(message: Data, users: FindUsersResult): Promise<NodeBuffer | string>;
-
     /**
      * Encrypts and signs the message for the current user and a single recipient user.
      *
@@ -224,7 +221,6 @@ export abstract class AbstractEThree {
      * was a string and `Buffer` otherwise.
      */
     async encrypt(message: Data, publicKey: IPublicKey): Promise<NodeBuffer | string>;
-
     /**
      * Encrypts and signs the message for the current user and multiple recipient users.
      *
@@ -275,7 +271,6 @@ export abstract class AbstractEThree {
      * was a string and `Buffer` otherwise.
      */
     async decrypt(message: Data): Promise<NodeBuffer | string>;
-
     /**
      * Decrypts and verifies the data encrypted by the user identified by `senderCard` for the
      * current user.
