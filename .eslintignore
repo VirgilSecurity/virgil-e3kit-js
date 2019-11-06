@@ -1,1 +1,5 @@
-dist/*
+examples/ionic
+examples/*/dist
+examples/*/node_modules
+packages/*/dist
+packages/*/node_modules

@@ -1,0 +1,46 @@
+{
+  "name": "ReactNativeSample",
+  "version": "0.7.0-beta.0",
+  "private": true,
+  "scripts": {
+    "android": "react-native run-android",
+    "ios": "react-native run-ios",
+    "start": "react-native start",
+    "test": "echo \"ignoring ReactNativeSample app tests\"",
+    "lint": "eslint ."
+  },
+  "dependencies": {
+    "@react-native-community/async-storage": "^1.6.2",
+    "@virgilsecurity/e3kit-native": "^0.7.0-beta.0",
+    "@virgilsecurity/key-storage-rn": "^0.2.1",
+    "react": "16.9.0",
+    "react-native": "0.61.2",
+    "react-native-keychain": "^4.0.1",
+    "react-native-virgil-crypto": "^0.4.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.6.4",
+    "@babel/runtime": "^7.6.3",
+    "@react-native-community/eslint-config": "^0.0.5",
+    "babel-jest": "^24.9.0",
+    "eslint": "^6.6.0",
+    "jest": "^24.9.0",
+    "metro-react-native-babel-preset": "^0.56.3",
+    "react-test-renderer": "16.9.0"
+  },
+  "jest": {
+    "preset": "react-native"
+  },
+  "workspaces": {
+    "nohoist": [
+      "**/@react-native-community/async-storage",
+      "**/@react-native-community/async-storage/**",
+      "**/@virgilsecurity/key-storage-rn",
+      "**/@virgilsecurity/key-storage-rn/**",
+      "**/react-native-keychain",
+      "**/react-native-keychain/**",
+      "**/react-native-virgil-crypto",
+      "**/react-native-virgil-crypto/**"
+    ]
+  }
+}

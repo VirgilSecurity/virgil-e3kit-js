@@ -1,0 +1,42 @@
+{
+    "name": "@virgilsecurity/e3kit",
+    "version": "0.7.0-beta.0",
+    "description": "End-to-end encryption with multiple device support powered by Virgil Security",
+    "main": "./dist/node.cjs.js",
+    "module": "./dist/node.es.js",
+    "browser": {
+        "./dist/node.cjs.js": "./browser.cjs.js",
+        "./dist/node.es.js": "./browser.es.js",
+        "./dist/node.asmjs.cjs.js": "./dist/browser.asmjs.cjs.js",
+        "./dist/node.asmjs.es.js": "./dist/browser.asmjs.es.js"
+    },
+    "typings": "./dist/types/index.d.ts",
+    "files": [
+        "dist",
+        "browser.cjs.js",
+        "browser.es.js",
+        "native.js",
+        "worker.cjs.js",
+        "worker.es.js"
+    ],
+    "repository": "https://github.com/VirgilSecurity/virgil-e3kit-js/tree/master/packages/e3kit",
+    "author": "Virgil Security Inc. <support@virgilsecurity.com>",
+    "license": "BSD-3-Clause",
+    "scripts": {
+        "clean": "rimraf dist browser.cjs.js browser.es.js worker.cjs.js worker.es.js",
+        "build": "node prepare.js",
+        "prepare": "npm run clean && npm run build"
+    },
+    "dependencies": {
+        "@virgilsecurity/e3kit-browser": "^0.7.0-beta.0",
+        "@virgilsecurity/e3kit-native": "^0.7.0-beta.0",
+        "@virgilsecurity/e3kit-node": "^0.7.0-beta.0"
+    },
+    "devDependencies": {
+        "mkdirp": "^0.5.1",
+        "rimraf": "^3.0.0"
+    },
+    "publishConfig": {
+        "access": "public"
+    }
+}

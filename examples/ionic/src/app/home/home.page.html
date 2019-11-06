@@ -1,0 +1,17 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>
+      Ionic Blank
+    </ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="ion-padding">
+    <h1>Virgil E3Kit SDK + Webpack usage example</h1>
+    <p>If all goes well, you should see messages printed below in a moment...</p>
+    <div *ngFor="let message of messages | async">
+        <p>{{ message }}</p>
+    </div>
+  </div>
+</ion-content>

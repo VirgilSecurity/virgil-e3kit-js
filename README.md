@@ -6,46 +6,35 @@
 
 [Introduction](#introduction) | [SDK Features](#sdk-features) | [Installation](#installation) | [Usage Example](#usage-example) | [Docs](#docs) | [Support](#support)
 
+> Warning! This README is for the beta release of E3kit, if you're here for the latest stable version check out the [v0.6.x branch](https://github.com/VirgilSecurity/virgil-e3kit-js/tree/v0.6.x)
+
 ## Introduction
 
 <a href="https://developer.virgilsecurity.com/docs"><img width="230px" src="https://cdn.virgilsecurity.com/assets/images/github/logos/virgil-logo-red.png" align="left" hspace="10" vspace="6"></a> [Virgil Security](https://virgilsecurity.com) provides an SDK which simplifies work with Virgil services and presents easy to use API for adding security to any application. In a few simple steps you can setup user encryption with multidevice support.
 
 This a beta release that is made available to allow users to test and evaluate the next verion of E3kit. It is not recommended for production use at this stage.
 
-## What's new in E3kit v0.6.0?
+## What's new in E3kit v0.7.0?
 
-The most important changes are:
-- The switch of the underlying crypto library implementation from asm.js to the more performant and smaller WebAssembly format
-- Separate _native_ crypto library implementation for React Native via the JS [bridge](https://github.com/VirgilSecurity/react-native-virgil-crypto)
-- Node.js support
+* The most important new feature is the ability to create secure group chats.
+* Also, starting from this version E3kit is distributed as a monorepo.
 
 ## Installation
 
-You can install this module from npm. Another option is to add it via script tag in browser.
+This is the root of the monorepo for E3kit, for platform-specific installation instrunctions please select the package link from below
 
-### npm
-You will need to install `@virgilsecurity/e3kit`:
-```sh
-npm install @virgilsecurity/e3kit
-```
-
-If you develop for browsers and `import` (or `require`) e3kit from the npm package, you will need to tell your module bundler (such as Webpack) to handle the `.wasm` file imports by copying them into the build output directory _preserving_ the original name.
-
-See an example of how to do this with Webpack in the [example/webpack](example/webpack) folder.
-
-> To serve WebAssembly in the most efficient way over the network, make sure your web server has the proper MIME type for `.wasm` files, which is `application/wasm`. That will allow streaming compilation, where the browser can start to compile code as it downloads.
-
-### In browser via `script` tag
-You will need to add `@virgilsecurity/e3kit` script.
-```html
-<script src="https://unpkg.com/@virgilsecurity/e3kit@0.6.2/dist/browser.umd.js"></script>
-```
+| Name | Description |
+| :--- | :---------- |
+| [e3kit-browser](/packages/e3kit-browser) | For use in web browsers. |
+| [e3kit-native](/packages/e3kit-native) | For use in React Native. |
+| [e3kit-node](/packages/e3kit-node) | For use in Node.js and Electron. |
+| [e3kit](/packages/e3kit) | This is the full `e3kit` package wrapping all of the above. It's mostly meant to preserve backward compatibility. We recommend to install one of the plaform-specific packages instead for faster install times. |
 
 ## Usage Example
 
 ### Initialize & Register
 
-```js
+```javascript
 import { EThree } from '@virgilsecurity/e3kit'
 // get virgil token from you backend (better to protect it!)
 const getToken = () => fetch('http://localhost:3000/get-virgil-jwt/')
@@ -63,9 +52,9 @@ const getToken = () => fetch('http://localhost:3000/get-virgil-jwt/')
 
 ### Encrypt & Decrypt
 
-```js
-const usersToEncryptTo = ["alice@myapp.com", "bob@myapp.com", 'sofia@myapp.com'];
-const userWhoEncrypts = "alex@myapp.com";
+```javascript
+const usersToEncryptTo = ['alice@myapp.com', 'bob@myapp.com', 'sofia@myapp.com'];
+const userWhoEncrypts = 'alex@myapp.com';
 const [receiverPublicKeys, senderPublicKey] = await Promise.all([
     eThree.lookupPublicKeys(usersToEncryptTo),
     eThree.lookupPublicKeys(userWhoEncrypts)
@@ -73,40 +62,111 @@ const [receiverPublicKeys, senderPublicKey] = await Promise.all([
 
 const encryptedMsg = await eThree.encrypt('Send you my sensitive information!', receiversPublicKeys);
 const decryptedMsg = await eThree.decrypt(encryptedMsg, senderPublicKey);
-// we decrypt the message and check that it is sent by "alex@myapp.com"
-
-```
-You can find more examples in [examples folder](example) and on https://developer.virgilsecurity.com/docs/use-cases.
-
-
-### Encrypt & decrypt large files
-
-If you need to encrypt & decrypt files in the browser, see the `encryptFile` and `decryptFile` methods:
-- https://virgilsecurity.github.io/virgil-e3kit-js/classes/ethree.html#encryptfile
-- https://virgilsecurity.github.io/virgil-e3kit-js/classes/ethree.html#decryptfile
-
-Both methods take an instance of `File` class as input instead of binary `ArrayBuffer`.
-The files are encrypted in small chunks, so it doesn't block the main thread and it returns an encrypted instance of `File`. The chunk size by default is 64kb which produces the best speed/browser performance ratio, but it can be changed. Larger chunk size speeds up encryption but can cause browser lags.
-
-Simple demo based on the methods above: https://virgilsecurity.github.io/virgil-e3kit-js/example/encryptFile.html
-The demo source code can be found here: https://github.com/VirgilSecurity/virgil-e3kit-js/blob/master/example/encryptFile.html
-
-> This approach for file encryption is currently only supported in browser environments and mobile apps built with the Ionic framework.
-
-
-### React Native usage
-
-This package _implicitly_ depends on [virgil-key-storage-rn](https://github.com/VirgilSecurity/virgil-key-storage-rn) to securely store private keys and [react-native-virgil-crypto](https://github.com/VirgilSecurity/react-native-virgil-crypto) as the underlying crypto library. All you have to do in your React Native project is install those two libraries and their native dependencies by following instructions in the repsective repository's README file.
-
-Then you need to specify the `@virgilsecurity/e3kit/native` entry point when importing `EThree` and the private key storage and crypto will be initialized automatically:
-
-```js
-import { EThree } from '@virgilsecurity/e3kit/native';
-
-EThree.initialize(getTokenCallback);
+// we decrypt the message and check that it is sent by 'alex@myapp.com'
 ```
 
-See the complete example in [example/E3kitReactNative](example/E3kitReactNative).
+### Enable Group Chat
+
+In this section, you'll find out how to build a group chat using the Virgil E3Kit.
+
+We assume that your users have installed and initialized the E3Kit, and used snippet above to register.
+
+
+#### Create group chat
+
+Let's imagine Alice wants to start a group chat with Bob and Carol. First, Alice creates a new group ticket by calling `createGroup` method and E3Kit stores the ticket in Virgil Cloud. This ticket holds a shared root key for future group encryption.
+
+Alice has to specify a unique `identifier` of group with length > 10 and `findUsersResult` of participants. We recommend tying this identifier to your unique transport channel id.
+
+```javascript
+const groupId = 'unique_group_id';
+const participants = await eThree.findUsers(['bob@myapp.com', 'carol@myapp.com']);
+const group = await eThree.createGroup(groupId, participants);
+// Group created and saved locally
+```
+
+#### Start group chat session
+
+Now, other participants, Bob and Carol, want to join the Alice's group and have to load the group ticket using `loadGroup` method. This function requires specifying the group's `identifier` and group initiator's Card.
+
+```javascript
+const groupId = 'unique_group_id';
+const aliceCard = await eThree.findUsers('alice@myapp.com');
+const group = await eThree.loadGroup(groupId, aliceCard);
+// Group loaded and saved locally
+```
+
+After the group is saved locally, you can use `getGroup` method to retrieve group instance from local storage.
+
+```javascript
+const groupId = 'unique_group_id';
+const group = await eThree.getGroup(groupId);
+```
+
+#### Encrypt and decrypt messages
+
+To encrypt and decrypt messages, use `encrypt` and `decrypt` methods of the group object, which allows you to work with Buffers and strings.
+
+The following code snippet encrypts a message:
+
+```javascript
+const messageToEncrypt = 'Hello, Bob and Carol!';
+const encrypted = await group.encrypt(messageToEncrypt);
+// `encrypted` will be a string in base64 encoding
+```
+
+The following code snippet decrypts a message:
+
+```javascript
+const messageSenderCard = await eThree.findUsers('alice@myapp.com');
+const decrypted = await group.decrypt(encrypted, messageSenderCard);
+```
+Note how we provide the result of `findUsers` to `decrypt` method to verify that the message hasn't been tempered with.
+
+### Manage group chat
+
+E3Kit allows you to add and remove participants to an existing group chat. In this version of E3Kit only the group initiator can change participants or delete a group.
+
+#### Add new participant
+
+To add a new chat member, the chat owner has to call the `add` method and specify the new member's Card. A new member will be able to decrypt all previous messages history.
+
+```javascript
+const newParticipant = await eThree.findUsers('john@myapp.com');
+await group.add(newParticipant);
+```
+
+#### Remove participant
+
+To remove a member, group owner has to call `remove` method and specify the member's Card. Removed participants won't be able to load or update this group.
+
+```javascript
+const existingParticipant = await eThree.findUsers('john@myapp.com');
+await group.remove(existingParticipant);
+```
+
+#### Update group chat
+
+In the event of changes in the group, e.g. new participant is added or existing participant is removed, each group chat participant has to update the encryption key by calling `update` method or reloading the group with `loadGroup`.
+
+```javascript
+await group.update();
+// Group has been updated
+```
+
+#### Delete group chat
+
+To delete a group, the owner has to call `deleteGroup` method and specify the group's `identifier`.
+
+```javascript
+await eThree.deleteGroup(groupId);
+// Group has been deleted
+```
+
+## Samples
+
+You can find more examples in [examples folder](/examples), on https://developer.virgilsecurity.com/docs/use-cases and in the [E3kit Web Demo](https://github.com/VirgilSecurity/demo-e3kit-web).
+
 
 ## Docs
 Virgil Security has a powerful set of APIs, and the documentation below can get you started today.
