@@ -137,7 +137,7 @@ export abstract class AbstractEThree {
             if (cards.length === 0) throw new RegisterRequiredError();
             if (cards.length > 1) throw new MultipleCardsError(this.identity);
             if (privateKey) throw new PrivateKeyAlreadyExistsError();
-            this.publishCardThenSavePrivateKeyLocal({ previousCard: cards[0] });
+            await this.publishCardThenSavePrivateKeyLocal({ previousCard: cards[0] });
         } finally {
             this.inProcess = false;
         }
