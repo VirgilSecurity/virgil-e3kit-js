@@ -169,13 +169,26 @@ export abstract class AbstractEThree {
 
     /**
      * Delete private key saved in Virgil Keyknox Storage.
-     * @param pwd User password for access to Virgil Keyknox Storage. If password omitted resets all
-     * Keyknox storage.
+     * @returns {Promise<void>} - Promise that is resolved if everything went fine.
      */
+    async resetPrivateKeyBackup(): Promise<void>;
+    /**
+     * Delete private key saved in Virgil Keyknox Storage.
+     *
+     * @deprecated since version 0.7.0-beta.1
+     * Will be removed in version 0.8.0
+     *
+     * @param {string} pwd - User password for access to Virgil Keyknox Storage.
+     * @returns {Promise<void>} - Promise that is resolved if everything went fine.
+     */
+    async resetPrivateKeyBackup(pwd: string): Promise<void>;
     async resetPrivateKeyBackup(pwd?: string) {
         if (!pwd) {
             return await this.keyLoader.resetAll();
         }
+        warn(
+            `'resetPrivateKeyBackup(pwd: string)' was deprecated. Please use 'resetPrivateKeyBackup()' instead.`,
+        );
         return this.keyLoader.resetPrivateKeyBackup(pwd);
     }
 
