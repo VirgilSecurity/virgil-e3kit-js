@@ -4,7 +4,8 @@
     "scripts": {
         "lint": "eslint '**/*.{js,ts}'",
         "test": "lerna run test --stream --ignore ionic",
-        "prepare": "lerna run prepare --stream"
+        "prepare": "lerna run prepare --stream",
+        "docs": "node scripts/generate-docs.js"
     },
     "devDependencies": {
         "@typescript-eslint/eslint-plugin": "^2.3.1",
