@@ -6,8 +6,17 @@
     <meta name="viewport" content="width=device-width">
     <title>Index of E3Kit API Reference</title>
     <style>
+        table {
+            border-collapse: separate;
+            border-spacing: 10px 10px;
+        }
         table tr { white-space: nowrap; }
-        td.display-name { padding-left: 1em; }
+        td.version {
+            background: #2196f3;
+            border-radius: 4px;
+            color: #fff;
+            padding: 0 .5em;
+        }
     </style>
 </head>
 <body>
@@ -17,6 +26,7 @@
             <% links.forEach(function(link) { %>
                 <tr>
                     <td class="display-name"><a href="<%= link.href %>"><%= link.title %></a></td>
+                    <td class="version"><code>v<%= link.version %></code></td>
                 </tr>
             <% }); %>
         </tbody>

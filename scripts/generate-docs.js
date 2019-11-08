@@ -33,8 +33,7 @@ function buildDocsForPackage(pkg) {
 
     const project = app.convert(app.expandInputFiles([pkg.srcPath]));
     if (!project) {
-        console.error(`Failed to generate docs for ${pkg.name}`);
-        return;
+        throw new Error(`Failed to generate docs for ${pkg.name}`);
     }
 
     app.generateDocs(project, path.join(outDir, pkg.dirName));
@@ -42,21 +41,23 @@ function buildDocsForPackage(pkg) {
     return {
         href: `/${pkg.dirName}`,
         title: pkg.name,
+        version: pkg.version,
     };
 }
 
 const links = fs
-    .readdirSync(packagesDir, { encoding: 'utf8', withFileTypes: true })
-    .filter(entry => entry.isDirectory())
-    .map(dir => {
-        const absPath = path.join(packagesDir, dir.name);
+    .readdirSync(packagesDir, { encoding: 'utf8' })
+    .filter(entry => fs.statSync(path.join(packagesDir, entry)).isDirectory())
+    .map(dirName => {
+        const absPath = path.join(packagesDir, dirName);
         const srcPath = path.join(absPath, 'src');
         const packageJson = require(path.join(absPath, 'package.json'));
         return {
             name: packageJson.name,
+            version: packageJson.version,
             isPrivate: packageJson.private,
             srcPath: fs.existsSync(srcPath) ? srcPath : undefined,
-            dirName: dir.name,
+            dirName: dirName,
         };
     })
     .filter(pkg => !pkg.isPrivate && pkg.srcPath)
