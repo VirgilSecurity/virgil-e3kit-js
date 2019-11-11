@@ -558,20 +558,21 @@ export abstract class AbstractEThree {
         }
     }
 
+    async createGroup(groupId: Data): Promise<Group>;
     async createGroup(groupId: Data, participant: ICard): Promise<Group>;
     async createGroup(groupId: Data, participants: FindUsersResult): Promise<Group>;
-    async createGroup(groupId: Data, participants: ICard | FindUsersResult): Promise<Group> {
-        let participantIdentities: Set<string>;
-        let participantCards: ICard[];
+    async createGroup(groupId: Data, participants?: ICard | FindUsersResult): Promise<Group> {
+        let participantIdentities = new Set<string>();
+        let participantCards: ICard[] = [];
         if (isVirgilCard(participants)) {
             participantIdentities = new Set([participants.identity]);
             participantCards = [participants];
         } else if (isFindUsersResult(participants)) {
             participantIdentities = new Set(Object.keys(participants));
             participantCards = getObjectValues(participants);
-        } else {
+        } else if (typeof participants !== 'undefined') {
             throw new TypeError(
-                'Expected participants to be the result of "findUsers" method call',
+                'Expected participants to be the result of "findUsers" method call or to be "typeof undefined"',
             );
         }
         participantIdentities.add(this.identity);
@@ -581,7 +582,6 @@ export abstract class AbstractEThree {
                 `Cannot create group with ${participantIdentities.size} participant(s). Group can have ${VALID_GROUP_PARTICIPANT_COUNT_RANGE[0]} to ${VALID_GROUP_PARTICIPANT_COUNT_RANGE[1]} participants.`,
             );
         }
-
         const groupSession = this.virgilCrypto.generateGroupSession(groupId);
         const ticket = {
             groupSessionMessage: {
