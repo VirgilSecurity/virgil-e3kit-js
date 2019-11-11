@@ -606,20 +606,6 @@ export abstract class AbstractEThree {
 
     async deleteGroup(groupId: Data) {
         const sessionId = this.virgilCrypto.calculateGroupSessionId(groupId);
-        const group = await this.groupManager.retrieve(sessionId);
-        if (!group) {
-            throw new GroupError(
-                GroupErrorCode.LocalGroupNotFound,
-                `Group with ID "${groupId}" was not found in local storage. Try to load it first.`,
-            );
-        }
-        if (!group.isEditable()) {
-            throw new GroupError(
-                GroupErrorCode.PermissionDenied,
-                'Only group initiator can delete the group',
-            );
-        }
-
         await this.groupManager.delete(sessionId);
     }
 

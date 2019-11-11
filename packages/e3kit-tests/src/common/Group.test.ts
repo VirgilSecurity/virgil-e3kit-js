@@ -263,12 +263,6 @@ describe('EThree', () => {
             const aliceCard = await bobEThree.findUsers(aliceEThree.identity);
             const group = await bobEThree.loadGroup(groupId, aliceCard);
             try {
-                await bobEThree.deleteGroup(groupId);
-                expect.fail();
-            } catch (error) {
-                expect(error).to.be.instanceOf(GroupError);
-            }
-            try {
                 await group.remove(bobAndCharlesCards[charlesEThree.identity]);
                 expect.fail();
             } catch (error) {
@@ -518,6 +512,16 @@ describe('EThree', () => {
             const group2 = await bobEThree.loadGroup(groupId, aliceCard);
             const decrypted = await group2.decrypt(encrypted, aliceCard);
             expect(decrypted.toString('utf8')).to.equal(message);
+        });
+
+        it('STE-85', async () => {
+            const aliceEThree = await createEThree();
+            const groupId = uuid();
+            try {
+                await aliceEThree.deleteGroup(groupId);
+            } catch (_) {
+                expect.fail();
+            }
         });
     });
 });
