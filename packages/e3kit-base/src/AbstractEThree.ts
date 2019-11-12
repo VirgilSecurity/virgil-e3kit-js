@@ -169,13 +169,26 @@ export abstract class AbstractEThree {
 
     /**
      * Delete private key saved in Virgil Keyknox Storage.
-     * @param pwd User password for access to Virgil Keyknox Storage. If password omitted resets all
-     * Keyknox storage.
+     * @returns {Promise<void>} - Promise that is resolved if everything went fine.
      */
+    async resetPrivateKeyBackup(): Promise<void>;
+    /**
+     * Delete private key saved in Virgil Keyknox Storage.
+     *
+     * @deprecated since version 0.7.0-beta.1
+     * Will be removed in version 0.8.0
+     *
+     * @param {string} pwd - User password for access to Virgil Keyknox Storage.
+     * @returns {Promise<void>} - Promise that is resolved if everything went fine.
+     */
+    async resetPrivateKeyBackup(pwd: string): Promise<void>;
     async resetPrivateKeyBackup(pwd?: string) {
         if (!pwd) {
             return await this.keyLoader.resetAll();
         }
+        warn(
+            `'resetPrivateKeyBackup(pwd: string)' was deprecated. Please use 'resetPrivateKeyBackup()' instead.`,
+        );
         return this.keyLoader.resetPrivateKeyBackup(pwd);
     }
 
@@ -545,20 +558,21 @@ export abstract class AbstractEThree {
         }
     }
 
+    async createGroup(groupId: Data): Promise<Group>;
     async createGroup(groupId: Data, participant: ICard): Promise<Group>;
     async createGroup(groupId: Data, participants: FindUsersResult): Promise<Group>;
-    async createGroup(groupId: Data, participants: ICard | FindUsersResult): Promise<Group> {
-        let participantIdentities: Set<string>;
-        let participantCards: ICard[];
+    async createGroup(groupId: Data, participants?: ICard | FindUsersResult): Promise<Group> {
+        let participantIdentities = new Set<string>();
+        let participantCards: ICard[] = [];
         if (isVirgilCard(participants)) {
             participantIdentities = new Set([participants.identity]);
             participantCards = [participants];
         } else if (isFindUsersResult(participants)) {
             participantIdentities = new Set(Object.keys(participants));
             participantCards = getObjectValues(participants);
-        } else {
+        } else if (typeof participants !== 'undefined') {
             throw new TypeError(
-                'Expected participants to be the result of "findUsers" method call',
+                'Expected participants to be the result of "findUsers" method call or to be "typeof undefined"',
             );
         }
         participantIdentities.add(this.identity);
@@ -568,7 +582,6 @@ export abstract class AbstractEThree {
                 `Cannot create group with ${participantIdentities.size} participant(s). Group can have ${VALID_GROUP_PARTICIPANT_COUNT_RANGE[0]} to ${VALID_GROUP_PARTICIPANT_COUNT_RANGE[1]} participants.`,
             );
         }
-
         const groupSession = this.virgilCrypto.generateGroupSession(groupId);
         const ticket = {
             groupSessionMessage: {
@@ -593,20 +606,6 @@ export abstract class AbstractEThree {
 
     async deleteGroup(groupId: Data) {
         const sessionId = this.virgilCrypto.calculateGroupSessionId(groupId);
-        const group = await this.groupManager.retrieve(sessionId);
-        if (!group) {
-            throw new GroupError(
-                GroupErrorCode.LocalGroupNotFound,
-                `Group with ID "${groupId}" was not found in local storage. Try to load it first.`,
-            );
-        }
-        if (!group.isEditable()) {
-            throw new GroupError(
-                GroupErrorCode.PermissionDenied,
-                'Only group initiator can delete the group',
-            );
-        }
-
         await this.groupManager.delete(sessionId);
     }
 

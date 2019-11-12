@@ -10,6 +10,8 @@ import { JwtGenerator } from 'virgil-sdk';
 
 import { sleep } from '../utils';
 
+type ICard = import('virgil-sdk').ICard;
+
 describe('EThree', () => {
     let virgilCrypto: VirgilCrypto;
     let jwtGenerator: JwtGenerator;
@@ -78,22 +80,25 @@ describe('EThree', () => {
             expect(decryptedMessageForCharles.toString('utf8')).to.eq(message);
         });
 
-        it('STE-26 `createGroup` throws if trying to pass invalid participants', async () => {
+        it('STE-26 `createGroup` throws if trying to pass invalid participants count', async () => {
             const aliceEThree = await createEThree();
             const groupId = uuid();
             const aliceCard = await aliceEThree.findUsers(aliceEThree.identity);
+            const findUserResults: { [key: string]: ICard } = {};
+            for (let i = 0; i < 100; i += 1) {
+                findUserResults[uuid()] = aliceCard;
+            }
             try {
-                await aliceEThree.createGroup(groupId, aliceCard);
+                await aliceEThree.createGroup(groupId, findUserResults);
                 expect.fail();
             } catch (error) {
                 expect(error).to.be.instanceOf(GroupError);
             }
-            try {
-                await aliceEThree.createGroup(groupId, { [aliceCard.identity]: aliceCard });
-                expect.fail();
-            } catch (error) {
-                expect(error).to.be.instanceOf(GroupError);
-            }
+            const newUsers: { [key: string]: ICard } = {};
+            newUsers[uuid()] = aliceCard;
+            const group = await aliceEThree.createGroup(groupId, newUsers);
+            expect(group.participants).to.have.length(2);
+            expect(group.participants).to.include(aliceEThree.identity);
         });
 
         it('STE-27 `createGroup` adds founder to the list of participants', async () => {
@@ -201,11 +206,10 @@ describe('EThree', () => {
 
         it('STE-34 `remove` throws if trying to remove last participant', async () => {
             const aliceEThree = await createEThree();
-            const bobEThree = await createEThree();
-            const bobCard = await aliceEThree.findUsers(bobEThree.identity);
-            const group = await aliceEThree.createGroup(uuid(), bobCard);
+            const aliceCard = await aliceEThree.findUsers(aliceEThree.identity);
+            const group = await aliceEThree.createGroup(uuid());
             try {
-                await group.remove(bobCard);
+                await group.remove(aliceCard);
                 expect.fail();
             } catch (error) {
                 expect(error).to.be.instanceOf(GroupError);
@@ -258,12 +262,6 @@ describe('EThree', () => {
             await aliceEThree.createGroup(groupId, bobAndCharlesCards);
             const aliceCard = await bobEThree.findUsers(aliceEThree.identity);
             const group = await bobEThree.loadGroup(groupId, aliceCard);
-            try {
-                await bobEThree.deleteGroup(groupId);
-                expect.fail();
-            } catch (error) {
-                expect(error).to.be.instanceOf(GroupError);
-            }
             try {
                 await group.remove(bobAndCharlesCards[charlesEThree.identity]);
                 expect.fail();
@@ -499,6 +497,31 @@ describe('EThree', () => {
             await aliceEThree.getGroup(groupId);
             await bobEThree.getGroup(groupId);
             await aliceEThree.deleteGroup(groupId);
+        });
+
+        it('STE-73', async () => {
+            const aliceEThree = await createEThree();
+            const bobEThree = await createEThree();
+            const groupId = uuid();
+            const group1 = await aliceEThree.createGroup(groupId);
+            const message = 'message';
+            const encrypted = await group1.encrypt(message);
+            const bobCard = await aliceEThree.findUsers(bobEThree.identity);
+            await group1.add(bobCard);
+            const aliceCard = await bobEThree.findUsers(aliceEThree.identity);
+            const group2 = await bobEThree.loadGroup(groupId, aliceCard);
+            const decrypted = await group2.decrypt(encrypted, aliceCard);
+            expect(decrypted.toString('utf8')).to.equal(message);
+        });
+
+        it('STE-85', async () => {
+            const aliceEThree = await createEThree();
+            const groupId = uuid();
+            try {
+                await aliceEThree.deleteGroup(groupId);
+            } catch (_) {
+                expect.fail();
+            }
         });
     });
 });
