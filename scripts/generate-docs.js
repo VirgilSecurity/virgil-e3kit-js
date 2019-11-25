@@ -39,7 +39,7 @@ function buildDocsForPackage(pkg) {
     app.generateDocs(project, path.join(outDir, pkg.dirName));
 
     return {
-        href: `/${pkg.dirName}`,
+        href: pkg.dirName,
         title: pkg.name,
         version: pkg.version,
     };
