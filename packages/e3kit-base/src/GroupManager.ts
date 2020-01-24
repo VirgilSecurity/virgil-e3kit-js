@@ -137,8 +137,13 @@ export class GroupManager {
 
     async addAccess(sessionId: string, allowedCards: ICard[]) {
         const cloudTicketStorage = await this.getCloudTicketStorage();
+        const localGroupStorage = await this.getLocalGroupStorage();
         try {
             await cloudTicketStorage.addRecipients(sessionId, allowedCards);
+            await localGroupStorage.addParticipants(
+                sessionId,
+                allowedCards.map(card => card.identity),
+            );
         } catch (error) {
             if (error.name === 'GroupTicketNoAccessError') {
                 throw new GroupError(

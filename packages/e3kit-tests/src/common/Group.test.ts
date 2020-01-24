@@ -523,5 +523,19 @@ describe('EThree', () => {
                 expect.fail();
             }
         });
+
+        it('STE-86', async () => {
+            const aliceEThree = await createEThree();
+            const bobEThree = await createEThree();
+            const groupId = uuid();
+            const group = await aliceEThree.createGroup(groupId);
+            const bobCard = await aliceEThree.findUsers(bobEThree.identity);
+            await group.add(bobCard);
+            const localGroup = await aliceEThree.getGroup(groupId);
+            const participants = new Set(localGroup!.participants);
+            expect(participants.size).to.equal(2);
+            expect(participants.has(aliceEThree.identity)).to.be.true;
+            expect(participants.has(bobEThree.identity)).to.be.true;
+        });
     });
 });
