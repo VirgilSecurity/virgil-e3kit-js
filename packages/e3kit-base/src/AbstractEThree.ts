@@ -219,9 +219,6 @@ export abstract class AbstractEThree {
     /**
      * Encrypts and signs the message for the current user and a single recipient user.
      *
-     * @deprecated since version 0.7.0
-     * Will be removed in version 0.8.0
-     *
      * Use the overload that accepts `ICard` object instead.
      *
      * @param {Data} message - Message to sign and encrypt.

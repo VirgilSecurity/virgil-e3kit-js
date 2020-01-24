@@ -20,5 +20,5 @@ deploy:
     keep-history: true
     local-dir: docs
     on: # deploy only tagged build on Node.js 10
-        tags: true
+        branch: master
         node: '10'
