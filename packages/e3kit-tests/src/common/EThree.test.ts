@@ -4,6 +4,7 @@ import uuid from 'uuid/v4';
 
 import { setFoundationModules, VirgilCrypto } from '@virgilsecurity/base-crypto';
 import initFoundation from '@virgilsecurity/core-foundation';
+import initPythia from '@virgilsecurity/core-pythia';
 import {
     IdentityAlreadyExistsError,
     RegisterRequiredError,
@@ -21,7 +22,7 @@ import {
     KeyknoxCrypto,
     CloudKeyStorage,
 } from '@virgilsecurity/keyknox';
-import { initPythia, VirgilBrainKeyCrypto } from '@virgilsecurity/pythia-crypto';
+import { setPythiaModules, VirgilBrainKeyCrypto } from '@virgilsecurity/pythia-crypto';
 import { VirgilCardCrypto, VirgilAccessTokenSigner } from '@virgilsecurity/sdk-crypto';
 import { createBrainKey } from 'virgil-pythia';
 import {
@@ -50,7 +51,10 @@ describe('EThree', () => {
     let keyEntryStorage: KeyEntryStorage;
 
     before(async () => {
-        await Promise.all([initFoundation().then(setFoundationModules), initPythia()]);
+        await Promise.all([
+            initFoundation().then(setFoundationModules),
+            initPythia().then(setPythiaModules),
+        ]);
     });
 
     beforeEach(async () => {

@@ -21,6 +21,7 @@
         "@types/mkdirp": "^0.5.2",
         "@virgilsecurity/base-crypto": "0.6.1",
         "@virgilsecurity/core-foundation": "0.3.0",
+        "@virgilsecurity/core-pythia": "0.3.0",
         "@virgilsecurity/e3kit-base": "0.7.0",
         "@virgilsecurity/pythia-crypto": "0.2.2",
         "@virgilsecurity/sdk-crypto": "0.4.5",

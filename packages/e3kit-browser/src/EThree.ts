@@ -1,10 +1,11 @@
-import initFoundation from '@virgilsecurity/core-foundation';
 import {
     setFoundationModules,
     hasFoundationModules,
     VirgilCrypto,
     VirgilPublicKey,
 } from '@virgilsecurity/base-crypto';
+import initFoundation from '@virgilsecurity/core-foundation';
+import initPythia from '@virgilsecurity/core-pythia';
 import {
     DEFAULT_API_URL,
     DEFAULT_STORAGE_NAME,
@@ -14,7 +15,11 @@ import {
     IntegrityCheckFailedError,
     RegisterRequiredError,
 } from '@virgilsecurity/e3kit-base';
-import { initPythia, hasPythiaModules, VirgilBrainKeyCrypto } from '@virgilsecurity/pythia-crypto';
+import {
+    hasPythiaModules,
+    setPythiaModules,
+    VirgilBrainKeyCrypto,
+} from '@virgilsecurity/pythia-crypto';
 import { VirgilCardCrypto } from '@virgilsecurity/sdk-crypto';
 import { CachingJwtProvider, CardManager, KeyEntryStorage, VirgilCardVerifier } from 'virgil-sdk';
 import leveljs from 'level-js';
@@ -63,7 +68,7 @@ export class EThree extends AbstractEThree {
             modulesToLoad.push(initFoundation().then(setFoundationModules));
         }
         if (!hasPythiaModules()) {
-            modulesToLoad.push(initPythia());
+            modulesToLoad.push(initPythia().then(setPythiaModules));
         }
         await Promise.all(modulesToLoad);
 

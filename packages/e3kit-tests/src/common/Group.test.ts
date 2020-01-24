@@ -3,8 +3,9 @@ import uuid from 'uuid/v4';
 
 import { setFoundationModules, VirgilCrypto } from '@virgilsecurity/base-crypto';
 import initFoundation from '@virgilsecurity/core-foundation';
+import initPythia from '@virgilsecurity/core-pythia';
 import { EThree, GroupError } from '@virgilsecurity/e3kit-node';
-import { initPythia } from '@virgilsecurity/pythia-crypto';
+import { setPythiaModules } from '@virgilsecurity/pythia-crypto';
 import { VirgilAccessTokenSigner } from '@virgilsecurity/sdk-crypto';
 import { JwtGenerator } from 'virgil-sdk';
 
@@ -17,7 +18,10 @@ describe('EThree', () => {
     let jwtGenerator: JwtGenerator;
 
     before(async () => {
-        await Promise.all([initFoundation().then(setFoundationModules), initPythia()]);
+        await Promise.all([
+            initFoundation().then(setFoundationModules),
+            initPythia().then(setPythiaModules),
+        ]);
     });
 
     beforeEach(() => {
