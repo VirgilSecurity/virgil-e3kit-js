@@ -1,6 +1,6 @@
 {
     "name": "@virgilsecurity/e3kit-native",
-    "version": "0.7.0",
+    "version": "0.7.0-beta.2",
     "description": "End-to-end encryption with multiple device support powered by Virgil Security",
     "main": "./dist/e3kit-native.cjs.js",
     "module": "./dist/e3kit-native.es.js",
@@ -19,10 +19,10 @@
     "dependencies": {
         "@types/abstract-leveldown": "^5.0.1",
         "@types/react-native": "^0.61.4",
-        "@virgilsecurity/e3kit-base": "0.7.0",
+        "@virgilsecurity/e3kit-base": "0.7.0-beta.2",
         "@virgilsecurity/sdk-crypto": "0.4.5",
         "asyncstorage-down": "^4.2.0",
-        "virgil-sdk": "6.0.0-alpha.5"
+        "virgil-sdk": "6.0.0-alpha.6"
     },
     "devDependencies": {
         "@virgilsecurity/key-storage-rn": "0.2.1",

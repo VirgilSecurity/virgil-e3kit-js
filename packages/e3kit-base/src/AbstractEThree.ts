@@ -666,7 +666,7 @@ export abstract class AbstractEThree {
     protected getPublicKeysForEncryption(
         ownPrivateKey: IPrivateKey,
         recipients?: ICard | FindUsersResult | IPublicKey | LookupResult,
-    ) {
+    ): IPublicKey[] | null {
         let publicKeys: IPublicKey[];
         if (recipients == null) {
             publicKeys = [];
@@ -701,7 +701,7 @@ export abstract class AbstractEThree {
         ownPrivateKey: IPrivateKey,
         senderCardOrPublicKey?: ICard | IPublicKey,
         encryptedAt?: Date | number,
-    ) {
+    ): IPublicKey | null {
         if (senderCardOrPublicKey == null) {
             return this.virgilCrypto.extractPublicKey(ownPrivateKey);
         }
