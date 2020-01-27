@@ -1,3 +1,6 @@
+process.env.__VIRGIL_PRODUCT_NAME__ = process.env.SET_PRODUCT_NAME;
+process.env.__VIRGIL_PRODUCT_VERSION__ = process.env.SET_PRODUCT_VERSION;
+
 export {
     // errors
     SdkError,

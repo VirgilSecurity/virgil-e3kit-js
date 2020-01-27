@@ -57,8 +57,8 @@ const createEntry = (cryptoType, format) => {
             commonjs(),
             replace({
                 replaces: {
-                    'process.env.PRODUCT_NAME': JSON.stringify(PRODUCT_NAME),
-                    'process.env.PRODUCT_VERSION': JSON.stringify(packageJson.version),
+                    'process.env.SET_PRODUCT_NAME': JSON.stringify(PRODUCT_NAME),
+                    'process.env.SET_PRODUCT_VERSION': JSON.stringify(packageJson.version),
                 },
                 patterns: [
                     {

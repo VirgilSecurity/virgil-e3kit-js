@@ -355,9 +355,9 @@ export class EThree extends AbstractEThree {
             apiUrl: opts.apiUrl,
             productInfo: {
                 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                product: process.env.PRODUCT_NAME!,
+                product: process.env.__VIRGIL_PRODUCT_NAME__!,
                 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                version: process.env.PRODUCT_VERSION!,
+                version: process.env.__VIRGIL_PRODUCT_VERSION__!,
             },
         });
         const groupStorageLeveldown = leveljs(opts.groupStorageName!);
