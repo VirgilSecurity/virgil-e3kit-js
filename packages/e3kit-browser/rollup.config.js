@@ -79,8 +79,8 @@ const createEntry = (target, cryptoType, format) => {
         plugins: [
             replace({
                 replaces: {
-                    'process.env.PRODUCT_NAME': JSON.stringify(PRODUCT_NAME),
-                    'process.env.PRODUCT_VERSION': JSON.stringify(packageJson.version),
+                    'process.env.__VIRGIL_PRODUCT_NAME__': JSON.stringify(PRODUCT_NAME),
+                    'process.env.__VIRGIL_PRODUCT_VERSION__': JSON.stringify(packageJson.version),
                 },
                 patterns: [
                     {

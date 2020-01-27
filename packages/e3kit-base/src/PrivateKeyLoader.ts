@@ -39,7 +39,10 @@ export class PrivateKeyLoader {
         this.options.apiUrl,
         undefined,
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        new VirgilAgent(process.env.PRODUCT_NAME!, process.env.PRODUCT_VERSION!),
+        new VirgilAgent(
+            process.env.__VIRGIL_PRODUCT_NAME__!,
+            process.env.__VIRGIL_PRODUCT_VERSION__!,
+        ),
     );
     private keyknoxCrypto = new KeyknoxCrypto(this.options.virgilCrypto);
     private cachedPrivateKey: IPrivateKey | null = null;
