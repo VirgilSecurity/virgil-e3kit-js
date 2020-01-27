@@ -17,6 +17,7 @@
         "prepare": "npm run clean && npm run build"
     },
     "dependencies": {
+        "@rollup/plugin-json": "^4.0.1",
         "@types/leveldown": "^4.0.0",
         "@types/mkdirp": "^0.5.2",
         "@virgilsecurity/base-crypto": "0.6.1",
