@@ -2,8 +2,8 @@ import { expect } from 'chai';
 import isBuffer from 'is-buffer';
 import uuid from 'uuid/v4';
 
-import { setFoundationModules, VirgilCrypto } from '@virgilsecurity/base-crypto';
 import initFoundation from '@virgilsecurity/core-foundation';
+import initPythia from '@virgilsecurity/core-pythia';
 import {
     IdentityAlreadyExistsError,
     RegisterRequiredError,
@@ -21,8 +21,9 @@ import {
     KeyknoxCrypto,
     CloudKeyStorage,
 } from '@virgilsecurity/keyknox';
-import { initPythia, VirgilBrainKeyCrypto } from '@virgilsecurity/pythia-crypto';
+import { setPythiaModules, VirgilBrainKeyCrypto } from '@virgilsecurity/pythia-crypto';
 import { VirgilCardCrypto, VirgilAccessTokenSigner } from '@virgilsecurity/sdk-crypto';
+import { setFoundationModules, VirgilCrypto } from 'virgil-crypto';
 import { createBrainKey } from 'virgil-pythia';
 import {
     VirgilCardVerifier,
@@ -35,7 +36,7 @@ import {
 
 import { sleep } from '../utils';
 
-type VirgilPublicKey = import('@virgilsecurity/base-crypto').VirgilPublicKey;
+type VirgilPublicKey = import('virgil-crypto').VirgilPublicKey;
 type IKeyEntry = import('virgil-sdk').IKeyEntry;
 
 const BRAIN_KEY_RATE_LIMIT_DELAY = 2000;
@@ -50,7 +51,10 @@ describe('EThree', () => {
     let keyEntryStorage: KeyEntryStorage;
 
     before(async () => {
-        await Promise.all([initFoundation().then(setFoundationModules), initPythia()]);
+        await Promise.all([
+            initFoundation().then(setFoundationModules),
+            initPythia().then(setPythiaModules),
+        ]);
     });
 
     beforeEach(async () => {

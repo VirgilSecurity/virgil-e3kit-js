@@ -1,10 +1,5 @@
 import initFoundation from '@virgilsecurity/core-foundation';
-import {
-    setFoundationModules,
-    hasFoundationModules,
-    VirgilCrypto,
-    VirgilPublicKey,
-} from '@virgilsecurity/base-crypto';
+import initPythia from '@virgilsecurity/core-pythia';
 import {
     DEFAULT_API_URL,
     DEFAULT_STORAGE_NAME,
@@ -14,10 +9,20 @@ import {
     IntegrityCheckFailedError,
     RegisterRequiredError,
 } from '@virgilsecurity/e3kit-base';
-import { initPythia, hasPythiaModules, VirgilBrainKeyCrypto } from '@virgilsecurity/pythia-crypto';
+import {
+    hasPythiaModules,
+    setPythiaModules,
+    VirgilBrainKeyCrypto,
+} from '@virgilsecurity/pythia-crypto';
 import { VirgilCardCrypto } from '@virgilsecurity/sdk-crypto';
-import { CachingJwtProvider, CardManager, KeyEntryStorage, VirgilCardVerifier } from 'virgil-sdk';
 import leveljs from 'level-js';
+import {
+    setFoundationModules,
+    hasFoundationModules,
+    VirgilCrypto,
+    VirgilPublicKey,
+} from 'virgil-crypto';
+import { CachingJwtProvider, CardManager, KeyEntryStorage, VirgilCardVerifier } from 'virgil-sdk';
 
 import {
     VIRGIL_STREAM_SIGNING_STATE,
@@ -63,7 +68,7 @@ export class EThree extends AbstractEThree {
             modulesToLoad.push(initFoundation().then(setFoundationModules));
         }
         if (!hasPythiaModules()) {
-            modulesToLoad.push(initPythia());
+            modulesToLoad.push(initPythia().then(setPythiaModules));
         }
         await Promise.all(modulesToLoad);
 
@@ -350,9 +355,9 @@ export class EThree extends AbstractEThree {
             apiUrl: opts.apiUrl,
             productInfo: {
                 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                product: process.env.PRODUCT_NAME!,
+                product: process.env.__VIRGIL_PRODUCT_NAME__!,
                 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                version: process.env.PRODUCT_VERSION!,
+                version: process.env.__VIRGIL_PRODUCT_VERSION__!,
             },
         });
         const groupStorageLeveldown = leveljs(opts.groupStorageName!);

@@ -8,15 +8,8 @@ import {
     AbstractIteratorOptions,
     ErrorCallback,
 } from 'abstract-leveldown';
-import { Ticket, RawGroup, GroupInfo, IKeyPair, ICrypto } from './types';
+import { Ticket, RawGroup, GroupInfo, IKeyPair, ICrypto, ICard } from './types';
 import VirgilEncryptDown from './virgil-encrypt-down';
-
-declare module 'levelup' {
-    interface LevelUp {
-        clear(options?: AbstractIteratorOptions): Promise<void>;
-        clear(options?: AbstractIteratorOptions, callback?: ErrorCallback): void;
-    }
-}
 
 export interface RetrieveOptions {
     ticketCount?: number;
@@ -92,6 +85,18 @@ export class GroupLocalStorage {
 
     async reset() {
         await this._db.clear();
+    }
+
+    async addParticipants(sessionId: string, participants: string[]) {
+        const [ticket] = await this.retrieveNLastTickets(sessionId, 1);
+        const newTicket: Ticket = {
+            participants: ticket.participants.concat(participants),
+            groupSessionMessage: ticket.groupSessionMessage,
+        };
+        const key = this.getTicketKey(sessionId, ticket.groupSessionMessage.epochNumber);
+        // TODO: figure out why 'this._db.put' doesn't work
+        // await this._db.put(key, newTicket);
+        await this._db.batch([{ type: 'put', key, value: newTicket }]);
     }
 
     setEncryptionKeyPair(keyPair: IKeyPair) {

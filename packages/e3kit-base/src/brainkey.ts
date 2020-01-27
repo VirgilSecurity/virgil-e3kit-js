@@ -24,7 +24,10 @@ export async function generateBrainPair(pwd: string, options: BrainkeyOptions): 
         options.accessTokenProvider,
         options.apiUrl,
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        new VirgilAgent(process.env.PRODUCT_NAME!, process.env.PRODUCT_VERSION!),
+        new VirgilAgent(
+            process.env.__VIRGIL_PRODUCT_NAME__!,
+            process.env.__VIRGIL_PRODUCT_VERSION__!,
+        ),
     );
     const brainKey = new BrainKey({
         pythiaClient,

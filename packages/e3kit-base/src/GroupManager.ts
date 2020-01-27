@@ -5,7 +5,7 @@ import {
     KeyknoxClient,
     GroupTicket,
 } from '@virgilsecurity/keyknox';
-import { CardManager } from 'virgil-sdk';
+import { CardManager, VirgilAgent } from 'virgil-sdk';
 
 import { ICard, Ticket } from './types';
 import { CLOUD_GROUP_SESSIONS_ROOT, MAX_EPOCHS_IN_GROUP_SESSION } from './constants';
@@ -137,8 +137,13 @@ export class GroupManager {
 
     async addAccess(sessionId: string, allowedCards: ICard[]) {
         const cloudTicketStorage = await this.getCloudTicketStorage();
+        const localGroupStorage = await this.getLocalGroupStorage();
         try {
             await cloudTicketStorage.addRecipients(sessionId, allowedCards);
+            await localGroupStorage.addParticipants(
+                sessionId,
+                allowedCards.map(card => card.identity),
+            );
         } catch (error) {
             if (error.name === 'GroupTicketNoAccessError') {
                 throw new GroupError(
@@ -208,7 +213,16 @@ export class GroupManager {
 
         const keyknoxManager = new KeyknoxManager(
             new KeyknoxCrypto(virgilCrypto),
-            new KeyknoxClient(accessTokenProvider, apiUrl),
+            new KeyknoxClient(
+                accessTokenProvider,
+                apiUrl,
+                undefined,
+                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                new VirgilAgent(
+                    process.env.__VIRGIL_PRODUCT_NAME__!,
+                    process.env.__VIRGIL_PRODUCT_VERSION__!,
+                ),
+            ),
         );
 
         return new CloudGroupTicketStorage({

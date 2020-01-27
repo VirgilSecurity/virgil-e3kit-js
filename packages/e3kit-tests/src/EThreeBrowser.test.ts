@@ -1,8 +1,8 @@
 import { expect } from 'chai';
 import uuid from 'uuid/v4';
 
-import { setFoundationModules, VirgilCrypto } from '@virgilsecurity/base-crypto';
 import initFoundation from '@virgilsecurity/core-foundation';
+import initPythia from '@virgilsecurity/core-pythia';
 import {
     VIRGIL_STREAM_SIGNING_STATE,
     VIRGIL_STREAM_ENCRYPTING_STATE,
@@ -14,8 +14,9 @@ import {
     onDecryptProgressSnapshot,
     EThree,
 } from '@virgilsecurity/e3kit-browser';
-import { initPythia } from '@virgilsecurity/pythia-crypto';
+import { setPythiaModules } from '@virgilsecurity/pythia-crypto';
 import { VirgilAccessTokenSigner } from '@virgilsecurity/sdk-crypto';
+import { setFoundationModules, VirgilCrypto } from 'virgil-crypto';
 import { JwtGenerator } from 'virgil-sdk';
 
 describe('EThreeBrowser', () => {
@@ -23,8 +24,10 @@ describe('EThreeBrowser', () => {
     let jwtGenerator: JwtGenerator;
 
     before(async () => {
-        await initFoundation().then(setFoundationModules);
-        await initPythia();
+        await Promise.all([
+            await initFoundation().then(setFoundationModules),
+            await initPythia().then(setPythiaModules),
+        ]);
         virgilCrypto = new VirgilCrypto();
         jwtGenerator = new JwtGenerator({
             appId: process.env.APP_ID!,

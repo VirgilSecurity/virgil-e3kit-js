@@ -47,13 +47,14 @@ const getCryptoEntryPointName = (target, cryptoType, format) =>
     `${target}${cryptoType === CRYPTO_TYPE.ASMJS ? '.asmjs' : ''}.${format}.js`;
 
 const createEntry = (target, cryptoType, format) => {
-    const foundationModuleName = '@virgilsecurity/core-foundation';
+    const foundationModuleName = 'virgil-crypto';
     const foundationPath = getModulePath(foundationModuleName);
     const foundationEntryPoint = path.join(
         foundationModuleName,
+        'dist',
         getCryptoEntryPointName(target, cryptoType, FORMAT.ES),
     );
-    const foundationWasmPath = path.join(foundationPath, `libfoundation.${target}.wasm`);
+    const foundationWasmPath = path.join(foundationPath, 'dist', `libfoundation.${target}.wasm`);
 
     const pythiaModuleName = '@virgilsecurity/pythia-crypto';
     const pythiaPath = getModulePath(pythiaModuleName);
@@ -67,12 +68,7 @@ const createEntry = (target, cryptoType, format) => {
     return {
         external:
             format !== FORMAT.UMD
-                ? [
-                      foundationEntryPoint,
-                      pythiaEntryPoint,
-                      '@virgilsecurity/base-crypto',
-                      '@virgilsecurity/sdk-crypto',
-                  ]
+                ? [foundationEntryPoint, pythiaEntryPoint, '@virgilsecurity/sdk-crypto']
                 : [],
         input: path.join(sourcePath, 'index.ts'),
         output: {
@@ -83,8 +79,8 @@ const createEntry = (target, cryptoType, format) => {
         plugins: [
             replace({
                 replaces: {
-                    'process.env.PRODUCT_NAME': JSON.stringify(PRODUCT_NAME),
-                    'process.env.PRODUCT_VERSION': JSON.stringify(packageJson.version),
+                    'process.env.__VIRGIL_PRODUCT_NAME__': JSON.stringify(PRODUCT_NAME),
+                    'process.env.__VIRGIL_PRODUCT_VERSION__': JSON.stringify(packageJson.version),
                 },
                 patterns: [
                     {

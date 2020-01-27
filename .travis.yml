@@ -1,9 +1,9 @@
 language: node_js
 node_js:
-    - "8"
-    - "10"
-    - "11"
-    - "12"
+    - 10
+    - 11
+    - 12
+    - 13
 before_install:
     - yarn cache clean
 install:
@@ -20,5 +20,5 @@ deploy:
     keep-history: true
     local-dir: docs
     on: # deploy only tagged build on Node.js 10
-        tags: true
-        node: '10'
+        branch: master
+        node: 10

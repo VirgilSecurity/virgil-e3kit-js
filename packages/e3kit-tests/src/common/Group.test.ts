@@ -1,11 +1,12 @@
 import { expect } from 'chai';
 import uuid from 'uuid/v4';
 
-import { setFoundationModules, VirgilCrypto } from '@virgilsecurity/base-crypto';
 import initFoundation from '@virgilsecurity/core-foundation';
+import initPythia from '@virgilsecurity/core-pythia';
 import { EThree, GroupError } from '@virgilsecurity/e3kit-node';
-import { initPythia } from '@virgilsecurity/pythia-crypto';
+import { setPythiaModules } from '@virgilsecurity/pythia-crypto';
 import { VirgilAccessTokenSigner } from '@virgilsecurity/sdk-crypto';
+import { setFoundationModules, VirgilCrypto } from 'virgil-crypto';
 import { JwtGenerator } from 'virgil-sdk';
 
 import { sleep } from '../utils';
@@ -17,7 +18,10 @@ describe('EThree', () => {
     let jwtGenerator: JwtGenerator;
 
     before(async () => {
-        await Promise.all([initFoundation().then(setFoundationModules), initPythia()]);
+        await Promise.all([
+            initFoundation().then(setFoundationModules),
+            initPythia().then(setPythiaModules),
+        ]);
     });
 
     beforeEach(() => {
@@ -522,6 +526,20 @@ describe('EThree', () => {
             } catch (_) {
                 expect.fail();
             }
+        });
+
+        it('STE-86', async () => {
+            const aliceEThree = await createEThree();
+            const bobEThree = await createEThree();
+            const groupId = uuid();
+            const group = await aliceEThree.createGroup(groupId);
+            const bobCard = await aliceEThree.findUsers(bobEThree.identity);
+            await group.add(bobCard);
+            const localGroup = await aliceEThree.getGroup(groupId);
+            const participants = new Set(localGroup!.participants);
+            expect(participants.size).to.equal(2);
+            expect(participants.has(aliceEThree.identity)).to.be.true;
+            expect(participants.has(bobEThree.identity)).to.be.true;
         });
     });
 });
