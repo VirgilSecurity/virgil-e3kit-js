@@ -54,7 +54,6 @@ const createEntry = (cryptoType, format) => {
             file: path.join(outputPath, outputFileName),
         },
         plugins: [
-            json(),
             nodeResolve(),
             commonjs(),
             replace({
@@ -79,6 +78,7 @@ const createEntry = (cryptoType, format) => {
                     },
                 },
             }),
+            json(),
             license({
                 banner: {
                     content: {

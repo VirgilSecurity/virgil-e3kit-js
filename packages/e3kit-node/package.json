@@ -4,7 +4,7 @@
     "description": "End-to-end encryption with multiple device support powered by Virgil Security",
     "main": "./dist/node.cjs.js",
     "module": "./dist/node.es.js",
-    "typings": "./dist/types/index.d.ts",
+    "typings": "./dist/types/src/index.d.ts",
     "files": [
         "dist"
     ],
@@ -17,7 +17,6 @@
         "prepare": "npm run clean && npm run build"
     },
     "dependencies": {
-        "@rollup/plugin-json": "^4.0.1",
         "@types/leveldown": "^4.0.0",
         "@types/mkdirp": "^0.5.2",
         "@virgilsecurity/base-crypto": "0.6.1",
@@ -32,6 +31,7 @@
         "virgil-sdk": "6.0.0-alpha.5"
     },
     "devDependencies": {
+        "@rollup/plugin-json": "^4.0.1",
         "builtin-modules": "^3.1.0",
         "rimraf": "^3.0.0",
         "rollup": "^1.21.4",
