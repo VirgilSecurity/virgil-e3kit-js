@@ -11,13 +11,6 @@ import {
 import { Ticket, RawGroup, GroupInfo, IKeyPair, ICrypto, ICard } from './types';
 import VirgilEncryptDown from './virgil-encrypt-down';
 
-declare module 'levelup' {
-    interface LevelUp {
-        clear(options?: AbstractIteratorOptions): Promise<void>;
-        clear(options?: AbstractIteratorOptions, callback?: ErrorCallback): void;
-    }
-}
-
 export interface RetrieveOptions {
     ticketCount?: number;
     epochNumber?: number;

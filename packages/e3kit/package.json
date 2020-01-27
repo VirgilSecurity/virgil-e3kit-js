@@ -33,7 +33,7 @@
         "@virgilsecurity/e3kit-node": "0.7.0"
     },
     "devDependencies": {
-        "mkdirp": "^0.5.1",
+        "mkdirp": "^1.0.3",
         "rimraf": "^3.0.0"
     },
     "publishConfig": {
