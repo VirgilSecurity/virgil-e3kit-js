@@ -3,7 +3,7 @@ import { expect, use } from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 import sinon from 'sinon';
 import memdown from 'memdown';
-import { VirgilCrypto } from '@virgilsecurity/base-crypto';
+import { VirgilCrypto } from 'virgil-crypto';
 
 import { GroupInfo, Ticket, IKeyPair, ICrypto } from '../types';
 import { GroupLocalStorage } from '../GroupLocalStorage';

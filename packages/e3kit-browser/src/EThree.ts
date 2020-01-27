@@ -1,9 +1,3 @@
-import {
-    setFoundationModules,
-    hasFoundationModules,
-    VirgilCrypto,
-    VirgilPublicKey,
-} from '@virgilsecurity/base-crypto';
 import initFoundation from '@virgilsecurity/core-foundation';
 import initPythia from '@virgilsecurity/core-pythia';
 import {
@@ -21,8 +15,14 @@ import {
     VirgilBrainKeyCrypto,
 } from '@virgilsecurity/pythia-crypto';
 import { VirgilCardCrypto } from '@virgilsecurity/sdk-crypto';
-import { CachingJwtProvider, CardManager, KeyEntryStorage, VirgilCardVerifier } from 'virgil-sdk';
 import leveljs from 'level-js';
+import {
+    setFoundationModules,
+    hasFoundationModules,
+    VirgilCrypto,
+    VirgilPublicKey,
+} from 'virgil-crypto';
+import { CachingJwtProvider, CardManager, KeyEntryStorage, VirgilCardVerifier } from 'virgil-sdk';
 
 import {
     VIRGIL_STREAM_SIGNING_STATE,

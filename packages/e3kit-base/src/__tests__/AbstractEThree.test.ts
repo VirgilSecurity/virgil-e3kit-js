@@ -3,7 +3,7 @@ import { expect, use } from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 import sinon from 'sinon';
 import { CardManager, CachingJwtProvider, KeyEntryStorage, ICard } from 'virgil-sdk';
-import { VirgilCrypto } from '@virgilsecurity/base-crypto';
+import { VirgilCrypto } from 'virgil-crypto';
 import { AbstractLevelDOWN } from 'abstract-leveldown';
 
 import { PrivateKeyLoader } from '../PrivateKeyLoader';

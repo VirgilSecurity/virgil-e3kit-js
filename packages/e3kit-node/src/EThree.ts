@@ -1,11 +1,5 @@
 /// <reference path="index.d.ts" />
 
-import {
-    hasFoundationModules,
-    setFoundationModules,
-    VirgilCrypto,
-    VirgilPublicKey,
-} from '@virgilsecurity/base-crypto';
 import initFoundation from '@virgilsecurity/core-foundation';
 import initPythia from '@virgilsecurity/core-pythia';
 import {
@@ -21,10 +15,16 @@ import {
     VirgilBrainKeyCrypto,
 } from '@virgilsecurity/pythia-crypto';
 import { VirgilCardCrypto } from '@virgilsecurity/sdk-crypto';
-import { CachingJwtProvider, CardManager, KeyEntryStorage, VirgilCardVerifier } from 'virgil-sdk';
-import leveldown from 'leveldown';
 import isInvalidPath from 'is-invalid-path';
+import leveldown from 'leveldown';
 import mkdirp from 'mkdirp';
+import {
+    hasFoundationModules,
+    setFoundationModules,
+    VirgilCrypto,
+    VirgilPublicKey,
+} from 'virgil-crypto';
+import { CachingJwtProvider, CardManager, KeyEntryStorage, VirgilCardVerifier } from 'virgil-sdk';
 
 import { IPublicKey, EThreeInitializeOptions, EThreeCtorOptions } from './types';
 
