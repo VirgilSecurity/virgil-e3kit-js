@@ -49,7 +49,7 @@ This package is **ONLY** for browsers. Use the following packages on other platf
 
 If you need to encrypt & decrypt large files with the best speed/browser perfomance ratio, see the `encryptFile` and `decryptFile` methods:
 - https://virgilsecurity.github.io/virgil-e3kit-js/e3kit-browser/classes/ethree.html#encryptfile
-- https://virgilsecurity.github.io/virgil-e3kit-js/classes/ethree.html#decryptfile
+- https://virgilsecurity.github.io/virgil-e3kit-js/e3kit-browser/classes/ethree.html#decryptfile
 
 Both methods take an instance of `File` class as input instead of binary `ArrayBuffer`.
 The files are encrypted in small chunks, so it doesn't block the main thread and it returns an encrypted instance of `File`. The chunk size by default is 64kb which produces the best speed/browser performance ratio, but it can be changed. Larger chunk size speeds up encryption but can cause browser lags.
