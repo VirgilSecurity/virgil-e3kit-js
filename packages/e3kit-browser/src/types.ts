@@ -14,8 +14,8 @@ export type EThreeCtorOptions = import('@virgilsecurity/e3kit-base').EThreeCtorO
 export type FindUsersResult = import('@virgilsecurity/e3kit-base').FindUsersResult;
 export type LookupResult = import('@virgilsecurity/e3kit-base').LookupResult;
 
-export type VirgilCrypto = import('@virgilsecurity/base-crypto').VirgilCrypto;
-export type VirgilPrivateKey = import('@virgilsecurity/base-crypto').VirgilPrivateKey;
+export type VirgilCrypto = import('virgil-crypto').VirgilCrypto;
+export type VirgilPrivateKey = import('virgil-crypto').VirgilPrivateKey;
 
 /**
  * Callback invoked for each chunk being processed in encryptFile method.

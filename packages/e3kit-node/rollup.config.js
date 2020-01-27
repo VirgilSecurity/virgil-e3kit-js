@@ -1,9 +1,7 @@
 const path = require('path');
 
 const builtinModules = require('builtin-modules');
-const commonjs = require('rollup-plugin-commonjs');
 const license = require('rollup-plugin-license');
-const nodeResolve = require('rollup-plugin-node-resolve');
 const replace = require('rollup-plugin-re');
 const typescript = require('rollup-plugin-typescript2');
 const json = require('@rollup/plugin-json');
@@ -55,8 +53,6 @@ const createEntry = (cryptoType, format) => {
         },
         plugins: [
             json(),
-            nodeResolve(),
-            commonjs(),
             replace({
                 patterns: [
                     {

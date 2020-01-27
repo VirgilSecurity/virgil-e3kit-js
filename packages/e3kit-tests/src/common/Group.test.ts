@@ -1,12 +1,12 @@
 import { expect } from 'chai';
 import uuid from 'uuid/v4';
 
-import { setFoundationModules, VirgilCrypto } from '@virgilsecurity/base-crypto';
 import initFoundation from '@virgilsecurity/core-foundation';
 import initPythia from '@virgilsecurity/core-pythia';
 import { EThree, GroupError } from '@virgilsecurity/e3kit-node';
 import { setPythiaModules } from '@virgilsecurity/pythia-crypto';
 import { VirgilAccessTokenSigner } from '@virgilsecurity/sdk-crypto';
+import { setFoundationModules, VirgilCrypto } from 'virgil-crypto';
 import { JwtGenerator } from 'virgil-sdk';
 
 import { sleep } from '../utils';
