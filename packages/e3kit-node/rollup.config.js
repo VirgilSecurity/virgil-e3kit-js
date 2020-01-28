@@ -1,14 +1,12 @@
 const path = require('path');
 
 const builtinModules = require('builtin-modules');
-const commonjs = require('rollup-plugin-commonjs');
 const license = require('rollup-plugin-license');
-const nodeResolve = require('rollup-plugin-node-resolve');
 const replace = require('rollup-plugin-re');
 const typescript = require('rollup-plugin-typescript2');
+const json = require('@rollup/plugin-json');
 
 const packageJson = require('./package.json');
-const PRODUCT_NAME = 'e3kit';
 
 const FORMAT = {
     CJS: 'cjs',
@@ -44,6 +42,7 @@ const createEntry = (cryptoType, format) => {
     const external = builtinModules
         .concat(Object.keys(packageJson.dependencies))
         .concat([foundationEntryPoint, pythiaEntryPoint]);
+
     const outputFileName = getCryptoEntryPointName(cryptoType, format);
 
     return {
@@ -54,13 +53,7 @@ const createEntry = (cryptoType, format) => {
             file: path.join(outputPath, outputFileName),
         },
         plugins: [
-            nodeResolve(),
-            commonjs(),
             replace({
-                replaces: {
-                    'process.env.PRODUCT_NAME': JSON.stringify(PRODUCT_NAME),
-                    'process.env.PRODUCT_VERSION': JSON.stringify(packageJson.version),
-                },
                 patterns: [
                     {
                         match: /(index|EThree)\.ts$/,
@@ -82,6 +75,7 @@ const createEntry = (cryptoType, format) => {
                     },
                 },
             }),
+            json(),
             license({
                 banner: {
                     content: {
