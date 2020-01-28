@@ -1,12 +1,9 @@
 import { expect } from 'chai';
 import uuid from 'uuid/v4';
 
-import initFoundation from '@virgilsecurity/core-foundation';
-import initPythia from '@virgilsecurity/core-pythia';
 import { EThree, GroupError } from '@virgilsecurity/e3kit-node';
-import { setPythiaModules } from '@virgilsecurity/pythia-crypto';
-import { VirgilAccessTokenSigner } from '@virgilsecurity/sdk-crypto';
-import { setFoundationModules, VirgilCrypto, KeyPairType } from 'virgil-crypto';
+import { initPythia } from '@virgilsecurity/pythia-crypto';
+import { initCrypto, VirgilAccessTokenSigner, VirgilCrypto, KeyPairType } from 'virgil-crypto';
 import { JwtGenerator } from 'virgil-sdk';
 
 import { sleep } from '../utils';
@@ -18,10 +15,7 @@ describe('EThree', () => {
     let jwtGenerator: JwtGenerator;
 
     before(async () => {
-        await Promise.all([
-            initFoundation().then(setFoundationModules),
-            initPythia().then(setPythiaModules),
-        ]);
+        await Promise.all([initCrypto(), initPythia()]);
     });
 
     beforeEach(() => {

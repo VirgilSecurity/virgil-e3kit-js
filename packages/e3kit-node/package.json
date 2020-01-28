@@ -19,11 +19,8 @@
     "dependencies": {
         "@types/leveldown": "^4.0.2",
         "@types/mkdirp": "^0.5.2",
-        "@virgilsecurity/core-foundation": "0.4.0",
-        "@virgilsecurity/core-pythia": "0.4.0",
         "@virgilsecurity/e3kit-base": "0.8.0-beta.0",
         "@virgilsecurity/pythia-crypto": "0.3.3",
-        "@virgilsecurity/sdk-crypto": "0.5.0",
         "is-invalid-path": "^1.0.2",
         "leveldown": "^5.4.1",
         "mkdirp": "^1.0.3",

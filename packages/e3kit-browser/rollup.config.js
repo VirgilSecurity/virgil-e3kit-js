@@ -66,10 +66,7 @@ const createEntry = (target, cryptoType, format) => {
     const pythiaWasmPath = path.join(pythiaPath, 'dist', `libpythia.${target}.wasm`);
 
     return {
-        external:
-            format !== FORMAT.UMD
-                ? [foundationEntryPoint, pythiaEntryPoint, '@virgilsecurity/sdk-crypto']
-                : [],
+        external: format !== FORMAT.UMD ? [foundationEntryPoint, pythiaEntryPoint] : [],
         input: path.join(sourcePath, 'index.ts'),
         output: {
             format,

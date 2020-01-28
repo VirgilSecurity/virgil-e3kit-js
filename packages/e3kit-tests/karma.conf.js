@@ -17,8 +17,8 @@ const getModulePath = request => {
     throw new Error(`Module '${request}' was not found`);
 };
 
-const foundationPath = getModulePath('@virgilsecurity/core-foundation');
-const pythiaPath = getModulePath('@virgilsecurity/core-pythia');
+const virgilCryptoDist = path.join(getModulePath('virgil-crypto'), 'dist');
+const pythiaCryptoDist = path.join(getModulePath('@virgilsecurity/pythia-crypto'), 'dist');
 
 module.exports = config => {
     config.set({
@@ -26,12 +26,12 @@ module.exports = config => {
         autoWatch: false,
         files: [
             'src/browser.test.ts',
-            { pattern: path.join(foundationPath, 'libfoundation.browser.wasm'), included: false },
-            { pattern: path.join(pythiaPath, 'libpythia.browser.wasm'), included: false },
+            { pattern: path.join(virgilCryptoDist, 'libfoundation.browser.wasm'), included: false },
+            { pattern: path.join(pythiaCryptoDist, 'libpythia.browser.wasm'), included: false },
         ],
         proxies: {
-            '/base/src/libfoundation.browser.wasm': `${foundationPath}/libfoundation.browser.wasm`,
-            '/base/src/libpythia.browser.wasm': `${pythiaPath}/libpythia.browser.wasm`,
+            '/base/src/libfoundation.browser.wasm': `${virgilCryptoDist}/libfoundation.browser.wasm`,
+            '/base/src/libpythia.browser.wasm': `${pythiaCryptoDist}/libpythia.browser.wasm`,
         },
         browsers: ['ChromeHeadless'],
         colors: true,
