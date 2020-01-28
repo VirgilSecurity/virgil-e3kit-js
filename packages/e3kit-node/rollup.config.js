@@ -31,10 +31,9 @@ const createEntry = (cryptoType, format) => {
         getCryptoEntryPointName(cryptoType, format),
     );
 
-    const pythiaModuleName = '@virgilsecurity/pythia-crypto';
+    const pythiaModuleName = '@virgilsecurity/core-pythia';
     const pythiaEntryPoint = path.join(
         pythiaModuleName,
-        'dist',
         getCryptoEntryPointName(cryptoType, format),
     );
 

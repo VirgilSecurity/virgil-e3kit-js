@@ -14,11 +14,11 @@ import {
     setPythiaModules,
     VirgilBrainKeyCrypto,
 } from '@virgilsecurity/pythia-crypto';
-import { VirgilCardCrypto } from '@virgilsecurity/sdk-crypto';
 import leveljs from 'level-js';
 import {
     setFoundationModules,
     hasFoundationModules,
+    VirgilCardCrypto,
     VirgilCrypto,
     VirgilPublicKey,
 } from 'virgil-crypto';

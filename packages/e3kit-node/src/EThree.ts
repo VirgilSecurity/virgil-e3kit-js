@@ -14,13 +14,13 @@ import {
     setPythiaModules,
     VirgilBrainKeyCrypto,
 } from '@virgilsecurity/pythia-crypto';
-import { VirgilCardCrypto } from '@virgilsecurity/sdk-crypto';
 import isInvalidPath from 'is-invalid-path';
 import leveldown from 'leveldown';
 import mkdirp from 'mkdirp';
 import {
     hasFoundationModules,
     setFoundationModules,
+    VirgilCardCrypto,
     VirgilCrypto,
     VirgilPublicKey,
 } from 'virgil-crypto';

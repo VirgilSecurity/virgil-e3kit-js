@@ -26,7 +26,6 @@
         "@virgilsecurity/core-pythia": "0.3.0",
         "@virgilsecurity/e3kit-base": "0.7.0",
         "@virgilsecurity/pythia-crypto": "0.2.2",
-        "@virgilsecurity/sdk-crypto": "0.4.5",
         "level-js": "^5.0.1",
         "virgil-crypto": "4.0.0-alpha.15",
         "virgil-sdk": "6.0.0-alpha.5"
