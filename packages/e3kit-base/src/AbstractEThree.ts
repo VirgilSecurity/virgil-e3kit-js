@@ -395,11 +395,7 @@ export abstract class AbstractEThree {
                     typeof arg1,
             );
         }
-        const decryptedData = this.virgilCrypto.decryptThenVerify(
-            arg0,
-            privateKey,
-            senderPublicKey,
-        );
+        const decryptedData = this.virgilCrypto.decryptAndVerify(arg0, privateKey, senderPublicKey);
         if (returnString) {
             return decryptedData.toString('utf8');
         }

@@ -732,4 +732,21 @@ describe('EThree', () => {
             ).to.be.true;
         });
     });
+
+    describe('authEncrypt -> authDecrypt', () => {
+        it('works', async () => {
+            const identity = uuid();
+            const fetchToken = createFetchToken(identity);
+            const sdk = await EThree.initialize(fetchToken, {
+                apiUrl: process.env.API_URL,
+                groupStorageName: `.virgil-group-storage/${uuid()}`,
+                keyPairType: KeyPairType.CURVE25519_ROUND5_ED25519_FALCON,
+            });
+            await sdk.register();
+            const message = 'message';
+            const encrypted = await sdk.authEncrypt(message);
+            const decrypted = await sdk.authDecrypt(encrypted);
+            expect(decrypted).to.equal(message);
+        });
+    });
 });
