@@ -1,6 +1,6 @@
 {
   "name": "ReactNativeSample",
-  "version": "0.7.0-beta.2",
+  "version": "0.7.0",
   "private": true,
   "scripts": {
     "android": "react-native run-android",
@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@react-native-community/async-storage": "^1.6.2",
-    "@virgilsecurity/e3kit-native": "0.7.0-beta.2",
+    "@virgilsecurity/e3kit-native": "0.7.0",
     "@virgilsecurity/key-storage-rn": "0.2.1",
     "react": "16.9.0",
     "react-native": "0.61.2",
