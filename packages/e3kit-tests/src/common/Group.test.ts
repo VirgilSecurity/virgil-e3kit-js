@@ -6,7 +6,7 @@ import initPythia from '@virgilsecurity/core-pythia';
 import { EThree, GroupError } from '@virgilsecurity/e3kit-node';
 import { setPythiaModules } from '@virgilsecurity/pythia-crypto';
 import { VirgilAccessTokenSigner } from '@virgilsecurity/sdk-crypto';
-import { setFoundationModules, VirgilCrypto } from 'virgil-crypto';
+import { setFoundationModules, VirgilCrypto, KeyPairType } from 'virgil-crypto';
 import { JwtGenerator } from 'virgil-sdk';
 
 import { sleep } from '../utils';
@@ -41,6 +41,7 @@ describe('EThree', () => {
         EThree.initialize(fetchToken, {
             apiUrl: process.env.API_URL,
             groupStorageName: `.virgil-group-storage/${uuid()}`,
+            keyPairType: KeyPairType.ED25519,
         });
 
     describe('group encryption', () => {

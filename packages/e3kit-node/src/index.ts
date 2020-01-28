@@ -28,8 +28,6 @@ export {
     ICard,
     IKeyEntryStorage,
     IKeyEntry,
-    EThreeInitializeOptions,
-    EThreeCtorOptions,
     LookupResult,
     EncryptPublicKeyArg,
     FindUsersResult,
@@ -37,4 +35,6 @@ export {
     GroupInfo,
     RawGroup,
 } from '@virgilsecurity/e3kit-base';
+export { KeyPairType } from 'virgil-crypto';
 export { EThree } from './EThree';
+export { EThreeInitializeOptions, EThreeCtorOptions } from './types';

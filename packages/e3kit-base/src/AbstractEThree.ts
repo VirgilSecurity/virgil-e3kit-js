@@ -63,6 +63,8 @@ export abstract class AbstractEThree {
      */
     keyEntryStorage: IKeyEntryStorage;
 
+    keyPairType?: any;
+
     protected keyLoader: PrivateKeyLoader;
     protected inProcess = false;
 
@@ -79,6 +81,7 @@ export abstract class AbstractEThree {
         keyEntryStorage: IKeyEntryStorage;
         keyLoader: PrivateKeyLoader;
         groupStorageLeveldown: AbstractLevelDOWN;
+        keyPairType?: any;
     }) {
         this.identity = options.identity;
         this.virgilCrypto = options.virgilCrypto;
@@ -96,6 +99,7 @@ export abstract class AbstractEThree {
                 virgilCrypto: options.virgilCrypto,
             }),
         });
+        this.keyPairType = options.keyPairType;
     }
 
     /**
@@ -667,7 +671,7 @@ export abstract class AbstractEThree {
         previousCard?: ICard;
     }) {
         const { keyPair, previousCard } = options;
-        const myKeyPair = keyPair || this.virgilCrypto.generateKeys();
+        const myKeyPair = keyPair || this.virgilCrypto.generateKeys(this.keyPairType);
         const card = await this.cardManager.publishCard({
             privateKey: myKeyPair.privateKey,
             publicKey: myKeyPair.publicKey,

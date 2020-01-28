@@ -370,6 +370,7 @@ export class EThree extends AbstractEThree {
             keyEntryStorage,
             keyLoader,
             groupStorageLeveldown,
+            keyPairType: options.keyPairType,
         };
     }
 

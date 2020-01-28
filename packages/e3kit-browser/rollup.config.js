@@ -99,7 +99,7 @@ const createEntry = (target, cryptoType, format) => {
                         replace: 'module.exports = {}',
                     },
                     {
-                        match: /EThree\.ts$/,
+                        match: /(index|EThree)\.ts$/,
                         test: foundationModuleName,
                         replace: foundationEntryPoint,
                     },

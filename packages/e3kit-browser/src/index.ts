@@ -28,8 +28,6 @@ export {
     ICard,
     IKeyEntryStorage,
     IKeyEntry,
-    EThreeInitializeOptions,
-    EThreeCtorOptions,
     LookupResult,
     EncryptPublicKeyArg,
     FindUsersResult,
@@ -37,6 +35,7 @@ export {
     GroupInfo,
     RawGroup,
 } from '@virgilsecurity/e3kit-base';
+export { KeyPairType } from 'virgil-crypto';
 export * from './constants';
 export { EThree } from './EThree';
 export {
@@ -44,6 +43,8 @@ export {
     onDecryptProgressCallback,
     onEncryptProgressSnapshot,
     onDecryptProgressSnapshot,
+    EThreeInitializeOptions,
+    EThreeCtorOptions,
     EncryptFileOptions,
     DecryptFileOptions,
 } from './types';

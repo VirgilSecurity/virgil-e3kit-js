@@ -15,8 +15,12 @@ const report = message => {
 
 (async () => {
     try {
-        const alice = await EThree.initialize(createGetToken('alice'));
-        const bob = await EThree.initialize(createGetToken('bob'));
+        const alice = await EThree.initialize(
+            createGetToken(`alice-${Math.round(Math.random() * 1000000)}`),
+        );
+        const bob = await EThree.initialize(
+            createGetToken(`bob-${Math.round(Math.random() * 1000000)}`),
+        );
 
         report('Alice registers...');
         await alice.register();

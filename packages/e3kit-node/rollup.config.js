@@ -62,7 +62,7 @@ const createEntry = (cryptoType, format) => {
                 },
                 patterns: [
                     {
-                        match: /EThree\.ts$/,
+                        match: /(index|EThree)\.ts$/,
                         test: foundationModuleName,
                         replace: foundationEntryPoint,
                     },

@@ -23,7 +23,7 @@ import {
 } from '@virgilsecurity/keyknox';
 import { setPythiaModules, VirgilBrainKeyCrypto } from '@virgilsecurity/pythia-crypto';
 import { VirgilCardCrypto, VirgilAccessTokenSigner } from '@virgilsecurity/sdk-crypto';
-import { setFoundationModules, VirgilCrypto } from 'virgil-crypto';
+import { setFoundationModules, VirgilCrypto, KeyPairType } from 'virgil-crypto';
 import { createBrainKey } from 'virgil-pythia';
 import {
     VirgilCardVerifier,
@@ -93,6 +93,7 @@ describe('EThree', () => {
         EThree.initialize(fetchToken, {
             apiUrl: process.env.API_URL,
             groupStorageName: `.virgil-group-storage/${uuid()}`,
+            keyPairType: KeyPairType.ED25519,
         });
 
     const createSyncStorage = async (identity: string, password: string) => {
