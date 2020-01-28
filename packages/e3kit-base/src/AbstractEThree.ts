@@ -349,6 +349,59 @@ export abstract class AbstractEThree {
         return res;
     }
 
+    authEncrypt(message: Data): Promise<NodeBuffer | string>;
+    authEncrypt(message: Data, publicKey: IPublicKey): Promise<NodeBuffer | string>;
+    authEncrypt(message: Data, card: ICard): Promise<NodeBuffer | string>;
+    authEncrypt(message: Data, users: FindUsersResult): Promise<NodeBuffer | string>;
+    async authEncrypt(arg0: Data, arg1?: IPublicKey | ICard | FindUsersResult) {
+        const returnString = isString(arg0);
+        const privateKey = await this.keyLoader.loadLocalPrivateKey();
+        if (!privateKey) {
+            throw new MissingPrivateKeyError();
+        }
+        const publicKeys = this.getPublicKeysForEncryption(privateKey, arg1);
+        if (!publicKeys) {
+            throw new TypeError(
+                'Could not get public keys from the second argument.\n' +
+                    'Make sure you pass the resolved value of "EThree.findUsers" or "EThree.lookupPublicKeys" methods ' +
+                    'when encrypting for other users, or nothing when encrypting for the current user only.',
+            );
+        }
+        const encryptedData = this.virgilCrypto.signAndEncrypt(arg0, privateKey, publicKeys, true);
+        if (returnString) {
+            return encryptedData.toString('base64');
+        }
+        return encryptedData;
+    }
+
+    authDecrypt(message: Data): Promise<NodeBuffer | string>;
+    authDecrypt(message: Data, publicKey: IPublicKey): Promise<NodeBuffer | string>;
+    authDecrypt(message: Data, card: ICard, encryptedAt?: Date): Promise<NodeBuffer | string>;
+    async authDecrypt(arg0: Data, arg1?: ICard | IPublicKey, arg2?: Date) {
+        const returnString = isString(arg0);
+        const privateKey = await this.keyLoader.loadLocalPrivateKey();
+        if (!privateKey) {
+            throw new MissingPrivateKeyError();
+        }
+        const senderPublicKey = this.getPublicKeyForVerification(privateKey, arg1, arg2);
+        if (!senderPublicKey) {
+            throw new TypeError(
+                'Could not get public key from the second argument.' +
+                    'Expected a Virgil Card or a Public Key object. Got ' +
+                    typeof arg1,
+            );
+        }
+        const decryptedData = this.virgilCrypto.decryptThenVerify(
+            arg0,
+            privateKey,
+            senderPublicKey,
+        );
+        if (returnString) {
+            return decryptedData.toString('utf8');
+        }
+        return decryptedData;
+    }
+
     /**
      * Finds Virgil Card for user identity registered on Virgil Cloud.
      *
