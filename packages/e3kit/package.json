@@ -28,9 +28,9 @@
         "prepare": "npm run clean && npm run build"
     },
     "dependencies": {
-        "@virgilsecurity/e3kit-browser": "0.7.0",
-        "@virgilsecurity/e3kit-native": "0.7.0",
-        "@virgilsecurity/e3kit-node": "0.7.0"
+        "@virgilsecurity/e3kit-browser": "0.7.1",
+        "@virgilsecurity/e3kit-native": "0.7.1",
+        "@virgilsecurity/e3kit-node": "0.7.1"
     },
     "devDependencies": {
         "mkdirp": "^1.0.3",

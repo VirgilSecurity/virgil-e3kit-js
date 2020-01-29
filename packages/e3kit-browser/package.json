@@ -24,7 +24,7 @@
         "@types/level-js": "^4.0.1",
         "@virgilsecurity/core-foundation": "0.3.0",
         "@virgilsecurity/core-pythia": "0.3.0",
-        "@virgilsecurity/e3kit-base": "0.7.0",
+        "@virgilsecurity/e3kit-base": "0.7.1",
         "@virgilsecurity/pythia-crypto": "0.2.2",
         "level-js": "^5.0.1",
         "virgil-crypto": "4.0.0-alpha.15",
