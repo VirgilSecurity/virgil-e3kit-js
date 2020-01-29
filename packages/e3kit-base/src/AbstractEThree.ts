@@ -367,7 +367,7 @@ export abstract class AbstractEThree {
         if (!publicKeys) {
             throw new TypeError(
                 'Could not get public keys from the second argument.\n' +
-                    'Make sure you pass the resolved value of "EThree.findUsers" or "EThree.lookupPublicKeys" methods ' +
+                    'Make sure you pass the resolved value of the "EThree.findUsers" method ' +
                     'when encrypting for other users, or nothing when encrypting for the current user only.',
             );
         }
