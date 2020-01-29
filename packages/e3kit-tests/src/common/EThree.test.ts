@@ -2,8 +2,6 @@ import { expect } from 'chai';
 import isBuffer from 'is-buffer';
 import uuid from 'uuid/v4';
 
-import initFoundation from '@virgilsecurity/core-foundation';
-import initPythia from '@virgilsecurity/core-pythia';
 import {
     IdentityAlreadyExistsError,
     RegisterRequiredError,
@@ -21,9 +19,14 @@ import {
     KeyknoxCrypto,
     CloudKeyStorage,
 } from '@virgilsecurity/keyknox';
-import { setPythiaModules, VirgilBrainKeyCrypto } from '@virgilsecurity/pythia-crypto';
-import { VirgilCardCrypto, VirgilAccessTokenSigner } from '@virgilsecurity/sdk-crypto';
-import { setFoundationModules, VirgilCrypto } from 'virgil-crypto';
+import { initPythia, VirgilBrainKeyCrypto } from '@virgilsecurity/pythia-crypto';
+import {
+    initCrypto,
+    VirgilCardCrypto,
+    VirgilAccessTokenSigner,
+    VirgilCrypto,
+    KeyPairType,
+} from 'virgil-crypto';
 import { createBrainKey } from 'virgil-pythia';
 import {
     VirgilCardVerifier,
@@ -51,10 +54,7 @@ describe('EThree', () => {
     let keyEntryStorage: KeyEntryStorage;
 
     before(async () => {
-        await Promise.all([
-            initFoundation().then(setFoundationModules),
-            initPythia().then(setPythiaModules),
-        ]);
+        await Promise.all([initCrypto(), initPythia()]);
     });
 
     beforeEach(async () => {
@@ -93,6 +93,7 @@ describe('EThree', () => {
         EThree.initialize(fetchToken, {
             apiUrl: process.env.API_URL,
             groupStorageName: `.virgil-group-storage/${uuid()}`,
+            keyPairType: KeyPairType.ED25519,
         });
 
     const createSyncStorage = async (identity: string, password: string) => {
@@ -729,6 +730,23 @@ describe('EThree', () => {
                     .exportPublicKey(result[theirIdentity].publicKey as VirgilPublicKey)
                     .equals(virgilCrypto.exportPublicKey(theirKeypair.publicKey)),
             ).to.be.true;
+        });
+    });
+
+    describe('authEncrypt -> authDecrypt', () => {
+        it('works', async () => {
+            const identity = uuid();
+            const fetchToken = createFetchToken(identity);
+            const sdk = await EThree.initialize(fetchToken, {
+                apiUrl: process.env.API_URL,
+                groupStorageName: `.virgil-group-storage/${uuid()}`,
+                keyPairType: KeyPairType.CURVE25519_ROUND5_ED25519_FALCON,
+            });
+            await sdk.register();
+            const message = 'message';
+            const encrypted = await sdk.authEncrypt(message);
+            const decrypted = await sdk.authDecrypt(encrypted);
+            expect(decrypted).to.equal(message);
         });
     });
 });

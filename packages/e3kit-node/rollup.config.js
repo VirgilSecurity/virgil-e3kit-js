@@ -25,9 +25,10 @@ const getCryptoEntryPointName = (cryptoType, format) =>
     `node${cryptoType === CRYPTO_TYPE.ASMJS ? '.asmjs' : ''}.${format}.js`;
 
 const createEntry = (cryptoType, format) => {
-    const foundationModuleName = '@virgilsecurity/core-foundation';
+    const foundationModuleName = 'virgil-crypto';
     const foundationEntryPoint = path.join(
         foundationModuleName,
+        'dist',
         getCryptoEntryPointName(cryptoType, format),
     );
 
@@ -55,7 +56,7 @@ const createEntry = (cryptoType, format) => {
             replace({
                 patterns: [
                     {
-                        match: /EThree\.ts$/,
+                        match: /(index|EThree)\.ts$/,
                         test: foundationModuleName,
                         replace: foundationEntryPoint,
                     },

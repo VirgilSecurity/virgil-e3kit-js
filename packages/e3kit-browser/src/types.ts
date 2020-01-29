@@ -9,13 +9,22 @@ export type NodeBuffer = import('@virgilsecurity/e3kit-base').NodeBuffer;
 export type Data = import('@virgilsecurity/e3kit-base').Data;
 export type ICard = import('@virgilsecurity/e3kit-base').ICard;
 export type IPublicKey = import('@virgilsecurity/e3kit-base').IPublicKey;
-export type EThreeInitializeOptions = import('@virgilsecurity/e3kit-base').EThreeInitializeOptions;
-export type EThreeCtorOptions = import('@virgilsecurity/e3kit-base').EThreeCtorOptions;
+export type EThreeBaseInitializeOptions = import('@virgilsecurity/e3kit-base').EThreeInitializeOptions;
+export type EThreeBaseCtorOptions = import('@virgilsecurity/e3kit-base').EThreeCtorOptions;
 export type FindUsersResult = import('@virgilsecurity/e3kit-base').FindUsersResult;
 export type LookupResult = import('@virgilsecurity/e3kit-base').LookupResult;
 
+export type KeyPairType = import('virgil-crypto').KeyPairType;
 export type VirgilCrypto = import('virgil-crypto').VirgilCrypto;
 export type VirgilPrivateKey = import('virgil-crypto').VirgilPrivateKey;
+
+export interface EThreeInitializeOptions extends EThreeBaseInitializeOptions {
+    keyPairType?: KeyPairType;
+}
+
+export interface EThreeCtorOptions extends EThreeBaseCtorOptions {
+    keyPairType?: KeyPairType;
+}
 
 /**
  * Callback invoked for each chunk being processed in encryptFile method.

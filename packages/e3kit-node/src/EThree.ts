@@ -1,7 +1,5 @@
 /// <reference path="index.d.ts" />
 
-import initFoundation from '@virgilsecurity/core-foundation';
-import initPythia from '@virgilsecurity/core-pythia';
 import {
     DEFAULT_API_URL,
     DEFAULT_STORAGE_NAME,
@@ -9,21 +7,11 @@ import {
     AbstractEThree,
     PrivateKeyLoader,
 } from '@virgilsecurity/e3kit-base';
-import {
-    hasPythiaModules,
-    setPythiaModules,
-    VirgilBrainKeyCrypto,
-} from '@virgilsecurity/pythia-crypto';
-import { VirgilCardCrypto } from '@virgilsecurity/sdk-crypto';
+import { initPythia, VirgilBrainKeyCrypto } from '@virgilsecurity/pythia-crypto';
 import isInvalidPath from 'is-invalid-path';
 import leveldown from 'leveldown';
 import mkdirp from 'mkdirp';
-import {
-    hasFoundationModules,
-    setFoundationModules,
-    VirgilCrypto,
-    VirgilPublicKey,
-} from 'virgil-crypto';
+import { initCrypto, VirgilCardCrypto, VirgilCrypto, VirgilPublicKey } from 'virgil-crypto';
 import { CachingJwtProvider, CardManager, KeyEntryStorage, VirgilCardVerifier } from 'virgil-sdk';
 
 import { IPublicKey, EThreeInitializeOptions, EThreeCtorOptions } from './types';
@@ -84,6 +72,7 @@ export class EThree extends AbstractEThree {
             keyEntryStorage,
             keyLoader,
             groupStorageLeveldown,
+            keyPairType: options.keyPairType,
         });
     }
 
@@ -95,14 +84,7 @@ export class EThree extends AbstractEThree {
         getToken: () => Promise<string>,
         options: EThreeInitializeOptions = {},
     ): Promise<EThree> {
-        const modulesToLoad: Promise<void>[] = [];
-        if (!hasFoundationModules()) {
-            modulesToLoad.push(initFoundation().then(setFoundationModules));
-        }
-        if (!hasPythiaModules()) {
-            modulesToLoad.push(initPythia().then(setPythiaModules));
-        }
-        await Promise.all(modulesToLoad);
+        await Promise.all([initCrypto(), initPythia()]);
 
         if (typeof getToken !== 'function') {
             throw new TypeError(

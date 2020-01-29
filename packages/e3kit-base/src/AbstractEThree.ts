@@ -63,6 +63,8 @@ export abstract class AbstractEThree {
      */
     keyEntryStorage: IKeyEntryStorage;
 
+    keyPairType?: any;
+
     protected keyLoader: PrivateKeyLoader;
     protected inProcess = false;
 
@@ -79,6 +81,7 @@ export abstract class AbstractEThree {
         keyEntryStorage: IKeyEntryStorage;
         keyLoader: PrivateKeyLoader;
         groupStorageLeveldown: AbstractLevelDOWN;
+        keyPairType?: any;
     }) {
         this.identity = options.identity;
         this.virgilCrypto = options.virgilCrypto;
@@ -96,6 +99,7 @@ export abstract class AbstractEThree {
                 virgilCrypto: options.virgilCrypto,
             }),
         });
+        this.keyPairType = options.keyPairType;
     }
 
     /**
@@ -347,6 +351,55 @@ export abstract class AbstractEThree {
             return res.toString('utf8');
         }
         return res;
+    }
+
+    authEncrypt(message: Data): Promise<NodeBuffer | string>;
+    authEncrypt(message: Data, publicKey: IPublicKey): Promise<NodeBuffer | string>;
+    authEncrypt(message: Data, card: ICard): Promise<NodeBuffer | string>;
+    authEncrypt(message: Data, users: FindUsersResult): Promise<NodeBuffer | string>;
+    async authEncrypt(arg0: Data, arg1?: IPublicKey | ICard | FindUsersResult) {
+        const returnString = isString(arg0);
+        const privateKey = await this.keyLoader.loadLocalPrivateKey();
+        if (!privateKey) {
+            throw new MissingPrivateKeyError();
+        }
+        const publicKeys = this.getPublicKeysForEncryption(privateKey, arg1);
+        if (!publicKeys) {
+            throw new TypeError(
+                'Could not get public keys from the second argument.\n' +
+                    'Make sure you pass the resolved value of the "EThree.findUsers" method ' +
+                    'when encrypting for other users, or nothing when encrypting for the current user only.',
+            );
+        }
+        const encryptedData = this.virgilCrypto.signAndEncrypt(arg0, privateKey, publicKeys, true);
+        if (returnString) {
+            return encryptedData.toString('base64');
+        }
+        return encryptedData;
+    }
+
+    authDecrypt(message: Data): Promise<NodeBuffer | string>;
+    authDecrypt(message: Data, publicKey: IPublicKey): Promise<NodeBuffer | string>;
+    authDecrypt(message: Data, card: ICard, encryptedAt?: Date): Promise<NodeBuffer | string>;
+    async authDecrypt(arg0: Data, arg1?: ICard | IPublicKey, arg2?: Date) {
+        const returnString = isString(arg0);
+        const privateKey = await this.keyLoader.loadLocalPrivateKey();
+        if (!privateKey) {
+            throw new MissingPrivateKeyError();
+        }
+        const senderPublicKey = this.getPublicKeyForVerification(privateKey, arg1, arg2);
+        if (!senderPublicKey) {
+            throw new TypeError(
+                'Could not get public key from the second argument.' +
+                    'Expected a Virgil Card or a Public Key object. Got ' +
+                    typeof arg1,
+            );
+        }
+        const decryptedData = this.virgilCrypto.decryptAndVerify(arg0, privateKey, senderPublicKey);
+        if (returnString) {
+            return decryptedData.toString('utf8');
+        }
+        return decryptedData;
     }
 
     /**
@@ -614,7 +667,7 @@ export abstract class AbstractEThree {
         previousCard?: ICard;
     }) {
         const { keyPair, previousCard } = options;
-        const myKeyPair = keyPair || this.virgilCrypto.generateKeys();
+        const myKeyPair = keyPair || this.virgilCrypto.generateKeys(this.keyPairType);
         const card = await this.cardManager.publishCard({
             privateKey: myKeyPair.privateKey,
             publicKey: myKeyPair.publicKey,
@@ -666,7 +719,7 @@ export abstract class AbstractEThree {
     protected getPublicKeysForEncryption(
         ownPrivateKey: IPrivateKey,
         recipients?: ICard | FindUsersResult | IPublicKey | LookupResult,
-    ) {
+    ): IPublicKey[] | null {
         let publicKeys: IPublicKey[];
         if (recipients == null) {
             publicKeys = [];
@@ -701,7 +754,7 @@ export abstract class AbstractEThree {
         ownPrivateKey: IPrivateKey,
         senderCardOrPublicKey?: ICard | IPublicKey,
         encryptedAt?: Date | number,
-    ) {
+    ): IPublicKey | null {
         if (senderCardOrPublicKey == null) {
             return this.virgilCrypto.extractPublicKey(ownPrivateKey);
         }

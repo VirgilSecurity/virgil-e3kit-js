@@ -37,6 +37,11 @@ export interface EThreeInitializeOptions {
      * Name of the group storage. Default `.virgil-group-storage`.
      */
     groupStorageName?: string;
+
+    /**
+     * Key type that will be used for key generation. Default is ED25519.
+     */
+    keyPairType?: any;
 }
 
 /**
