@@ -10,7 +10,7 @@
         "start": "node index.js"
     },
     "dependencies": {
-        "@virgilsecurity/e3kit-node": "^0.7.1,
+        "@virgilsecurity/e3kit-node": "0.7.1",
         "dotenv": "^8.1.0"
     }
 }
