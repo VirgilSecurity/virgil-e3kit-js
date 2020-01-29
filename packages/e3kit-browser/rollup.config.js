@@ -47,28 +47,45 @@ const getCryptoEntryPointName = (target, cryptoType, format) =>
     `${target}${cryptoType === CRYPTO_TYPE.ASMJS ? '.asmjs' : ''}.${format}.js`;
 
 const createEntry = (target, cryptoType, format) => {
-    const foundationModuleName = 'virgil-crypto';
+    const foundationModuleName = '@virgilsecurity/core-foundation';
     const foundationPath = getModulePath(foundationModuleName);
     const foundationEntryPoint = path.join(
         foundationModuleName,
-        'dist',
         getCryptoEntryPointName(target, cryptoType, FORMAT.ES),
     );
-    const foundationWasmPath = path.join(foundationPath, 'dist', `libfoundation.${target}.wasm`);
+    const foundationWasmPath = path.join(foundationPath, `libfoundation.${target}.wasm`);
 
-    const pythiaModuleName = '@virgilsecurity/pythia-crypto';
+    const pythiaModuleName = '@virgilsecurity/core-pythia';
     const pythiaPath = getModulePath(pythiaModuleName);
     const pythiaEntryPoint = path.join(
         pythiaModuleName,
+        getCryptoEntryPointName(target, cryptoType, FORMAT.ES),
+    );
+    const pythiaWasmPath = path.join(pythiaPath, `libpythia.${target}.wasm`);
+
+    const virgilCryptoModuleName = 'virgil-crypto';
+    const virgilCryptoEntryPoint = path.join(
+        virgilCryptoModuleName,
         'dist',
         getCryptoEntryPointName(target, cryptoType, FORMAT.ES),
     );
-    const pythiaWasmPath = path.join(pythiaPath, 'dist', `libpythia.${target}.wasm`);
+
+    const pythiaCryptoModuleName = '@virgilsecurity/pythia-crypto';
+    const pythiaCryptoEntryPoint = path.join(
+        pythiaCryptoModuleName,
+        'dist',
+        getCryptoEntryPointName(target, cryptoType, FORMAT.ES),
+    );
 
     return {
         external:
             format !== FORMAT.UMD
-                ? [foundationEntryPoint, pythiaEntryPoint, '@virgilsecurity/sdk-crypto']
+                ? [
+                      foundationEntryPoint,
+                      pythiaEntryPoint,
+                      virgilCryptoEntryPoint,
+                      pythiaCryptoEntryPoint,
+                  ]
                 : [],
         input: path.join(sourcePath, 'index.ts'),
         output: {
@@ -107,6 +124,16 @@ const createEntry = (target, cryptoType, format) => {
                         match: /EThree\.ts$/,
                         test: pythiaModuleName,
                         replace: pythiaEntryPoint,
+                    },
+                    {
+                        match: /EThree\.ts$/,
+                        test: virgilCryptoModuleName,
+                        replace: virgilCryptoEntryPoint,
+                    },
+                    {
+                        match: /EThree\.ts$/,
+                        test: pythiaCryptoModuleName,
+                        replace: pythiaCryptoEntryPoint,
                     },
                 ],
             }),
