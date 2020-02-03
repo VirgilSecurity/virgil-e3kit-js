@@ -14,7 +14,7 @@
 
 This a beta release that is made available to allow users to test and evaluate the next verion of E3kit. It is not recommended for production use at this stage.
 
-## What's new in E3kit v0.7.0?
+## What's new in E3kit v0.7.1?
 
 * The most important new feature is the ability to create secure group chats.
 * Also, starting from this version E3kit is distributed as a monorepo.
@@ -29,6 +29,10 @@ This is the root of the monorepo for E3kit, for platform-specific installation i
 | [e3kit-native](/packages/e3kit-native) | For use in React Native. |
 | [e3kit-node](/packages/e3kit-node) | For use in Node.js and Electron. |
 | [e3kit](/packages/e3kit) | This is the full `e3kit` package wrapping all of the above. It's mostly meant to preserve backward compatibility. We recommend to install one of the plaform-specific packages instead for faster install times. |
+
+## Samples
+
+You can find examples for React Native, Webpack, Ionic, Node and UMD in the [examples folder](/examples), on https://developer.virgilsecurity.com/docs/use-cases and in the [E3kit Web Demo](https://github.com/VirgilSecurity/demo-e3kit-web).
 
 ## Usage Example
 
@@ -163,11 +167,6 @@ await eThree.deleteGroup(groupId);
 // Group has been deleted
 ```
 
-## Samples
-
-You can find more examples in [examples folder](/examples), on https://developer.virgilsecurity.com/docs/use-cases and in the [E3kit Web Demo](https://github.com/VirgilSecurity/demo-e3kit-web).
-
-
 ## Docs
 Virgil Security has a powerful set of APIs, and the documentation below can get you started today.
 
@@ -187,3 +186,9 @@ Also, get extra help from our support team on [Slack](https://virgilsecurity.com
 [_virgil_crypto]: https://github.com/VirgilSecurity/virgil-crypto-javascript
 [_virgil_sdk]: https://github.com/VirgilSecurity/virgil-sdk-javascript
 [_documentation]: https://developer.virgilsecurity.com
+
+## Troubleshooting
+
+### Webpack
+
+Make sure you're following a similar approach to the [webpack example](/examples/webpack) and pay special attention to the webpack.config.js file.
