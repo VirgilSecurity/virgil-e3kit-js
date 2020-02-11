@@ -3,7 +3,7 @@
 [![Build Status](https://travis-ci.com/VirgilSecurity/e3kit-js.svg?branch=master)](https://travis-ci.com/VirgilSecurity)
 [![npm](https://img.shields.io/npm/v/@virgilsecurity/e3kit.svg)](https://www.npmjs.com/package/@virgilsecurity/e3kit)
 [![GitHub license](https://img.shields.io/github/license/VirgilSecurity/e3kit-js.svg)](https://github.com/VirgilSecurity/virgil-e3kit-js/blob/master/LICENSE)
-[![API Reference](https://img.shields.io/badge/API%20reference-e3kit--js-green)](https://virgilsecurity.github.io/virgil-e3kit-x/)
+[![API Reference](https://img.shields.io/badge/API%20reference-e3kit--js-green)](https://virgilsecurity.github.io/virgil-e3kit-js/)
 
 [Introduction](#introduction) | [Benefits](#benefits) | [Features](#features) | [Installation](#installation) | [Resources](#resources) | [Samples](#samples) | [License](#license) | [Support](#support)
 
