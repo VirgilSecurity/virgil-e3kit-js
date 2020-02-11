@@ -1,4 +1,4 @@
-# Virgil E3Kit Typescript/Javascript
+# Virgil E3Kit TypeScript/JavaScript
 
 [![Build Status](https://travis-ci.com/VirgilSecurity/e3kit-js.svg?branch=master)](https://travis-ci.com/VirgilSecurity)
 [![npm](https://img.shields.io/npm/v/@virgilsecurity/e3kit.svg)](https://www.npmjs.com/package/@virgilsecurity/e3kit)
@@ -45,7 +45,7 @@ This is the root of the monorepo for E3kit, for platform-specific installation i
 
 - [Developer Documentation](https://developer.virgilsecurity.com/docs/e3kit/) - start integrating E3Kit into your project with our detailed guides.
 - [Quickstart Demo](https://developer.virgilsecurity.com/docs/e3kit/get-started/quickstart/) - will help you to get started with the Virgil E3Kit quickly, and to learn some common ways to build end-to-end encryption between two fictional characters Alice and Bob.
-- [E3Kit JavaScript API Reference](https://virgilsecurity.github.io/virgil-e3kit-js/) - E3Kit API reference for the language of your choice.
+- [E3Kit TypeScript/JavaScript API Reference](https://virgilsecurity.github.io/virgil-e3kit-js/) - E3Kit API reference for the language of your choice.
 
 ## Samples
 
