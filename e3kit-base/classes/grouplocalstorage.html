@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>GroupLocalStorage | @virgilsecurity/e3kit-base - v0.7.0-beta.2</title>
+	<title>GroupLocalStorage | @virgilsecurity/e3kit-base</title>
 	<meta name="description" content="">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="../assets/css/main.css">
@@ -22,7 +22,7 @@
 						<li class="state loading">Preparing search index...</li>
 						<li class="state failure">The search index is not available</li>
 					</ul>
-					<a href="../index.html" class="title">@virgilsecurity/e3kit-base - v0.7.0-beta.2</a>
+					<a href="../index.html" class="title">@virgilsecurity/e3kit-base</a>
 				</div>
 				<div class="table-cell" id="tsd-widgets">
 					<div id="tsd-filter">
@@ -83,6 +83,7 @@
 						<section class="tsd-index-section ">
 							<h3>Methods</h3>
 							<ul class="tsd-index-list">
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="grouplocalstorage.html#addparticipants" class="tsd-kind-icon">add<wbr>Participants</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="grouplocalstorage.html#delete" class="tsd-kind-icon">delete</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="grouplocalstorage.html#reset" class="tsd-kind-icon">reset</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="grouplocalstorage.html#retrieve" class="tsd-kind-icon">retrieve</a></li>
@@ -99,20 +100,29 @@
 					<a name="constructor" class="tsd-anchor"></a>
 					<h3>constructor</h3>
 					<ul class="tsd-signatures tsd-kind-constructor tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">new <wbr>Group<wbr>Local<wbr>Storage<span class="tsd-signature-symbol">(</span>__namedParameters<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">object</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="grouplocalstorage.html" class="tsd-signature-type">GroupLocalStorage</a></li>
+						<li class="tsd-signature tsd-kind-icon">new <wbr>Group<wbr>Local<wbr>Storage<span class="tsd-signature-symbol">(</span>__namedParameters<span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">{ </span>identity<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">; </span>leveldown<span class="tsd-signature-symbol">: </span><a href="virgilencryptdown.html#abstractleveldown" class="tsd-signature-type">AbstractLevelDOWN</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">; </span>virgilCrypto<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">ICrypto</span><span class="tsd-signature-symbol"> }</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="grouplocalstorage.html" class="tsd-signature-type">GroupLocalStorage</a></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in packages/e3kit-base/src/GroupLocalStorage.ts:34</li>
+									<li>Defined in <a href="https://github.com/VirgilSecurity/virgil-e3kit-js/blob/ce874f8/packages/e3kit-base/src/GroupLocalStorage.ts#L27">packages/e3kit-base/src/GroupLocalStorage.ts:27</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>__namedParameters: <span class="tsd-signature-type">object</span></h5>
+									<h5>__namedParameters: <span class="tsd-signature-symbol">{ </span>identity<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">; </span>leveldown<span class="tsd-signature-symbol">: </span><a href="virgilencryptdown.html#abstractleveldown" class="tsd-signature-type">AbstractLevelDOWN</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">; </span>virgilCrypto<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">ICrypto</span><span class="tsd-signature-symbol"> }</span></h5>
 									<ul class="tsd-parameters">
+										<li class="tsd-parameter">
+											<h5>identity<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span></h5>
+										</li>
+										<li class="tsd-parameter">
+											<h5>leveldown<span class="tsd-signature-symbol">: </span><a href="virgilencryptdown.html#abstractleveldown" class="tsd-signature-type">AbstractLevelDOWN</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></h5>
+										</li>
+										<li class="tsd-parameter">
+											<h5>virgil<wbr>Crypto<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">ICrypto</span></h5>
+										</li>
 									</ul>
 								</li>
 							</ul>
@@ -124,6 +134,32 @@
 			<section class="tsd-panel-group tsd-member-group ">
 				<h2>Methods</h2>
 				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="addparticipants" class="tsd-anchor"></a>
+					<h3>add<wbr>Participants</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">add<wbr>Participants<span class="tsd-signature-symbol">(</span>sessionId<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, participants<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/VirgilSecurity/virgil-e3kit-js/blob/ce874f8/packages/e3kit-base/src/GroupLocalStorage.ts#L90">packages/e3kit-base/src/GroupLocalStorage.ts:90</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>sessionId: <span class="tsd-signature-type">string</span></h5>
+								</li>
+								<li>
+									<h5>participants: <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
 					<a name="delete" class="tsd-anchor"></a>
 					<h3>delete</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
@@ -133,7 +169,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in packages/e3kit-base/src/GroupLocalStorage.ts:85</li>
+									<li>Defined in <a href="https://github.com/VirgilSecurity/virgil-e3kit-js/blob/ce874f8/packages/e3kit-base/src/GroupLocalStorage.ts#L78">packages/e3kit-base/src/GroupLocalStorage.ts:78</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -156,7 +192,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in packages/e3kit-base/src/GroupLocalStorage.ts:93</li>
+									<li>Defined in <a href="https://github.com/VirgilSecurity/virgil-e3kit-js/blob/ce874f8/packages/e3kit-base/src/GroupLocalStorage.ts#L86">packages/e3kit-base/src/GroupLocalStorage.ts:86</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></h4>
@@ -173,7 +209,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in packages/e3kit-base/src/GroupLocalStorage.ts:64</li>
+									<li>Defined in <a href="https://github.com/VirgilSecurity/virgil-e3kit-js/blob/ce874f8/packages/e3kit-base/src/GroupLocalStorage.ts#L57">packages/e3kit-base/src/GroupLocalStorage.ts:57</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -199,7 +235,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in packages/e3kit-base/src/GroupLocalStorage.ts:97</li>
+									<li>Defined in <a href="https://github.com/VirgilSecurity/virgil-e3kit-js/blob/ce874f8/packages/e3kit-base/src/GroupLocalStorage.ts#L102">packages/e3kit-base/src/GroupLocalStorage.ts:102</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -222,7 +258,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in packages/e3kit-base/src/GroupLocalStorage.ts:43</li>
+									<li>Defined in <a href="https://github.com/VirgilSecurity/virgil-e3kit-js/blob/ce874f8/packages/e3kit-base/src/GroupLocalStorage.ts#L36">packages/e3kit-base/src/GroupLocalStorage.ts:36</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -254,6 +290,9 @@
 						<ul>
 							<li class=" tsd-kind-constructor tsd-parent-kind-class">
 								<a href="grouplocalstorage.html#constructor" class="tsd-kind-icon">constructor</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="grouplocalstorage.html#addparticipants" class="tsd-kind-icon">add<wbr>Participants</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class">
 								<a href="grouplocalstorage.html#delete" class="tsd-kind-icon">delete</a>

@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>EncryptFileOptions | @virgilsecurity/e3kit-browser</title>
+	<title>EThreeCtorOptions | @virgilsecurity/e3kit-node</title>
 	<meta name="description" content="">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="../assets/css/main.css">
@@ -22,7 +22,7 @@
 						<li class="state loading">Preparing search index...</li>
 						<li class="state failure">The search index is not available</li>
 					</ul>
-					<a href="../index.html" class="title">@virgilsecurity/e3kit-browser</a>
+					<a href="../index.html" class="title">@virgilsecurity/e3kit-node</a>
 				</div>
 				<div class="table-cell" id="tsd-widgets">
 					<div id="tsd-filter">
@@ -52,31 +52,24 @@
 					<a href="../index.html">Globals</a>
 				</li>
 				<li>
-					<a href="encryptfileoptions.html">EncryptFileOptions</a>
+					<a href="ethreectoroptions.html">EThreeCtorOptions</a>
 				</li>
 			</ul>
-			<h1>Interface EncryptFileOptions</h1>
+			<h1>Interface EThreeCtorOptions</h1>
 		</div>
 	</div>
 </header>
 <div class="container container-main">
 	<div class="row">
 		<div class="col-8 col-content">
-			<section class="tsd-panel tsd-comment">
-				<div class="tsd-comment tsd-typography">
-					<div class="lead">
-						<p>Options for encryptedFile method.</p>
-					</div>
-				</div>
-			</section>
 			<section class="tsd-panel tsd-hierarchy">
 				<h3>Hierarchy</h3>
 				<ul class="tsd-hierarchy">
 					<li>
-						<a href="fileoptions.html" class="tsd-signature-type">FileOptions</a>
+						<span class="tsd-signature-type">EThreeCtorOptions</span>
 						<ul class="tsd-hierarchy">
 							<li>
-								<span class="target">EncryptFileOptions</span>
+								<span class="target">EThreeCtorOptions</span>
 							</li>
 						</ul>
 					</li>
@@ -89,9 +82,13 @@
 						<section class="tsd-index-section ">
 							<h3>Properties</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-inherited"><a href="encryptfileoptions.html#chunksize" class="tsd-kind-icon">chunk<wbr>Size</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="encryptfileoptions.html#onprogress" class="tsd-kind-icon">on<wbr>Progress</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-inherited"><a href="encryptfileoptions.html#signal" class="tsd-kind-icon">signal</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-inherited"><a href="ethreectoroptions.html#accesstokenprovider" class="tsd-kind-icon">access<wbr>Token<wbr>Provider</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-inherited"><a href="ethreectoroptions.html#apiurl" class="tsd-kind-icon">api<wbr>Url</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-inherited"><a href="ethreectoroptions.html#groupstoragename" class="tsd-kind-icon">group<wbr>Storage<wbr>Name</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-inherited"><a href="ethreectoroptions.html#keyentrystorage" class="tsd-kind-icon">key<wbr>Entry<wbr>Storage</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-overwrite"><a href="ethreectoroptions.html#keypairtype" class="tsd-kind-icon">key<wbr>Pair<wbr>Type</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-inherited"><a href="ethreectoroptions.html#storagename" class="tsd-kind-icon">storage<wbr>Name</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-inherited"><a href="ethreectoroptions.html#usesha256identifiers" class="tsd-kind-icon">use<wbr>Sha256<wbr>Identifiers</a></li>
 							</ul>
 						</section>
 					</div>
@@ -100,51 +97,110 @@
 			<section class="tsd-panel-group tsd-member-group ">
 				<h2>Properties</h2>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
-					<a name="chunksize" class="tsd-anchor"></a>
-					<h3><span class="tsd-flag ts-flagOptional">Optional</span> chunk<wbr>Size</h3>
-					<div class="tsd-signature tsd-kind-icon">chunk<wbr>Size<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span></div>
+					<a name="accesstokenprovider" class="tsd-anchor"></a>
+					<h3>access<wbr>Token<wbr>Provider</h3>
+					<div class="tsd-signature tsd-kind-icon">access<wbr>Token<wbr>Provider<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">IAccessTokenProvider</span></div>
 					<aside class="tsd-sources">
-						<p>Inherited from <a href="fileoptions.html">FileOptions</a>.<a href="fileoptions.html#chunksize">chunkSize</a></p>
+						<p>Inherited from <a href="ethreectoroptions.html">EThreeCtorOptions</a>.<a href="ethreectoroptions.html#accesstokenprovider">accessTokenProvider</a></p>
 						<ul>
-							<li>Defined in <a href="https://github.com/VirgilSecurity/virgil-e3kit-js/blob/ce874f8/packages/e3kit-browser/src/types.ts#L75">e3kit-browser/src/types.ts:75</a></li>
+							<li>Defined in e3kit-base/dist/types/types.d.ts:49</li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
 						<div class="lead">
-							<p>Size of chunk being processed at one time. Bigger chunks make function execute faster, but
-							consume more memory in one time and can cause a performance hit. Default value is 64kb.</p>
-						</div>
-					</div>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
-					<a name="onprogress" class="tsd-anchor"></a>
-					<h3><span class="tsd-flag ts-flagOptional">Optional</span> on<wbr>Progress</h3>
-					<div class="tsd-signature tsd-kind-icon">on<wbr>Progress<span class="tsd-signature-symbol">:</span> <a href="../index.html#onencryptprogresscallback" class="tsd-signature-type">onEncryptProgressCallback</a></div>
-					<aside class="tsd-sources">
-						<ul>
-							<li>Defined in <a href="https://github.com/VirgilSecurity/virgil-e3kit-js/blob/ce874f8/packages/e3kit-browser/src/types.ts#L90">e3kit-browser/src/types.ts:90</a></li>
-						</ul>
-					</aside>
-					<div class="tsd-comment tsd-typography">
-						<div class="lead">
-							<p><code>onEncryptProgressCallback</code> parameter.</p>
+							<p>Implementation of IAccessTokenProvider from <a href="https://github.com/virgilsecurity/virgil-sdk-javascript">Virgil SDK</a>;</p>
 						</div>
 					</div>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
-					<a name="signal" class="tsd-anchor"></a>
-					<h3><span class="tsd-flag ts-flagOptional">Optional</span> signal</h3>
-					<div class="tsd-signature tsd-kind-icon">signal<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">AbortSignal</span></div>
+					<a name="apiurl" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagOptional">Optional</span> api<wbr>Url</h3>
+					<div class="tsd-signature tsd-kind-icon">api<wbr>Url<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
 					<aside class="tsd-sources">
-						<p>Inherited from <a href="fileoptions.html">FileOptions</a>.<a href="fileoptions.html#signal">signal</a></p>
+						<p>Inherited from <a href="ethreeinitializeoptions.html">EThreeInitializeOptions</a>.<a href="ethreeinitializeoptions.html#apiurl">apiUrl</a></p>
 						<ul>
-							<li>Defined in <a href="https://github.com/VirgilSecurity/virgil-e3kit-js/blob/ce874f8/packages/e3kit-browser/src/types.ts#L80">e3kit-browser/src/types.ts:80</a></li>
+							<li>Defined in e3kit-base/dist/types/types.d.ts:24</li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
 						<div class="lead">
-							<p>Instance of <code>AbortSignal</code> which can be received from <code>AbortController</code>. Used to cancel encryptFile
-							operation.</p>
+							<p>Url of the Card Services. Used for development purposes.</p>
+						</div>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
+					<a name="groupstoragename" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagOptional">Optional</span> group<wbr>Storage<wbr>Name</h3>
+					<div class="tsd-signature tsd-kind-icon">group<wbr>Storage<wbr>Name<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
+					<aside class="tsd-sources">
+						<p>Inherited from <a href="ethreeinitializeoptions.html">EThreeInitializeOptions</a>.<a href="ethreeinitializeoptions.html#groupstoragename">groupStorageName</a></p>
+						<ul>
+							<li>Defined in e3kit-base/dist/types/types.d.ts:36</li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>Name of the group storage. Default <code>.virgil-group-storage</code>.</p>
+						</div>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
+					<a name="keyentrystorage" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagOptional">Optional</span> key<wbr>Entry<wbr>Storage</h3>
+					<div class="tsd-signature tsd-kind-icon">key<wbr>Entry<wbr>Storage<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">IKeyEntryStorage</span></div>
+					<aside class="tsd-sources">
+						<p>Inherited from <a href="ethreeinitializeoptions.html">EThreeInitializeOptions</a>.<a href="ethreeinitializeoptions.html#keyentrystorage">keyEntryStorage</a></p>
+						<ul>
+							<li>Defined in e3kit-base/dist/types/types.d.ts:20</li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>Implementation of IKeyEntryStorage. Used IndexedDB Key Storage from
+							<a href="https://github.com/virgilsecurity/virgil-sdk-javascript">Virgil SDK</a> by default.</p>
+						</div>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-overwrite">
+					<a name="keypairtype" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagOptional">Optional</span> key<wbr>Pair<wbr>Type</h3>
+					<div class="tsd-signature tsd-kind-icon">key<wbr>Pair<wbr>Type<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">KeyPairType</span></div>
+					<aside class="tsd-sources">
+						<p>Overrides EThreeInitializeOptions.keyPairType</p>
+						<ul>
+							<li>Defined in <a href="https://github.com/VirgilSecurity/virgil-e3kit-js/blob/ce874f8/packages/e3kit-node/src/types.ts#L12">e3kit-node/src/types.ts:12</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
+					<a name="storagename" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagOptional">Optional</span> storage<wbr>Name</h3>
+					<div class="tsd-signature tsd-kind-icon">storage<wbr>Name<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
+					<aside class="tsd-sources">
+						<p>Inherited from <a href="ethreeinitializeoptions.html">EThreeInitializeOptions</a>.<a href="ethreeinitializeoptions.html#storagename">storageName</a></p>
+						<ul>
+							<li>Defined in e3kit-base/dist/types/types.d.ts:32</li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>Name of the key storage. Default <code>.virgil-local-storage</code>.</p>
+						</div>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
+					<a name="usesha256identifiers" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagOptional">Optional</span> use<wbr>Sha256<wbr>Identifiers</h3>
+					<div class="tsd-signature tsd-kind-icon">use<wbr>Sha256<wbr>Identifiers<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span></div>
+					<aside class="tsd-sources">
+						<p>Inherited from <a href="ethreeinitializeoptions.html">EThreeInitializeOptions</a>.<a href="ethreeinitializeoptions.html#usesha256identifiers">useSha256Identifiers</a></p>
+						<ul>
+							<li>Defined in e3kit-base/dist/types/types.d.ts:28</li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>Indicates whether to use old algorithm to calculate keypair identifiers.</p>
 						</div>
 					</div>
 				</section>
@@ -163,47 +219,38 @@
 					<li class=" tsd-kind-class">
 						<a href="../classes/ethree.html" class="tsd-kind-icon">EThree</a>
 					</li>
-					<li class=" tsd-kind-interface">
-						<a href="decryptfileoptions.html" class="tsd-kind-icon">Decrypt<wbr>File<wbr>Options</a>
-					</li>
-					<li class=" tsd-kind-interface">
-						<a href="ethreectoroptions.html" class="tsd-kind-icon">EThree<wbr>Ctor<wbr>Options</a>
-					</li>
-					<li class=" tsd-kind-interface">
-						<a href="ethreeinitializeoptions.html" class="tsd-kind-icon">EThree<wbr>Initialize<wbr>Options</a>
-					</li>
 				</ul>
 				<ul class="current">
 					<li class="current tsd-kind-interface">
-						<a href="encryptfileoptions.html" class="tsd-kind-icon">Encrypt<wbr>File<wbr>Options</a>
+						<a href="ethreectoroptions.html" class="tsd-kind-icon">EThree<wbr>Ctor<wbr>Options</a>
 						<ul>
 							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
-								<a href="encryptfileoptions.html#chunksize" class="tsd-kind-icon">chunk<wbr>Size</a>
-							</li>
-							<li class=" tsd-kind-property tsd-parent-kind-interface">
-								<a href="encryptfileoptions.html#onprogress" class="tsd-kind-icon">on<wbr>Progress</a>
+								<a href="ethreectoroptions.html#accesstokenprovider" class="tsd-kind-icon">access<wbr>Token<wbr>Provider</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
-								<a href="encryptfileoptions.html#signal" class="tsd-kind-icon">signal</a>
+								<a href="ethreectoroptions.html#apiurl" class="tsd-kind-icon">api<wbr>Url</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
+								<a href="ethreectoroptions.html#groupstoragename" class="tsd-kind-icon">group<wbr>Storage<wbr>Name</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
+								<a href="ethreectoroptions.html#keyentrystorage" class="tsd-kind-icon">key<wbr>Entry<wbr>Storage</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-overwrite">
+								<a href="ethreectoroptions.html#keypairtype" class="tsd-kind-icon">key<wbr>Pair<wbr>Type</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
+								<a href="ethreectoroptions.html#storagename" class="tsd-kind-icon">storage<wbr>Name</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
+								<a href="ethreectoroptions.html#usesha256identifiers" class="tsd-kind-icon">use<wbr>Sha256<wbr>Identifiers</a>
 							</li>
 						</ul>
 					</li>
 				</ul>
 				<ul class="after-current">
 					<li class=" tsd-kind-interface">
-						<a href="fileoptions.html" class="tsd-kind-icon">File<wbr>Options</a>
-					</li>
-					<li class=" tsd-kind-interface">
-						<a href="ondecryptprogresssnapshot.html" class="tsd-kind-icon">on<wbr>Decrypt<wbr>Progress<wbr>Snapshot</a>
-					</li>
-					<li class=" tsd-kind-interface">
-						<a href="onencryptprogresssnapshot.html" class="tsd-kind-icon">on<wbr>Encrypt<wbr>Progress<wbr>Snapshot</a>
-					</li>
-					<li class=" tsd-kind-interface">
-						<a href="onprogresssnapshot.html" class="tsd-kind-icon">on<wbr>Progress<wbr>Snapshot</a>
-					</li>
-					<li class=" tsd-kind-type-alias">
-						<a href="../index.html#data" class="tsd-kind-icon">Data</a>
+						<a href="ethreeinitializeoptions.html" class="tsd-kind-icon">EThree<wbr>Initialize<wbr>Options</a>
 					</li>
 					<li class=" tsd-kind-type-alias">
 						<a href="../index.html#ethreebasectoroptions" class="tsd-kind-icon">EThree<wbr>Base<wbr>Ctor<wbr>Options</a>
@@ -212,58 +259,10 @@
 						<a href="../index.html#ethreebaseinitializeoptions" class="tsd-kind-icon">EThree<wbr>Base<wbr>Initialize<wbr>Options</a>
 					</li>
 					<li class=" tsd-kind-type-alias">
-						<a href="../index.html#findusersresult" class="tsd-kind-icon">Find<wbr>Users<wbr>Result</a>
-					</li>
-					<li class=" tsd-kind-type-alias">
-						<a href="../index.html#icard" class="tsd-kind-icon">ICard</a>
-					</li>
-					<li class=" tsd-kind-type-alias">
 						<a href="../index.html#ipublickey" class="tsd-kind-icon">IPublic<wbr>Key</a>
 					</li>
 					<li class=" tsd-kind-type-alias">
 						<a href="../index.html#keypairtype" class="tsd-kind-icon">Key<wbr>Pair<wbr>Type</a>
-					</li>
-					<li class=" tsd-kind-type-alias">
-						<a href="../index.html#lookupresult" class="tsd-kind-icon">Lookup<wbr>Result</a>
-					</li>
-					<li class=" tsd-kind-type-alias">
-						<a href="../index.html#nodebuffer" class="tsd-kind-icon">Node<wbr>Buffer</a>
-					</li>
-					<li class=" tsd-kind-type-alias">
-						<a href="../index.html#virgil_stream_decrypting_state" class="tsd-kind-icon">VIRGIL_<wbr>STREAM_<wbr>DECRYPTING_<wbr>STATE</a>
-					</li>
-					<li class=" tsd-kind-type-alias">
-						<a href="../index.html#virgil_stream_encrypting_state" class="tsd-kind-icon">VIRGIL_<wbr>STREAM_<wbr>ENCRYPTING_<wbr>STATE</a>
-					</li>
-					<li class=" tsd-kind-type-alias">
-						<a href="../index.html#virgil_stream_signing_state" class="tsd-kind-icon">VIRGIL_<wbr>STREAM_<wbr>SIGNING_<wbr>STATE</a>
-					</li>
-					<li class=" tsd-kind-type-alias">
-						<a href="../index.html#virgil_stream_verifying_state" class="tsd-kind-icon">VIRGIL_<wbr>STREAM_<wbr>VERIFYING_<wbr>STATE</a>
-					</li>
-					<li class=" tsd-kind-type-alias">
-						<a href="../index.html#virgilcrypto" class="tsd-kind-icon">Virgil<wbr>Crypto</a>
-					</li>
-					<li class=" tsd-kind-type-alias">
-						<a href="../index.html#virgilprivatekey" class="tsd-kind-icon">Virgil<wbr>Private<wbr>Key</a>
-					</li>
-					<li class=" tsd-kind-type-alias">
-						<a href="../index.html#ondecryptprogresscallback" class="tsd-kind-icon">on<wbr>Decrypt<wbr>Progress<wbr>Callback</a>
-					</li>
-					<li class=" tsd-kind-type-alias">
-						<a href="../index.html#onencryptprogresscallback" class="tsd-kind-icon">on<wbr>Encrypt<wbr>Progress<wbr>Callback</a>
-					</li>
-					<li class=" tsd-kind-variable">
-						<a href="../index.html#virgil_stream_decrypting_state" class="tsd-kind-icon">VIRGIL_<wbr>STREAM_<wbr>DECRYPTING_<wbr>STATE</a>
-					</li>
-					<li class=" tsd-kind-variable">
-						<a href="../index.html#virgil_stream_encrypting_state" class="tsd-kind-icon">VIRGIL_<wbr>STREAM_<wbr>ENCRYPTING_<wbr>STATE</a>
-					</li>
-					<li class=" tsd-kind-variable">
-						<a href="../index.html#virgil_stream_signing_state" class="tsd-kind-icon">VIRGIL_<wbr>STREAM_<wbr>SIGNING_<wbr>STATE</a>
-					</li>
-					<li class=" tsd-kind-variable">
-						<a href="../index.html#virgil_stream_verifying_state" class="tsd-kind-icon">VIRGIL_<wbr>STREAM_<wbr>VERIFYING_<wbr>STATE</a>
 					</li>
 				</ul>
 			</nav>
