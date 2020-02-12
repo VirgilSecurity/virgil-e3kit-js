@@ -13,20 +13,21 @@ const template = ejs.compile(
 );
 
 function buildDocsForPackage(pkg) {
-    const app = new TypeDoc.Application({
+    const app = new TypeDoc.Application();
+    app.bootstrap({
         mode: 'file',
-        target: 'ES6',
-        module: 'es6',
+        module: 'es2015',
         moduleResolution: 'node',
         exclude: '**/__tests__/**',
-        ignoreCompilerErrors: true,
-        excludePrivate: true,
-        excludeNotExported: true,
-        stripInternal: true,
         excludeExternals: true,
+        excludeNotExported: true,
+        excludePrivate: true,
+        ignoreCompilerErrors: true,
+        readme: 'none',
+        stripInternal: true,
         suppressExcessPropertyErrors: true,
         suppressImplicitAnyIndexErrors: true,
-        readme: 'none',
+        target: 'es2015',
     });
 
     console.log(`Generating docs for ${pkg.dirName}`);
