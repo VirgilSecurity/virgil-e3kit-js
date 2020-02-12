@@ -1,6 +1,6 @@
 {
     "name": "@virgilsecurity/e3kit",
-    "version": "0.7.1",
+    "version": "0.8.0-beta.0",
     "description": "End-to-end encryption with multiple device support powered by Virgil Security",
     "main": "./dist/node.cjs.js",
     "module": "./dist/node.es.js",
@@ -28,9 +28,9 @@
         "prepare": "npm run clean && npm run build"
     },
     "dependencies": {
-        "@virgilsecurity/e3kit-browser": "0.7.1",
-        "@virgilsecurity/e3kit-native": "0.7.1",
-        "@virgilsecurity/e3kit-node": "0.7.1"
+        "@virgilsecurity/e3kit-browser": "0.8.0-beta.0",
+        "@virgilsecurity/e3kit-native": "0.8.0-beta.0",
+        "@virgilsecurity/e3kit-node": "0.8.0-beta.0"
     },
     "devDependencies": {
         "mkdirp": "^1.0.3",

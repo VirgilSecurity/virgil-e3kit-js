@@ -1,6 +1,6 @@
 {
   "name": "ReactNativeSample",
-  "version": "0.7.1",
+  "version": "0.8.0-beta.0",
   "private": true,
   "scripts": {
     "android": "react-native run-android",
@@ -11,12 +11,12 @@
   },
   "dependencies": {
     "@react-native-community/async-storage": "^1.6.2",
-    "@virgilsecurity/e3kit-native": "0.7.1",
+    "@virgilsecurity/e3kit-native": "0.8.0-beta.0",
     "@virgilsecurity/key-storage-rn": "0.2.1",
     "react": "16.9.0",
     "react-native": "0.61.2",
     "react-native-keychain": "^4.0.1",
-    "react-native-virgil-crypto": "^0.4.0"
+    "react-native-virgil-crypto": "0.5.0"
   },
   "devDependencies": {
     "@babel/core": "^7.6.4",
