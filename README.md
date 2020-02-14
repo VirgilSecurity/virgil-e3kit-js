@@ -32,14 +32,7 @@
 
 ## Installation
 
-This is the root of the monorepo for E3kit, for platform-specific installation instrunctions please select the package link from below
-
-| Name | Description |
-| :--- | :---------- |
-| [e3kit-browser](/packages/e3kit-browser) | For use in web browsers. |
-| [e3kit-native](/packages/e3kit-native) | For use in React Native. |
-| [e3kit-node](/packages/e3kit-node) | For use in Node.js and Electron. |
-| [e3kit](/packages/e3kit) | This is the full `e3kit` package wrapping all of the above. It's mostly meant to preserve backward compatibility. We recommend to install one of the plaform-specific packages instead for faster install times. |
+Navigate to [Developer Documentation](https://developer.virgilsecurity.com/docs/e3kit/get-started/setup-client/) to install and initialize Virgil E3Kit.
 
 ## Resources
 
