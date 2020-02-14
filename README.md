@@ -32,7 +32,7 @@
 
 ## Installation
 
-Navigate to [Developer Documentation](https://developer.virgilsecurity.com/docs/e3kit/get-started/setup-client/) to install and initialize Virgil E3Kit.
+Navigate to our [Developer Documentation](https://developer.virgilsecurity.com/docs/e3kit/get-started/setup-client/) to install and initialize Virgil E3Kit.
 
 ## Resources
 
@@ -42,7 +42,7 @@ Navigate to [Developer Documentation](https://developer.virgilsecurity.com/docs/
 
 ## Samples
 
-You can find examples for React Native, Webpack, Ionic, Node and UMD in the [examples folder](/examples), at https://developer.virgilsecurity.com/docs/e3kit/ and in the [E3kit Web Demo](https://github.com/VirgilSecurity/demo-e3kit-web).
+You can find examples for React Native, Webpack, Ionic, Node and UMD in the [examples folder](/examples), at our [Developer Documentation](https://developer.virgilsecurity.com/docs/e3kit/) and in the [E3kit Web Demo](https://github.com/VirgilSecurity/demo-e3kit-web).
 
 ## License
 
