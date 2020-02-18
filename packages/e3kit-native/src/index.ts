@@ -37,4 +37,5 @@ export {
     GroupInfo,
     RawGroup,
 } from '@virgilsecurity/e3kit-base';
+export { KeyPairType } from 'react-native-virgil-crypto';
 export { EThree, EThreeNativeInitializeOptions } from './EThree';
