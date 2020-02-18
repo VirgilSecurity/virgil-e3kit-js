@@ -8,21 +8,21 @@ This package is **ONLY** for browsers. Use the following packages on other platf
 ## Install
 - npm:
   ```sh
-  npm install @virgilsecurity/e3kit-browser@next
+  npm install @virgilsecurity/e3kit-browser
   ```
 - yarn:
   ```sh
-  yarn add @virgilsecurity/e3kit-browser@next
+  yarn add @virgilsecurity/e3kit-browser
   ```
 - UMD:
   **WebAssembly** (Recommended)
   ```html
-  <script type="text/javascript" src="https://unpkg.com/@virgilsecurity/e3kit-browser@next/dist/browser.umd.js"></script>
+  <script type="text/javascript" src="https://unpkg.com/@virgilsecurity/e3kit-browser@^2.0.0/dist/browser.umd.js"></script>
   ```
 
   **Asm.js** (If you need to support older browsers)
   ```html
-  <script type="text/javascript" src="https://unpkg.com/@virgilsecurity/e3kit-browser@next/dist/browser.asmjs.umd.js"></script>
+  <script type="text/javascript" src="https://unpkg.com/@virgilsecurity/e3kit-browser@^2.0.0/dist/browser.asmjs.umd.js"></script>
   ```
 
 ## Use
@@ -44,7 +44,7 @@ This package is **ONLY** for browsers. Use the following packages on other platf
       const EThree = window.E3kit.EThree;
   </script>
   ```
-  
+
 ## Encrypt & decrypt large files
 
 If you need to encrypt & decrypt large files with the best speed/browser perfomance ratio, see the `encryptFile` and `decryptFile` methods:
@@ -56,7 +56,7 @@ The files are encrypted in small chunks, so it doesn't block the main thread and
 
 The code sample can be found here: https://github.com/VirgilSecurity/virgil-e3kit-js/blob/master/examples/encryptFile.html
 
-> This approach for file encryption is currently only supported in browser environments and mobile apps built with the Ionic framework. 
+> This approach for file encryption is currently only supported in browser environments and mobile apps built with the Ionic framework.
 
 ## Further reading
 You can find detailed guide on library usage [here](https://github.com/VirgilSecurity/virgil-e3kit-js).

@@ -3,6 +3,7 @@ require_relative '../node_modules/@react-native-community/cli-platform-ios/nativ
 
 target 'ReactNativeSample' do
   use_frameworks!
+  use_native_modules!
 
   # Pods for ReactNativeSample
   pod 'FBLazyVector', :path => "../node_modules/react-native/Libraries/FBLazyVector"
@@ -40,8 +41,6 @@ target 'ReactNativeSample' do
     inherit! :search_paths
     # Pods for testing
   end
-
-  use_native_modules!
 end
 
 target 'ReactNativeSample-tvOS' do
@@ -51,5 +50,4 @@ target 'ReactNativeSample-tvOS' do
     inherit! :search_paths
     # Pods for testing
   end
-
 end
