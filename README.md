@@ -15,24 +15,30 @@
 
 - Easy to setup and integrate into new or existing projects
 - Compatible with any CPaaS provider, including Nexmo, Firebase, Twilio, PubNub and etc.
-- Strong secret keys storage, integration with Keychain
+- Strong secret keys storage, integration with all platform-specific storages
 - Provides GDPR and HIPAA compliance
 - Immune to quantum computers attacks
 
 ## Features
 
 - Strong one-to-one and group encryption
-- Files and stream end-to-end encryption
+- Files end-to-end encryption (for browser and React Native)
 - Data signature and verification as part of the encrypt and decrypt functions
 - Recoverable private encryption keys
 - Access to encrypted data from multiple user devices
-- Perfect forward secrecy with the Double Ratchet algorithm
-- Encryption for unregistered users
 - Post-quantum algorithms support: [Round5](https://round5.org/) (encryption), [Falcon](https://falcon-sign.info/) (signature)
 
 ## Installation
 
 Navigate to our [Developer Documentation](https://developer.virgilsecurity.com/docs/e3kit/get-started/setup-client/) to install and initialize Virgil E3Kit.
+
+Virgil E3Kit JS is provided in separate packages for different platforms:
+
+| Name | Description |
+| :--- | :---------- |
+| [e3kit-browser](/packages/e3kit-browser) | For use in web browsers. |
+| [e3kit-native](/packages/e3kit-native) | For use in React Native. |
+| [e3kit-node](/packages/e3kit-node) | For use in Node.js and Electron. |
 
 ## Resources
 
