@@ -8,11 +8,11 @@ This package is **ONLY** for Node.js. Use the following packages on other platfo
 ## Install
 - npm:
   ```sh
-  npm install @virgilsecurity/e3kit-node@next
+  npm install @virgilsecurity/e3kit-node
   ```
 - yarn:
   ```sh
-  yarn add @virgilsecurity/e3kit-node@next
+  yarn add @virgilsecurity/e3kit-node
   ```
 
 ## Use

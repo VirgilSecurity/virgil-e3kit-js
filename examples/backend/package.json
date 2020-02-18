@@ -1,6 +1,6 @@
 {
     "name": "@virgilsecurity/example-backend",
-    "version": "0.8.0-beta.0",
+    "version": "2.0.0",
     "description": "Sample backend for Virgil E3Kit SDK examples",
     "repository": "https://github.com/VirgilSecurity/virgil-e3kit-js/tree/master/packages/example-backend",
     "author": "Virgil Security Inc. <support@virgilsecurity.com>",
@@ -12,7 +12,7 @@
     "dependencies": {
         "dotenv": "^8.1.0",
         "express": "^4.17.1",
-        "virgil-crypto": "4.0.0-alpha.18",
-        "virgil-sdk": "6.0.0-alpha.6"
+        "virgil-crypto": "^4.0.0",
+        "virgil-sdk": "^6.0.0"
     }
 }

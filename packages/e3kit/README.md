@@ -7,15 +7,15 @@ This package is **ONLY** for backward compatibility. We strongly encourage you t
 ## Install
 - npm:
   ```sh
-  npm install @virgilsecurity/e3kit@next
+  npm install @virgilsecurity/e3kit
   ```
 - yarn:
   ```sh
-  yarn add @virgilsecurity/e3kit@next
+  yarn add @virgilsecurity/e3kit
   ```
 - UMD:
   ```html
-  <script type="text/javascript" src="https://unpkg.com/@virgilsecurity/e3kit@next/dist/browser.umd.js"></script>
+  <script type="text/javascript" src="https://unpkg.com/@virgilsecurity/e3kit@^2.0.0/dist/browser.umd.js"></script>
   ```
 
 ## Further reading
