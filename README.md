@@ -1,7 +1,7 @@
 # Virgil E3Kit TypeScript/JavaScript
 
-[![Build Status](https://travis-ci.com/VirgilSecurity/e3kit-js.svg?branch=master)](https://travis-ci.com/VirgilSecurity)
-[![npm](https://img.shields.io/npm/v/@virgilsecurity/e3kit.svg)](https://www.npmjs.com/package/@virgilsecurity/e3kit)
+[![Build Status](https://travis-ci.com/VirgilSecurity/virgil-e3kit-js.svg?branch=master)](https://travis-ci.com/VirgilSecurity/virgil-e3kit-js)
+[![npm](https://img.shields.io/npm/v/@virgilsecurity/e3kit-browser.svg)](https://www.npmjs.com/package/@virgilsecurity/e3kit-browser)
 [![GitHub license](https://img.shields.io/github/license/VirgilSecurity/e3kit-js.svg)](https://github.com/VirgilSecurity/virgil-e3kit-js/blob/master/LICENSE)
 [![API Reference](https://img.shields.io/badge/API%20reference-e3kit--js-green)](https://virgilsecurity.github.io/virgil-e3kit-js/)
 
