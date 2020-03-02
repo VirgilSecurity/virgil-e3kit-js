@@ -29,7 +29,9 @@
         "nohoist": [
             "**/react-native",
             "**/react-native/**",
-            "**/abstract-leveldown"
+            "**/abstract-leveldown",
+            "**/webpack",
+            "**/webpack-dev-server"
         ]
     }
 }
