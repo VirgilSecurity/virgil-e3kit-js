@@ -19,7 +19,7 @@
     "dependencies": {
         "@types/leveldown": "^4.0.0",
         "@types/mkdirp": "^0.5.2",
-        "@virgilsecurity/e3kit-base": "^2.0.0",
+        "@virgilsecurity/e3kit-base": "^2.0.1",
         "@virgilsecurity/pythia-crypto": "^1.0.0",
         "is-invalid-path": "^1.0.2",
         "leveldown": "^5.4.1",
