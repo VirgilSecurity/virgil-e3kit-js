@@ -35,7 +35,7 @@
         "ts-node": "^8.6.2",
         "typescript": "^3.7.5",
         "uuid": "^3.4.0",
-        "virgil-crypto": "^4.0.0",
+        "virgil-crypto": "^4.0.2",
         "virgil-pythia": "^1.0.0",
         "virgil-sdk": "^6.0.0",
         "webpack": "^4.41.5"

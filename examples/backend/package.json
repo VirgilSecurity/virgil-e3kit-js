@@ -12,7 +12,7 @@
     "dependencies": {
         "dotenv": "^8.1.0",
         "express": "^4.17.1",
-        "virgil-crypto": "^4.0.0",
+        "virgil-crypto": "^4.0.2",
         "virgil-sdk": "^6.0.0"
     }
 }
