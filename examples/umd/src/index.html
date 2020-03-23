@@ -7,13 +7,13 @@
     <title>Virgil E3Kit SDK UMD example</title>
 </head>
 <body>
-    <script type="text/javascript" src="browser.asmjs.umd.js"></script>
+    <script type="text/javascript" src="https://unpkg.com/@virgilsecurity/e3kit-browser@^2.0.0/dist/browser.asmjs.umd.js"></script>
     <script type="text/javascript">
         const API_URL = 'http://localhost:8080';
 
         const getToken = async () => {
-            const myIdentity = 'my-identity';
-            const response = await fetch(`${API_URL}/virgil-jwt?identity=${myIdentity}`);
+            const identity = `my-identity-${Math.random()}`;
+            const response = await fetch(`${API_URL}/virgil-jwt?identity=${identity}`);
             const { virgil_jwt: virgilJwt } = await response.json();
             return virgilJwt;
         };
@@ -21,9 +21,7 @@
         (async () => {
             let message;
             try {
-                const sdk = await E3kit.EThree.initialize(getToken, {
-                    apiUrl: VIRGIL_API_URL,
-                });
+                const sdk = await E3kit.EThree.initialize(getToken);
                 await sdk.register();
                 await sdk.backupPrivateKey('pa$$w0rd');
                 const encryptedMessage = await sdk.encrypt('Success');
