@@ -22,10 +22,15 @@ Also you need to install several mandatory dependencies that aren't bundled in t
 import AsyncStorage from '@react-native-community/async-storage';
 import { EThree } from '@virgilsecurity/e3kit-native';
 
-EThree.initialize(getTokenCallback, { AsyncStorage })
+// Promise
+EThree.initialize(tokenCallback, { AsyncStorage })
     .then(eThree => {
         // register user, encrypt, decrypt, etc.
-    })
+    });
+
+// async/await
+const eThree = await EThree.initialize(tokenCallback, { AsyncStorage });
+// register user, encrypt, decrypt, etc.
 ```
 > You need to explicitly pass `AsyncStorage` implementation to E3Kit. Otherwise an app will crash.
 

@@ -20,10 +20,15 @@ Virgil E3Kit SDK is also available on other platforms:
 ```javascript
 import { EThree } from '@virgilsecurity/e3kit-node';
 
-EThree.initialize(getTokenCallback)
+// Promise
+EThree.initialize(tokenCallback)
     .then(eThree => {
         // register user, encrypt, decrypt, etc.
     });
+
+// async/await
+const eThree = await EThree.initialize(tokenCallback);
+// register user, encrypt, decrypt, etc.
 ```
 
 ## Further reading

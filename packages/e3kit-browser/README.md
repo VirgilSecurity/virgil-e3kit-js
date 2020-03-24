@@ -34,20 +34,30 @@ Virgil E3Kit SDK is also available on other platforms:
   ```javascript
   import { EThree } from '@virgilsecurirty/e3kit-browser';
 
-  EThree.initialize(getTokenCallback)
+  // Promise
+  EThree.initialize(tokenCallback)
       .then(eThree => {
           // register user, encrypt, decrypt, etc.
       });
+
+  // async/await
+  const eThree = await EThree.initialize(tokenCallback);
+  // register user, encrypt, decrypt, etc.
   ```
 
   **asm.js** (Use this only if your target environments don't support WebAssembly)
   ```javascript
   import { EThree } from '@virgilsecurirty/e3kit-browser/dist/browser.asmjs.es';
 
-  EThree.initialize(getTokenCallback)
+  // Promise
+  EThree.initialize(tokenCallback)
       .then(eThree => {
           // register user, encrypt, decrypt, etc.
       });
+
+  // async/await
+  const eThree = await EThree.initialize(tokenCallback);
+  // register user, encrypt, decrypt, etc.
   ```
 
 - UMD:
@@ -55,10 +65,15 @@ Virgil E3Kit SDK is also available on other platforms:
   <script type="text/javascript">
       const EThree = window.E3kit.EThree;
 
-      EThree.initialize(getTokenCallback)
+      // Promise
+      EThree.initialize(tokenCallback)
           .then(eThree => {
               // register user, encrypt, decrypt, etc.
           });
+
+      // async/await
+      const eThree = await EThree.initialize(tokenCallback);
+      // register user, encrypt, decrypt, etc.
   </script>
   ```
 
