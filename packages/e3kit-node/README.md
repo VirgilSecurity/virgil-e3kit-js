@@ -1,9 +1,9 @@
 # Virgil E3Kit SDK for Node.js
-This package is **ONLY** for Node.js. Use the following packages on other platforms:
+Virgil E3Kit SDK is also available on other platforms:
 - [Browser](https://github.com/VirgilSecurity/virgil-e3kit-js/tree/master/packages/e3kit-browser)
 - [React Native](https://github.com/VirgilSecurity/virgil-e3kit-js/tree/master/packages/e3kit-native)
 
-> Important! The minimum Node.js version for E3kit is `8.6.0`
+> Minimum supported version of Node.js is `8.6.0`.
 
 ## Install
 - npm:
@@ -19,10 +19,20 @@ This package is **ONLY** for Node.js. Use the following packages on other platfo
 
 ```javascript
 import { EThree } from '@virgilsecurity/e3kit-node';
+
+// Promise
+EThree.initialize(tokenCallback)
+    .then(eThree => {
+        // register user, encrypt, decrypt, etc.
+    });
+
+// async/await
+const eThree = await EThree.initialize(tokenCallback);
+// register user, encrypt, decrypt, etc.
 ```
 
 ## Further reading
-You can find detailed guide on library usage [here](https://github.com/VirgilSecurity/virgil-e3kit-js).
+You can find detailed guides on library usage [here](https://github.com/VirgilSecurity/virgil-e3kit-js#resources).
 
 ## License
 This library is released under the [3-clause BSD License](LICENSE).
