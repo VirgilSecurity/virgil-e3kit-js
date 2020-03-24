@@ -9,7 +9,7 @@
 
 ## Introduction
 
-<a href="https://developer.virgilsecurity.com/docs"><img width="100px" src="https://cdn.virgilsecurity.com/assets/images/github/logos/e3kit/E3Kit.png" align="left" hspace="10" vspace="6"></a> [Virgil Security](https://virgilsecurity.com) provides the [E3Kit](https://developer.virgilsecurity.com/docs/e3kit/) - an open-source client-side framework that allows developers to add end-to-end encryption to their messaging applications, file sharing programs, and other digital communication products in just a few simple steps to become HIPAA and GDPR compliant and more.
+<a href="https://virgilsecurity.com/e3kit/"><img width="100px" src="https://cdn.virgilsecurity.com/assets/images/github/logos/e3kit/E3Kit.png" align="left" hspace="10" vspace="6"></a> [Virgil Security](https://virgilsecurity.com) provides [Virgil E3Kit](https://virgilsecurity.com/e3kit/) - an open-source client-side framework that allows developers to add end-to-end encryption to their messaging applications, file sharing programs, and other digital communication products in just a few simple steps to become HIPAA and GDPR compliant and more.
 
 ## Benefits
 
@@ -42,10 +42,11 @@ Virgil E3Kit JS is provided in separate packages for different platforms:
 
 ## Resources
 
-- [Developer Documentation](https://developer.virgilsecurity.com/docs/e3kit/) - start integrating E3Kit into your project with our detailed guides.
-- [Quickstart Demo](https://developer.virgilsecurity.com/docs/e3kit/get-started/quickstart/) - will help you to get started with the Virgil E3Kit quickly, and to learn some common ways to build end-to-end encryption between two fictional characters Alice and Bob.
+- [E3Kit Product Page](https://virgilsecurity.com/e3kit/)
+- [E3Kit Documentation](https://developer.virgilsecurity.com/docs/e3kit/) - start integrating E3Kit into your project with our detailed guides.
 - [E3Kit TypeScript/JavaScript API Reference](https://virgilsecurity.github.io/virgil-e3kit-js/) - E3Kit API reference for the language of your choice.
-
+- [Quickstart Demo](https://developer.virgilsecurity.com/docs/e3kit/get-started/quickstart/) - will help you to get started with the Virgil E3Kit quickly, and to learn some common ways to build end-to-end encryption between two fictional characters Alice and Bob.
+ 
 ## Samples
 
 You can find examples for React Native, Webpack, Ionic, Node and UMD in the [examples folder](/examples), at our [Developer Documentation](https://developer.virgilsecurity.com/docs/e3kit/) and in the [E3kit Web Demo](https://github.com/VirgilSecurity/demo-e3kit-web).
