@@ -1,5 +1,5 @@
 # Virgil E3Kit SDK for React Native
-This package is **ONLY** for React Native. Use the following packages on other platforms:
+Virgil E3Kit SDK is also available on other platforms:
 - [Browser](https://github.com/VirgilSecurity/virgil-e3kit-js/tree/master/packages/e3kit-browser)
 - [Node.js](https://github.com/VirgilSecurity/virgil-e3kit-js/tree/master/packages/e3kit-node)
 

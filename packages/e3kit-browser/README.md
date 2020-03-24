@@ -1,9 +1,9 @@
 # Virgil E3Kit SDK for Browsers
-This package is **ONLY** for browsers. Use the following packages on other platforms:
-- [React Native](https://github.com/VirgilSecurity/virgil-e3kit-js/tree/master/packages/e3kit-native)
+Virgil E3Kit SDK is also available on other platforms:
 - [Node.js](https://github.com/VirgilSecurity/virgil-e3kit-js/tree/master/packages/e3kit-node)
+- [React Native](https://github.com/VirgilSecurity/virgil-e3kit-js/tree/master/packages/e3kit-native)
 
-> E3Kit's underlying crypto library is compiled to WebAssembly, so you need to make sure that your target browsers [support WebAssembly](https://caniuse.com/#search=WebAssembly). For environments that don't support WebAssembly we have asm.js fallback. The downside of it is much slower download and execution time.
+> E3Kit's underlying crypto library is compiled to WebAssembly. You need to make sure your target browsers [support WebAssembly](https://caniuse.com/#search=WebAssembly). We also have asm.js fallback for environments that don't support WebAssembly. The downside of it is much slower download and execution time.
 
 ## Install
 - npm:
@@ -64,7 +64,7 @@ This package is **ONLY** for browsers. Use the following packages on other platf
 
 ## Encrypt & decrypt large files
 
-If you need to encrypt & decrypt large files with the best speed/browser performance ratio, see the following methods:
+See the following methods if you need to encrypt & decrypt large files with the best speed/browser performance ratio:
 - [encryptFile](https://virgilsecurity.github.io/virgil-e3kit-js/e3kit-browser/classes/ethree.html#encryptfile)
 - [decryptFile](https://virgilsecurity.github.io/virgil-e3kit-js/e3kit-browser/classes/ethree.html#decryptfile)
 
