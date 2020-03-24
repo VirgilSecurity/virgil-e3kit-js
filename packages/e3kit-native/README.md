@@ -1,37 +1,43 @@
 # Virgil E3Kit SDK for React Native
+This package is **ONLY** for React Native. Use the following packages on other platforms:
+- [Browser](https://github.com/VirgilSecurity/virgil-e3kit-js/tree/master/packages/e3kit-browser)
+- [Node.js](https://github.com/VirgilSecurity/virgil-e3kit-js/tree/master/packages/e3kit-node)
 
 ## Installation
-
-This module is available on NPM as `@virgilsecurity/e3kit-native`.
-
+Install `@virgilsecurity/e3kit-native`
 ```sh
-npm install @virgilsecurity/e3kit
+npm install @virgilsecurity/e3kit-native
 ```
 
-There are several dependencies that are required for correct E3kit functioning in React Native but aren't bundled in the package as dependencies.
-You'll need to install these dependencies yourself:
+Also you need to install several mandatory dependencies that aren't bundled in the package:
+- [react-native-virgil-crypto](https://github.com/VirgilSecurity/react-native-virgil-crypto) - Virgil Crypto Library for React Native.
+- [@react-native-community/async-storage](https://github.com/react-native-community/async-storage) - storage backend for group chats.
+- [@virgilsecurity/key-storage-rn](https://github.com/VirgilSecurity/virgil-key-storage-rn) - storage for Virgil Crypto's Private Keys.
+- [react-native-keychain](https://github.com/oblador/react-native-keychain) - storage backend for [@virgilsecurity/key-storage-rn](https://github.com/VirgilSecurity/virgil-key-storage-rn).
 
-* [@react-native-community/async-storage](https://github.com/react-native-community/async-storage) - Used as storage backend for group chats. Optional. React Native's [own AsyncStorage](https://facebook.github.io/react-native/docs/asyncstorage) can also be used.
-* [@virgilsecurity/key-storage-rn](https://github.com/VirgilSecurity/virgil-key-storage-rn) - Used as storage for private keys
-* [react-native-keychain](https://github.com/oblador/react-native-keychain) - Storage backend for `@virgilsecurity/key-storage-rn`
-* [react-native-virgil-crypto](https://github.com/VirgilSecurity/react-native-virgil-crypto) - Native Crypto Library bridge.
-
-```sh
-npm install @react-native-community/async-storage @virgilsecurity/key-storage-rn react-native-keychain react-native-virgil-crypto
-```
+> Tip: carefully follow the installation guides of each library to avoid problems in future.
 
 ## Usage
-
-You need to pass your `AsyncStorage` implementation in
-
 ```js
 import AsyncStorage from '@react-native-community/async-storage';
 import { EThree } from '@virgilsecurity/e3kit-native';
 
 EThree.initialize(getTokenCallback, { AsyncStorage })
-.then(eThree => {
-    // register user, encrypt, decrypt, etc.
-})
+    .then(eThree => {
+        // register user, encrypt, decrypt, etc.
+    })
 ```
+> You need to explicitly pass `AsyncStorage` implementation to E3Kit. Otherwise an app will crash.
 
-See more usage examples in the [repository root]() and in sample React Native project in [examples/ReactNativeSample](https://github.com/VirgilSecurity/virgil-e3kit-js/tree/master/examples/ReactNativeSample).
+## Further reading
+You can find detailed guides on library usage [here](https://github.com/VirgilSecurity/virgil-e3kit-js#resources).
+
+## License
+This library is released under the [3-clause BSD License](LICENSE).
+
+## Support
+Our developer support team is here to help you. Find out more information on our [Help Center](https://help.virgilsecurity.com).
+
+You can find us on [Twitter](https://twitter.com/VirgilSecurity) or send us email support@VirgilSecurity.com.
+
+Also, get extra help from our support team on [Slack](https://virgilsecurity.com/join-community).
