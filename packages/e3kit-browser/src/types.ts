@@ -12,6 +12,7 @@ export type IPublicKey = import('@virgilsecurity/e3kit-base').IPublicKey;
 export type EThreeBaseInitializeOptions = import('@virgilsecurity/e3kit-base').EThreeInitializeOptions;
 export type EThreeBaseCtorOptions = import('@virgilsecurity/e3kit-base').EThreeCtorOptions;
 export type FindUsersResult = import('@virgilsecurity/e3kit-base').FindUsersResult;
+export type LookupResult = import('@virgilsecurity/e3kit-base').LookupResult;
 
 export type KeyPairType = import('virgil-crypto').KeyPairType;
 export type VirgilCrypto = import('virgil-crypto').VirgilCrypto;

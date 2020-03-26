@@ -30,6 +30,7 @@ import {
     EThreeCtorOptions,
     EncryptFileOptions,
     DecryptFileOptions,
+    LookupResult,
     FindUsersResult,
 } from './types';
 
@@ -77,8 +78,8 @@ export class EThree extends AbstractEThree {
     }
 
     /**
-     * Signs and encrypts File or Blob for recipient public key, Card or `FindUsersResult`
-     * If there is no recipient and the message is encrypted for the current user, omit the
+     * Signs and encrypts File or Blob for recipient public key or `LookupResult` dictionary for multiple
+     * recipients. If there is no recipient and the message is encrypted for the current user, omit the
      * public key parameter. You can define chunk size and a callback, that will be invoked on each chunk.
      *
      * The file will be read twice during this method execution:
@@ -87,7 +88,7 @@ export class EThree extends AbstractEThree {
      */
     async encryptFile(
         file: File | Blob,
-        recipients?: ICard | FindUsersResult | IPublicKey,
+        recipients?: ICard | FindUsersResult | IPublicKey | LookupResult,
         options: EncryptFileOptions = {},
     ): Promise<File | Blob> {
         const chunkSize = options.chunkSize ? options.chunkSize : 64 * 1024;
@@ -196,7 +197,7 @@ export class EThree extends AbstractEThree {
      */
     async decryptFile(
         file: File | Blob,
-        senderCardOrPublicKey?: ICard | IPublicKey,
+        senderCardOrPublicKey?: IPublicKey,
         options: DecryptFileOptions = {},
     ): Promise<File | Blob> {
         const fileSize = file.size;

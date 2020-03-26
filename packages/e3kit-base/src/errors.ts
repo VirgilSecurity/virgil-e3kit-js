@@ -1,3 +1,5 @@
+import { IPublicKey } from './types';
+
 /**
  * Custom error class for errors specific to Virgil E3kit.
  */
@@ -85,6 +87,47 @@ export class MultipleCardsError extends SdkError {
             'MultipleCardsError',
             MultipleCardsError,
         );
+    }
+}
+
+/**
+ * @deprecated since version 0.7.0
+ * Will be removed in version 0.8.0
+ */
+export type LookupResultWithErrors = {
+    [identity: string]: IPublicKey | Error;
+};
+
+/**
+ * Error thrown by {@link EThree.lookupPublicKeys} in case if some identity missing or has multiple cards.
+ *
+ * @deprecated since version 0.7.0
+ * Will be removed in version 0.8.0
+ */
+export class LookupError extends SdkError {
+    /**
+     * Key Value object, where key is identity and value is IPublicKey or [[MultipleCardsError]] or [[LookupNotFoundError]]
+     */
+    public lookupResult: LookupResultWithErrors;
+    constructor(lookupResult: LookupResultWithErrors) {
+        super(
+            'Failed some public keys lookups. You can see the results by calling error.lookupResult property of this error instance',
+            'LookupError',
+            LookupError,
+        );
+        this.lookupResult = lookupResult;
+    }
+}
+
+/**
+ * Error thrown by {@link EThree.lookupPublicKeys} in case if sought identity is not registered.
+ *
+ * @deprecated since version 0.7.0
+ * Will be removed in version 0.8.0
+ */
+export class LookupNotFoundError extends SdkError {
+    constructor(public identity: string) {
+        super(`${identity} not found`, 'LookupNotFoundError', LookupNotFoundError);
     }
 }
 
