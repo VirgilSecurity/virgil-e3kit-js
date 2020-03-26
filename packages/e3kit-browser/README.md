@@ -18,12 +18,12 @@ Virgil E3Kit SDK is also available on other platforms:
 
   **WebAssembly**
   ```html
-  <script type="text/javascript" src="https://unpkg.com/@virgilsecurity/e3kit-browser@^2.0.0/dist/browser.umd.js"></script>
+  <script type="text/javascript" src="https://unpkg.com/@virgilsecurity/e3kit-browser@^2.1.0/dist/browser.umd.js"></script>
   ```
 
   **asm.js** (Use this only if your target environments don't support WebAssembly)
   ```html
-  <script type="text/javascript" src="https://unpkg.com/@virgilsecurity/e3kit-browser@^2.0.0/dist/browser.asmjs.umd.js"></script>
+  <script type="text/javascript" src="https://unpkg.com/@virgilsecurity/e3kit-browser@^2.1.0/dist/browser.asmjs.umd.js"></script>
   ```
 
 ## Use
