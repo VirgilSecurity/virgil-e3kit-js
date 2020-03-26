@@ -6,6 +6,8 @@ export type KeyPairType = import('virgil-crypto').KeyPairType;
 
 export interface EThreeInitializeOptions extends EThreeBaseInitializeOptions {
     keyPairType?: KeyPairType;
+    foundationWasmPath?: string;
+    pythiaWasmPath?: string;
 }
 
 export interface EThreeCtorOptions extends EThreeBaseCtorOptions {

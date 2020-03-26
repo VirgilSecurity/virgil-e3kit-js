@@ -84,7 +84,13 @@ export class EThree extends AbstractEThree {
         getToken: () => Promise<string>,
         options: EThreeInitializeOptions = {},
     ): Promise<EThree> {
-        await Promise.all([initCrypto(), initPythia()]);
+        const cryptoOptions = options.foundationWasmPath
+            ? { foundation: [{ locateFile: () => options.foundationWasmPath }] }
+            : undefined;
+        const pythiaOptions = options.pythiaWasmPath
+            ? { pythia: [{ locateFile: () => options.pythiaWasmPath }] }
+            : undefined;
+        await Promise.all([initCrypto(cryptoOptions), initPythia(pythiaOptions)]);
 
         if (typeof getToken !== 'function') {
             throw new TypeError(

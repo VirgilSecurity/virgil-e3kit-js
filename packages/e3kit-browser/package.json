@@ -23,9 +23,9 @@
     "dependencies": {
         "@types/level-js": "^4.0.1",
         "@virgilsecurity/e3kit-base": "^2.0.1",
-        "@virgilsecurity/pythia-crypto": "^1.0.0",
+        "@virgilsecurity/pythia-crypto": "^1.1.0",
         "level-js": "^5.0.1",
-        "virgil-crypto": "^4.0.2",
+        "virgil-crypto": "^4.1.0",
         "virgil-sdk": "^6.0.0"
     },
     "devDependencies": {
