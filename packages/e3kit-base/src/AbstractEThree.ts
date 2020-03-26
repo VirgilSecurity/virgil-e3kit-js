@@ -179,8 +179,7 @@ export abstract class AbstractEThree {
     /**
      * Delete private key saved in Virgil Keyknox Storage.
      *
-     * @deprecated since version 0.7.0-beta.1
-     * Will be removed in version 0.8.0
+     * @deprecated and will be removed in next major release.
      *
      * @param {string} pwd - User password for access to Virgil Keyknox Storage.
      * @returns {Promise<void>} - Promise that is resolved if everything went fine.
@@ -234,8 +233,7 @@ export abstract class AbstractEThree {
     /**
      * Encrypts and signs the message for the current user and multiple recipient users.
      *
-     * @deprecated since version 0.7.0
-     * Will be removed in version 0.8.0
+     * @deprecated and will be removed in next major release.
      *
      * Use the overload that accepts `FindUsersResult` object instead.
      *
@@ -310,8 +308,7 @@ export abstract class AbstractEThree {
      * Decrypts and verifies the data encrypted by the user identified by `senderPublicKey` for the
      * current user.
      *
-     * @deprecated since version 0.7.0
-     * Will be removed in version 0.8.0
+     * @deprecated and will be removed in next major release.
      *
      * Use the overload that accepts Virgil Card object instead.
      *
@@ -485,8 +482,7 @@ export abstract class AbstractEThree {
     /**
      * Finds public key for user identity registered on Virgil Cloud.
      *
-     * @deprecated since version 0.7.0
-     * Will be removed in version 0.8.0
+     * @deprecated and will be removed in next major release.
      *
      * Use the {@link EThree.findUsers} instead, which returns Virgil Cards instead
      * of just the public keys. You can get a public key out of the Virgil Card object
@@ -500,8 +496,7 @@ export abstract class AbstractEThree {
     /**
      * Finds public keys for user identities registered on Virgil Cloud.
      *
-     * @deprecated since version 0.7.0
-     * Will be removed in version 0.8.0
+     * @deprecated and will be removed in next major release.
      *
      * Use the {@link EThree.findUsers} instead, which returns Virgil Cards instead
      * of just the public keys. You can get a public key out of the Virgil Card object

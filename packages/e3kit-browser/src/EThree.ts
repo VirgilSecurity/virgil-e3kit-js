@@ -78,14 +78,27 @@ export class EThree extends AbstractEThree {
     }
 
     /**
-     * Signs and encrypts File or Blob for recipient public key or `LookupResult` dictionary for multiple
-     * recipients. If there is no recipient and the message is encrypted for the current user, omit the
+     * Signs and encrypts File or Blob.
+     * If there is no recipient and the message is encrypted for the current user, omit the
      * public key parameter. You can define chunk size and a callback, that will be invoked on each chunk.
      *
      * The file will be read twice during this method execution:
      * 1. To calculate the signature of the plaintext file.
      * 2. To encrypt the file with encoded signature.
      */
+    encryptFile(
+        file: File | Blob,
+        recipients?: ICard | FindUsersResult,
+        options?: EncryptFileOptions,
+    ): Promise<File | Blob>;
+    /**
+     * @deprecated and will be removed in next major release.
+     */
+    encryptFile(
+        file: File | Blob,
+        recipients?: IPublicKey | LookupResult,
+        options?: EncryptFileOptions,
+    ): Promise<File | Blob>;
     async encryptFile(
         file: File | Blob,
         recipients?: ICard | FindUsersResult | IPublicKey | LookupResult,
@@ -197,7 +210,7 @@ export class EThree extends AbstractEThree {
      */
     async decryptFile(
         file: File | Blob,
-        senderCardOrPublicKey?: IPublicKey,
+        senderCardOrPublicKey?: ICard | IPublicKey,
         options: DecryptFileOptions = {},
     ): Promise<File | Blob> {
         const fileSize = file.size;

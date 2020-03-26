@@ -91,8 +91,7 @@ export class MultipleCardsError extends SdkError {
 }
 
 /**
- * @deprecated since version 0.7.0
- * Will be removed in version 0.8.0
+ * @deprecated and will be removed in next major release.
  */
 export type LookupResultWithErrors = {
     [identity: string]: IPublicKey | Error;
@@ -101,8 +100,7 @@ export type LookupResultWithErrors = {
 /**
  * Error thrown by {@link EThree.lookupPublicKeys} in case if some identity missing or has multiple cards.
  *
- * @deprecated since version 0.7.0
- * Will be removed in version 0.8.0
+ * @deprecated and will be removed in next major release.
  */
 export class LookupError extends SdkError {
     /**
@@ -122,8 +120,7 @@ export class LookupError extends SdkError {
 /**
  * Error thrown by {@link EThree.lookupPublicKeys} in case if sought identity is not registered.
  *
- * @deprecated since version 0.7.0
- * Will be removed in version 0.8.0
+ * @deprecated and will be removed in next major release.
  */
 export class LookupNotFoundError extends SdkError {
     constructor(public identity: string) {
