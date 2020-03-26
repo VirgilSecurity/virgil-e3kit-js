@@ -34,10 +34,10 @@ const createGetToken = identity => async () => {
 
 (async () => {
     try {
-        const alice = await EThree.initialize(createGetToken('alice'), {
+        const alice = await EThree.initialize(createGetToken(`alice-${Math.random()}`), {
             apiUrl: process.env.VIRGIL_API_URL,
         });
-        const bob = await EThree.initialize(createGetToken('bob'), {
+        const bob = await EThree.initialize(createGetToken(`bob-${Math.random()}`), {
             apiUrl: process.env.VIRGIL_API_URL,
         });
 

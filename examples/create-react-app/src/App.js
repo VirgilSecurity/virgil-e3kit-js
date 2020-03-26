@@ -16,8 +16,8 @@ function App() {
   React.useEffect(() => {
     (async () => {
       try {
-        const alice = await EThree.initialize(createGetToken("alice"));
-        const bob = await EThree.initialize(createGetToken("bob"));
+        const alice = await EThree.initialize(createGetToken(`alice-${Math.random()}`));
+        const bob = await EThree.initialize(createGetToken(`bob-${Math.random()}`));
 
         setMessages(messages => messages.concat(["Alice registers..."]));
         await alice.register();

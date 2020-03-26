@@ -12,7 +12,7 @@
         const API_URL = 'http://localhost:8080';
 
         const getToken = async () => {
-            const identity = `my-identity-${Math.random()}`;
+            const identity = `identity-${Math.random()}`;
             const response = await fetch(`${API_URL}/virgil-jwt?identity=${identity}`);
             const { virgil_jwt: virgilJwt } = await response.json();
             return virgilJwt;
