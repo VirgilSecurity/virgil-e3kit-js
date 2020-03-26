@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { ICard, FindUsersResult, LookupResult } from './types';
+import { ICard, FindUsersResult } from './types';
 import { getObjectValues } from './array';
 
 /**
@@ -40,19 +40,4 @@ export function isFindUsersResult(obj: any): obj is FindUsersResult {
     if (values.length === 0) return false;
 
     return values.every(val => isVirgilCard(val));
-}
-
-/**
- * @hidden
- */
-export function isLookupResult(
-    obj: any,
-    isPublicKeyFn: (obj: any) => boolean,
-): obj is LookupResult {
-    if (!isObject(obj)) return false;
-
-    const values = getObjectValues(obj);
-    if (values.length === 0) return false;
-
-    return values.every(val => isPublicKeyFn(val));
 }

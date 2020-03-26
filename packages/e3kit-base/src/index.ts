@@ -17,8 +17,6 @@ export {
     IKeyEntry,
     EThreeInitializeOptions,
     EThreeCtorOptions,
-    LookupResult,
-    EncryptPublicKeyArg,
     FindUsersResult,
     Ticket,
     GroupInfo,
