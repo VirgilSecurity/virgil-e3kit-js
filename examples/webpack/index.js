@@ -15,8 +15,8 @@ const report = message => {
 
 (async () => {
     try {
-        const alice = await EThree.initialize(createGetToken('alice'));
-        const bob = await EThree.initialize(createGetToken('bob'));
+        const alice = await EThree.initialize(createGetToken(`alice-${Math.random()}`));
+        const bob = await EThree.initialize(createGetToken(`bob-${Math.random()}`));
 
         report('Alice registers...');
         await alice.register();

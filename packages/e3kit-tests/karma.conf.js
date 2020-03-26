@@ -1,38 +1,13 @@
-const fs = require('fs');
-const path = require('path');
-
 const dotenv = require('dotenv');
 const webpack = require('webpack');
 
 dotenv.config();
 
-const getModulePath = request => {
-    const resolvePaths = require.resolve.paths(request);
-    for (let resolvePath of resolvePaths) {
-        const modulePath = path.join(resolvePath, request);
-        if (fs.existsSync(modulePath)) {
-            return modulePath;
-        }
-    }
-    throw new Error(`Module '${request}' was not found`);
-};
-
-const virgilCryptoDist = path.join(getModulePath('virgil-crypto'), 'dist');
-const pythiaCryptoDist = path.join(getModulePath('@virgilsecurity/pythia-crypto'), 'dist');
-
 module.exports = config => {
     config.set({
         frameworks: ['mocha'],
         autoWatch: false,
-        files: [
-            'src/browser.test.ts',
-            { pattern: path.join(virgilCryptoDist, 'libfoundation.browser.wasm'), included: false },
-            { pattern: path.join(pythiaCryptoDist, 'libpythia.browser.wasm'), included: false },
-        ],
-        proxies: {
-            '/base/src/libfoundation.browser.wasm': `${virgilCryptoDist}/libfoundation.browser.wasm`,
-            '/base/src/libpythia.browser.wasm': `${pythiaCryptoDist}/libpythia.browser.wasm`,
-        },
+        files: ['src/browser.test.ts'],
         browsers: ['ChromeHeadless'],
         colors: true,
         logLevel: config.LOG_INFO,
@@ -65,9 +40,6 @@ module.exports = config => {
                         test: /\.wasm$/,
                         type: 'javascript/auto',
                         loader: 'file-loader',
-                        options: {
-                            name: '[name].[ext]',
-                        },
                     },
                 ],
             },
