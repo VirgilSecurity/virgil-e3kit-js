@@ -12,7 +12,7 @@ npm install @virgilsecurity/e3kit-native
 Also you need to install several mandatory dependencies that aren't bundled in the package:
 - [react-native-virgil-crypto](https://github.com/VirgilSecurity/react-native-virgil-crypto) - Virgil Crypto Library for React Native.
 - [@react-native-community/async-storage](https://github.com/react-native-community/async-storage) - storage backend for group chats.
-- [@virgilsecurity/key-storage-rn](https://github.com/VirgilSecurity/virgil-key-storage-rn) - storage for Virgil Crypto's Private Keys.
+- [@virgilsecurity/key-storage-rn](https://github.com/VirgilSecurity/virgil-key-storage-rn) - storage adapter for React Native.
 - [react-native-keychain](https://github.com/oblador/react-native-keychain) - storage backend for [@virgilsecurity/key-storage-rn](https://github.com/VirgilSecurity/virgil-key-storage-rn).
 
 > Tip: carefully follow the installation guides of each library to avoid problems in future.
