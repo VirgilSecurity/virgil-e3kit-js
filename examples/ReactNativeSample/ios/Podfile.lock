@@ -217,9 +217,9 @@ PODS:
     - React-cxxreact (= 0.61.2)
     - React-jsi (= 0.61.2)
     - ReactCommon/jscallinvoker (= 0.61.2)
-  - RNCAsyncStorage (1.7.1):
+  - RNCAsyncStorage (1.8.1):
     - React
-  - RNKeychain (4.0.5):
+  - RNKeychain (5.0.1):
     - React
   - RNVirgilCrypto (0.5.0):
     - React
@@ -366,8 +366,8 @@ SPEC CHECKSUMS:
   React-RCTText: e3ef6191cdb627855ff7fe8fa0c1e14094967fb8
   React-RCTVibration: fb54c732fd20405a76598e431aa2f8c2bf527de9
   ReactCommon: 5848032ed2f274fcb40f6b9ec24067787c42d479
-  RNCAsyncStorage: 44395cb9c7c1523104c2b499eb426ef7aff82bca
-  RNKeychain: 840f8e6f13be0576202aefcdffd26a4f54bfe7b5
+  RNCAsyncStorage: e0dd7c8a36543b4ef84969acd9f8aceba3a92dc2
+  RNKeychain: a5623de13ec5378bfb8035422e3dee4fa538660d
   RNVirgilCrypto: 986c5ef18de7e0a47791f50e90680d3c4c8407e5
   VirgilCrypto: c2831582c5230eeb2adba2365336c768cd6d8c59
   VirgilCryptoFoundation: 79f23a7ab6db642268d31bc63b0cf54db416f089
@@ -377,4 +377,4 @@ SPEC CHECKSUMS:
 
 PODFILE CHECKSUM: 6fe0e8f2a84cc38f29f6d678d9695550f57e8934
 
-COCOAPODS: 1.8.4
+COCOAPODS: 1.9.1

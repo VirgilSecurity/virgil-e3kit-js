@@ -5,10 +5,10 @@ import {
     AbstractEThree,
     PrivateKeyLoader,
 } from '@virgilsecurity/e3kit-base';
-import createNativeKeyEntryStorage from '@virgilsecurity/key-storage-rn/native';
+import { ReactNativeKeychainStorageAdapter } from '@virgilsecurity/key-storage-rn';
 import { VirgilCardCrypto } from '@virgilsecurity/sdk-crypto';
 import { virgilCrypto, virgilBrainKeyCrypto } from 'react-native-virgil-crypto';
-import { CachingJwtProvider, CardManager, VirgilCardVerifier } from 'virgil-sdk';
+import { CachingJwtProvider, CardManager, VirgilCardVerifier, KeyEntryStorage } from 'virgil-sdk';
 import asyncstorageDown from 'asyncstorage-down';
 
 import { IPublicKey, EThreeCtorOptions, EThreeInitializeOptions } from './types';
@@ -37,7 +37,8 @@ export class EThree extends AbstractEThree {
         };
         const accessTokenProvider = opts.accessTokenProvider;
         const keyEntryStorage =
-            opts.keyEntryStorage || createNativeKeyEntryStorage({ username: opts.storageName });
+            opts.keyEntryStorage ||
+            new KeyEntryStorage({ adapter: new ReactNativeKeychainStorageAdapter() });
         const cardCrypto = new VirgilCardCrypto(virgilCrypto);
         const cardVerifier = new VirgilCardVerifier(cardCrypto);
         const keyLoader = new PrivateKeyLoader(identity, {

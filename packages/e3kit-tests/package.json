@@ -1,6 +1,6 @@
 {
     "name": "@virgilsecurity/e3kit-tests",
-    "version": "2.1.0",
+    "version": "2.1.1",
     "description": "Virgil E3Kit SDK tests",
     "repository": "https://github.com/VirgilSecurity/virgil-e3kit-js/tree/master/packages/e3kit-tests",
     "author": "Virgil Security Inc. <support@virgilsecurity.com>",
@@ -37,7 +37,7 @@
         "uuid": "^3.4.0",
         "virgil-crypto": "^4.1.0",
         "virgil-pythia": "^1.0.0",
-        "virgil-sdk": "^6.0.0",
+        "virgil-sdk": "^6.1.0",
         "webpack": "^4.41.5"
     },
     "workspaces": {
