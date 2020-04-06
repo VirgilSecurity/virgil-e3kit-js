@@ -18,10 +18,13 @@ export type KeyPairType = import('virgil-crypto').KeyPairType;
 export type VirgilCrypto = import('virgil-crypto').VirgilCrypto;
 export type VirgilPrivateKey = import('virgil-crypto').VirgilPrivateKey;
 
-export interface EThreeInitializeOptions extends EThreeBaseInitializeOptions {
-    keyPairType?: KeyPairType;
+export interface CryptoLibraryOptions {
     foundationWasmPath?: string;
     pythiaWasmPath?: string;
+}
+
+export interface EThreeInitializeOptions extends EThreeBaseInitializeOptions, CryptoLibraryOptions {
+    keyPairType?: KeyPairType;
 }
 
 export interface EThreeCtorOptions extends EThreeBaseCtorOptions {

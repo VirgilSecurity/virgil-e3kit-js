@@ -5,10 +5,13 @@ export type EThreeBaseCtorOptions = import('@virgilsecurity/e3kit-base').EThreeC
 
 export type KeyPairType = import('virgil-crypto').KeyPairType;
 
-export interface EThreeInitializeOptions extends EThreeBaseInitializeOptions {
-    keyPairType?: KeyPairType;
+export interface CryptoLibraryOptions {
     foundationWasmPath?: string;
     pythiaWasmPath?: string;
+}
+
+export interface EThreeInitializeOptions extends EThreeBaseInitializeOptions, CryptoLibraryOptions {
+    keyPairType?: KeyPairType;
 }
 
 export interface EThreeCtorOptions extends EThreeBaseCtorOptions {
