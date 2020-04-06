@@ -120,8 +120,12 @@ describe('EThree', () => {
 
     describe('derivePasswords', () => {
         it('derives passwords', async () => {
-            const { loginPassword, backupPassword } = await EThree.derivePasswords('password');
-            expect(loginPassword.equals(backupPassword)).to.be.false;
+            const password = 'password';
+            const loginPasswordBase64 = '82e04faeb478cd77c6561544437ffb06e18ec0e61d8=';
+            const backupPasswordBase64 = 'XWm+9+dNm9HuetvNXG9XneXufeneOt9X/O9OPHvHGnM=';
+            const { loginPassword, backupPassword } = await EThree.derivePasswords(password);
+            expect(loginPassword.toString('base64')).equals(loginPasswordBase64);
+            expect(backupPassword.toString('base64')).equals(backupPasswordBase64);
         });
     });
 
