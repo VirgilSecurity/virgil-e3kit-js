@@ -116,6 +116,7 @@
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="ethree.html#restoreprivatekey" class="tsd-kind-icon">restore<wbr>Private<wbr>Key</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="ethree.html#rotateprivatekey" class="tsd-kind-icon">rotate<wbr>Private<wbr>Key</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="ethree.html#unregister" class="tsd-kind-icon">unregister</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-static"><a href="ethree.html#derivepasswords" class="tsd-kind-icon">derive<wbr>Passwords</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-static"><a href="ethree.html#initialize" class="tsd-kind-icon">initialize</a></li>
 							</ul>
 						</section>
@@ -696,7 +697,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/VirgilSecurity/virgil-e3kit-js/blob/9c5ae07/packages/e3kit-browser/src/EThree.ts#L211">e3kit-browser/src/EThree.ts:211</a></li>
+									<li>Defined in <a href="https://github.com/VirgilSecurity/virgil-e3kit-js/blob/57421be/packages/e3kit-browser/src/EThree.ts#L226">e3kit-browser/src/EThree.ts:226</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -929,7 +930,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/VirgilSecurity/virgil-e3kit-js/blob/9c5ae07/packages/e3kit-browser/src/EThree.ts#L89">e3kit-browser/src/EThree.ts:89</a></li>
+									<li>Defined in <a href="https://github.com/VirgilSecurity/virgil-e3kit-js/blob/57421be/packages/e3kit-browser/src/EThree.ts#L104">e3kit-browser/src/EThree.ts:104</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -961,7 +962,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/VirgilSecurity/virgil-e3kit-js/blob/9c5ae07/packages/e3kit-browser/src/EThree.ts#L97">e3kit-browser/src/EThree.ts:97</a></li>
+									<li>Defined in <a href="https://github.com/VirgilSecurity/virgil-e3kit-js/blob/57421be/packages/e3kit-browser/src/EThree.ts#L112">e3kit-browser/src/EThree.ts:112</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1387,6 +1388,32 @@
 					</ul>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-static">
+					<a name="derivepasswords" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagStatic">Static</span> derive<wbr>Passwords</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-static">
+						<li class="tsd-signature tsd-kind-icon">derive<wbr>Passwords<span class="tsd-signature-symbol">(</span>password<span class="tsd-signature-symbol">: </span><a href="../index.html#data" class="tsd-signature-type">Data</a>, options<span class="tsd-signature-symbol">?: </span><a href="../interfaces/foundationlibraryoptions.html" class="tsd-signature-type">FoundationLibraryOptions</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-symbol">{ </span>backupPassword<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Buffer</span><span class="tsd-signature-symbol">; </span>loginPassword<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Buffer</span><span class="tsd-signature-symbol"> }</span><span class="tsd-signature-symbol">&gt;</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/VirgilSecurity/virgil-e3kit-js/blob/57421be/packages/e3kit-browser/src/EThree.ts#L84">e3kit-browser/src/EThree.ts:84</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>password: <a href="../index.html#data" class="tsd-signature-type">Data</a></h5>
+								</li>
+								<li>
+									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> options: <a href="../interfaces/foundationlibraryoptions.html" class="tsd-signature-type">FoundationLibraryOptions</a><span class="tsd-signature-symbol"> = {}</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-symbol">{ </span>backupPassword<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Buffer</span><span class="tsd-signature-symbol">; </span>loginPassword<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Buffer</span><span class="tsd-signature-symbol"> }</span><span class="tsd-signature-symbol">&gt;</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-static">
 					<a name="initialize" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagStatic">Static</span> initialize</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-static">
@@ -1396,7 +1423,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/VirgilSecurity/virgil-e3kit-js/blob/9c5ae07/packages/e3kit-browser/src/EThree.ts#L50">e3kit-browser/src/EThree.ts:50</a></li>
+									<li>Defined in <a href="https://github.com/VirgilSecurity/virgil-e3kit-js/blob/57421be/packages/e3kit-browser/src/EThree.ts#L58">e3kit-browser/src/EThree.ts:58</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1537,6 +1564,9 @@
 								<a href="ethree.html#unregister" class="tsd-kind-icon">unregister</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-static">
+								<a href="ethree.html#derivepasswords" class="tsd-kind-icon">derive<wbr>Passwords</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-static">
 								<a href="ethree.html#initialize" class="tsd-kind-icon">initialize</a>
 							</li>
 						</ul>
@@ -1557,6 +1587,12 @@
 					</li>
 					<li class=" tsd-kind-interface">
 						<a href="../interfaces/fileoptions.html" class="tsd-kind-icon">File<wbr>Options</a>
+					</li>
+					<li class=" tsd-kind-interface">
+						<a href="../interfaces/foundationlibraryoptions.html" class="tsd-kind-icon">Foundation<wbr>Library<wbr>Options</a>
+					</li>
+					<li class=" tsd-kind-interface">
+						<a href="../interfaces/pythialibraryoptions.html" class="tsd-kind-icon">Pythia<wbr>Library<wbr>Options</a>
 					</li>
 					<li class=" tsd-kind-interface">
 						<a href="../interfaces/ondecryptprogresssnapshot.html" class="tsd-kind-icon">on<wbr>Decrypt<wbr>Progress<wbr>Snapshot</a>
