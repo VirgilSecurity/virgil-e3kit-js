@@ -119,8 +119,8 @@ describe('EThree', () => {
     };
 
     describe('derivePasswords', () => {
-        it('derives passwords', () => {
-            const { loginPassword, backupPassword } = EThree.derivePasswords('password');
+        it('derives passwords', async () => {
+            const { loginPassword, backupPassword } = await EThree.derivePasswords('password');
             expect(loginPassword.equals(backupPassword)).to.be.false;
         });
     });

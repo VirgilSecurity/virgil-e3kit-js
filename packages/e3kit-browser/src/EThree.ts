@@ -32,7 +32,8 @@ import {
     ICard,
     IPublicKey,
     VirgilPrivateKey,
-    CryptoLibraryOptions,
+    FoundationLibraryOptions,
+    PythiaLibraryOptions,
     EThreeInitializeOptions,
     EThreeCtorOptions,
     EncryptFileOptions,
@@ -58,7 +59,8 @@ export class EThree extends AbstractEThree {
         getToken: () => Promise<string>,
         options: EThreeInitializeOptions = {},
     ): Promise<EThree> {
-        const { cryptoOptions, pythiaOptions } = EThree.getCryptoLibraryOptions(options);
+        const cryptoOptions = EThree.getFoundationLibraryOptions(options);
+        const pythiaOptions = EThree.getPythiaLibraryOptions(options);
         await Promise.all([initCrypto(cryptoOptions), initPythia(pythiaOptions)]);
 
         if (typeof getToken !== 'function') {
@@ -79,9 +81,9 @@ export class EThree extends AbstractEThree {
         return new EThree(identity, opts);
     }
 
-    static async derivePasswords(password: Data, options: CryptoLibraryOptions = {}) {
-        const { cryptoOptions, pythiaOptions } = EThree.getCryptoLibraryOptions(options);
-        await Promise.all([initCrypto(cryptoOptions), initPythia(pythiaOptions)]);
+    static async derivePasswords(password: Data, options: FoundationLibraryOptions = {}) {
+        const cryptoOptions = EThree.getFoundationLibraryOptions(options);
+        await initCrypto(cryptoOptions);
         const crypto = new VirgilCrypto();
         const hash1 = crypto.calculateHash(password, HashAlgorithm.SHA256);
         const hash2 = crypto.calculateHash(hash1, HashAlgorithm.SHA512);
@@ -336,17 +338,19 @@ export class EThree extends AbstractEThree {
     /**
      * @hidden
      */
-    private static getCryptoLibraryOptions(options: CryptoLibraryOptions) {
-        const cryptoOptions = options.foundationWasmPath
+    private static getFoundationLibraryOptions(options: FoundationLibraryOptions) {
+        return options.foundationWasmPath
             ? { foundation: [{ locateFile: () => options.foundationWasmPath }] }
             : undefined;
-        const pythiaOptions = options.pythiaWasmPath
+    }
+
+    /**
+     * @hidden
+     */
+    private static getPythiaLibraryOptions(options: PythiaLibraryOptions) {
+        return options.pythiaWasmPath
             ? { pythia: [{ locateFile: () => options.pythiaWasmPath }] }
             : undefined;
-        return {
-            cryptoOptions,
-            pythiaOptions,
-        };
     }
 
     /**
