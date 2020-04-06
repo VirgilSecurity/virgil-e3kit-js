@@ -11,10 +11,16 @@ import { initPythia, VirgilBrainKeyCrypto } from '@virgilsecurity/pythia-crypto'
 import isInvalidPath from 'is-invalid-path';
 import leveldown from 'leveldown';
 import mkdirp from 'mkdirp';
-import { initCrypto, VirgilCardCrypto, VirgilCrypto, VirgilPublicKey } from 'virgil-crypto';
+import {
+    initCrypto,
+    VirgilCardCrypto,
+    VirgilCrypto,
+    VirgilPublicKey,
+    HashAlgorithm,
+} from 'virgil-crypto';
 import { CachingJwtProvider, CardManager, KeyEntryStorage, VirgilCardVerifier } from 'virgil-sdk';
 
-import { IPublicKey, EThreeInitializeOptions, EThreeCtorOptions } from './types';
+import { Data, IPublicKey, EThreeInitializeOptions, EThreeCtorOptions } from './types';
 
 export class EThree extends AbstractEThree {
     /**
@@ -108,6 +114,15 @@ export class EThree extends AbstractEThree {
         });
         const identity = token.identity();
         return new EThree(identity, opts);
+    }
+
+    static derivePasswords(password: Data) {
+        const crypto = new VirgilCrypto();
+        const hash1 = crypto.calculateHash(password, HashAlgorithm.SHA256);
+        const hash2 = crypto.calculateHash(hash1, HashAlgorithm.SHA512);
+        const loginPassword = hash2.slice(0, 32);
+        const backupPassword = hash2.slice(32, 64);
+        return { loginPassword, backupPassword };
     }
 
     /**

@@ -9,7 +9,13 @@ import {
 } from '@virgilsecurity/e3kit-base';
 import { initPythia, VirgilBrainKeyCrypto } from '@virgilsecurity/pythia-crypto';
 import leveljs from 'level-js';
-import { initCrypto, VirgilCardCrypto, VirgilCrypto, VirgilPublicKey } from 'virgil-crypto';
+import {
+    initCrypto,
+    VirgilCardCrypto,
+    VirgilCrypto,
+    VirgilPublicKey,
+    HashAlgorithm,
+} from 'virgil-crypto';
 import { CachingJwtProvider, CardManager, KeyEntryStorage, VirgilCardVerifier } from 'virgil-sdk';
 
 import {
@@ -75,6 +81,15 @@ export class EThree extends AbstractEThree {
         });
         const identity = token.identity();
         return new EThree(identity, opts);
+    }
+
+    static derivePasswords(password: Data) {
+        const crypto = new VirgilCrypto();
+        const hash1 = crypto.calculateHash(password, HashAlgorithm.SHA256);
+        const hash2 = crypto.calculateHash(hash1, HashAlgorithm.SHA512);
+        const loginPassword = hash2.slice(0, 32);
+        const backupPassword = hash2.slice(32, 64);
+        return { loginPassword, backupPassword };
     }
 
     /**

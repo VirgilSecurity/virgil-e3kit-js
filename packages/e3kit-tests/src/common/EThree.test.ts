@@ -118,6 +118,13 @@ describe('EThree', () => {
         return storage;
     };
 
+    describe('derivePasswords', () => {
+        it('derives passwords', () => {
+            const { loginPassword, backupPassword } = EThree.derivePasswords('password');
+            expect(loginPassword.equals(backupPassword)).to.be.false;
+        });
+    });
+
     describe('EThree.register()', () => {
         it('STA-9 has no local key, has no card', async () => {
             const identity = uuid();
