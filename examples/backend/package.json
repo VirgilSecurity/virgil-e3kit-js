@@ -1,6 +1,6 @@
 {
     "name": "@virgilsecurity/example-backend",
-    "version": "2.1.1",
+    "version": "2.2.0",
     "description": "Sample backend for Virgil E3Kit SDK examples",
     "repository": "https://github.com/VirgilSecurity/virgil-e3kit-js/tree/master/packages/example-backend",
     "author": "Virgil Security Inc. <support@virgilsecurity.com>",
