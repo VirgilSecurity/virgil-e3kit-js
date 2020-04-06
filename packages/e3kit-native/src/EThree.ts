@@ -7,11 +7,11 @@ import {
 } from '@virgilsecurity/e3kit-base';
 import { ReactNativeKeychainStorageAdapter } from '@virgilsecurity/key-storage-rn';
 import { VirgilCardCrypto } from '@virgilsecurity/sdk-crypto';
-import { virgilCrypto, virgilBrainKeyCrypto } from 'react-native-virgil-crypto';
+import { virgilCrypto, virgilBrainKeyCrypto, HashAlgorithm } from 'react-native-virgil-crypto';
 import { CachingJwtProvider, CardManager, VirgilCardVerifier, KeyEntryStorage } from 'virgil-sdk';
 import asyncstorageDown from 'asyncstorage-down';
 
-import { IPublicKey, EThreeCtorOptions, EThreeInitializeOptions } from './types';
+import { Data, IPublicKey, EThreeCtorOptions, EThreeInitializeOptions } from './types';
 
 import './asyncstoragedown-clear-polyfill';
 
@@ -101,6 +101,14 @@ export class EThree extends AbstractEThree {
         });
         const identity = token.identity();
         return new EThree(identity, opts);
+    }
+
+    static derivePasswords(password: Data) {
+        const hash1 = virgilCrypto.calculateHash(password, HashAlgorithm.SHA256);
+        const hash2 = virgilCrypto.calculateHash(hash1, HashAlgorithm.SHA512);
+        const loginPassword = hash2.slice(0, 32);
+        const backupPassword = hash2.slice(32, 64);
+        return { loginPassword, backupPassword };
     }
 
     /**

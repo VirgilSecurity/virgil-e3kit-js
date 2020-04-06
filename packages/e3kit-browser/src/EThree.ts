@@ -9,7 +9,13 @@ import {
 } from '@virgilsecurity/e3kit-base';
 import { initPythia, VirgilBrainKeyCrypto } from '@virgilsecurity/pythia-crypto';
 import leveljs from 'level-js';
-import { initCrypto, VirgilCardCrypto, VirgilCrypto, VirgilPublicKey } from 'virgil-crypto';
+import {
+    initCrypto,
+    VirgilCardCrypto,
+    VirgilCrypto,
+    VirgilPublicKey,
+    HashAlgorithm,
+} from 'virgil-crypto';
 import { CachingJwtProvider, CardManager, KeyEntryStorage, VirgilCardVerifier } from 'virgil-sdk';
 
 import {
@@ -26,6 +32,8 @@ import {
     ICard,
     IPublicKey,
     VirgilPrivateKey,
+    FoundationLibraryOptions,
+    PythiaLibraryOptions,
     EThreeInitializeOptions,
     EThreeCtorOptions,
     EncryptFileOptions,
@@ -51,12 +59,8 @@ export class EThree extends AbstractEThree {
         getToken: () => Promise<string>,
         options: EThreeInitializeOptions = {},
     ): Promise<EThree> {
-        const cryptoOptions = options.foundationWasmPath
-            ? { foundation: [{ locateFile: () => options.foundationWasmPath }] }
-            : undefined;
-        const pythiaOptions = options.pythiaWasmPath
-            ? { pythia: [{ locateFile: () => options.pythiaWasmPath }] }
-            : undefined;
+        const cryptoOptions = EThree.getFoundationLibraryOptions(options);
+        const pythiaOptions = EThree.getPythiaLibraryOptions(options);
         await Promise.all([initCrypto(cryptoOptions), initPythia(pythiaOptions)]);
 
         if (typeof getToken !== 'function') {
@@ -75,6 +79,17 @@ export class EThree extends AbstractEThree {
         });
         const identity = token.identity();
         return new EThree(identity, opts);
+    }
+
+    static async derivePasswords(password: Data, options: FoundationLibraryOptions = {}) {
+        const cryptoOptions = EThree.getFoundationLibraryOptions(options);
+        await initCrypto(cryptoOptions);
+        const crypto = new VirgilCrypto();
+        const hash1 = crypto.calculateHash(password, HashAlgorithm.SHA256);
+        const hash2 = crypto.calculateHash(hash1, HashAlgorithm.SHA512);
+        const loginPassword = hash2.slice(0, 32);
+        const backupPassword = hash2.slice(32, 64);
+        return { loginPassword, backupPassword };
     }
 
     /**
@@ -318,6 +333,24 @@ export class EThree extends AbstractEThree {
         }
 
         return decryptedFile;
+    }
+
+    /**
+     * @hidden
+     */
+    private static getFoundationLibraryOptions(options: FoundationLibraryOptions) {
+        return options.foundationWasmPath
+            ? { foundation: [{ locateFile: () => options.foundationWasmPath }] }
+            : undefined;
+    }
+
+    /**
+     * @hidden
+     */
+    private static getPythiaLibraryOptions(options: PythiaLibraryOptions) {
+        return options.pythiaWasmPath
+            ? { pythia: [{ locateFile: () => options.pythiaWasmPath }] }
+            : undefined;
     }
 
     /**

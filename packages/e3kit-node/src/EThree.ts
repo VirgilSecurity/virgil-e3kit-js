@@ -11,10 +11,23 @@ import { initPythia, VirgilBrainKeyCrypto } from '@virgilsecurity/pythia-crypto'
 import isInvalidPath from 'is-invalid-path';
 import leveldown from 'leveldown';
 import mkdirp from 'mkdirp';
-import { initCrypto, VirgilCardCrypto, VirgilCrypto, VirgilPublicKey } from 'virgil-crypto';
+import {
+    initCrypto,
+    VirgilCardCrypto,
+    VirgilCrypto,
+    VirgilPublicKey,
+    HashAlgorithm,
+} from 'virgil-crypto';
 import { CachingJwtProvider, CardManager, KeyEntryStorage, VirgilCardVerifier } from 'virgil-sdk';
 
-import { IPublicKey, EThreeInitializeOptions, EThreeCtorOptions } from './types';
+import {
+    Data,
+    IPublicKey,
+    FoundationLibraryOptions,
+    PythiaLibraryOptions,
+    EThreeInitializeOptions,
+    EThreeCtorOptions,
+} from './types';
 
 export class EThree extends AbstractEThree {
     /**
@@ -84,12 +97,8 @@ export class EThree extends AbstractEThree {
         getToken: () => Promise<string>,
         options: EThreeInitializeOptions = {},
     ): Promise<EThree> {
-        const cryptoOptions = options.foundationWasmPath
-            ? { foundation: [{ locateFile: () => options.foundationWasmPath }] }
-            : undefined;
-        const pythiaOptions = options.pythiaWasmPath
-            ? { pythia: [{ locateFile: () => options.pythiaWasmPath }] }
-            : undefined;
+        const cryptoOptions = EThree.getFoundationLibraryOptions(options);
+        const pythiaOptions = EThree.getPythiaLibraryOptions(options);
         await Promise.all([initCrypto(cryptoOptions), initPythia(pythiaOptions)]);
 
         if (typeof getToken !== 'function') {
@@ -110,10 +119,39 @@ export class EThree extends AbstractEThree {
         return new EThree(identity, opts);
     }
 
+    static async derivePasswords(password: Data, options: FoundationLibraryOptions = {}) {
+        const cryptoOptions = EThree.getFoundationLibraryOptions(options);
+        await initCrypto(cryptoOptions);
+        const crypto = new VirgilCrypto();
+        const hash1 = crypto.calculateHash(password, HashAlgorithm.SHA256);
+        const hash2 = crypto.calculateHash(hash1, HashAlgorithm.SHA512);
+        const loginPassword = hash2.slice(0, 32);
+        const backupPassword = hash2.slice(32, 64);
+        return { loginPassword, backupPassword };
+    }
+
     /**
      * @hidden
      */
     isPublicKey(publicKey: IPublicKey) {
         return publicKey instanceof VirgilPublicKey;
+    }
+
+    /**
+     * @hidden
+     */
+    private static getFoundationLibraryOptions(options: FoundationLibraryOptions) {
+        return options.foundationWasmPath
+            ? { foundation: [{ locateFile: () => options.foundationWasmPath }] }
+            : undefined;
+    }
+
+    /**
+     * @hidden
+     */
+    private static getPythiaLibraryOptions(options: PythiaLibraryOptions) {
+        return options.pythiaWasmPath
+            ? { pythia: [{ locateFile: () => options.pythiaWasmPath }] }
+            : undefined;
     }
 }

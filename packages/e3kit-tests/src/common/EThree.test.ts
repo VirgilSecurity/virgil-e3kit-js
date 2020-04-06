@@ -118,6 +118,17 @@ describe('EThree', () => {
         return storage;
     };
 
+    describe('derivePasswords', () => {
+        it('derives passwords', async () => {
+            const password = 'password';
+            const loginPasswordBase64 = '8AfkqegTXFuyufUkwZ7u9s6x8xc9CjtZANqIjmueS40=';
+            const backupPasswordBase64 = 'R/NHBt3Bv4ZIRPNEFirMH5GnRS1F/Rz64mYq1f+g+aU=';
+            const { loginPassword, backupPassword } = await EThree.derivePasswords(password);
+            expect(loginPassword.toString('base64')).equals(loginPasswordBase64);
+            expect(backupPassword.toString('base64')).equals(backupPasswordBase64);
+        });
+    });
+
     describe('EThree.register()', () => {
         it('STA-9 has no local key, has no card', async () => {
             const identity = uuid();
