@@ -114,7 +114,7 @@ export class EThree extends AbstractEThree {
     /**
      * @hidden
      */
-    protected isPublicKey(publicKey: IPublicKey) {
+    protected isPublicKey(publicKey: any) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         return publicKey != null && typeof (publicKey as any).value === 'string';
     }

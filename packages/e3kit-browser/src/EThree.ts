@@ -410,7 +410,7 @@ export class EThree extends AbstractEThree {
     /**
      * @hidden
      */
-    protected isPublicKey(publicKey: IPublicKey) {
+    protected isPublicKey(publicKey: any) {
         return publicKey instanceof VirgilPublicKey;
     }
 

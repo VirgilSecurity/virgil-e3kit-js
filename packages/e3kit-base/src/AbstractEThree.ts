@@ -727,7 +727,7 @@ export abstract class AbstractEThree {
                 'Warning! Calling `encrypt` with the result of `lookupPublicKeys` method has been deprecated. ' +
                     'Please use the result of `findUsers` call instead',
             );
-            publicKeys = [recipients];
+            publicKeys = [recipients as IPublicKey];
         } else if (isLookupResult(recipients, this.isPublicKey.bind(this))) {
             warn(
                 'Warning! Calling `encrypt` with the result of `lookupPublicKeys` method has been deprecated. ' +
@@ -770,5 +770,5 @@ export abstract class AbstractEThree {
     /**
      * @hidden
      */
-    protected abstract isPublicKey(publicKey: IPublicKey): boolean;
+    protected abstract isPublicKey(publicKey: any): boolean;
 }
