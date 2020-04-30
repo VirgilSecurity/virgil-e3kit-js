@@ -9,10 +9,11 @@ import { AbstractLevelDOWN } from 'abstract-leveldown';
 import { PrivateKeyLoader } from '../PrivateKeyLoader';
 import { AbstractEThree } from '../AbstractEThree';
 import { UsersNotFoundError, UsersFoundWithMultipleCardsError } from '../errors';
+import { ICrypto } from '../types';
 
 use(chaiAsPromised);
 
-let virgilCryptoStub: sinon.SinonStubbedInstance<VirgilCrypto>;
+let cryptoStub: sinon.SinonStubbedInstance<ICrypto>;
 let cardManagerStub: sinon.SinonStubbedInstance<CardManager>;
 let keyLoaderStub: sinon.SinonStubbedInstance<PrivateKeyLoader>;
 let accessTokenProviderStub: sinon.SinonStubbedInstance<CachingJwtProvider>;
@@ -23,7 +24,7 @@ class MyEThree extends AbstractEThree {
     constructor(identity: string) {
         super({
             identity,
-            virgilCrypto: virgilCryptoStub,
+            virgilCrypto: cryptoStub,
             cardManager: cardManagerStub as any,
             keyLoader: keyLoaderStub as any,
             groupStorageLeveldown: groupStorageLeveldownStub as any,
@@ -37,7 +38,7 @@ class MyEThree extends AbstractEThree {
 }
 
 beforeEach(() => {
-    virgilCryptoStub = sinon.createStubInstance(VirgilCrypto);
+    cryptoStub = sinon.createStubInstance(VirgilCrypto);
     cardManagerStub = sinon.createStubInstance(CardManager);
     keyLoaderStub = sinon.createStubInstance(PrivateKeyLoader);
     accessTokenProviderStub = sinon.createStubInstance(CachingJwtProvider);
