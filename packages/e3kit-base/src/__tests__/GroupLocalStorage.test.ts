@@ -41,9 +41,9 @@ const createTickets = (sessionId: string, count: number): Ticket[] => {
     return result;
 };
 
-const createKeyPairStub = () => ({ privateKey: {}, publicKey: {} });
+const createKeyPairStub = () => ({ privateKey: {}, publicKey: {} } as IKeyPair);
 const createVirgilCryptoStub = () => {
-    const virgilCryptoStub = sinon.createStubInstance(VirgilCrypto);
+    const virgilCryptoStub = sinon.createStubInstance<ICrypto>(VirgilCrypto);
     virgilCryptoStub.signThenEncrypt.callsFake((value: any, privateKey: any, publicKey: any) => {
         const valueStr = Buffer.isBuffer(value) ? value.toString('utf8') : value;
         return Buffer.from(`encrypted_${valueStr}`);

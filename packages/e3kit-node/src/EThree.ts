@@ -133,7 +133,7 @@ export class EThree extends AbstractEThree {
     /**
      * @hidden
      */
-    isPublicKey(publicKey: IPublicKey) {
+    isPublicKey(publicKey: any) {
         return publicKey instanceof VirgilPublicKey;
     }
 

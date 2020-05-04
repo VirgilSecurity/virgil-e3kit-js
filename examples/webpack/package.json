@@ -1,6 +1,6 @@
 {
     "name": "@virgilsecurity/example-webpack",
-    "version": "2.2.0",
+    "version": "2.2.1",
     "description": "Virgil E3Kit SDK + Webpack usage example",
     "repository": "https://github.com/VirgilSecurity/virgil-e3kit-js/tree/master/packages/example-webpack",
     "author": "Virgil Security Inc. <support@virgilsecurity.com>",
