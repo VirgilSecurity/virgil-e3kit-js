@@ -63,7 +63,7 @@ describe('EThreeBrowser', () => {
         const identity2 = uuid();
         const identity3 = uuid();
 
-        let sdk1: EThree, sdk2: EThree, sdk3: EThree, cards: LookupResult;
+        let sdk1: EThree, sdk2: EThree, sdk3: EThree, lookupResult: LookupResult;
 
         const originString = 'foo'.repeat(1024 * 3);
 
@@ -78,7 +78,7 @@ describe('EThreeBrowser', () => {
                 initializeETheeFromIdentity(identity3),
             ]);
             await Promise.all([sdk1.register(), sdk2.register(), sdk3.register()]);
-            cards = await sdk1.lookupPublicKeys([identity1, identity2, identity3]);
+            lookupResult = await sdk1.lookupPublicKeys([identity1, identity2, identity3]);
         });
 
         it('should decrypt file for one public key', async () => {
@@ -126,7 +126,7 @@ describe('EThreeBrowser', () => {
                 type: 'text/plain',
             });
             expect(originFile.size).to.equal(3);
-            const encryptedFile = await sdk1.encryptFile(originFile, cards[identity2], {
+            const encryptedFile = await sdk1.encryptFile(originFile, lookupResult[identity2], {
                 chunkSize: 2,
                 onProgress: encryptedSnapshots.push.bind(encryptedSnapshots),
             });
@@ -152,7 +152,7 @@ describe('EThreeBrowser', () => {
                 state: VIRGIL_STREAM_ENCRYPTING_STATE,
             });
             const decryptedSnapshots: onDecryptProgressSnapshot[] = [];
-            await sdk2.decryptFile(encryptedFile, cards[identity1], {
+            await sdk2.decryptFile(encryptedFile, lookupResult[identity1], {
                 chunkSize: Math.ceil(encryptedFile.size / 2),
                 onProgress: decryptedSnapshots.push.bind(decryptedSnapshots),
             });
@@ -177,8 +177,8 @@ describe('EThreeBrowser', () => {
         it('should abort encryptFile', async () => {
             const encryptAbort = new AbortController();
             const decryptAbort = new AbortController();
-            const encryptPromise = sdk1.encryptFile(originFile, cards[identity2]);
-            const encryptAbortedPromise = sdk1.encryptFile(originFile, cards[identity2], {
+            const encryptPromise = sdk1.encryptFile(originFile, lookupResult[identity2]);
+            const encryptAbortedPromise = sdk1.encryptFile(originFile, lookupResult[identity2], {
                 chunkSize: 1,
                 signal: encryptAbort.signal,
             });
@@ -189,7 +189,7 @@ describe('EThreeBrowser', () => {
                 expect(err).to.be.instanceOf(Error);
             }
             try {
-                await sdk1.decryptFile(await encryptPromise, cards[identity1], {
+                await sdk1.decryptFile(await encryptPromise, lookupResult[identity1], {
                     chunkSize: Math.floor(originFile.size / 3),
                     signal: decryptAbort.signal,
                     onProgress: decryptAbort.abort,
@@ -219,7 +219,7 @@ describe('EThreeBrowser', () => {
         const identity2 = uuid();
         const identity3 = uuid();
 
-        let sdk1: EThree, sdk2: EThree, sdk3: EThree, lookupResult: FindUsersResult;
+        let sdk1: EThree, sdk2: EThree, sdk3: EThree, cards: FindUsersResult;
 
         const originString = 'All work and no pay makes Alexey a dull boy\n'.repeat(128);
 
@@ -234,7 +234,7 @@ describe('EThreeBrowser', () => {
                 initializeETheeFromIdentity(identity3),
             ]);
             await Promise.all([sdk1.register(), sdk2.register(), sdk3.register()]);
-            lookupResult = await sdk1.findUsers([identity1, identity2, identity3]);
+            cards = await sdk1.findUsers([identity1, identity2, identity3]);
         });
 
         it('should decrypt file for one public key', async () => {
@@ -282,7 +282,7 @@ describe('EThreeBrowser', () => {
                 type: 'text/plain',
             });
             expect(originFile.size).to.equal(3);
-            const encryptedFile = await sdk1.authEncryptFile(originFile, lookupResult[identity2], {
+            const encryptedFile = await sdk1.authEncryptFile(originFile, cards[identity2], {
                 chunkSize: 2,
                 onProgress: encryptedSnapshots.push.bind(encryptedSnapshots),
             });
@@ -297,7 +297,7 @@ describe('EThreeBrowser', () => {
             });
 
             const decryptedSnapshots: onProgressSnapshot[] = [];
-            await sdk2.authDecryptFile(encryptedFile, lookupResult[identity1], {
+            await sdk2.authDecryptFile(encryptedFile, cards[identity1], {
                 chunkSize: Math.ceil(encryptedFile.size / 2),
                 onProgress: decryptedSnapshots.push.bind(decryptedSnapshots),
             });
@@ -315,15 +315,11 @@ describe('EThreeBrowser', () => {
         it('should abort authEncryptFile', async () => {
             const encryptAbort = new AbortController();
             const decryptAbort = new AbortController();
-            const encryptPromise = sdk1.authEncryptFile(originFile, lookupResult[identity2]);
-            const encryptAbortedPromise = sdk1.authEncryptFile(
-                originFile,
-                lookupResult[identity2],
-                {
-                    chunkSize: 1,
-                    signal: encryptAbort.signal,
-                },
-            );
+            const encryptPromise = sdk1.authEncryptFile(originFile, cards[identity2]);
+            const encryptAbortedPromise = sdk1.authEncryptFile(originFile, cards[identity2], {
+                chunkSize: 1,
+                signal: encryptAbort.signal,
+            });
             encryptAbort.abort();
             try {
                 await encryptAbortedPromise;
@@ -331,7 +327,7 @@ describe('EThreeBrowser', () => {
                 expect(err).to.be.instanceOf(Error);
             }
             try {
-                await sdk1.authDecryptFile(await encryptPromise, lookupResult[identity1], {
+                await sdk1.authDecryptFile(await encryptPromise, cards[identity1], {
                     chunkSize: Math.floor(originFile.size / 3),
                     signal: decryptAbort.signal,
                     onProgress: decryptAbort.abort,
