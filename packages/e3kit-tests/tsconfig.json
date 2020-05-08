@@ -5,6 +5,7 @@
         "declarationDir": "./dist/types",
         "strict": true,
         "esModuleInterop": true,
-        "moduleResolution": "node"
+        "moduleResolution": "node",
+        "resolveJsonModule": true
     }
 }

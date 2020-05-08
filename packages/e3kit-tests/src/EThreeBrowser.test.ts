@@ -22,11 +22,14 @@ import {
     VirgilCryptoError,
     VirgilCryptoErrorStatus,
 } from 'virgil-crypto';
-import { JwtGenerator } from 'virgil-sdk';
+import { JwtGenerator, KeyEntryStorage } from 'virgil-sdk';
+import compatibilityData from './compatibility_data.json';
+import { b64toBlob } from './utils';
 
 describe('EThreeBrowser', () => {
     let virgilCrypto: VirgilCrypto;
     let jwtGenerator: JwtGenerator;
+    let keyEntryStorage: KeyEntryStorage;
 
     before(async () => {
         await Promise.all([initCrypto(), initPythia()]);
@@ -37,6 +40,7 @@ describe('EThreeBrowser', () => {
             apiKey: virgilCrypto.importPrivateKey(process.env.APP_KEY!),
             accessTokenSigner: new VirgilAccessTokenSigner(virgilCrypto),
         });
+        keyEntryStorage = new KeyEntryStorage('.virgil-local-storage');
     });
 
     const createFetchToken = (identity: string) => () =>
@@ -217,7 +221,7 @@ describe('EThreeBrowser', () => {
 
         let sdk1: EThree, sdk2: EThree, sdk3: EThree, lookupResult: FindUsersResult;
 
-        const originString = 'All work and no pay makes Alexey a dull boy'.repeat(1024 * 3);
+        const originString = 'All work and no pay makes Alexey a dull boy\n'.repeat(128);
 
         const originFile = new File([originString], 'foo.txt', {
             type: 'text/plain',
@@ -350,6 +354,19 @@ describe('EThreeBrowser', () => {
                 return;
             }
             expect.fail();
+        });
+
+        it('compatibility test', async () => {
+            const identity = uuid();
+            const e3kit = await initializeETheeFromIdentity(identity);
+            await keyEntryStorage.save({
+                name: identity,
+                value: compatibilityData.authEncryptFile.privateKey,
+            });
+            const encryptedFile = b64toBlob(compatibilityData.authEncryptFile.data, 'foo.txt');
+            const decryptedFile = await e3kit.authDecryptFile(encryptedFile);
+            const decryptedString = await readFile(decryptedFile);
+            expect(originString).to.equal(decryptedString);
         });
     });
 });
