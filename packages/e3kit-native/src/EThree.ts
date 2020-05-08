@@ -11,7 +11,7 @@ import { virgilCrypto, virgilBrainKeyCrypto, HashAlgorithm } from 'react-native-
 import { CachingJwtProvider, CardManager, VirgilCardVerifier, KeyEntryStorage } from 'virgil-sdk';
 import asyncstorageDown from 'asyncstorage-down';
 
-import { Data, IPublicKey, EThreeCtorOptions, EThreeInitializeOptions } from './types';
+import { Data, EThreeCtorOptions, EThreeInitializeOptions } from './types';
 
 import './asyncstoragedown-clear-polyfill';
 

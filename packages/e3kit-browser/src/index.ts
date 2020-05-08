@@ -41,8 +41,10 @@ export { EThree } from './EThree';
 export {
     onEncryptProgressCallback,
     onDecryptProgressCallback,
+    onProgressCallback,
     onEncryptProgressSnapshot,
     onDecryptProgressSnapshot,
+    onProgressSnapshot,
     EThreeInitializeOptions,
     EThreeCtorOptions,
     EncryptFileOptions,

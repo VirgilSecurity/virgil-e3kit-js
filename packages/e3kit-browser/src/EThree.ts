@@ -40,6 +40,8 @@ import {
     DecryptFileOptions,
     LookupResult,
     FindUsersResult,
+    AuthDecryptFileOptions,
+    AuthEncryptFileOptions,
 } from './types';
 
 export class EThree extends AbstractEThree {
@@ -193,8 +195,7 @@ export class EThree extends AbstractEThree {
                 resolve(encryptedChunks);
             };
 
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const onErrorCallback = (err: any) => {
+            const onErrorCallback = (err: Error) => {
                 reject(err);
                 streamCipher.dispose();
             };
@@ -215,6 +216,7 @@ export class EThree extends AbstractEThree {
     }
 
     /**
+     * @deprecated and will be removed in next major release.
      * Decrypts and verifies integrity of File or Blob for recipient public key. If there is no recipient
      * and the message is encrypted for the current user, omit the public key parameter. You can define
      * chunk size and a callback, that will be invoked on each chunk.
@@ -333,6 +335,166 @@ export class EThree extends AbstractEThree {
         }
 
         return decryptedFile;
+    }
+
+    /**
+     * Signs and encrypts File or Blob.
+     * If there is no recipient and the message is encrypted for the current user, omit the
+     * public key parameter. You can define chunk size and a callback, that will be invoked on each chunk.
+     */
+    authEncryptFile(
+        file: File | Blob,
+        recipients?: ICard | FindUsersResult,
+        options?: EncryptFileOptions,
+    ): Promise<File | Blob>;
+    authEncryptFile(
+        file: File | Blob,
+        recipients?: IPublicKey | LookupResult,
+        options?: EncryptFileOptions,
+    ): Promise<File | Blob>;
+    async authEncryptFile(
+        file: File | Blob,
+        recipients?: ICard | FindUsersResult | IPublicKey | LookupResult,
+        options: AuthEncryptFileOptions = {},
+    ): Promise<File | Blob> {
+        const chunkSize = options.chunkSize ? options.chunkSize : 64 * 1024;
+        if (!Number.isInteger(chunkSize)) throw TypeError('chunkSize should be an integer value');
+        const fileSize = file.size;
+
+        const privateKey = await this.keyLoader.loadLocalPrivateKey();
+        if (!privateKey) throw new RegisterRequiredError();
+
+        const publicKeys = this.getPublicKeysForEncryption(privateKey, recipients);
+        if (!publicKeys) {
+            throw new TypeError(
+                'Could not get public keys from the second argument.\n' +
+                    'Make sure you pass the resolved value of "EThree.findUsers" or "EThree.lookupPublicKeys" methods ' +
+                    'when encrypting for other users, or nothing when encrypting for the current user only.',
+            );
+        }
+
+        const streamCipher = (this.virgilCrypto as VirgilCrypto).createStreamSignAndEncrypt(
+            privateKey as VirgilPrivateKey,
+            publicKeys as VirgilPublicKey[],
+            true,
+        );
+
+        const encryptedChunksPromise = new Promise<NodeBuffer[]>((resolve, reject) => {
+            const encryptedChunks: NodeBuffer[] = [];
+            encryptedChunks.push(streamCipher.start(fileSize));
+
+            const onChunkCallback: onChunkCallback = (chunk, offset) => {
+                encryptedChunks.push(streamCipher.update(this.toData(chunk)));
+                if (options.onProgress) {
+                    options.onProgress({
+                        bytesProcessed: offset,
+                        fileSize: fileSize,
+                    });
+                }
+            };
+
+            const onFinishCallback = () => {
+                encryptedChunks.push(streamCipher.final());
+                resolve(encryptedChunks);
+            };
+
+            const onErrorCallback = (err: Error) => {
+                reject(err);
+                streamCipher.dispose();
+            };
+
+            processFile({
+                file,
+                chunkSize,
+                onChunkCallback,
+                onFinishCallback,
+                onErrorCallback,
+                signal: options.signal,
+            });
+        });
+
+        const encryptedChunks = await encryptedChunksPromise;
+        if (isFile(file)) return new File(encryptedChunks, file.name, { type: file.type });
+        return new Blob(encryptedChunks, { type: file.type });
+    }
+
+    /**
+     * Decrypts and verifies integrity of File or Blob for recipient public key. If there is no recipient
+     * and the message is encrypted for the current user, omit the public key parameter. You can define
+     * chunk size and a callback, that will be invoked on each chunk.
+     *
+     * The file will be read twice during this method execution:
+     * 1. To decrypt encrypted file.
+     * 2. To verify the validity of the signature over the decrypted file for the public key.
+     */
+    async authDecryptFile(
+        file: File | Blob,
+        senderCardOrPublicKey?: ICard | IPublicKey,
+        options: AuthDecryptFileOptions = {},
+    ): Promise<File | Blob> {
+        const fileSize = file.size;
+        const chunkSize = options.chunkSize ? options.chunkSize : 64 * 1024;
+        if (!Number.isInteger(chunkSize)) throw TypeError('chunkSize should be an integer value');
+
+        const privateKey = (await this.keyLoader.loadLocalPrivateKey()) as VirgilPrivateKey;
+        if (!privateKey) throw new RegisterRequiredError();
+
+        const publicKey = this.getPublicKeyForVerification(
+            privateKey,
+            senderCardOrPublicKey,
+            options.encryptedOn,
+        );
+        if (!publicKey) {
+            throw new TypeError(
+                'Could not get public key from the second argument.' +
+                    'Expected a Virgil Card or a Public Key object. Got ' +
+                    typeof senderCardOrPublicKey,
+            );
+        }
+
+        const streamDecipher = (this.virgilCrypto as VirgilCrypto).createStreamDecryptAndVerify();
+
+        const decryptedChunksPromise = new Promise<NodeBuffer[]>((resolve, reject) => {
+            const decryptedChunks: NodeBuffer[] = [];
+
+            streamDecipher.start(privateKey);
+
+            const onChunkCallback: onChunkCallback = (chunk, offset) => {
+                decryptedChunks.push(streamDecipher.update(this.toData(chunk)));
+                if (options.onProgress) {
+                    options.onProgress({
+                        bytesProcessed: offset,
+                        fileSize: fileSize,
+                    });
+                }
+            };
+
+            const onFinishCallback = () => {
+                decryptedChunks.push(streamDecipher.final());
+                streamDecipher.verify(publicKey as VirgilPublicKey);
+                streamDecipher.dispose();
+                resolve(decryptedChunks);
+            };
+
+            const onErrorCallback = (err: Error) => {
+                streamDecipher.dispose();
+                reject(err);
+            };
+
+            processFile({
+                file,
+                chunkSize,
+                onChunkCallback,
+                onFinishCallback,
+                onErrorCallback,
+                signal: options.signal,
+            });
+        });
+
+        const decryptedFile = await decryptedChunksPromise;
+
+        if (isFile(file)) return new File(decryptedFile, file.name, { type: file.type });
+        return new Blob(decryptedFile, { type: file.type });
     }
 
     /**
