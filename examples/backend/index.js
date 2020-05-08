@@ -22,8 +22,8 @@ const app = express();
         apiKey,
         accessTokenSigner,
         appId: process.env.APP_ID,
-        apiKeyId: process.env.API_KEY_ID,
-        apiUrl: process.env.API_URL,
+        apiKeyId: process.env.APP_KEY_ID,
+        apiUrl: process.env.APP_URL,
     });
 
     app.get('/virgil-jwt', (request, response) => {

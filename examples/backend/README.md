@@ -7,6 +7,7 @@
   ```
   > You need to use Yarn because we use [Yarn Workspaces](https://yarnpkg.com/lang/en/docs/workspaces/) in this repository :)
 2. Create `.env` file. Use `.env.example` as a reference
+  > You can download ready-to-use config inside your appliaction > E3kit section > .env config on [Virgil Dashboard](https://dashboard.virgilsecurity.com)
 3. Run the following command to start the server
   ```sh
   yarn start

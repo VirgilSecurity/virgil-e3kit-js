@@ -7,9 +7,7 @@ Sample project demonstrating the usage of `@virgilsecurity/e3kit-browser`.
   ```sh
   yarn install
   ```
-  > You need to use Yarn because we use [Workspaces](https://yarnpkg.com/lang/en/docs/workspaces/) in this repository :)
-3. Create `.env` file. Use `.env.example` as a reference
-4. Run the following command to start the demo
+3. Run the following command to start the demo
   ```sh
   yarn start
   ```
