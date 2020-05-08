@@ -7,7 +7,7 @@
     <title>Document</title>
     <script src="https://unpkg.com/virgil-crypto@^4.0.0/dist/browser.umd.js"></script>
     <script src="https://unpkg.com/virgil-sdk@^6.0.0/dist/virgil-sdk.browser.umd.js"></script>
-    <script src="https://unpkg.com/@virgilsecurity/e3kit-browser@^2.0.0/dist/browser.umd.js"></script>
+    <script src="https://unpkg.com/@virgilsecurity/e3kit-browser@^2.3.0/dist/browser.umd.js""></script>
     <script src="https://mrdoob.github.io/stats.js/build/stats.min.js"></script>
 </head>
 <body>
@@ -80,7 +80,7 @@
                 initializeE3kit().then(e3kit => {
                     fps.begin();
                     const start = Date.now();
-                    e3kit.encryptFile(file, undefined, {
+                    e3kit.authEncryptFile(file, undefined, {
                         signal: abort.signal,
                         chunkSize,
                         onProgress: (snapshot) => {
@@ -116,7 +116,7 @@
                     fps.begin();
                     const start = Date.now();
 
-                    e3kit.decryptFile(file, undefined, {
+                    e3kit.authDecryptFile(file, undefined, {
                         signal: abort.signal,
                         chunkSize,
                         onProgress: (snapshot) => {
@@ -142,29 +142,29 @@
                 const APP_KEY = document.getElementById('api-key').value;
                 const APP_KEY_ID = document.getElementById('api-key-id').value;
 
-                const virgilCrypto = new VirgilCrypto.VirgilCrypto();
-                const accessTokenSigner = new VirgilCrypto.VirgilAccessTokenSigner(virgilCrypto);
-
-                const jwtGenerator = new Virgil.JwtGenerator({
-                    appId: APP_ID,
-                    apiKey: virgilCrypto.importPrivateKey(APP_KEY),
-                    apiKeyId: APP_KEY_ID,
-                    accessTokenSigner: accessTokenSigner,
-                });
-
-
                 let e3kit;
 
+                return VirgilCrypto.initCrypto().then(() => {
 
-                return E3kit.EThree.initialize(() => {
-                    return Promise.resolve(jwtGenerator.generateToken('test'));
+                    const virgilCrypto = new VirgilCrypto.VirgilCrypto();
+                    const accessTokenSigner = new VirgilCrypto.VirgilAccessTokenSigner(virgilCrypto);
+
+                    const jwtGenerator = new Virgil.JwtGenerator({
+                        appId: APP_ID,
+                        apiKey: virgilCrypto.importPrivateKey(APP_KEY),
+                        apiKeyId: APP_KEY_ID,
+                        accessTokenSigner: accessTokenSigner,
+                    });
+
+                    return E3kit.EThree.initialize(() => Promise.resolve(jwtGenerator.generateToken('test')));
                 }).then(sdk => {
                     e3kit = sdk;
                     return e3kit.hasLocalPrivateKey();
                 }).then(hasLocalPrivateKey => {
-                    if (!hasLocalPrivateKey) return e3kit.register();
-                    return e3kit;
-                });
+                    if (!hasLocalPrivateKey) {
+                        return e3kit.register();
+                    }
+                }).then(() => e3kit)
             }
 
 
@@ -186,6 +186,5 @@
             }
 
         </script>
-
 </body>
 </html>
