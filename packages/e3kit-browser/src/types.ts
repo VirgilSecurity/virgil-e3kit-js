@@ -47,8 +47,13 @@ export type onEncryptProgressCallback = (snapshot: onEncryptProgressSnapshot) =>
  */
 export type onDecryptProgressCallback = (snapshot: onDecryptProgressSnapshot) => void;
 
+/**
+ * Callback invoked for each chunk being processed in decryptFile method.
+ */
+export type onProgressCallback = (snapshot: onProgressSnapshot) => void;
+
 // eslint-disable-next-line @typescript-eslint/class-name-casing
-interface onProgressSnapshot {
+export interface onProgressSnapshot {
     /**
      * Total size of the file being processed.
      */
@@ -109,5 +114,26 @@ export interface DecryptFileOptions extends FileOptions {
      * `onDecryptProgressCallback` parameter.
      */
     onProgress?: onDecryptProgressCallback;
+    encryptedOn?: Date;
+}
+
+/**
+ * Options for authEncryptedFile method.
+ */
+export interface AuthEncryptFileOptions extends FileOptions {
+    /**
+     * `onEncryptProgressCallback` parameter.
+     */
+    onProgress?: onProgressCallback;
+}
+
+/**
+ * Options for decryptedFile method.
+ */
+export interface AuthDecryptFileOptions extends FileOptions {
+    /**
+     * `onDecryptProgressCallback` parameter.
+     */
+    onProgress?: onProgressCallback;
     encryptedOn?: Date;
 }

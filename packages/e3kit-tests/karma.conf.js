@@ -25,6 +25,7 @@ module.exports = config => {
                 timeout: 15000,
             },
         },
+        reporters: ['spec'],
         webpack: {
             mode: 'production',
             resolve: {
