@@ -80,13 +80,13 @@ Virgil E3Kit SDK is also available on other platforms:
 ## Encrypt & decrypt large files
 
 See the following methods if you need to encrypt & decrypt large files with the best speed/browser performance ratio:
-- [encryptFile](https://virgilsecurity.github.io/virgil-e3kit-js/e3kit-browser/classes/ethree.html#encryptfile)
-- [decryptFile](https://virgilsecurity.github.io/virgil-e3kit-js/e3kit-browser/classes/ethree.html#decryptfile)
+- [authEncryptFile](https://virgilsecurity.github.io/virgil-e3kit-js/e3kit-browser/classes/ethree.html#authencryptfile)
+- [authDecryptFile](https://virgilsecurity.github.io/virgil-e3kit-js/e3kit-browser/classes/ethree.html#authdecryptfile)
 
 Both methods take an instance of `File` class as input instead of binary `ArrayBuffer`.
 The files are encrypted in small chunks, so it doesn't block the main thread and it returns an encrypted instance of `File`. The chunk size by default is 64kb which produces the best speed/browser performance ratio, but it can be changed. Larger chunk size speeds up encryption but can cause browser lags.
 
-The code sample can be found [here](https://github.com/VirgilSecurity/virgil-e3kit-js/blob/master/examples/encryptFile.html).
+The code sample can be found [here](https://github.com/VirgilSecurity/virgil-e3kit-js/blob/master/examples/authEncryptFile.html).
 
 > This approach for file encryption is currently only supported in browser environments and mobile apps built with the Ionic framework.
 
