@@ -115,6 +115,11 @@
                 "glob": "**/*",
                 "input": "src/assets",
                 "output": "/assets"
+              },
+              {
+                "glob": "{libfoundation,libpythia}.browser.wasm",
+                "input": "../../node_modules/@virgilsecurity/e3kit-browser/dist",
+                "output": "."
               }
             ]
           },
