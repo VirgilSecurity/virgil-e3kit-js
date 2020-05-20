@@ -6,7 +6,7 @@
     "module": "./dist/e3kit-base.es.js",
     "typings": "./dist/types/index.d.ts",
     "files": [
-        "dist"
+        "dist", "declarations.d.ts"
     ],
     "repository": "https://github.com/VirgilSecurity/virgil-e3kit-js/tree/master/packages/e3kit-base",
     "author": "Virgil Security Inc. <support@virgilsecurity.com>",
