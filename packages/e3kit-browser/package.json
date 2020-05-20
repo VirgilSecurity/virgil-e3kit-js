@@ -1,6 +1,6 @@
 {
     "name": "@virgilsecurity/e3kit-browser",
-    "version": "2.3.0",
+    "version": "2.3.1",
     "description": "End-to-end encryption with multiple device support powered by Virgil Security",
     "main": "./browser.cjs.js",
     "module": "./browser.es.js",
@@ -22,7 +22,7 @@
     },
     "dependencies": {
         "@types/level-js": "^4.0.1",
-        "@virgilsecurity/e3kit-base": "^2.3.0",
+        "@virgilsecurity/e3kit-base": "^2.3.1",
         "@virgilsecurity/pythia-crypto": "^1.1.2",
         "level-js": "^5.0.1",
         "virgil-crypto": "^4.1.2",
