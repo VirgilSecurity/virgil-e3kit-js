@@ -6,7 +6,7 @@
     "module": "./dist/e3kit-native.es.js",
     "typings": "./dist/types/index.d.ts",
     "files": [
-        "dist"
+        "dist", "declarationds.d.ts"
     ],
     "repository": "https://github.com/VirgilSecurity/virgil-e3kit-js/tree/master/packages/e3kit-native",
     "author": "Virgil Security Inc. <support@virgilsecurity.com>",

@@ -6,7 +6,7 @@
     "module": "./dist/node.es.js",
     "typings": "./dist/types/src/index.d.ts",
     "files": [
-        "dist"
+        "dist", "declaration.d.ts"
     ],
     "repository": "https://github.com/VirgilSecurity/virgil-e3kit-js/tree/master/packages/e3kit-node",
     "author": "Virgil Security Inc. <support@virgilsecurity.com>",
