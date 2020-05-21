@@ -1,4 +1,4 @@
-/// <reference path="index.d.ts" />
+/// <reference path="../declaration.d.ts" />
 
 import {
     DEFAULT_API_URL,
@@ -22,7 +22,6 @@ import { CachingJwtProvider, CardManager, KeyEntryStorage, VirgilCardVerifier } 
 
 import {
     Data,
-    IPublicKey,
     FoundationLibraryOptions,
     PythiaLibraryOptions,
     EThreeInitializeOptions,

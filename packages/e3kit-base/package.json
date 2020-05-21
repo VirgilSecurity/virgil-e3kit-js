@@ -1,12 +1,13 @@
 {
     "name": "@virgilsecurity/e3kit-base",
-    "version": "2.3.0",
+    "version": "2.3.1",
     "description": "End-to-end encryption with multiple device support powered by Virgil Security",
     "main": "./dist/e3kit-base.cjs.js",
     "module": "./dist/e3kit-base.es.js",
     "typings": "./dist/types/index.d.ts",
     "files": [
-        "dist"
+        "dist",
+        "declarations.d.ts"
     ],
     "repository": "https://github.com/VirgilSecurity/virgil-e3kit-js/tree/master/packages/e3kit-base",
     "author": "Virgil Security Inc. <support@virgilsecurity.com>",

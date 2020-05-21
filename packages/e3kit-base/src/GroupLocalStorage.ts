@@ -1,14 +1,8 @@
 /// <reference path="../declarations.d.ts" />
-
 import levelup, { LevelUp } from 'levelup';
 import sub from 'subleveldown';
-import {
-    AbstractLevelDOWN,
-    AbstractBatch,
-    AbstractIteratorOptions,
-    ErrorCallback,
-} from 'abstract-leveldown';
-import { Ticket, RawGroup, GroupInfo, IKeyPair, ICrypto, ICard } from './types';
+import { AbstractLevelDOWN, AbstractBatch } from 'abstract-leveldown';
+import { Ticket, RawGroup, GroupInfo, IKeyPair, ICrypto } from './types';
 import VirgilEncryptDown from './virgil-encrypt-down';
 
 export interface RetrieveOptions {
