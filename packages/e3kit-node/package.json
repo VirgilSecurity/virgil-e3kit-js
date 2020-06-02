@@ -22,7 +22,6 @@
         "@types/mkdirp": "^0.5.2",
         "@virgilsecurity/e3kit-base": "^2.3.1",
         "@virgilsecurity/pythia-crypto": "^1.1.2",
-        "is-invalid-path": "^1.0.2",
         "leveldown": "^5.4.1",
         "mkdirp": "^1.0.3",
         "virgil-crypto": "^4.1.2",

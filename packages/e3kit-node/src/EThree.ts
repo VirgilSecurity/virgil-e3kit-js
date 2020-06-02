@@ -8,7 +8,6 @@ import {
     PrivateKeyLoader,
 } from '@virgilsecurity/e3kit-base';
 import { initPythia, VirgilBrainKeyCrypto } from '@virgilsecurity/pythia-crypto';
-import isInvalidPath from 'is-invalid-path';
 import leveldown from 'leveldown';
 import mkdirp from 'mkdirp';
 import {
