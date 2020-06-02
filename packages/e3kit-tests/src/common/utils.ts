@@ -1,6 +1,3 @@
-import { JwtGenerator, GeneratorJwtProvider } from 'virgil-sdk';
-import { VirgilAccessTokenSigner, VirgilCrypto } from 'virgil-crypto';
-
 export const sleep = (ms: number) =>
     new Promise(resolve => {
         setTimeout(resolve, ms);
@@ -24,15 +21,4 @@ export const b64toBlob = (b64Data: string, contentType = 'text/plain', sliceSize
 
     const blob = new Blob(byteArrays, { type: contentType });
     return blob;
-};
-
-export const getGeneratorProvider = (virgilCrypto: VirgilCrypto) => {
-    const jwtGenerator = new JwtGenerator({
-        appId: process.env.APP_ID!,
-        apiKeyId: process.env.APP_KEY_ID!,
-        apiKey: virgilCrypto.importPrivateKey(process.env.APP_KEY!),
-        accessTokenSigner: new VirgilAccessTokenSigner(virgilCrypto),
-    });
-
-    return new GeneratorJwtProvider(jwtGenerator, undefined, 'default_identity');
 };
