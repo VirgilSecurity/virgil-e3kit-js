@@ -23,8 +23,8 @@ import {
     VirgilCryptoErrorStatus,
 } from 'virgil-crypto';
 import { JwtGenerator, KeyEntryStorage } from 'virgil-sdk';
-import compatibilityData from './compatibility_data.json';
-import { b64toBlob } from './utils';
+import compatibilityData from '../common/compatibility_data.json';
+import { b64toBlob } from '../common/utils';
 
 describe('EThreeBrowser', () => {
     let virgilCrypto: VirgilCrypto;

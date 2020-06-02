@@ -37,7 +37,7 @@ import {
     KeyEntryStorage,
 } from 'virgil-sdk';
 
-import { sleep } from '../utils';
+import { sleep } from './utils';
 
 type VirgilPublicKey = import('virgil-crypto').VirgilPublicKey;
 type IKeyEntry = import('virgil-sdk').IKeyEntry;

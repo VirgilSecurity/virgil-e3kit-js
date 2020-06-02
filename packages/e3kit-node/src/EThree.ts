@@ -8,7 +8,6 @@ import {
     PrivateKeyLoader,
 } from '@virgilsecurity/e3kit-base';
 import { initPythia, VirgilBrainKeyCrypto } from '@virgilsecurity/pythia-crypto';
-import isInvalidPath from 'is-invalid-path';
 import leveldown from 'leveldown';
 import mkdirp from 'mkdirp';
 import {
@@ -70,9 +69,6 @@ export class EThree extends AbstractEThree {
                 version: process.env.__VIRGIL_PRODUCT_VERSION__!,
             },
         });
-        if (isInvalidPath(opts.groupStorageName!)) {
-            throw new TypeError('`groupStorageName` is not a valid path');
-        }
         mkdirp.sync(opts.groupStorageName!);
         const groupStorageLeveldown = leveldown(opts.groupStorageName!);
 

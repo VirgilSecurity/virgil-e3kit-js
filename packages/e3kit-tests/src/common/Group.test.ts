@@ -6,7 +6,7 @@ import { initPythia } from '@virgilsecurity/pythia-crypto';
 import { initCrypto, VirgilAccessTokenSigner, VirgilCrypto, KeyPairType } from 'virgil-crypto';
 import { JwtGenerator } from 'virgil-sdk';
 
-import { sleep } from '../utils';
+import { sleep } from './utils';
 
 type ICard = import('virgil-sdk').ICard;
 

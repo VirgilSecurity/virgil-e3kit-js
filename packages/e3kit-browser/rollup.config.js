@@ -9,7 +9,7 @@ const nodeGlobals = require('rollup-plugin-node-globals');
 const nodeResolve = require('rollup-plugin-node-resolve');
 const replace = require('rollup-plugin-re');
 const typescript = require('rollup-plugin-typescript2');
-
+const { generateCrossPlatformPath } = require('../../utils/build');
 const packageJson = require('./package.json');
 const PRODUCT_NAME = 'e3kit';
 
@@ -49,21 +49,30 @@ const getCryptoEntryPointName = (target, cryptoType, format) =>
 const createEntry = (target, cryptoType, format) => {
     const foundationModuleName = 'virgil-crypto';
     const foundationPath = getModulePath(foundationModuleName);
-    const foundationEntryPoint = path.join(
+    const foundationEntryPoint = generateCrossPlatformPath(
         foundationModuleName,
         'dist',
         getCryptoEntryPointName(target, cryptoType, FORMAT.ES),
     );
-    const foundationWasmPath = path.join(foundationPath, 'dist', `libfoundation.${target}.wasm`);
+
+    const foundationWasmPath = generateCrossPlatformPath(
+        foundationPath,
+        'dist',
+        `libfoundation.${target}.wasm`,
+    );
 
     const pythiaModuleName = '@virgilsecurity/pythia-crypto';
     const pythiaPath = getModulePath(pythiaModuleName);
-    const pythiaEntryPoint = path.join(
+    const pythiaEntryPoint = generateCrossPlatformPath(
         pythiaModuleName,
         'dist',
         getCryptoEntryPointName(target, cryptoType, FORMAT.ES),
     );
-    const pythiaWasmPath = path.join(pythiaPath, 'dist', `libpythia.${target}.wasm`);
+    const pythiaWasmPath = generateCrossPlatformPath(
+        pythiaPath,
+        'dist',
+        `libpythia.${target}.wasm`,
+    );
 
     return {
         external: format !== FORMAT.UMD ? [foundationEntryPoint, pythiaEntryPoint] : [],

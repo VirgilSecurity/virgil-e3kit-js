@@ -1,6 +1,6 @@
 {
     "name": "@virgilsecurity/example-webpack",
-    "version": "2.3.1",
+    "version": "2.3.2",
     "description": "Virgil E3Kit SDK + Webpack usage example",
     "repository": "https://github.com/VirgilSecurity/virgil-e3kit-js/tree/master/packages/example-webpack",
     "author": "Virgil Security Inc. <support@virgilsecurity.com>",
@@ -11,7 +11,7 @@
         "build": "webpack"
     },
     "dependencies": {
-        "@virgilsecurity/e3kit-browser": "^2.3.1"
+        "@virgilsecurity/e3kit-browser": "^2.3.2"
     },
     "devDependencies": {
         "dotenv": "^8.1.0",

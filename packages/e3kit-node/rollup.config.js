@@ -5,6 +5,7 @@ const license = require('rollup-plugin-license');
 const replace = require('rollup-plugin-re');
 const typescript = require('rollup-plugin-typescript2');
 const json = require('@rollup/plugin-json');
+const { generateCrossPlatformPath } = require('../../utils/build');
 
 const packageJson = require('./package.json');
 
@@ -26,14 +27,14 @@ const getCryptoEntryPointName = (cryptoType, format) =>
 
 const createEntry = (cryptoType, format) => {
     const foundationModuleName = 'virgil-crypto';
-    const foundationEntryPoint = path.join(
+    let foundationEntryPoint = generateCrossPlatformPath(
         foundationModuleName,
         'dist',
         getCryptoEntryPointName(cryptoType, format),
     );
 
     const pythiaModuleName = '@virgilsecurity/pythia-crypto';
-    const pythiaEntryPoint = path.join(
+    const pythiaEntryPoint = generateCrossPlatformPath(
         pythiaModuleName,
         'dist',
         getCryptoEntryPointName(cryptoType, format),

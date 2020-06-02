@@ -1,6 +1,6 @@
 {
     "name": "@virgilsecurity/e3kit-browser",
-    "version": "2.3.1",
+    "version": "2.3.2",
     "description": "End-to-end encryption with multiple device support powered by Virgil Security",
     "main": "./browser.cjs.js",
     "module": "./browser.es.js",
@@ -16,7 +16,7 @@
     "author": "Virgil Security Inc. <support@virgilsecurity.com>",
     "license": "BSD-3-Clause",
     "scripts": {
-        "build": "node --max-old-space-size=4096 node_modules/.bin/rollup -c",
+        "build": "cross-env NODE_OPTIONS=--max-old-space-size=4096 rollup -c",
         "clean": "rimraf .rpt2_cache dist",
         "prepare": "npm run clean && npm run build"
     },
@@ -29,6 +29,7 @@
         "virgil-sdk": "^6.1.1"
     },
     "devDependencies": {
+        "cross-env": "^7.0.2",
         "rimraf": "^3.0.0",
         "rollup": "^1.29.1",
         "rollup-plugin-commonjs": "^10.1.0",
