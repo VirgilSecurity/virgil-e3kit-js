@@ -1,6 +1,6 @@
 {
     "name": "@virgilsecurity/example-node",
-    "version": "2.3.1",
+    "version": "2.3.2",
     "description": "Virgil E3Kit SDK + Node.js usage example",
     "repository": "https://github.com/VirgilSecurity/virgil-e3kit-js/tree/master/packages/example-node",
     "author": "Virgil Security Inc. <support@virgilsecurity.com>",
@@ -10,7 +10,7 @@
         "start": "node index.js"
     },
     "dependencies": {
-        "@virgilsecurity/e3kit-node": "^2.3.1",
+        "@virgilsecurity/e3kit-node": "^2.3.2",
         "dotenv": "^8.1.0"
     }
 }

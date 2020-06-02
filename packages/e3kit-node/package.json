@@ -1,6 +1,6 @@
 {
     "name": "@virgilsecurity/e3kit-node",
-    "version": "2.3.1",
+    "version": "2.3.2",
     "description": "End-to-end encryption with multiple device support powered by Virgil Security",
     "main": "./dist/node.cjs.js",
     "module": "./dist/node.es.js",
