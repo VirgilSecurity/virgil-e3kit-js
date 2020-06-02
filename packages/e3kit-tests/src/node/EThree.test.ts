@@ -49,7 +49,7 @@ describe.only('EThree initialization', () => {
 
     it('should initialize with custom group name', () => {
         EThree.initialize(createFetchToken(uuid()), {
-            groupStorageName: `C:/program files/${uuid()}`,
+            groupStorageName: `d:/program files/${uuid()}`,
         });
     });
 });
