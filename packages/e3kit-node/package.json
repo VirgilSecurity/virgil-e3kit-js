@@ -1,6 +1,6 @@
 {
     "name": "@virgilsecurity/e3kit-node",
-    "version": "2.3.2",
+    "version": "2.3.3",
     "description": "End-to-end encryption with multiple device support powered by Virgil Security",
     "main": "./dist/node.cjs.js",
     "module": "./dist/node.es.js",
@@ -20,12 +20,12 @@
     "dependencies": {
         "@types/leveldown": "^4.0.0",
         "@types/mkdirp": "^0.5.2",
-        "@virgilsecurity/e3kit-base": "^2.3.1",
+        "@virgilsecurity/e3kit-base": "^2.3.3",
         "@virgilsecurity/pythia-crypto": "^1.1.2",
         "leveldown": "^5.4.1",
         "mkdirp": "^1.0.3",
         "virgil-crypto": "^4.1.2",
-        "virgil-sdk": "^6.1.1"
+        "virgil-sdk": "^6.1.2"
     },
     "devDependencies": {
         "@rollup/plugin-json": "^4.0.1",
