@@ -77,13 +77,16 @@ export default class App extends Component {
             const bobCard = await alice.findUsers(bob.identity);
 
             this.reportStep('Alice encrypts message for Bob...');
-            const encryptedForBob = await alice.encrypt('Hello Bob!', bobCard);
+            const encryptedForBob = await alice.authEncrypt(
+                'Hello Bob!',
+                bobCard,
+            );
 
             this.reportStep("Bob searches for Alice's card...");
             const aliceCard = await bob.findUsers(alice.identity);
 
             this.reportStep('Bob decrypts the message...');
-            const decryptedByBob = await bob.decrypt(
+            const decryptedByBob = await bob.authDecrypt(
                 encryptedForBob,
                 aliceCard,
             );
