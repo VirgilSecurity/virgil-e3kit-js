@@ -32,7 +32,7 @@ Virgil E3Kit SDK is also available on other platforms:
   **WebAssembly**
 
   ```javascript
-  import { EThree } from '@virgilsecurirty/e3kit-browser';
+  import { EThree } from '@virgilsecurity/e3kit-browser';
 
   // Promise
   EThree.initialize(tokenCallback)
@@ -47,7 +47,7 @@ Virgil E3Kit SDK is also available on other platforms:
 
   **asm.js** (Use this only if your target environments don't support WebAssembly)
   ```javascript
-  import { EThree } from '@virgilsecurirty/e3kit-browser/dist/browser.asmjs.es';
+  import { EThree } from '@virgilsecurity/e3kit-browser/dist/browser.asmjs.es';
 
   // Promise
   EThree.initialize(tokenCallback)
