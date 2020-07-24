@@ -367,7 +367,7 @@ describe('EThreeBrowser', () => {
         });
     });
 
-    describe.only('EThree.encryptSharedFile/EThree.decryptSharedFile', async () => {
+    describe('EThree.encryptSharedFile/EThree.decryptSharedFile', async () => {
         const identity1 = uuid();
         const identity2 = uuid();
         const identity3 = uuid();
