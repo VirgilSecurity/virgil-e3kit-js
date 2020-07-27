@@ -7,6 +7,7 @@ import {
 
 export type NodeBuffer = import('@virgilsecurity/e3kit-base').NodeBuffer;
 export type Data = import('@virgilsecurity/e3kit-base').Data;
+export type StringEncoding = import('@virgilsecurity/e3kit-base').StringEncoding;
 export type ICard = import('@virgilsecurity/e3kit-base').ICard;
 export type IPublicKey = import('@virgilsecurity/e3kit-base').IPublicKey;
 export type EThreeBaseInitializeOptions = import('@virgilsecurity/e3kit-base').EThreeInitializeOptions;
@@ -51,6 +52,14 @@ export type onDecryptProgressCallback = (snapshot: onDecryptProgressSnapshot) =>
  * Callback invoked for each chunk being processed in decryptFile method.
  */
 export type onProgressCallback = (snapshot: onProgressSnapshot) => void;
+
+/**
+ * `eThree.encryptSharedFile` method resulting object.
+ */
+export type EncryptSharedFileResult = {
+    encryptedSharedFile: File | Blob;
+    fileKey: Data;
+};
 
 // eslint-disable-next-line @typescript-eslint/class-name-casing
 export interface onProgressSnapshot {
@@ -118,7 +127,7 @@ export interface DecryptFileOptions extends FileOptions {
 }
 
 /**
- * Options for authEncryptedFile method.
+ * Options for authEncryptFile method.
  */
 export interface AuthEncryptFileOptions extends FileOptions {
     /**
@@ -128,9 +137,30 @@ export interface AuthEncryptFileOptions extends FileOptions {
 }
 
 /**
- * Options for decryptedFile method.
+ * Options for authDecryptFile method.
  */
 export interface AuthDecryptFileOptions extends FileOptions {
+    /**
+     * `onDecryptProgressCallback` parameter.
+     */
+    onProgress?: onProgressCallback;
+    encryptedOn?: Date;
+}
+
+/**
+ * Options for encryptSharedFile method.
+ */
+export interface EncryptSharedFileOptions extends FileOptions {
+    /**
+     * `onEncryptProgressCallback` parameter.
+     */
+    onProgress?: onProgressCallback;
+}
+
+/**
+ * Options for decryptSharedFile method.
+ */
+export interface DecryptSharedFileOptions extends FileOptions {
     /**
      * `onDecryptProgressCallback` parameter.
      */

@@ -5,6 +5,7 @@ export { PrivateKeyLoader } from './PrivateKeyLoader';
 export {
     NodeBuffer,
     Data,
+    StringEncoding,
     IKeyPair,
     IPrivateKey,
     IPublicKey,

@@ -1,5 +1,6 @@
 export type NodeBuffer = import('@virgilsecurity/crypto-types').NodeBuffer;
 export type Data = import('@virgilsecurity/crypto-types').Data;
+export type StringEncoding = import('@virgilsecurity/crypto-types').StringEncoding;
 export type IKeyPair = import('@virgilsecurity/crypto-types').IKeyPair;
 export type IPrivateKey = import('@virgilsecurity/crypto-types').IPrivateKey;
 export type IPublicKey = import('@virgilsecurity/crypto-types').IPublicKey;

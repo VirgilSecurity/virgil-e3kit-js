@@ -365,4 +365,147 @@ describe('EThreeBrowser', () => {
             expect(originString).to.equal(decryptedString);
         });
     });
+
+    describe('EThree.encryptSharedFile/EThree.decryptSharedFile', async () => {
+        const identity1 = uuid();
+        const identity2 = uuid();
+
+        let sdk1: EThree, sdk2: EThree, cards: FindUsersResult;
+
+        const originString = 'Sign.Encrypt.Decrypt.'.repeat(666);
+
+        const originFile = new File([originString], 'foo.txt', {
+            type: 'text/plain',
+        });
+
+        before(async () => {
+            [sdk1, sdk2] = await Promise.all([
+                initializeETheeFromIdentity(identity1),
+                initializeETheeFromIdentity(identity2),
+            ]);
+            await Promise.all([sdk1.register(), sdk2.register()]);
+            cards = await sdk1.findUsers([identity1, identity2]);
+        });
+
+        it('Should decrypt file and check signature of sender', async () => {
+            const { encryptedSharedFile, fileKey } = await sdk1.encryptSharedFile(originFile);
+            const decryptedFile = await sdk2.decryptSharedFile(
+                encryptedSharedFile,
+                fileKey,
+                cards[identity1],
+            );
+            const decryptedString = await readFile(decryptedFile);
+            expect(originString).to.equal(decryptedString);
+        });
+
+        it('Should decrypt file from yourself', async () => {
+            const { encryptedSharedFile, fileKey } = await sdk1.encryptSharedFile(originFile);
+            const decryptedFile = await sdk1.decryptSharedFile(encryptedSharedFile, fileKey);
+            const decryptedString = await readFile(decryptedFile);
+            expect(originString).to.equal(decryptedString);
+        });
+
+        it('should take input as string, file or blob', async () => {
+            const originBlob = new Blob(['foo'], {
+                type: 'text/plain',
+            });
+            const { encryptedSharedFile: encryptedFile } = await sdk1.encryptSharedFile(originFile);
+            const { encryptedSharedFile: encryptedBlob } = await sdk1.encryptSharedFile(originBlob);
+            expect(encryptedFile).to.be.instanceOf(File);
+            expect(encryptedBlob).to.be.instanceOf(Blob);
+            expect(encryptedBlob).not.to.be.instanceOf(File);
+        });
+
+        it('should process different chunks of data', async () => {
+            const encryptedSnapshots: onProgressSnapshot[] = [];
+            const originString = 'foo';
+            const originFile = new File([originString], 'foo.txt', {
+                type: 'text/plain',
+            });
+            expect(originFile.size).to.equal(3);
+            const { encryptedSharedFile, fileKey } = await sdk1.encryptSharedFile(originFile, {
+                chunkSize: 2,
+                onProgress: encryptedSnapshots.push.bind(encryptedSnapshots),
+            });
+            expect(encryptedSnapshots).to.have.length(2);
+            expect(encryptedSnapshots[0]).to.eql({
+                fileSize: originFile.size,
+                bytesProcessed: 2,
+            });
+            expect(encryptedSnapshots[1]).to.eql({
+                fileSize: originFile.size,
+                bytesProcessed: 3,
+            });
+
+            const decryptedSnapshots: onProgressSnapshot[] = [];
+            await sdk1.decryptSharedFile(encryptedSharedFile, fileKey, undefined, {
+                chunkSize: Math.ceil(encryptedSharedFile.size / 2),
+                onProgress: decryptedSnapshots.push.bind(decryptedSnapshots),
+            });
+            expect(decryptedSnapshots).to.have.length(2);
+            expect(decryptedSnapshots[0]).to.eql({
+                fileSize: encryptedSharedFile.size,
+                bytesProcessed: Math.ceil(encryptedSharedFile.size / 2),
+            });
+            expect(decryptedSnapshots[1]).to.eql({
+                fileSize: encryptedSharedFile.size,
+                bytesProcessed: encryptedSharedFile.size,
+            });
+        });
+
+        it('should abort encryptSharedFile/decryptSharedFile', async () => {
+            const encryptAbort = new AbortController();
+            const decryptAbort = new AbortController();
+            const encryptPromise = sdk1.encryptSharedFile(originFile);
+            const encryptAbortedPromise = sdk1.encryptSharedFile(originFile, {
+                chunkSize: 1,
+                signal: encryptAbort.signal,
+            });
+            encryptAbort.abort();
+            try {
+                await encryptAbortedPromise;
+            } catch (err) {
+                expect(err).to.be.instanceOf(Error);
+            }
+            try {
+                const { encryptedSharedFile, fileKey } = await encryptPromise;
+                await sdk1.decryptSharedFile(encryptedSharedFile, fileKey, undefined, {
+                    chunkSize: Math.floor(originFile.size / 3),
+                    signal: decryptAbort.signal,
+                    onProgress: decryptAbort.abort,
+                });
+            } catch (err) {
+                expect(err).to.be.instanceOf(Error);
+                return;
+            }
+            expect.fail();
+        });
+
+        it('should verify the signature', async () => {
+            const { publicKey: wrongPublicKey } = virgilCrypto.generateKeys();
+            const { encryptedSharedFile, fileKey } = await sdk1.encryptSharedFile(originFile);
+            try {
+                await sdk2.decryptSharedFile(encryptedSharedFile, fileKey, wrongPublicKey);
+            } catch (err) {
+                expect(err).to.be.instanceOf(VirgilCryptoError);
+                expect(err.status).to.be.equal(VirgilCryptoErrorStatus.SIGNER_NOT_FOUND);
+                return;
+            }
+            expect.fail();
+        });
+
+        it('compatibility test', async () => {
+            const encryptedFile = b64toBlob(
+                compatibilityData.encryptSharedFile.encryptedData,
+                'foo.txt',
+            );
+            const decryptedFile = await sdk1.decryptSharedFile(
+                encryptedFile,
+                compatibilityData.encryptSharedFile.fileKey,
+                virgilCrypto.importPublicKey(compatibilityData.encryptSharedFile.senderPublicKey),
+            );
+            const decryptedString = await readFile(decryptedFile);
+            expect(decryptedString).to.equal(compatibilityData.encryptSharedFile.originData);
+        });
+    });
 });

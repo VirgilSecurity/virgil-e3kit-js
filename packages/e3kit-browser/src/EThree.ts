@@ -15,6 +15,7 @@ import {
     VirgilCrypto,
     VirgilPublicKey,
     HashAlgorithm,
+    VirgilPrivateKey,
 } from 'virgil-crypto';
 import { CachingJwtProvider, CardManager, KeyEntryStorage, VirgilCardVerifier } from 'virgil-sdk';
 
@@ -31,7 +32,6 @@ import {
     Data,
     ICard,
     IPublicKey,
-    VirgilPrivateKey,
     FoundationLibraryOptions,
     PythiaLibraryOptions,
     EThreeInitializeOptions,
@@ -42,6 +42,9 @@ import {
     FindUsersResult,
     AuthDecryptFileOptions,
     AuthEncryptFileOptions,
+    EncryptSharedFileResult,
+    EncryptSharedFileOptions,
+    DecryptSharedFileOptions,
 } from './types';
 
 export class EThree extends AbstractEThree {
@@ -103,14 +106,14 @@ export class EThree extends AbstractEThree {
      * 1. To calculate the signature of the plaintext file.
      * 2. To encrypt the file with encoded signature.
      */
+    /**
+     * @deprecated and will be removed in next major release.
+     */
     encryptFile(
         file: File | Blob,
         recipients?: ICard | FindUsersResult,
         options?: EncryptFileOptions,
     ): Promise<File | Blob>;
-    /**
-     * @deprecated and will be removed in next major release.
-     */
     encryptFile(
         file: File | Blob,
         recipients?: IPublicKey | LookupResult,
@@ -498,6 +501,156 @@ export class EThree extends AbstractEThree {
     }
 
     /**
+     * Encrypts file with `fileKey` which can be shared among other users.
+     * You can define chunk size and a callback, that will be invoked on each chunk.
+     */
+    encryptSharedFile(
+        file: File | Blob,
+        options?: EncryptSharedFileOptions,
+    ): Promise<EncryptSharedFileResult>;
+    async encryptSharedFile(
+        file: File | Blob,
+        options: EncryptSharedFileOptions = {},
+    ): Promise<EncryptSharedFileResult> {
+        const chunkSize = options.chunkSize ? options.chunkSize : 64 * 1024;
+        if (!Number.isInteger(chunkSize)) throw TypeError('chunkSize should be an integer value');
+        const fileSize = file.size;
+
+        const privateKey = (await this.keyLoader.loadLocalPrivateKey()) as VirgilPrivateKey;
+
+        const { privateKey: fileKey, publicKey: filePublicKey } = this.virgilCrypto.generateKeys();
+
+        const streamCipher = (this.virgilCrypto as VirgilCrypto).createStreamSignAndEncrypt(
+            privateKey as VirgilPrivateKey,
+            filePublicKey as VirgilPublicKey,
+            true,
+        );
+
+        const encryptedChunksPromise = new Promise<NodeBuffer[]>((resolve, reject) => {
+            const encryptedChunks: NodeBuffer[] = [];
+            encryptedChunks.push(streamCipher.start(fileSize));
+
+            const onChunkCallback: onChunkCallback = (chunk, offset) => {
+                encryptedChunks.push(streamCipher.update(this.toData(chunk)));
+                if (options.onProgress) {
+                    options.onProgress({
+                        bytesProcessed: offset,
+                        fileSize: fileSize,
+                    });
+                }
+            };
+
+            const onFinishCallback = () => {
+                encryptedChunks.push(streamCipher.final());
+                resolve(encryptedChunks);
+            };
+
+            const onErrorCallback = (err: Error) => {
+                reject(err);
+                streamCipher.dispose();
+            };
+
+            processFile({
+                file,
+                chunkSize,
+                onChunkCallback,
+                onFinishCallback,
+                onErrorCallback,
+                signal: options.signal,
+            });
+        });
+
+        const encryptedChunks = await encryptedChunksPromise;
+        const encryptedSharedFile = isFile(file)
+            ? new File(encryptedChunks, file.name, { type: file.type })
+            : new Blob(encryptedChunks, { type: file.type });
+
+        return {
+            encryptedSharedFile,
+            fileKey: this.virgilCrypto.exportPrivateKey(fileKey),
+        };
+    }
+
+    /**
+     * Decrypts File or Blob with `fileKey` and verifies integrity with `senderCardOrPublicKey`. If there is no recipient
+     * and the message is encrypted for the current user, omit the `senderCardOrPublicKey` parameter. You can define
+     * chunk size and a callback, that will be invoked on each chunk.
+     *
+     */
+    async decryptSharedFile(
+        file: File | Blob,
+        fileKey: Data,
+        senderCardOrPublicKey?: ICard | IPublicKey,
+        options: DecryptSharedFileOptions = {},
+    ): Promise<File | Blob> {
+        const fileSize = file.size;
+        const chunkSize = options.chunkSize ? options.chunkSize : 64 * 1024;
+        if (!Number.isInteger(chunkSize)) throw TypeError('chunkSize should be an integer value');
+
+        const privateKey = (await this.keyLoader.loadLocalPrivateKey()) as VirgilPrivateKey;
+        if (!privateKey) throw new RegisterRequiredError();
+
+        const publicKey = this.getPublicKeyForVerification(
+            privateKey,
+            senderCardOrPublicKey,
+            options.encryptedOn,
+        );
+        if (!publicKey) {
+            throw new TypeError(
+                'Could not get public key from the second argument.' +
+                    'Expected a Virgil Card or a Public Key object. Got ' +
+                    typeof senderCardOrPublicKey,
+            );
+        }
+
+        const formatedFileKey = this.virgilCrypto.importPrivateKey(fileKey) as VirgilPrivateKey;
+
+        const streamDecipher = (this.virgilCrypto as VirgilCrypto).createStreamDecryptAndVerify();
+
+        const decryptedChunksPromise = new Promise<NodeBuffer[]>((resolve, reject) => {
+            const decryptedChunks: NodeBuffer[] = [];
+
+            streamDecipher.start(formatedFileKey);
+
+            const onChunkCallback: onChunkCallback = (chunk, offset) => {
+                decryptedChunks.push(streamDecipher.update(this.toData(chunk)));
+                if (options.onProgress) {
+                    options.onProgress({
+                        bytesProcessed: offset,
+                        fileSize: fileSize,
+                    });
+                }
+            };
+
+            const onFinishCallback = () => {
+                decryptedChunks.push(streamDecipher.final());
+                streamDecipher.verify(publicKey as VirgilPublicKey);
+                streamDecipher.dispose();
+                resolve(decryptedChunks);
+            };
+
+            const onErrorCallback = (err: Error) => {
+                streamDecipher.dispose();
+                reject(err);
+            };
+
+            processFile({
+                file,
+                chunkSize,
+                onChunkCallback,
+                onFinishCallback,
+                onErrorCallback,
+                signal: options.signal,
+            });
+        });
+
+        const decryptedFile = await decryptedChunksPromise;
+
+        if (isFile(file)) return new File(decryptedFile, file.name, { type: file.type });
+        return new Blob(decryptedFile, { type: file.type });
+    }
+
+    /**
      * @hidden
      */
     private static getFoundationLibraryOptions(options: FoundationLibraryOptions) {
@@ -555,6 +708,7 @@ export class EThree extends AbstractEThree {
                 version: process.env.__VIRGIL_PRODUCT_VERSION__!,
             },
         });
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         const groupStorageLeveldown = leveljs(opts.groupStorageName!);
 
         return {
