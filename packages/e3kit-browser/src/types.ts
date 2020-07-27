@@ -154,7 +154,6 @@ export interface EncryptSharedFileOptions extends FileOptions {
     /**
      * `onEncryptProgressCallback` parameter.
      */
-    fileKeyEncoding?: StringEncoding;
     onProgress?: onProgressCallback;
 }
 

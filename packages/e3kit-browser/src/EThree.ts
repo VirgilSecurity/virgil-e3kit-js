@@ -567,9 +567,7 @@ export class EThree extends AbstractEThree {
 
         return {
             encryptedSharedFile,
-            fileKey: options.fileKeyEncoding
-                ? this.virgilCrypto.exportPrivateKey(fileKey).toString(options.fileKeyEncoding)
-                : (fileKey as VirgilPrivateKey),
+            fileKey: fileKey as VirgilPrivateKey,
         };
     }
 

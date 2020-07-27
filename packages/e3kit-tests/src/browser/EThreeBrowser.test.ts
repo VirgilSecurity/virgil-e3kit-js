@@ -370,9 +370,8 @@ describe('EThreeBrowser', () => {
     describe('EThree.encryptSharedFile/EThree.decryptSharedFile', async () => {
         const identity1 = uuid();
         const identity2 = uuid();
-        const identity3 = uuid();
 
-        let sdk1: EThree, sdk2: EThree, sdk3: EThree, cards: FindUsersResult;
+        let sdk1: EThree, sdk2: EThree, cards: FindUsersResult;
 
         const originString = 'Sign.Encrypt.Decrypt.'.repeat(666);
 
@@ -381,13 +380,12 @@ describe('EThreeBrowser', () => {
         });
 
         before(async () => {
-            [sdk1, sdk2, sdk3] = await Promise.all([
+            [sdk1, sdk2] = await Promise.all([
                 initializeETheeFromIdentity(identity1),
                 initializeETheeFromIdentity(identity2),
-                initializeETheeFromIdentity(identity3),
             ]);
-            await Promise.all([sdk1.register(), sdk2.register(), sdk3.register()]);
-            cards = await sdk1.findUsers([identity1, identity2, identity3]);
+            await Promise.all([sdk1.register(), sdk2.register()]);
+            cards = await sdk1.findUsers([identity1, identity2]);
         });
 
         it('Should decrypt file and check signature of sender', async () => {
@@ -495,16 +493,6 @@ describe('EThreeBrowser', () => {
                 return;
             }
             expect.fail();
-        });
-
-        it('should return different type of fileKey depends on options', async () => {
-            const { fileKey: virgilFileKey } = await sdk1.encryptSharedFile(originFile);
-            const { fileKey: base64fileKey } = await sdk1.encryptSharedFile(originFile, {
-                fileKeyEncoding: 'base64',
-            });
-
-            expect(virgilFileKey).to.be.instanceOf(VirgilPrivateKey);
-            expect(base64fileKey).to.be.a('string');
         });
     });
 });
