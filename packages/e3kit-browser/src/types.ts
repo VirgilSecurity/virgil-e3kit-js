@@ -58,7 +58,7 @@ export type onProgressCallback = (snapshot: onProgressSnapshot) => void;
  */
 export type EncryptSharedFileResult = {
     encryptedSharedFile: File | Blob;
-    fileKey: VirgilPrivateKey | Data;
+    fileKey: Data;
 };
 
 // eslint-disable-next-line @typescript-eslint/class-name-casing

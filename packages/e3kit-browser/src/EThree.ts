@@ -567,7 +567,7 @@ export class EThree extends AbstractEThree {
 
         return {
             encryptedSharedFile,
-            fileKey: fileKey as VirgilPrivateKey,
+            fileKey: this.virgilCrypto.exportPrivateKey(fileKey),
         };
     }
 
@@ -579,7 +579,7 @@ export class EThree extends AbstractEThree {
      */
     async decryptSharedFile(
         file: File | Blob,
-        fileKey: Data | VirgilPrivateKey,
+        fileKey: Data,
         senderCardOrPublicKey?: ICard | IPublicKey,
         options: DecryptSharedFileOptions = {},
     ): Promise<File | Blob> {
@@ -603,10 +603,7 @@ export class EThree extends AbstractEThree {
             );
         }
 
-        const formatedFileKey =
-            fileKey instanceof VirgilPrivateKey
-                ? fileKey
-                : (this.virgilCrypto.importPrivateKey(fileKey) as VirgilPrivateKey);
+        const formatedFileKey = this.virgilCrypto.importPrivateKey(fileKey) as VirgilPrivateKey;
 
         const streamDecipher = (this.virgilCrypto as VirgilCrypto).createStreamDecryptAndVerify();
 
