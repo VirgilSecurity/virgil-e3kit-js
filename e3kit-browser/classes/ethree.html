@@ -105,9 +105,11 @@
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="ethree.html#creategroup" class="tsd-kind-icon">create<wbr>Group</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="ethree.html#decrypt" class="tsd-kind-icon">decrypt</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="ethree.html#decryptfile" class="tsd-kind-icon">decrypt<wbr>File</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="ethree.html#decryptsharedfile" class="tsd-kind-icon">decrypt<wbr>Shared<wbr>File</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="ethree.html#deletegroup" class="tsd-kind-icon">delete<wbr>Group</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="ethree.html#encrypt" class="tsd-kind-icon">encrypt</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="ethree.html#encryptfile" class="tsd-kind-icon">encrypt<wbr>File</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="ethree.html#encryptsharedfile" class="tsd-kind-icon">encrypt<wbr>Shared<wbr>File</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="ethree.html#findusers" class="tsd-kind-icon">find<wbr>Users</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="ethree.html#getgroup" class="tsd-kind-icon">get<wbr>Group</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="ethree.html#haslocalprivatekey" class="tsd-kind-icon">has<wbr>Local<wbr>Private<wbr>Key</a></li>
@@ -318,7 +320,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/VirgilSecurity/virgil-e3kit-js/blob/d2a4982/packages/e3kit-browser/src/EThree.ts#L430">e3kit-browser/src/EThree.ts:430</a></li>
+									<li>Defined in <a href="https://github.com/VirgilSecurity/virgil-e3kit-js/blob/0a4bb97/packages/e3kit-browser/src/EThree.ts#L433">e3kit-browser/src/EThree.ts:433</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -441,7 +443,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/VirgilSecurity/virgil-e3kit-js/blob/d2a4982/packages/e3kit-browser/src/EThree.ts#L345">e3kit-browser/src/EThree.ts:345</a></li>
+									<li>Defined in <a href="https://github.com/VirgilSecurity/virgil-e3kit-js/blob/0a4bb97/packages/e3kit-browser/src/EThree.ts#L348">e3kit-browser/src/EThree.ts:348</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -468,7 +470,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/VirgilSecurity/virgil-e3kit-js/blob/d2a4982/packages/e3kit-browser/src/EThree.ts#L350">e3kit-browser/src/EThree.ts:350</a></li>
+									<li>Defined in <a href="https://github.com/VirgilSecurity/virgil-e3kit-js/blob/0a4bb97/packages/e3kit-browser/src/EThree.ts#L353">e3kit-browser/src/EThree.ts:353</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -797,7 +799,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/VirgilSecurity/virgil-e3kit-js/blob/d2a4982/packages/e3kit-browser/src/EThree.ts#L228">e3kit-browser/src/EThree.ts:228</a></li>
+									<li>Defined in <a href="https://github.com/VirgilSecurity/virgil-e3kit-js/blob/0a4bb97/packages/e3kit-browser/src/EThree.ts#L231">e3kit-browser/src/EThree.ts:231</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -825,6 +827,45 @@
 								</li>
 								<li>
 									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> options: <a href="../interfaces/decryptfileoptions.html" class="tsd-signature-type">DecryptFileOptions</a><span class="tsd-signature-symbol"> = {}</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">File</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">Blob</span><span class="tsd-signature-symbol">&gt;</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="decryptsharedfile" class="tsd-anchor"></a>
+					<h3>decrypt<wbr>Shared<wbr>File</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">decrypt<wbr>Shared<wbr>File<span class="tsd-signature-symbol">(</span>file<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">File</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">Blob</span>, fileKey<span class="tsd-signature-symbol">: </span><a href="../index.html#data" class="tsd-signature-type">Data</a>, senderCardOrPublicKey<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">ICard</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">IPublicKey</span>, options<span class="tsd-signature-symbol">?: </span><a href="../interfaces/decryptsharedfileoptions.html" class="tsd-signature-type">DecryptSharedFileOptions</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">File</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">Blob</span><span class="tsd-signature-symbol">&gt;</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/VirgilSecurity/virgil-e3kit-js/blob/0a4bb97/packages/e3kit-browser/src/EThree.ts#L580">e3kit-browser/src/EThree.ts:580</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Decrypts File or Blob with <code>fileKey</code> and verifies integrity with <code>senderCardOrPublicKey</code>. If there is no recipient
+										and the message is encrypted for the current user, omit the <code>senderCardOrPublicKey</code> parameter. You can define
+									chunk size and a callback, that will be invoked on each chunk.</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>file: <span class="tsd-signature-type">File</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">Blob</span></h5>
+								</li>
+								<li>
+									<h5>fileKey: <a href="../index.html#data" class="tsd-signature-type">Data</a></h5>
+								</li>
+								<li>
+									<h5><span class="tsd-flag ts-flagOptional">Optional</span> senderCardOrPublicKey: <span class="tsd-signature-type">ICard</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">IPublicKey</span></h5>
+								</li>
+								<li>
+									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> options: <a href="../interfaces/decryptsharedfileoptions.html" class="tsd-signature-type">DecryptSharedFileOptions</a><span class="tsd-signature-symbol"> = {}</span></h5>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">File</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">Blob</span><span class="tsd-signature-symbol">&gt;</span></h4>
@@ -1033,20 +1074,15 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/VirgilSecurity/virgil-e3kit-js/blob/d2a4982/packages/e3kit-browser/src/EThree.ts#L106">e3kit-browser/src/EThree.ts:106</a></li>
+									<li>Defined in <a href="https://github.com/VirgilSecurity/virgil-e3kit-js/blob/0a4bb97/packages/e3kit-browser/src/EThree.ts#L112">e3kit-browser/src/EThree.ts:112</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
-								<div class="lead">
-									<p>Signs and encrypts File or Blob.
-										If there is no recipient and the message is encrypted for the current user, omit the
-									public key parameter. You can define chunk size and a callback, that will be invoked on each chunk.</p>
-								</div>
-								<p>The file will be read twice during this method execution:</p>
-								<ol>
-									<li>To calculate the signature of the plaintext file.</li>
-									<li>To encrypt the file with encoded signature.</li>
-								</ol>
+								<dl class="tsd-comment-tags">
+									<dt>deprecated</dt>
+									<dd><p>and will be removed in next major release.</p>
+									</dd>
+								</dl>
 							</div>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
@@ -1065,16 +1101,9 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/VirgilSecurity/virgil-e3kit-js/blob/d2a4982/packages/e3kit-browser/src/EThree.ts#L114">e3kit-browser/src/EThree.ts:114</a></li>
+									<li>Defined in <a href="https://github.com/VirgilSecurity/virgil-e3kit-js/blob/0a4bb97/packages/e3kit-browser/src/EThree.ts#L117">e3kit-browser/src/EThree.ts:117</a></li>
 								</ul>
 							</aside>
-							<div class="tsd-comment tsd-typography">
-								<dl class="tsd-comment-tags">
-									<dt>deprecated</dt>
-									<dd><p>and will be removed in next major release.</p>
-									</dd>
-								</dl>
-							</div>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
@@ -1088,6 +1117,38 @@
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">File</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">Blob</span><span class="tsd-signature-symbol">&gt;</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="encryptsharedfile" class="tsd-anchor"></a>
+					<h3>encrypt<wbr>Shared<wbr>File</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">encrypt<wbr>Shared<wbr>File<span class="tsd-signature-symbol">(</span>file<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">File</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">Blob</span>, options<span class="tsd-signature-symbol">?: </span><a href="../interfaces/encryptsharedfileoptions.html" class="tsd-signature-type">EncryptSharedFileOptions</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../index.html#encryptsharedfileresult" class="tsd-signature-type">EncryptSharedFileResult</a><span class="tsd-signature-symbol">&gt;</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/VirgilSecurity/virgil-e3kit-js/blob/0a4bb97/packages/e3kit-browser/src/EThree.ts#L507">e3kit-browser/src/EThree.ts:507</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Encrypts file with <code>fileKey</code> which can be shared among other users.
+									You can define chunk size and a callback, that will be invoked on each chunk.</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>file: <span class="tsd-signature-type">File</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">Blob</span></h5>
+								</li>
+								<li>
+									<h5><span class="tsd-flag ts-flagOptional">Optional</span> options: <a href="../interfaces/encryptsharedfileoptions.html" class="tsd-signature-type">EncryptSharedFileOptions</a></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../index.html#encryptsharedfileresult" class="tsd-signature-type">EncryptSharedFileResult</a><span class="tsd-signature-symbol">&gt;</span></h4>
 						</li>
 					</ul>
 				</section>
@@ -1500,7 +1561,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/VirgilSecurity/virgil-e3kit-js/blob/d2a4982/packages/e3kit-browser/src/EThree.ts#L86">e3kit-browser/src/EThree.ts:86</a></li>
+									<li>Defined in <a href="https://github.com/VirgilSecurity/virgil-e3kit-js/blob/0a4bb97/packages/e3kit-browser/src/EThree.ts#L89">e3kit-browser/src/EThree.ts:89</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -1526,7 +1587,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/VirgilSecurity/virgil-e3kit-js/blob/d2a4982/packages/e3kit-browser/src/EThree.ts#L60">e3kit-browser/src/EThree.ts:60</a></li>
+									<li>Defined in <a href="https://github.com/VirgilSecurity/virgil-e3kit-js/blob/0a4bb97/packages/e3kit-browser/src/EThree.ts#L63">e3kit-browser/src/EThree.ts:63</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1633,6 +1694,9 @@
 							<li class=" tsd-kind-method tsd-parent-kind-class">
 								<a href="ethree.html#decryptfile" class="tsd-kind-icon">decrypt<wbr>File</a>
 							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="ethree.html#decryptsharedfile" class="tsd-kind-icon">decrypt<wbr>Shared<wbr>File</a>
+							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
 								<a href="ethree.html#deletegroup" class="tsd-kind-icon">delete<wbr>Group</a>
 							</li>
@@ -1641,6 +1705,9 @@
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class">
 								<a href="ethree.html#encryptfile" class="tsd-kind-icon">encrypt<wbr>File</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="ethree.html#encryptsharedfile" class="tsd-kind-icon">encrypt<wbr>Shared<wbr>File</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
 								<a href="ethree.html#findusers" class="tsd-kind-icon">find<wbr>Users</a>
@@ -1692,6 +1759,9 @@
 						<a href="../interfaces/decryptfileoptions.html" class="tsd-kind-icon">Decrypt<wbr>File<wbr>Options</a>
 					</li>
 					<li class=" tsd-kind-interface">
+						<a href="../interfaces/decryptsharedfileoptions.html" class="tsd-kind-icon">Decrypt<wbr>Shared<wbr>File<wbr>Options</a>
+					</li>
+					<li class=" tsd-kind-interface">
 						<a href="../interfaces/ethreectoroptions.html" class="tsd-kind-icon">EThree<wbr>Ctor<wbr>Options</a>
 					</li>
 					<li class=" tsd-kind-interface">
@@ -1699,6 +1769,9 @@
 					</li>
 					<li class=" tsd-kind-interface">
 						<a href="../interfaces/encryptfileoptions.html" class="tsd-kind-icon">Encrypt<wbr>File<wbr>Options</a>
+					</li>
+					<li class=" tsd-kind-interface">
+						<a href="../interfaces/encryptsharedfileoptions.html" class="tsd-kind-icon">Encrypt<wbr>Shared<wbr>File<wbr>Options</a>
 					</li>
 					<li class=" tsd-kind-interface">
 						<a href="../interfaces/fileoptions.html" class="tsd-kind-icon">File<wbr>Options</a>
@@ -1728,6 +1801,9 @@
 						<a href="../index.html#ethreebaseinitializeoptions" class="tsd-kind-icon">EThree<wbr>Base<wbr>Initialize<wbr>Options</a>
 					</li>
 					<li class=" tsd-kind-type-alias">
+						<a href="../index.html#encryptsharedfileresult" class="tsd-kind-icon">Encrypt<wbr>Shared<wbr>File<wbr>Result</a>
+					</li>
+					<li class=" tsd-kind-type-alias">
 						<a href="../index.html#findusersresult" class="tsd-kind-icon">Find<wbr>Users<wbr>Result</a>
 					</li>
 					<li class=" tsd-kind-type-alias">
@@ -1744,6 +1820,9 @@
 					</li>
 					<li class=" tsd-kind-type-alias">
 						<a href="../index.html#nodebuffer" class="tsd-kind-icon">Node<wbr>Buffer</a>
+					</li>
+					<li class=" tsd-kind-type-alias">
+						<a href="../index.html#stringencoding" class="tsd-kind-icon">String<wbr>Encoding</a>
 					</li>
 					<li class=" tsd-kind-type-alias">
 						<a href="../index.html#virgil_stream_decrypting_state" class="tsd-kind-icon">VIRGIL_<wbr>STREAM_<wbr>DECRYPTING_<wbr>STATE</a>
