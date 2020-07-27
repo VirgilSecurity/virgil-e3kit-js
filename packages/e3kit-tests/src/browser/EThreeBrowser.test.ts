@@ -21,7 +21,6 @@ import {
     VirgilCrypto,
     VirgilCryptoError,
     VirgilCryptoErrorStatus,
-    VirgilPrivateKey,
 } from 'virgil-crypto';
 import { JwtGenerator, KeyEntryStorage } from 'virgil-sdk';
 import compatibilityData from '../common/compatibility_data.json';
@@ -493,6 +492,20 @@ describe('EThreeBrowser', () => {
                 return;
             }
             expect.fail();
+        });
+
+        it('compatibility test', async () => {
+            const encryptedFile = b64toBlob(
+                compatibilityData.encryptSharedFile.encryptedData,
+                'foo.txt',
+            );
+            const decryptedFile = await sdk1.decryptSharedFile(
+                encryptedFile,
+                compatibilityData.encryptSharedFile.fileKey,
+                virgilCrypto.importPublicKey(compatibilityData.encryptSharedFile.senderPublicKey),
+            );
+            const decryptedString = await readFile(decryptedFile);
+            expect(decryptedString).to.equal(compatibilityData.encryptSharedFile.originData);
         });
     });
 });
