@@ -2,7 +2,16 @@
 
 This directory contains various demos for E3Kit JavaScript. 
 
-Before launching any of the examples in the directory, first run the [sample backend](https://github.com/VirgilSecurity/virgil-e3kit-js/tree/master/examples/backend) for them.
+## Prerequisites
+
+- Navigate to the repository root and install dependencies with [Yarn](https://yarnpkg.com/en/).
+  ```sh
+  yarn install
+  ```
+  > You need to use Yarn because we use [Workspaces](https://yarnpkg.com/lang/en/docs/workspaces/) in this repository
+- Before launching any of the examples in the directory, first set up and run the [sample backend](https://github.com/VirgilSecurity/virgil-e3kit-js/tree/master/examples/backend) for them.
+
+## Directory contents
 
 | Demo | Description |
 | --- | --- |
