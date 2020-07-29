@@ -65,7 +65,6 @@
                 chunkSize: 65536, // default chunk is 64kb
                 onProgress: ({ bytesProcessed, fileSize }) => {
                     // use this callback to draw a progress bar
-                    console.log( bytesProcessed, fileSize)
                 }
             });
             download(encryptedSharedFile);
@@ -87,7 +86,6 @@
                 chunkSize: 65536, // default chunk is 64kb
                 onProgress: ({ bytesProcessed, fileSize }) => {
                     // use this callback to draw a progress bar
-                    console.log( bytesProcessed, fileSize)
                 }
             })
 
