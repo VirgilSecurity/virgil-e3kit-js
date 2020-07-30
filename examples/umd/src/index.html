@@ -7,7 +7,9 @@
     <title>Virgil E3Kit SDK UMD example</title>
 </head>
 <body>
-    This demo works only in one session (without refresh)!
+    <p>
+        This demo works only in one session (without refresh)!
+    </p>
     <p>
         <label>
             input file:
@@ -81,7 +83,7 @@
             const encryptedFile = document.getElementById('file-input').files[0];
             const fileKey = document.getElementById('file-key-input').value;
 
-            const decryptedSharedFile = await eThree.decryptSharedFile(file, fileKey, undefined, {
+            const decryptedSharedFile = await eThree.decryptSharedFile(encryptedFile, fileKey, undefined, {
                 signal: abortController.signal,
                 chunkSize: 65536, // default chunk is 64kb
                 onProgress: ({ bytesProcessed, fileSize }) => {
@@ -104,24 +106,6 @@
             element.click();
 
             document.body.removeChild(element);
-        }
-
-        async function readFileKey(fileKey) {
-            const reader = new FileReader();
-
-            reader.readAsArrayBuffer(fileKey);
-
-            const promise = new Promise((resolve, reject) => {
-                reader.onload = function() {
-                    resolve(new Uint8Array(reader.result));
-                };
-
-                reader.onerror = function() {
-                    reject(reader.error);
-                };
-            })
-
-            return await promise;
         }
 
         function showInfo(message) {
