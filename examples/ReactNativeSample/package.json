@@ -3,6 +3,7 @@
   "version": "2.4.0",
   "private": true,
   "scripts": {
+    "install:ios": "cd ios && pod install && cd ../",
     "android": "react-native run-android",
     "ios": "react-native run-ios",
     "start": "react-native start",

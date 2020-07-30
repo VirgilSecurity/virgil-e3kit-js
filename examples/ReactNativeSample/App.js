@@ -116,16 +116,18 @@ export default class App extends Component {
             await alice.deleteGroup(groupId);
 
             this.reportStep('Alice deletes private key backup...');
-            await alice.resetPrivateKeyBackup('alice_pa$$w0rd');
+            await alice.resetPrivateKeyBackup();
 
             this.reportStep('Alice unregisters...');
             await alice.unregister();
 
             this.reportStep('Bob deletes private key backup...');
-            await bob.resetPrivateKeyBackup('bob_pa$$w0rd');
+            await bob.resetPrivateKeyBackup();
 
             this.reportStep('Bob unregisters...');
             await bob.unregister();
+
+            this.reportStep('Success!');
         } catch (err) {
             console.error(err);
             this.setState({ error: err.toString() });

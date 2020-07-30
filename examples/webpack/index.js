@@ -64,16 +64,18 @@ const report = message => {
         await alice.deleteGroup(groupId);
 
         report('Alice deletes private key backup...');
-        await alice.resetPrivateKeyBackup('alice_pa$$w0rd');
+        await alice.resetPrivateKeyBackup();
 
         report('Alice unregisters...');
         await alice.unregister();
 
         report('Bob deletes private key backup...');
-        await bob.resetPrivateKeyBackup('bob_pa$$w0rd');
+        await bob.resetPrivateKeyBackup();
 
         report('Bob unregisters...');
         await bob.unregister();
+
+        report('Success!');
     } catch (error) {
         report(error.toString());
     }

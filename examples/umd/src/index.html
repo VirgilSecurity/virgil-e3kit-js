@@ -7,32 +7,92 @@
     <title>Virgil E3Kit SDK UMD example</title>
 </head>
 <body>
-    <script type="text/javascript" src="https://unpkg.com/@virgilsecurity/e3kit-browser@^2.0.0/dist/browser.asmjs.umd.js"></script>
+    <script src="https://unpkg.com/@virgilsecurity/e3kit-browser@^2.3.3/dist/browser.umd.js"></script>
     <script type="text/javascript">
         const API_URL = 'http://localhost:8080';
 
-        const getToken = async () => {
-            const identity = `identity-${Math.random()}`;
-            const response = await fetch(`${API_URL}/virgil-jwt?identity=${identity}`);
+        const createGetToken = identity => async () => {
+            const response = await fetch(
+            `${API_URL}/virgil-jwt?identity=${identity}`);
             const { virgil_jwt: virgilJwt } = await response.json();
             return virgilJwt;
         };
 
+        const log = (message) => {
+            const paragraph = document.createElement('p');
+            const textNode = document.createTextNode(message);
+            paragraph.appendChild(textNode);
+            document.body.appendChild(paragraph);
+        };
+
         (async () => {
-            let message;
             try {
-                const sdk = await E3kit.EThree.initialize(getToken);
-                await sdk.register();
-                await sdk.backupPrivateKey('pa$$w0rd');
-                const encryptedMessage = await sdk.encrypt('Success');
-                message = await sdk.decrypt(encryptedMessage);
+                const { EThree } = E3kit;
+                const alice = await EThree.initialize(createGetToken(`alice-${Math.random()}`));
+                const bob = await EThree.initialize(createGetToken(`bob-${Math.random()}`));
+
+                log("Alice registers...");
+                await alice.register();
+
+                log("Alice creates private key backup...");
+                await alice.backupPrivateKey("alice_pa$$w0rd");
+
+                log("Bob registers...");
+                await bob.register();
+
+                log("Bob creates private key backup...");
+                await bob.backupPrivateKey("bob_pa$$w0rd");
+
+                log("Alice searches for Bob's card...");
+                const bobCard = await alice.findUsers(bob.identity);
+
+                log("Alice encrypts message for Bob...");
+                const encryptedForBob = await alice.encrypt("Hello Bob!", bobCard);
+
+                log("Bob searches for Alice's card...");
+                const aliceCard = await bob.findUsers(alice.identity);
+
+                log("Bob decrypts the message...");
+                const decryptedByBob = await bob.decrypt(encryptedForBob, aliceCard);
+
+                log("Decrypted message: " + decryptedByBob);
+
+                const groupId = "AliceAndBobGroup";
+
+                log("Alice creates a group with Bob...")
+                const aliceGroup = await alice.createGroup(groupId, bobCard);
+
+                log("Alice encrypts message for the group...")
+                const encryptedForGroup = await aliceGroup.encrypt("Hello group!");
+
+                log("Bob loads the group by ID from the Cloud...")
+                const bobGroup = await bob.loadGroup(groupId, aliceCard);
+
+                log("Bob decrypts the group message...")
+                const decryptedByGroup = await bobGroup.decrypt(
+                    encryptedForGroup,
+                    aliceCard
+                );
+
+                log("Decrypted group message: " + decryptedByGroup);
+
+                log("Alice deletes group...");
+                await alice.deleteGroup(groupId);
+
+                log("Alice deletes private key backup...");
+                await alice.resetPrivateKeyBackup();
+
+                log("Alice unregisters...");
+                await alice.unregister();
+
+                log("Bob deletes private key backup...");
+                await bob.resetPrivateKeyBackup();
+                log("Bob unregisters...");
+                await bob.unregister();
+
+                log("Success");
             } catch (error) {
-                message = error.toString();
-            } finally {
-                const paragraph = document.createElement('p');
-                const textNode = document.createTextNode(message);
-                paragraph.appendChild(textNode);
-                document.body.appendChild(paragraph);
+                log(error.toString());
             }
         })();
     </script>
