@@ -91,7 +91,7 @@ export class E3KitService {
 
             messages.push('Alice deletes private key backup...');
             observer.next(messages);
-            await alice.resetPrivateKeyBackup('alice_pa$$w0rd');
+            await alice.resetPrivateKeyBackup();
 
             messages.push('Alice unregisters...');
             observer.next(messages);
@@ -99,11 +99,13 @@ export class E3KitService {
 
             messages.push('Bob deletes private key backup...');
             observer.next(messages);
-            await bob.resetPrivateKeyBackup('bob_pa$$w0rd');
+            await bob.resetPrivateKeyBackup();
 
             messages.push('Bob unregisters...');
             observer.next(messages);
             await bob.unregister();
+
+            messages.push('Success!');
         } catch (error) {
             messages.push(error.toString());
             observer.next(messages);

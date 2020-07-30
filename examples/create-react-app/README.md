@@ -18,6 +18,21 @@ Also, get extra help from our support team on [Slack](https://virgilsecurity.com
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
+## Get Started
+
+1. Configure and start the server in the `examples/backend` folder following instructions in `../examples/backend/README.md`.
+2. Install dependencies with [Yarn](https://yarnpkg.com/en/)
+  ```sh
+  yarn install
+  ```
+  > You need to use Yarn because we use [Workspaces](https://yarnpkg.com/lang/en/docs/workspaces/) in this repository :)
+3. Create `.env` file. Use `.env.example` as a reference.
+4. Run the following command to start the demo
+  ```sh
+  yarn start
+  ```
+> ⚠️ If you see `Cannot find module '@virgilsecurity/e3kit-browser'` Error, make sure you did `yarn install` in the root folder
+
 ## Available Scripts
 
 In the project directory, you can run:
