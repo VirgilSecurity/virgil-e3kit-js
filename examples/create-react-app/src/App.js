@@ -4,9 +4,9 @@ import { EThree } from "@virgilsecurity/e3kit-browser";
 import "./App.css";
 
 const createGetToken = identity => async () => {
+  const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080';
   const response = await fetch(
-    `${process.env.REACT_APP_API_URL}/virgil-jwt?identity=${identity}`
-  );
+  `${API_URL}/virgil-jwt?identity=${identity}`);
   const { virgil_jwt: virgilJwt } = await response.json();
   return virgilJwt;
 };
@@ -94,7 +94,7 @@ function App() {
         setMessages(messages =>
           messages.concat(["Alice deletes private key backup..."])
         );
-        await alice.resetPrivateKeyBackup("alice_pa$$w0rd");
+        await alice.resetPrivateKeyBackup();
 
         setMessages(messages => messages.concat(["Alice unregisters..."]));
         await alice.unregister();
@@ -102,9 +102,11 @@ function App() {
         setMessages(messages =>
           messages.concat(["Bob deletes private key backup..."])
         );
-        await bob.resetPrivateKeyBackup("bob_pa$$w0rd");
+        await bob.resetPrivateKeyBackup();
         setMessages(messages => messages.concat(["Bob unregisters..."]));
         await bob.unregister();
+
+        setMessages(messages => messages.concat(["Success!"]));
       } catch (error) {
         setMessages(messages => messages.concat([error.toString()]));
       }

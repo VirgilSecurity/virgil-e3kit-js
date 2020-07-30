@@ -13,6 +13,7 @@ Sample project demonstrating the usage of `@virgilsecurity/e3kit-browser` in [Io
   ```sh
   yarn start
   ```
+> ⚠️ If you see `Cannot find module '@virgilsecurity/e3kit-browser'` Error, make sure you did `yarn install` in the root folder
 
 ## License
 This library is released under the [3-clause BSD License](LICENSE).

@@ -36,6 +36,7 @@ const createGetToken = identity => async () => {
     try {
         const alice = await EThree.initialize(createGetToken(`alice-${Math.random()}`), {
             apiUrl: process.env.VIRGIL_API_URL,
+            groupStorageName: '.virgil-group-storage-alice',
         });
         const bob = await EThree.initialize(createGetToken(`bob-${Math.random()}`), {
             apiUrl: process.env.VIRGIL_API_URL,
@@ -87,16 +88,18 @@ const createGetToken = identity => async () => {
         await alice.deleteGroup(groupId);
 
         console.log('Alice deletes private key backup...');
-        await alice.resetPrivateKeyBackup('alice_pa$$w0rd');
+        await alice.resetPrivateKeyBackup();
 
         console.log('Alice unregisters...');
         await alice.unregister();
 
         console.log('Bob deletes private key backup...');
-        await bob.resetPrivateKeyBackup('bob_pa$$w0rd');
+        await bob.resetPrivateKeyBackup();
 
         console.log('Bob unregisters...');
         await bob.unregister();
+
+        console.log('Success!');
     } catch (error) {
         console.log(error.toString());
     }
