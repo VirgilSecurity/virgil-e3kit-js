@@ -7,7 +7,27 @@
     <title>Virgil E3Kit SDK UMD example</title>
 </head>
 <body>
-    <script src="https://unpkg.com/@virgilsecurity/e3kit-browser@^2.3.3/dist/browser.umd.js"></script>
+    <p>
+        This demo works only in one session (without refresh)!
+    </p>
+    <p>
+        <label>
+            input file:
+            <br />
+            <input id="file-input" type="file" />
+        </label>
+    </p>
+    <p>
+        <label>
+            file key (only for decrypt):
+            <br />
+            <input id="file-key-input" type="text" />
+        </label>
+    </p>
+    <button onclick="encrypt()">encrypt</button>
+    <button onclick="decrypt()">decrypt</button>
+    <button onclick="demo()">run demo</button>
+    <script type="text/javascript" src="https://unpkg.com/@virgilsecurity/e3kit-browser@^2.0.0/dist/browser.asmjs.umd.js"></script>
     <script type="text/javascript">
         const API_URL = 'http://localhost:8080';
 
@@ -18,6 +38,23 @@
             return virgilJwt;
         };
 
+        const sdk = (async () => {
+            let message;
+            try {
+                const eThree = await E3kit.EThree.initialize(createGetToken(`shared-file-${Math.random()}`));
+                await eThree.register();
+                await eThree.backupPrivateKey('pa$$w0rd');
+                const encryptedMessage = await eThree.encrypt('Success');
+                message = await eThree.decrypt(encryptedMessage);
+
+                return eThree;
+            } catch (error) {
+                message = error.toString();
+            } finally {
+                log(message);
+            }
+        })();
+
         const log = (message) => {
             const paragraph = document.createElement('p');
             const textNode = document.createTextNode(message);
@@ -25,7 +62,7 @@
             document.body.appendChild(paragraph);
         };
 
-        (async () => {
+        const demo = async () => {
             try {
                 const { EThree } = E3kit;
                 const alice = await EThree.initialize(createGetToken(`alice-${Math.random()}`));
@@ -94,7 +131,61 @@
             } catch (error) {
                 log(error.toString());
             }
-        })();
+        };
+
+        async function encrypt() {
+            const eThree = await sdk;
+
+            const abortController = new AbortController();
+            // You can get file from <input id="file-input" type="file" /> html tag or
+            // create with File API
+            const file = document.getElementById('file-input').files[0];
+
+            const { encryptedSharedFile, fileKey } = await eThree.encryptSharedFile(file, {
+                signal: abortController.signal,
+                chunkSize: 65536, // default chunk is 64kb
+                onProgress: ({ bytesProcessed, fileSize }) => {
+                    // use this callback to draw a progress bar
+                }
+            });
+            download(encryptedSharedFile);
+            log('File Key:' + fileKey.toString('base64'))
+        }
+
+
+        async function decrypt() {
+            const eThree = await sdk;
+
+            const abortController = new AbortController();
+            // You can get file from <input id="file-input" type="file" /> html tag or
+            // create with File API
+            const encryptedFile = document.getElementById('file-input').files[0];
+            const fileKey = document.getElementById('file-key-input').value;
+
+            const decryptedSharedFile = await eThree.decryptSharedFile(encryptedFile, fileKey, undefined, {
+                signal: abortController.signal,
+                chunkSize: 65536, // default chunk is 64kb
+                onProgress: ({ bytesProcessed, fileSize }) => {
+                    // use this callback to draw a progress bar
+                }
+            })
+
+            download(decryptedSharedFile)
+        }
+
+        function download(file) {
+            var element = document.createElement('a');
+            element.setAttribute('href', URL.createObjectURL(file));
+            element.setAttribute('download', file.name);
+
+            element.style.display = 'none';
+            document.body.appendChild(element);
+
+            element.click();
+
+            document.body.removeChild(element);
+        }
+
     </script>
 </body>
 </html>

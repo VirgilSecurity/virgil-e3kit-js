@@ -88,6 +88,37 @@ function App() {
           messages.concat(["Decrypted group message: " + decryptedByGroup])
         );
 
+        setMessages(messages =>
+            messages.concat(["Encrypting shared file ..."])
+        );
+        const { encryptedSharedFile, fileKey } = await alice.encryptSharedFile(
+            new File(['some file'], 'some_file.txt')
+        );
+
+        setMessages(messages =>
+            messages.concat(["Encrypting file key for group ..."])
+        );
+
+        const encryptedFileKeyForGroup = await aliceGroup.encrypt(fileKey);
+
+        const decryptedFileKey = await bobGroup.decrypt(encryptedFileKeyForGroup, aliceCard);
+
+        setMessages(messages =>
+            messages.concat(["Decrypted file key from group is: " + decryptedFileKey.toString('base64')])
+        );
+
+        const decryptedSharedFile = await bob.decryptSharedFile(
+            encryptedSharedFile,
+            decryptedFileKey,
+            aliceCard
+        );
+
+        setMessages(messages =>
+            messages.concat(["Downloading encrypted file"])
+        );
+
+        download(decryptedSharedFile)
+
         setMessages(messages => messages.concat(["Alice deletes group..."]));
         await alice.deleteGroup(groupId);
 
@@ -113,6 +144,19 @@ function App() {
     })();
   }, []);
   return messages.map(message => <p key={message}>{message}</p>);
+}
+
+function download(file) {
+    var element = document.createElement('a');
+    element.setAttribute('href', URL.createObjectURL(file));
+    element.setAttribute('download', file.name);
+
+    element.style.display = 'none';
+    document.body.appendChild(element);
+
+    element.click();
+
+    document.body.removeChild(element);
 }
 
 export default App;
