@@ -587,15 +587,12 @@ export abstract class AbstractEThree {
         this.inProcess = true;
         try {
             const cards = await this.cardManager.searchCards(this.identity);
-
-            if (cards.length > 1) {
-                throw new MultipleCardsError(this.identity);
-            }
             if (cards.length === 0) {
                 throw new RegisterRequiredError();
             }
-
-            await this.cardManager.revokeCard(cards[0].id);
+            for (const card of cards) {
+                await this.cardManager.revokeCard(card.id);
+            }
             await this.keyLoader.resetLocalPrivateKey();
             await this.onPrivateKeyDeleted();
         } finally {
