@@ -706,6 +706,27 @@ describe('EThree', () => {
             expect(cards).to.have.length(0);
             expect(key).to.be.null;
         });
+        it('revoke all Virgil Cards for identity', async () => {
+            const identity = uuid();
+            const keyPair = virgilCrypto.generateKeys();
+            const fetchToken = createFetchToken(identity);
+            const sdk = await initializeEThree(fetchToken);
+            await sdk.register();
+            await cardManager.publishCard({ identity: identity, ...keyPair });
+            const prevCards = await cardManager.searchCards(identity);
+            expect(prevCards).to.have.length(2);
+            try {
+                await sdk.unregister();
+            } catch (e) {
+                expect.fail();
+            }
+            const [cards, key] = await Promise.all([
+                cardManager.searchCards(identity),
+                keyEntryStorage.load(identity),
+            ]);
+            expect(cards).to.have.length(0);
+            expect(key).to.be.null;
+        });
     });
 
     describe('findUsers', () => {
