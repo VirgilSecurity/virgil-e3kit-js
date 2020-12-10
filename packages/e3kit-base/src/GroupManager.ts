@@ -191,6 +191,11 @@ export class GroupManager {
         await localGroupStorage.reset();
     }
 
+    async close() {
+        const localGroupStorage = await this.getLocalGroupStorage();
+        await localGroupStorage.close();
+    }
+
     private get selfIdentity() {
         return this._selfIdentity;
     }

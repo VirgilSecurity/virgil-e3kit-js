@@ -171,6 +171,10 @@ export abstract class AbstractEThree {
         await this.onPrivateKeyDeleted();
     }
 
+    async close() {
+        await this.groupManager.close();
+    }
+
     /**
      * Delete private key saved in Virgil Keyknox Storage.
      * @returns {Promise<void>} - Promise that is resolved if everything went fine.

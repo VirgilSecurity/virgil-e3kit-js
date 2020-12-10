@@ -81,6 +81,12 @@ export class GroupLocalStorage {
         await this._db.clear();
     }
 
+    async close() {
+        if (this._db.isOpen()) {
+            await this._db.close();
+        }
+    }
+
     async addParticipants(sessionId: string, participants: string[]) {
         const [ticket] = await this.retrieveNLastTickets(sessionId, 1);
         const newTicket: Ticket = {
