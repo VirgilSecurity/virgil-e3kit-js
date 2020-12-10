@@ -1,5 +1,6 @@
 import {
     CloudGroupTicketStorage,
+    GroupTicketAlreadyExistsError,
     KeyknoxManager,
     KeyknoxCrypto,
     KeyknoxClient,
@@ -42,7 +43,20 @@ export class GroupManager {
 
     async store(ticket: Ticket, cards: ICard[]) {
         const cloudTicketStorage = await this.getCloudTicketStorage();
-        await cloudTicketStorage.store(ticket.groupSessionMessage, cards);
+
+        try {
+            await cloudTicketStorage.store(ticket.groupSessionMessage, cards);
+        } catch (error) {
+            if (error instanceof GroupTicketAlreadyExistsError) {
+                throw new GroupError(
+                    GroupErrorCode.GroupExists,
+                    'Group with given id already exists',
+                );
+            } else {
+                throw error;
+            }
+        }
+
         const group = new Group({
             initiator: this.selfIdentity,
             tickets: [ticket],
