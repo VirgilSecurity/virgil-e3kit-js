@@ -8,17 +8,30 @@ import { AbstractLevelDOWN } from 'abstract-leveldown';
 
 import { PrivateKeyLoader } from '../PrivateKeyLoader';
 import { AbstractEThree } from '../AbstractEThree';
-import { UsersNotFoundError, UsersFoundWithMultipleCardsError } from '../errors';
+import {
+    UsersNotFoundError,
+    UsersFoundWithMultipleCardsError,
+    IdentityAlreadyExistsError,
+    MultipleCardsError,
+    RegisterRequiredError,
+} from '../errors';
 import { ICrypto } from '../types';
+import memdown from 'memdown';
 
 use(chaiAsPromised);
+
+const getRandomString = (prefix?: string) => {
+    return `${prefix ? prefix : ''}${Math.random()
+        .toString(36)
+        .substr(2)}`;
+};
 
 let cryptoStub: sinon.SinonStubbedInstance<ICrypto>;
 let cardManagerStub: sinon.SinonStubbedInstance<CardManager>;
 let keyLoaderStub: sinon.SinonStubbedInstance<PrivateKeyLoader>;
 let accessTokenProviderStub: sinon.SinonStubbedInstance<CachingJwtProvider>;
 let keyEntryStorageStub: sinon.SinonStubbedInstance<KeyEntryStorage>;
-let groupStorageLeveldownStub: sinon.SinonStubbedInstance<AbstractLevelDOWN>;
+let groupStorageLeveldownStub: AbstractLevelDOWN;
 
 class MyEThree extends AbstractEThree {
     constructor(identity: string) {
@@ -43,7 +56,7 @@ beforeEach(() => {
     keyLoaderStub = sinon.createStubInstance(PrivateKeyLoader);
     accessTokenProviderStub = sinon.createStubInstance(CachingJwtProvider);
     keyEntryStorageStub = sinon.createStubInstance(KeyEntryStorage);
-    groupStorageLeveldownStub = sinon.createStubInstance(AbstractLevelDOWN);
+    groupStorageLeveldownStub = memdown();
 });
 
 afterEach(() => {
@@ -52,6 +65,40 @@ afterEach(() => {
 });
 
 describe('AbstractEthree', () => {
+    describe('register', () => {
+        it('throws IdentityAlreadyExistsError when identity already has card', async () => {
+            const ethree = new MyEThree('my_identity');
+            cardManagerStub.searchCards.resolves([{ identity: 'my_identity' } as ICard]);
+            return expect(ethree.register()).eventually.rejectedWith(IdentityAlreadyExistsError);
+        });
+        it('throws MultipleCardsError when identity already has multiple cards', async () => {
+            const ethree = new MyEThree('my_identity');
+            cardManagerStub.searchCards.resolves([
+                { identity: 'my_identity' } as ICard,
+                { identity: 'my_identity' } as ICard,
+            ]);
+            return expect(ethree.register()).eventually.rejectedWith(MultipleCardsError);
+        });
+    });
+    describe('unregister', () => {
+        it('throws RegisterRequiredError when identity has no any cards', async () => {
+            const ethree = new MyEThree('my_identity');
+            cardManagerStub.searchCards.resolves([]);
+            return expect(ethree.unregister()).eventually.rejectedWith(RegisterRequiredError);
+        });
+        it('revoke all cards for identity', async () => {
+            const ethree = new MyEThree('my_identity');
+            const identitiesCards = [
+                { id: getRandomString(), identity: 'my_identity' } as ICard,
+                { id: getRandomString(), identity: 'my_identity' } as ICard,
+            ];
+            cardManagerStub.searchCards.resolves(identitiesCards);
+            await ethree.unregister();
+            expect(cardManagerStub.revokeCard.callCount).to.eq(2);
+            expect(cardManagerStub.revokeCard.firstCall.args[0]).to.eq(identitiesCards[0].id);
+            expect(cardManagerStub.revokeCard.secondCall.args[0]).to.eq(identitiesCards[1].id);
+        });
+    });
     describe('findUsers', () => {
         it('throws when identities not provided', async () => {
             const ethree = new MyEThree('my_identity');
@@ -95,8 +142,7 @@ describe('AbstractEthree', () => {
         it('throws if the Card is not found for an identity', () => {
             cardManagerStub.searchCards.resolves([{ identity: 'this_one_exists' } as ICard]);
             const ethree = new MyEThree('my_identity');
-
-            expect(
+            return expect(
                 ethree.findUsers(['this_one_exists', 'but_this_does_not']),
             ).eventually.rejectedWith(UsersNotFoundError);
         });
@@ -107,7 +153,7 @@ describe('AbstractEthree', () => {
                 { identity: 'with_many_cards' } as ICard,
             ]);
             const ethree = new MyEThree('my_identity');
-            expect(ethree.findUsers('with_many_cards')).eventually.rejectedWith(
+            return expect(ethree.findUsers('with_many_cards')).eventually.rejectedWith(
                 UsersFoundWithMultipleCardsError,
             );
         });
