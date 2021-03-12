@@ -18,7 +18,7 @@
         "@types/uuid": "^3.4.6",
         "@virgilsecurity/e3kit-browser": "^2.4.1",
         "@virgilsecurity/e3kit-node": "^2.4.1",
-        "@virgilsecurity/keyknox": "^1.0.1",
+        "@virgilsecurity/keyknox": "^1.0.2",
         "@virgilsecurity/pythia-crypto": "^1.1.2",
         "chai": "^4.2.0",
         "concurrently": "^5.1.0",
@@ -37,7 +37,7 @@
         "typescript": "^3.7.5",
         "uuid": "^3.4.0",
         "virgil-crypto": "^4.1.2",
-        "virgil-pythia": "^1.0.1",
+        "virgil-pythia": "^1.0.2",
         "virgil-sdk": "^6.1.2",
         "webpack": "^4.41.5"
     },
