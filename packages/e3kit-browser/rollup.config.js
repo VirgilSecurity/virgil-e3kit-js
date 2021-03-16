@@ -138,10 +138,8 @@ const createEntry = (target, cryptoType, format) => {
             }),
             cryptoType === CRYPTO_TYPE.WASM &&
                 copy({
-                    targets: [
-                        { src: foundationWasmPath, dest: outputPath },
-                        { src: pythiaWasmPath, dest: outputPath },
-                    ],
+                    outputFolder: outputPath,
+                    targets: [foundationWasmPath, pythiaWasmPath],
                 }),
         ],
     };
