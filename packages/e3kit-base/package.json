@@ -1,6 +1,6 @@
 {
     "name": "@virgilsecurity/e3kit-base",
-    "version": "2.4.1",
+    "version": "2.4.2",
     "description": "End-to-end encryption with multiple device support powered by Virgil Security",
     "main": "./dist/e3kit-base.cjs.js",
     "module": "./dist/e3kit-base.es.js",
@@ -22,12 +22,12 @@
         "@types/abstract-leveldown": "^5.0.1",
         "@types/levelup": "^4.3.0",
         "@virgilsecurity/crypto-types": "^1.0.0",
-        "@virgilsecurity/keyknox": "^1.0.1",
+        "@virgilsecurity/keyknox": "^1.0.2",
         "@virgilsecurity/sdk-crypto": "^1.0.0",
         "abstract-leveldown": "^6.2.2",
         "levelup": "^4.3.2",
         "subleveldown": "^4.1.4",
-        "virgil-pythia": "^1.0.1",
+        "virgil-pythia": "^1.0.2",
         "virgil-sdk": "^6.1.2"
     },
     "devDependencies": {
@@ -42,7 +42,7 @@
         "mocha": "^7.0.1",
         "rimraf": "^3.0.0",
         "rollup": "^1.29.1",
-        "rollup-plugin-license": "^0.13.0",
+        "rollup-plugin-license": "^2.3.0",
         "rollup-plugin-typescript2": "^0.25.3",
         "sinon": "8.1.1",
         "ts-node": "^8.6.2",
