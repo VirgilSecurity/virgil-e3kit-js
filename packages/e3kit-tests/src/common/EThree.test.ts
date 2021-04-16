@@ -114,7 +114,7 @@ describe('EThree', () => {
             keyPair.privateKey,
             keyPair.publicKey,
         );
-        if(!skipSync) {
+        if (!skipSync) {
             await storage.retrieveCloudEntries();
         }
         return storage;
@@ -426,7 +426,6 @@ describe('EThree', () => {
             }
             expect.fail();
         });
-
     });
 
     describe('restorePrivateKey', () => {
@@ -486,11 +485,9 @@ describe('EThree', () => {
             }
             expect.fail();
         });
-
     });
 
     describe('backupPrivateKey with keyName', () => {
-
         it('success', async () => {
             const identity = uuid();
             const fetchToken = () =>
@@ -530,11 +527,9 @@ describe('EThree', () => {
             }
             expect.fail();
         });
-
     });
 
     describe('restorePrivateKey with keyName', () => {
-
         it('has no private key', async () => {
             const identity = uuid();
             const keyPassword = uuid();
@@ -656,7 +651,6 @@ describe('EThree', () => {
             }
             expect.fail();
         });
-
     });
 
     describe('encrypt and decrypt', () => {
