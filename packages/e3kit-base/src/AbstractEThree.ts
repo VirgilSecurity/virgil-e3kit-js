@@ -150,10 +150,11 @@ export abstract class AbstractEThree {
     /**
      * Downloads private key from Virgil Cloud. Use [[backupPrivateKey]] to upload the key first.
      * @param pwd User password for access to Virgil Keyknox Storage.
+     * @param keyName Is a name for the key backup in the cloud.
      */
-    async restorePrivateKey(pwd: string): Promise<void> {
+    async restorePrivateKey(pwd: string, keyName?: string): Promise<void> {
         try {
-            await this.keyLoader.restorePrivateKey(pwd);
+            await this.keyLoader.restorePrivateKey(pwd, keyName);
         } catch (e) {
             if (e instanceof KeyEntryAlreadyExistsError) {
                 throw new PrivateKeyAlreadyExistsError();
@@ -556,13 +557,15 @@ export abstract class AbstractEThree {
 
     /**
      * Uploads current user private key to Virgil Keyknox Storage.
+     * @param pwd User password for access to Virgil Keyknox Storage
+     * @param keyName Is a name that would be used to store backup in the cloud.
      */
-    async backupPrivateKey(pwd: string): Promise<void> {
+    async backupPrivateKey(pwd: string, keyName?: string): Promise<void> {
         const privateKey = await this.keyLoader.loadLocalPrivateKey();
         if (!privateKey) {
             throw new MissingPrivateKeyError();
         }
-        await this.keyLoader.savePrivateKeyRemote(privateKey, pwd);
+        await this.keyLoader.savePrivateKeyRemote(privateKey, pwd, keyName);
         return;
     }
 

@@ -96,7 +96,7 @@ describe('EThree', () => {
             keyPairType: KeyPairType.ED25519,
         });
 
-    const createSyncStorage = async (identity: string, password: string) => {
+    const createSyncStorage = async (identity: string, password: string, skipSync = false) => {
         await sleep(BRAIN_KEY_RATE_LIMIT_DELAY);
         const fetchToken = createFetchToken(identity);
         const brainKey = createBrainKey({
@@ -114,7 +114,9 @@ describe('EThree', () => {
             keyPair.privateKey,
             keyPair.publicKey,
         );
-        await storage.retrieveCloudEntries();
+        if (!skipSync) {
+            await storage.retrieveCloudEntries();
+        }
         return storage;
     };
 
@@ -477,6 +479,172 @@ describe('EThree', () => {
             expect(privateKey).not.to.be.undefined;
             try {
                 await sdk.restorePrivateKey(pwd);
+            } catch (e) {
+                expect(e).to.be.instanceOf(PrivateKeyAlreadyExistsError);
+                return;
+            }
+            expect.fail();
+        });
+    });
+
+    describe('backupPrivateKey with keyName', () => {
+        it('success', async () => {
+            const identity = uuid();
+            const fetchToken = () =>
+                Promise.resolve(jwtGenerator.generateToken(identity).toString());
+            const pwd = 'secret_password';
+            const keyPassword = uuid();
+            const keyName = uuid();
+            const sdk = await initializeEThree(fetchToken);
+            const storage = await createSyncStorage(identity, keyPassword, true);
+            try {
+                expect(await storage.fetchEntryByKey(identity, keyPassword)).to.be.undefined;
+            } catch (e) {
+                expect(e).to.be.instanceOf(Error);
+            }
+            try {
+                await sdk.register();
+                await sdk.backupPrivateKey(keyPassword, keyName);
+            } catch (e) {
+                expect(e).to.be.undefined;
+            }
+            const key = await storage.fetchEntryByKey(identity, keyPassword);
+            expect(key).not.to.be.null;
+        });
+
+        it('No local private key', async () => {
+            const identity = uuid();
+            const keyPassword = uuid();
+            const keyName = uuid();
+            const fetchToken = () =>
+                Promise.resolve(jwtGenerator.generateToken(identity).toString());
+            const sdk = await initializeEThree(fetchToken);
+            try {
+                await sdk.backupPrivateKey(keyPassword, keyName);
+            } catch (e) {
+                expect(e).to.be.instanceOf(MissingPrivateKeyError);
+                return;
+            }
+            expect.fail();
+        });
+    });
+
+    describe('restorePrivateKey with keyName', () => {
+        it('has no private key', async () => {
+            const identity = uuid();
+            const keyPassword = uuid();
+            const keyName = uuid();
+            const fetchToken = () =>
+                Promise.resolve(jwtGenerator.generateToken(identity).toString());
+            const sdk = await initializeEThree(fetchToken);
+            const storage = await createSyncStorage(identity, keyPassword, true);
+            try {
+                expect(await storage.fetchEntryByKey(identity, keyPassword)).to.be.undefined;
+            } catch (e) {
+                expect(e).to.be.instanceOf(Error);
+            }
+            let privateKey: IKeyEntry | null;
+            try {
+                await sdk.register();
+                privateKey = await keyEntryStorage.load(identity);
+                await sdk.backupPrivateKey(keyPassword, keyName);
+                await sdk.cleanup();
+            } catch (e) {
+                expect(e).to.be.undefined;
+            }
+            const noPrivateKey = await keyEntryStorage.load(identity);
+            expect(noPrivateKey).to.be.null;
+            await sdk.restorePrivateKey(keyPassword, keyName);
+            const restoredPrivateKey = await keyEntryStorage.load(identity);
+            expect(restoredPrivateKey!.value).to.equal(privateKey!.value);
+        });
+
+        it('has private key', async () => {
+            const identity = uuid();
+            const keyPassword = uuid();
+            const keyName = uuid();
+            const fetchToken = () =>
+                Promise.resolve(jwtGenerator.generateToken(identity).toString());
+            const sdk = await initializeEThree(fetchToken);
+            const storage = await createSyncStorage(identity, keyPassword);
+            try {
+                expect(await storage.fetchEntryByKey(identity, keyPassword)).to.be.undefined;
+            } catch (e) {
+                expect(e).to.be.instanceOf(Error);
+            }
+            try {
+                await sdk.register();
+                await sdk.backupPrivateKey(keyPassword, keyName);
+            } catch (e) {
+                expect(e).to.be.undefined;
+            }
+            const privateKey = await keyEntryStorage.load(identity);
+            expect(privateKey).not.to.be.undefined;
+            try {
+                await sdk.restorePrivateKey(keyPassword, keyName);
+            } catch (e) {
+                expect(e).to.be.instanceOf(PrivateKeyAlreadyExistsError);
+                return;
+            }
+            expect.fail();
+        });
+
+        it('restore private key duplicate', async () => {
+            const identity = uuid();
+            const pwd = uuid();
+            const keyPassword = uuid();
+            const keyName = uuid();
+            const fetchToken = () =>
+                Promise.resolve(jwtGenerator.generateToken(identity).toString());
+            const sdk = await initializeEThree(fetchToken);
+            try {
+                await sdk.register();
+                await sdk.backupPrivateKey(pwd);
+            } catch (e) {
+                expect(e).to.be.undefined;
+            }
+            try {
+                await sdk.backupPrivateKey(keyPassword, keyName);
+            } catch (e) {
+                expect(e).to.be.undefined;
+            }
+            await sdk.cleanup();
+            try {
+                await sdk.restorePrivateKey(keyPassword, keyName);
+            } catch (e) {
+                expect(e).to.be.undefined;
+                return;
+            }
+            await sdk.cleanup();
+            try {
+                await sdk.restorePrivateKey(pwd);
+            } catch (e) {
+                expect(e).to.be.undefined;
+                return;
+            }
+        });
+
+        it('restore duplicate', async () => {
+            const identity = uuid();
+            const keyPassword = uuid();
+            const keyName = uuid();
+            const fetchToken = () =>
+                Promise.resolve(jwtGenerator.generateToken(identity).toString());
+            const sdk = await initializeEThree(fetchToken);
+            try {
+                await sdk.register();
+            } catch (e) {
+                expect(e).to.be.undefined;
+            }
+            try {
+                await sdk.backupPrivateKey(keyPassword, keyName);
+            } catch (e) {
+                expect(e).to.be.undefined;
+            }
+            await sdk.cleanup();
+            try {
+                await sdk.restorePrivateKey(keyPassword, keyName);
+                await sdk.restorePrivateKey(keyPassword, keyName);
             } catch (e) {
                 expect(e).to.be.instanceOf(PrivateKeyAlreadyExistsError);
                 return;
