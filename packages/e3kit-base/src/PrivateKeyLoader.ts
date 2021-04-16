@@ -3,7 +3,7 @@ import {
     KeyknoxManager,
     KeyknoxCrypto,
     CloudEntryDoesntExistError,
-    KeyknoxClient,
+    KeyknoxClient
 } from '@virgilsecurity/keyknox';
 import { VirgilAgent } from 'virgil-sdk';
 
@@ -17,6 +17,7 @@ import {
     IKeyEntryStorage,
     IKeyPair,
 } from './types';
+import {isString} from "./typeguards";
 
 /**
  * @hidden
@@ -51,12 +52,13 @@ export class PrivateKeyLoader {
         this.localStorage = options.keyEntryStorage;
     }
 
-    async savePrivateKeyRemote(privateKey: IPrivateKey, password: string) {
-        const storage = await this.getStorage(password);
-        return await storage.storeEntry(
-            this.identity,
-            this.options.virgilCrypto.exportPrivateKey(privateKey).toString('base64'),
-        );
+    async savePrivateKeyRemote(privateKey: IPrivateKey, password: string, keyName?: string) {
+            const storage = await this.getStorage(password, isString(keyName));
+            return await storage.storeEntry(
+                this.identity,
+                this.options.virgilCrypto.exportPrivateKey(privateKey).toString('base64'),
+                keyName
+            );
     }
 
     async savePrivateKeyLocal(privateKey: IPrivateKey) {
@@ -95,11 +97,11 @@ export class PrivateKeyLoader {
         await this.keyknoxClient.v1Reset();
     }
 
-    async restorePrivateKey(password: string): Promise<IPrivateKey> {
-        const storage = await this.getStorage(password);
+    async restorePrivateKey(password: string, keyName?: string): Promise<IPrivateKey> {
+        const storage = await this.getStorage(password, isString(keyName));
         try {
-            const rawKey = storage.retrieveEntry(this.identity);
-            await this.localStorage.save({ name: this.identity, value: rawKey.data });
+            const rawKey = !isString(keyName) ? storage.retrieveEntry(this.identity) : await storage.fetchEntryByKey(this.identity, keyName);
+            await this.localStorage.save({name: this.identity, value: rawKey.data});
             return this.importAndCachePrivateKey(rawKey.data);
         } catch (e) {
             if (e instanceof CloudEntryDoesntExistError) {
@@ -139,7 +141,7 @@ export class PrivateKeyLoader {
         });
     }
 
-    private async getStorage(pwd: string) {
+    private async getStorage(pwd: string, skipCloudSync = false) {
         const keyPair = await this.generateBrainPair(pwd);
 
         const storage = new CloudKeyStorage(
@@ -147,13 +149,15 @@ export class PrivateKeyLoader {
             keyPair.privateKey,
             keyPair.publicKey,
         );
-        try {
-            await storage.retrieveCloudEntries();
-        } catch (e) {
-            if (e.name === 'FoundationError' || e.name === 'RNVirgilCryptoError') {
-                throw new WrongKeyknoxPasswordError();
+        if(!skipCloudSync) {
+            try {
+                await storage.retrieveCloudEntries();
+            } catch (e) {
+                if (e.name === 'FoundationError' || e.name === 'RNVirgilCryptoError') {
+                    throw new WrongKeyknoxPasswordError();
+                }
+                throw e;
             }
-            throw e;
         }
         return storage;
     }
