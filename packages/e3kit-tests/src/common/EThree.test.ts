@@ -487,27 +487,6 @@ describe('EThree', () => {
             expect.fail();
         });
 
-        it('restore by keyName', async () => {
-            const pwd = 'secret_password';
-            const keyName = 'secret_key_name';
-            const identity = uuid();
-            const fetchToken = () =>
-                Promise.resolve(jwtGenerator.generateToken(identity).toString());
-            const sdk = await initializeEThree(fetchToken);
-            try {
-                await sdk.register();
-                await sdk.backupPrivateKey(pwd, keyName);
-            } catch (e) {
-                expect(e).to.be.undefined;
-            }
-            await sdk.cleanup();
-            try {
-                await sdk.restorePrivateKey(pwd, keyName);
-            } catch (e) {
-                expect(e).to.be.undefined;
-                return;
-            }
-        });
     });
 
     describe('backupPrivateKey with keyName', () => {
