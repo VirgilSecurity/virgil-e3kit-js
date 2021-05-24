@@ -150,7 +150,7 @@ export class PrivateKeyLoader {
                 }
                 throw e;
             }
-             const pushResult = await keyknoxManager.v2Push({
+             await keyknoxManager.v2Push({
                 root: 'e3kit',
                 path: 'backup',
                 key: keyName,
