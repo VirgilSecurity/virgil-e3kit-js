@@ -98,7 +98,7 @@ export class PrivateKeyLoader {
             root: 'e3kit',
             path: 'backup',
             key: keyName,
-            identity: this.identity
+            identity: this.identity,
         });
     }
 
@@ -150,7 +150,7 @@ export class PrivateKeyLoader {
                 }
                 throw e;
             }
-             await keyknoxManager.v2Push({
+            await keyknoxManager.v2Push({
                 root: 'e3kit',
                 path: 'backup',
                 key: keyName,
