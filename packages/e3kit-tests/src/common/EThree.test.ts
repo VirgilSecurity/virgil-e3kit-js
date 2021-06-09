@@ -653,6 +653,49 @@ describe('EThree', () => {
         });
     });
 
+    describe('change password for keyName', () => {
+        it('should change password', async () => {
+            const identity = uuid();
+            const fetchToken = () =>
+                Promise.resolve(jwtGenerator.generateToken(identity).toString());
+            const keyPassword = uuid();
+            const newKeyPassword = uuid();
+            const keyName = uuid();
+            const sdk = await initializeEThree(fetchToken);
+            try {
+                await sdk.register();
+                await sdk.backupPrivateKey(keyPassword, keyName);
+            } catch (e) {
+                expect(e).to.be.undefined;
+            }
+            await sdk.cleanup();
+            await sdk.changePassword(keyPassword, newKeyPassword, keyName);
+            await sdk.restorePrivateKey(newKeyPassword, keyName);
+            const hasKey = await sdk.hasLocalPrivateKey();
+            expect(hasKey).to.be.true;
+        });
+
+        it('wrong old password', async () => {
+            const identity = uuid();
+            const fetchToken = () =>
+                Promise.resolve(jwtGenerator.generateToken(identity).toString());
+            const keyName = uuid();
+            const keyPassword = uuid();
+            const newKeyPassword = uuid();
+            const wrongKeyPassword = uuid();
+            try {
+                const sdk = await initializeEThree(fetchToken);
+                await sdk.register();
+                await sdk.backupPrivateKey(keyPassword, keyName);
+                await sdk.changePassword(wrongKeyPassword, newKeyPassword, keyName);
+            } catch (e) {
+                expect(e).to.be.instanceOf(WrongKeyknoxPasswordError);
+                return;
+            }
+            expect.fail();
+        });
+    });
+
     describe('encrypt and decrypt', () => {
         it('STE-3 ', async () => {
             const identity1 = uuid();
@@ -830,6 +873,45 @@ describe('EThree', () => {
             await cloudStorage.retrieveCloudEntries();
             isExisting = cloudStorage.existsEntry(identity);
             expect(isExisting).to.be.false;
+        });
+    });
+
+    describe('resetPrivateKeyBackupWithKeyName', () => {
+        it('reset backup private key', async () => {
+            const identity = uuid();
+            const keyPassword = uuid();
+            const keyName = uuid();
+            const fetchToken = () =>
+                Promise.resolve(jwtGenerator.generateToken(identity).toString());
+            const sdk = await initializeEThree(fetchToken);
+            const storage = await createSyncStorage(identity, keyPassword);
+            try {
+                expect(await storage.fetchEntryByKey(identity, keyPassword)).to.be.undefined;
+            } catch (e) {
+                expect(e).to.be.instanceOf(Error);
+            }
+            try {
+                await sdk.register();
+                await sdk.backupPrivateKey(keyPassword, keyName);
+            } catch (e) {
+                expect(e).to.be.undefined;
+            }
+            try {
+                await sdk.resetPrivateKeyBackupWithKeyName(keyName);
+                await sdk.cleanup();
+            } catch (e) {
+                expect(e).to.be.undefined;
+            }
+            const noPrivateKey = await keyEntryStorage.load(identity);
+            expect(noPrivateKey).to.be.null;
+            try {
+                await sdk.restorePrivateKey(keyPassword, keyName);
+            } catch (e) {
+                expect(e).to.be.instanceOf(Error);
+                return;
+            }
+
+            expect.fail();
         });
     });
 

@@ -93,6 +93,15 @@ export class PrivateKeyLoader {
         await storage.deleteEntry(this.identity).catch(this.handleResetError);
     }
 
+    async resetPrivateKeyBackupWithKeyName(keyName: string) {
+        await this.keyknoxClient.v2Reset({
+            root: 'e3kit',
+            path: 'backup',
+            key: keyName,
+            identity: this.identity,
+        });
+    }
+
     async resetAll() {
         await this.keyknoxClient.v1Reset();
     }
@@ -113,14 +122,45 @@ export class PrivateKeyLoader {
         }
     }
 
-    async changePassword(oldPwd: string, newPwd: string) {
-        const storage = await this.getStorage(oldPwd);
+    async changePassword(oldPwd: string, newPwd: string, keyName?: string) {
+        const storage = await this.getStorage(oldPwd, isString(keyName));
         const keyPair = await this.generateBrainPair(newPwd);
-        const update = await storage.updateRecipients({
-            newPrivateKey: keyPair.privateKey,
-            newPublicKeys: [keyPair.publicKey],
-        });
-        return update;
+        if (!isString(keyName)) {
+            return await storage.updateRecipients({
+                newPrivateKey: keyPair.privateKey,
+                newPublicKeys: [keyPair.publicKey],
+            });
+        } else {
+            // Change password for key from keyknox v2
+            const keyknoxManager = new KeyknoxManager(this.keyknoxCrypto, this.keyknoxClient);
+            const oldKeyPair = await this.generateBrainPair(oldPwd);
+            let decryptedKeyknoxValue;
+            try {
+                decryptedKeyknoxValue = await keyknoxManager.v2Pull({
+                    root: 'e3kit',
+                    path: 'backup',
+                    key: keyName,
+                    identity: this.identity,
+                    privateKey: oldKeyPair.privateKey,
+                    publicKeys: [oldKeyPair.publicKey],
+                });
+            } catch (e) {
+                if (e.name === 'FoundationError' || e.name === 'RNVirgilCryptoError') {
+                    throw new WrongKeyknoxPasswordError();
+                }
+                throw e;
+            }
+            await keyknoxManager.v2Push({
+                root: 'e3kit',
+                path: 'backup',
+                key: keyName,
+                identities: [this.identity],
+                value: decryptedKeyknoxValue.value,
+                privateKey: keyPair.privateKey,
+                publicKeys: [keyPair.publicKey],
+                keyknoxHash: decryptedKeyknoxValue.keyknoxHash,
+            });
+        }
     }
 
     hasPrivateKey() {

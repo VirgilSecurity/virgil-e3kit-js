@@ -197,6 +197,14 @@ export abstract class AbstractEThree {
     }
 
     /**
+     * Delete private key saved in Virgil Keyknox Storage.
+     * @returns {Promise<void>} - Promise that is resolved if everything went fine.
+     */
+    async resetPrivateKeyBackupWithKeyName(keyName: string): Promise<void> {
+        return this.keyLoader.resetPrivateKeyBackupWithKeyName(keyName);
+    }
+
+    /**
      * Encrypts and signs the message for the current user.
      * @param {Data} message - Message to sign and encrypt.
      * @returns {Promise<NodeBuffer | string>} Promise that is that resolves to a string if `message`
@@ -551,8 +559,8 @@ export abstract class AbstractEThree {
      * @param oldPwd users old password
      * @param newPwd users new password
      */
-    async changePassword(oldPwd: string, newPwd: string) {
-        return await this.keyLoader.changePassword(oldPwd, newPwd);
+    async changePassword(oldPwd: string, newPwd: string, keyName?: string) {
+        return await this.keyLoader.changePassword(oldPwd, newPwd, keyName);
     }
 
     /**
