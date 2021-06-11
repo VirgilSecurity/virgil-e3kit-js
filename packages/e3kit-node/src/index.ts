@@ -20,6 +20,8 @@ export {
     GroupErrorCode,
     GroupError,
     MissingPrivateKeyError,
+    UsersNotFoundError,
+    UsersFoundWithMultipleCardsError,
     // types
     NodeBuffer,
     Data,
