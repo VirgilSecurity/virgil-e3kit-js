@@ -187,6 +187,7 @@ export enum GroupErrorCode {
     MessageNotFromThisGroup = 9,
     GroupIsOutdated = 10,
     NoAccess = 11,
+    ParticipantAlreadyAdded = 12,
 }
 
 export class GroupError extends SdkError {

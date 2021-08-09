@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import uuid from 'uuid/v4';
 
-import { EThree, GroupError } from '@virgilsecurity/e3kit-node';
+import { EThree, GroupError, GroupErrorCode } from '@virgilsecurity/e3kit-node';
 import { initPythia } from '@virgilsecurity/pythia-crypto';
 import { initCrypto, VirgilAccessTokenSigner, VirgilCrypto, KeyPairType } from 'virgil-crypto';
 import { JwtGenerator } from 'virgil-sdk';
@@ -535,6 +535,25 @@ describe('EThree', () => {
             expect(participants.size).to.equal(2);
             expect(participants.has(aliceEThree.identity)).to.be.true;
             expect(participants.has(bobEThree.identity)).to.be.true;
+        });
+
+        it('STE-87 `add`  throws if user already added', async () => {
+            const aliceEThree = await createEThree();
+            const bobEThree = await createEThree();
+            const groupId = uuid();
+            const bobCard = await aliceEThree.findUsers(bobEThree.identity);
+            const group1 = await aliceEThree.createGroup(groupId);
+            const aliceCard = await bobEThree.findUsers(aliceEThree.identity);
+            await group1.add(bobCard);
+            try {
+                await group1.add(bobCard);
+                expect.fail();
+            } catch (error) {
+                expect(error).to.be.instanceOf(GroupError);
+                expect((error as GroupError).errorCode).to.eq(
+                    GroupErrorCode.ParticipantAlreadyAdded,
+                );
+            }
         });
     });
 });

@@ -184,7 +184,12 @@ export class Group {
             );
         }
         const missingCards = cardsToAdd.filter(c => missingIdentities.has(c.identity));
-
+        if (missingCards.length === 0) {
+            throw new GroupError(
+                GroupErrorCode.ParticipantAlreadyAdded,
+                `Failed to add participant(s). Participant(s) have already been added.`,
+            );
+        }
         await this._groupManager.addAccess(this._session.getSessionId(), missingCards);
         this.participants = [...this.participants, ...missingIdentities];
     }
