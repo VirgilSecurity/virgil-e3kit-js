@@ -57,7 +57,7 @@ export class Group {
         this._virgilCrypto = options.privateKeyLoader.options.virgilCrypto;
         this._privateKeyLoader = options.privateKeyLoader;
         this._session = this._virgilCrypto.importGroupSession(
-            sortedTickets.map(t => t.groupSessionMessage.data),
+            sortedTickets.map((t: Ticket) => t.groupSessionMessage.data),
         );
         this._cardManager = options.cardManager;
         this._groupManager = options.groupManager;
@@ -132,7 +132,7 @@ export class Group {
                 decrypted = tempGroup.decrypt(encryptedData, actualCard);
             }
             return shouldReturnString ? decrypted.toString('utf8') : decrypted;
-        } catch (err) {
+        } catch (err: any) {
             if (err.name === 'FoundationError' && /Invalid signature/.test(err.message)) {
                 throw new GroupError(
                     GroupErrorCode.DataVerificationFailed,
@@ -173,7 +173,7 @@ export class Group {
         }
 
         const missingIdentities = setDifference(
-            new Set(cardsToAdd.map(c => c.identity)),
+            new Set(cardsToAdd.map((c: ICard) => c.identity)),
             new Set(this.participants),
         );
         const newParticipantCount = missingIdentities.size + this.participants.length;
@@ -183,7 +183,7 @@ export class Group {
                 `Cannot add ${missingIdentities.size} participant(s) to the group that has ${this.participants.length} participants. Group can have ${VALID_GROUP_PARTICIPANT_COUNT_RANGE[0]} to ${VALID_GROUP_PARTICIPANT_COUNT_RANGE[1]} participants.`,
             );
         }
-        const missingCards = cardsToAdd.filter(c => missingIdentities.has(c.identity));
+        const missingCards = cardsToAdd.filter((c: ICard) => missingIdentities.has(c.identity));
         if (missingCards.length === 0) {
             throw new GroupError(
                 GroupErrorCode.ParticipantAlreadyAdded,
@@ -214,14 +214,15 @@ export class Group {
         const oldIdentities = new Set(this.participants);
         const newIdentities = setDifference(
             new Set(this.participants),
-            new Set(cardsToRemove.map(c => c.identity)),
+            new Set(cardsToRemove.map((c: ICard) => c.identity)),
         );
 
         if (!isValidParticipantCount(newIdentities.size)) {
             throw new GroupError(
                 GroupErrorCode.InvalidChangeParticipants,
-                `Cannot remove ${oldIdentities.size -
-                    newIdentities.size} participant(s) from the group that has ${
+                `Cannot remove ${
+                    oldIdentities.size - newIdentities.size
+                } participant(s) from the group that has ${
                     oldIdentities.size
                 } participants. Group can have ${VALID_GROUP_PARTICIPANT_COUNT_RANGE[0]} to ${
                     VALID_GROUP_PARTICIPANT_COUNT_RANGE[1]

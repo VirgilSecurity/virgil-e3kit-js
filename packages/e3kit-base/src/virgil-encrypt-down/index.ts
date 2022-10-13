@@ -46,7 +46,7 @@ class VirgilEncryptDownIterator<K> extends AbstractIterator<K, ValueType> {
                     key,
                     this.options.valueAsBuffer ? decrypted : decrypted.toString('utf8'),
                 );
-            } catch (err) {
+            } catch (err: any) {
                 callback(err, undefined!, undefined!);
             }
         });
@@ -58,7 +58,7 @@ class VirgilEncryptDownIterator<K> extends AbstractIterator<K, ValueType> {
 }
 
 class VirgilEncryptDown<K> extends AbstractLevelDOWN<K, ValueType> {
-    db: AbstractLevelDOWN;
+    public db: AbstractLevelDOWN;
     crypto: ICrypto;
     keyPair?: IKeyPair;
 
@@ -86,7 +86,7 @@ class VirgilEncryptDown<K> extends AbstractLevelDOWN<K, ValueType> {
             try {
                 const decrypted = this.decrypt(encrypted);
                 callback(undefined, options.asBuffer ? decrypted : decrypted.toString('utf8'));
-            } catch (error) {
+            } catch (error: any) {
                 callback(error, undefined!);
             }
         });
@@ -96,7 +96,7 @@ class VirgilEncryptDown<K> extends AbstractLevelDOWN<K, ValueType> {
         let encrypted;
         try {
             encrypted = this.encrypt(value);
-        } catch (err) {
+        } catch (err: any) {
             return setTimeout(() => callback(err));
         }
 
@@ -114,13 +114,13 @@ class VirgilEncryptDown<K> extends AbstractLevelDOWN<K, ValueType> {
     ) {
         let operations;
         try {
-            operations = ops.map(op => {
+            operations = ops.map((op) => {
                 if (op.type === 'put') {
                     return { ...op, value: this.encrypt(op.value) };
                 }
                 return op;
             });
-        } catch (err) {
+        } catch (err: any) {
             return setTimeout(() => callback(err));
         }
 

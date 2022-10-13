@@ -111,7 +111,7 @@ export abstract class AbstractEThree {
         }
         this.inProcess = true;
         try {
-            const [cards, privateKey] = await Promise.all<ICard[], IPrivateKey | null>([
+            const [cards, privateKey]: [ICard[], IPrivateKey | null] = await Promise.all([
                 this.cardManager.searchCards(this.identity),
                 this.keyLoader.loadLocalPrivateKey(),
             ]);
@@ -134,7 +134,7 @@ export abstract class AbstractEThree {
         }
         this.inProcess = true;
         try {
-            const [cards, privateKey] = await Promise.all<ICard[], IPrivateKey | null>([
+            const [cards, privateKey]: [ICard[], IPrivateKey | null] = await Promise.all([
                 this.cardManager.searchCards(this.identity),
                 this.keyLoader.loadLocalPrivateKey(),
             ]);
@@ -472,7 +472,7 @@ export abstract class AbstractEThree {
         }
 
         const identitiesFound = new Set(Object.keys(result));
-        const identitiesNotFound = new Set([...identitySet].filter(i => !identitiesFound.has(i)));
+        const identitiesNotFound = new Set([...identitySet].filter((i) => !identitiesFound.has(i)));
         if (identitiesNotFound.size > 0) {
             throw new UsersNotFoundError([...identitiesNotFound]);
         }
@@ -533,7 +533,7 @@ export abstract class AbstractEThree {
         const resultWithErrors: { [identity: string]: Error } = {};
 
         for (const identity of argument) {
-            const filteredCards = cards.filter(card => card.identity === identity);
+            const filteredCards = cards.filter((card) => card.identity === identity);
             if (filteredCards.length === 0) {
                 resultWithErrors[identity] = new LookupNotFoundError(identity);
             } else if (filteredCards.length > 1) {
@@ -689,10 +689,10 @@ export abstract class AbstractEThree {
     private isOwnPublicKeyIncluded(ownPublicKey: IPublicKey, publicKeys: IPublicKey[]) {
         const selfPublicKey = this.virgilCrypto.exportPublicKey(ownPublicKey).toString('base64');
 
-        const stringKeys = publicKeys.map(key =>
+        const stringKeys = publicKeys.map((key) =>
             this.virgilCrypto.exportPublicKey(key).toString('base64'),
         );
-        return stringKeys.some(key => key === selfPublicKey);
+        return stringKeys.some((key) => key === selfPublicKey);
     }
 
     private throwIllegalInvocationError(method: string) {

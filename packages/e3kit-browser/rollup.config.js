@@ -11,6 +11,8 @@ const replace = require('rollup-plugin-re');
 const typescript = require('rollup-plugin-typescript2');
 const { generateCrossPlatformPath } = require('../../utils/build');
 const packageJson = require('./package.json');
+const json = require('@rollup/plugin-json');
+const wasm = require('@rollup/plugin-wasm');
 const PRODUCT_NAME = 'e3kit';
 
 const FORMAT = {
@@ -32,7 +34,7 @@ const TARGET = {
 const sourcePath = path.join(__dirname, 'src');
 const outputPath = path.join(__dirname, 'dist');
 
-const getModulePath = request => {
+const getModulePath = (request) => {
     const resolvePaths = require.resolve.paths(request);
     for (let resolvePath of resolvePaths) {
         const modulePath = path.join(resolvePath, request);
@@ -127,6 +129,7 @@ const createEntry = (target, cryptoType, format) => {
                     },
                 },
             }),
+            json(),
             nodeGlobals(),
             nodeBuiltins(),
             license({
@@ -136,11 +139,14 @@ const createEntry = (target, cryptoType, format) => {
                     },
                 },
             }),
-            cryptoType === CRYPTO_TYPE.WASM &&
-                copy({
-                    outputFolder: outputPath,
-                    targets: [foundationWasmPath, pythiaWasmPath],
-                }),
+            wasm({
+                sync: [foundationWasmPath, pythiaWasmPath],
+            }),
+            // cryptoType === CRYPTO_TYPE.WASM &&
+            //     copy({
+            //         outputFolder: outputPath,
+            //         targets: [foundationWasmPath, pythiaWasmPath],
+            //     }),
         ],
     };
 };

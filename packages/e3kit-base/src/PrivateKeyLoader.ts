@@ -39,10 +39,9 @@ export class PrivateKeyLoader {
         this.options.accessTokenProvider,
         this.options.apiUrl,
         undefined,
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         new VirgilAgent(
-            process.env.__VIRGIL_PRODUCT_NAME__!,
-            process.env.__VIRGIL_PRODUCT_VERSION__!,
+            process.env.__VIRGIL_PRODUCT_NAME__ ?? '',
+            process.env.__VIRGIL_PRODUCT_VERSION__ ?? '',
         ),
     );
     private keyknoxCrypto = new KeyknoxCrypto(this.options.virgilCrypto);
@@ -144,7 +143,7 @@ export class PrivateKeyLoader {
                     privateKey: oldKeyPair.privateKey,
                     publicKeys: [oldKeyPair.publicKey],
                 });
-            } catch (e) {
+            } catch (e: any) {
                 if (e.name === 'FoundationError' || e.name === 'RNVirgilCryptoError') {
                     throw new WrongKeyknoxPasswordError();
                 }
@@ -194,7 +193,7 @@ export class PrivateKeyLoader {
         if (!skipCloudSync) {
             try {
                 await storage.retrieveCloudEntries();
-            } catch (e) {
+            } catch (e: any) {
                 if (e.name === 'FoundationError' || e.name === 'RNVirgilCryptoError') {
                     throw new WrongKeyknoxPasswordError();
                 }

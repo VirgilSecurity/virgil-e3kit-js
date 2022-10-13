@@ -68,7 +68,7 @@ export class GroupManager {
                 initiatorCard.identity,
                 initiatorCard.publicKey,
             );
-        } catch (err) {
+        } catch (err: any) {
             if (
                 err.name === 'GroupTicketDoesntExistError' ||
                 err.name === 'GroupTicketNoAccessError'
@@ -92,7 +92,7 @@ export class GroupManager {
         }
 
         const initiator = initiatorCard.identity;
-        const tickets = cloudTickets.map(ct => ({
+        const tickets = cloudTickets.map((ct) => ({
             groupSessionMessage: ct.groupSessionMessageInfo,
             participants: ct.identities,
         }));
@@ -124,7 +124,7 @@ export class GroupManager {
                 cardManager: this._cardManager,
                 groupManager: this,
             });
-        } catch (error) {
+        } catch (error: any) {
             if (error.name === 'GroupTicketNoAccessError') {
                 throw new GroupError(
                     GroupErrorCode.NoAccess,
@@ -142,9 +142,9 @@ export class GroupManager {
             await cloudTicketStorage.addRecipients(sessionId, allowedCards);
             await localGroupStorage.addParticipants(
                 sessionId,
-                allowedCards.map(card => card.identity),
+                allowedCards.map((card) => card.identity),
             );
-        } catch (error) {
+        } catch (error: any) {
             if (error.name === 'GroupTicketNoAccessError') {
                 throw new GroupError(
                     GroupErrorCode.NoAccess,
@@ -158,7 +158,7 @@ export class GroupManager {
     async removeAccess(sessionId: string, forbiddenIdentities: string[]) {
         const cloudTicketStorage = await this.getCloudTicketStorage();
         await Promise.all(
-            forbiddenIdentities.map(identity =>
+            forbiddenIdentities.map((identity) =>
                 cloudTicketStorage.removeRecipient(sessionId, identity),
             ),
         );
@@ -175,7 +175,7 @@ export class GroupManager {
         const cloudTicketStorage = await this.getCloudTicketStorage();
         try {
             await cloudTicketStorage.reAddRecipient(sessionId, allowedCard);
-        } catch (error) {
+        } catch (error: any) {
             if (error.name === 'GroupTicketNoAccessError') {
                 throw new GroupError(
                     GroupErrorCode.NoAccess,
@@ -217,10 +217,9 @@ export class GroupManager {
                 accessTokenProvider,
                 apiUrl,
                 undefined,
-                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
                 new VirgilAgent(
-                    process.env.__VIRGIL_PRODUCT_NAME__!,
-                    process.env.__VIRGIL_PRODUCT_VERSION__!,
+                    process.env.__VIRGIL_PRODUCT_NAME__ ?? '',
+                    process.env.__VIRGIL_PRODUCT_VERSION__ ?? '',
                 ),
             ),
         );

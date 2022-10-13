@@ -21,12 +21,10 @@ import memdown from 'memdown';
 use(chaiAsPromised);
 
 const getRandomString = (prefix?: string) => {
-    return `${prefix ? prefix : ''}${Math.random()
-        .toString(36)
-        .substr(2)}`;
+    return `${prefix ? prefix : ''}${Math.random().toString(36).substr(2)}`;
 };
 
-let cryptoStub: sinon.SinonStubbedInstance<ICrypto>;
+let cryptoStub: sinon.SinonStubbedInstance<VirgilCrypto>;
 let cardManagerStub: sinon.SinonStubbedInstance<CardManager>;
 let keyLoaderStub: sinon.SinonStubbedInstance<PrivateKeyLoader>;
 let accessTokenProviderStub: sinon.SinonStubbedInstance<CachingJwtProvider>;
@@ -122,9 +120,9 @@ describe('AbstractEthree', () => {
             const identities = Array(numberOfIdentities)
                 .fill(undefined)
                 .map((_: undefined, index: number) => `identity_${index + 1}`);
-            cardManagerStub.searchCards.callsFake(identities => {
+            cardManagerStub.searchCards.callsFake((identities) => {
                 if (Array.isArray(identities)) {
-                    return Promise.resolve(identities.map(identity => ({ identity } as ICard)));
+                    return Promise.resolve(identities.map((identity) => ({ identity } as ICard)));
                 } else {
                     throw new Error('Expected "identities" to be an array');
                 }

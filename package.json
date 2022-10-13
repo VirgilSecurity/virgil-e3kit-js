@@ -8,18 +8,21 @@
         "docs": "node scripts/generate-docs.js"
     },
     "devDependencies": {
-        "@typescript-eslint/eslint-plugin": "^2.17.0",
-        "@typescript-eslint/parser": "^2.17.0",
+        "@typescript-eslint/eslint-plugin": "^5.40.0",
+        "@typescript-eslint/parser": "^5.40.0",
         "ejs": "^3.0.1",
-        "eslint": "^6.8.0",
-        "eslint-config-prettier": "^6.9.0",
-        "eslint-plugin-prettier": "^3.1.2",
+        "eslint": "^8.25.0",
+        "eslint-config-prettier": "^8.5.0",
+        "eslint-plugin-no-cyrillic-string": "^1.0.5",
+        "eslint-plugin-prettier": "^4.2.1",
+        "eslint-plugin-simple-import-sort": "^8.0.0",
         "husky": "^4.2.1",
-        "lerna": "^3.20.2",
+        "lerna": "^6.0.0",
+        "lerna-update-wizard": "^1.1.2",
         "lint-staged": "^10.0.2",
-        "prettier": "1.18.2",
-        "typedoc": "^0.16.9",
-        "typescript": "^3.7.5"
+        "prettier": "2.7.1",
+        "typedoc": "^0.23.16",
+        "typescript": "^4.8.4"
     },
     "workspaces": {
         "packages": [

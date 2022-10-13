@@ -7,6 +7,7 @@ const typescript = require('rollup-plugin-typescript2');
 const builtins = require('rollup-plugin-node-builtins');
 const globals = require('rollup-plugin-node-globals');
 const replace = require('rollup-plugin-re');
+const json = require('@rollup/plugin-json');
 
 const packageJson = require('./package.json');
 const PRODUCT_NAME = 'e3kit';
@@ -19,7 +20,7 @@ const FORMAT = {
 const sourcePath = path.join(__dirname, 'src');
 const outputPath = path.join(__dirname, 'dist');
 
-const createEntry = format => ({
+const createEntry = (format) => ({
     external: [
         '@react-native-community/async-storage',
         '@virgilsecurity/key-storage-rn/native',
@@ -51,6 +52,7 @@ const createEntry = format => ({
                 },
             },
         }),
+        json(),
         license({
             banner: {
                 content: {
