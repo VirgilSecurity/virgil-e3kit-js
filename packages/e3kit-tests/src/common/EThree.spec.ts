@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import isBuffer from 'is-buffer';
-import uuid from 'uuid/v4';
+import { v4 as uuid } from 'uuid';
 
 import {
     IdentityAlreadyExistsError,
@@ -316,7 +316,7 @@ describe('EThree', () => {
             const identity2 = uuid();
             try {
                 await sdk.lookupPublicKeys([identity1, identity2]);
-            } catch (e) {
+            } catch (e: any) {
                 expect(e).to.be.instanceOf(LookupError);
                 expect(e.lookupResult[identity1]).to.be.instanceOf(LookupNotFoundError);
                 expect(e.lookupResult[identity2]).to.be.instanceOf(LookupNotFoundError);

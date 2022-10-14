@@ -2,25 +2,24 @@
 import { expect, use } from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 import sinon from 'sinon';
-import { CardManager, CachingJwtProvider, KeyEntryStorage, ICard } from 'virgil-sdk';
-import { VirgilCrypto } from 'virgil-crypto';
 import { AbstractLevelDOWN } from 'abstract-leveldown';
-
+import { ICard } from '../types';
+import memdown from 'memdown';
+import { VirgilCrypto } from 'virgil-crypto';
+import { CachingJwtProvider, CardManager, KeyEntryStorage } from 'virgil-sdk';
 import { PrivateKeyLoader } from '../PrivateKeyLoader';
 import { AbstractEThree } from '../AbstractEThree';
 import {
-    UsersNotFoundError,
-    UsersFoundWithMultipleCardsError,
     IdentityAlreadyExistsError,
     MultipleCardsError,
     RegisterRequiredError,
+    UsersFoundWithMultipleCardsError,
+    UsersNotFoundError,
 } from '../errors';
-import { ICrypto } from '../types';
-import memdown from 'memdown';
 
 use(chaiAsPromised);
 
-const getRandomString = (prefix?: string) => {
+const getRandomString = (prefix: string): string => {
     return `${prefix ? prefix : ''}${Math.random().toString(36).substr(2)}`;
 };
 
@@ -36,9 +35,9 @@ class MyEThree extends AbstractEThree {
         super({
             identity,
             virgilCrypto: cryptoStub,
-            cardManager: cardManagerStub as any,
-            keyLoader: keyLoaderStub as any,
-            groupStorageLeveldown: groupStorageLeveldownStub as any,
+            cardManager: cardManagerStub,
+            keyLoader: keyLoaderStub,
+            groupStorageLeveldown: groupStorageLeveldownStub,
             // the following aren't actually used in the code and tests
             accessTokenProvider: accessTokenProviderStub,
             keyEntryStorage: keyEntryStorageStub,
@@ -87,8 +86,8 @@ describe('AbstractEthree', () => {
         it('revoke all cards for identity', async () => {
             const ethree = new MyEThree('my_identity');
             const identitiesCards = [
-                { id: getRandomString(), identity: 'my_identity' } as ICard,
-                { id: getRandomString(), identity: 'my_identity' } as ICard,
+                { id: getRandomString(''), identity: 'my_identity' } as ICard,
+                { id: getRandomString(''), identity: 'my_identity' } as ICard,
             ];
             cardManagerStub.searchCards.resolves(identitiesCards);
             await ethree.unregister();

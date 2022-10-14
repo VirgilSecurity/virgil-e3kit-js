@@ -3,7 +3,7 @@ const webpack = require('webpack');
 
 dotenv.config();
 
-module.exports = config => {
+module.exports = (config) => {
     config.set({
         frameworks: ['mocha'],
         autoWatch: false,

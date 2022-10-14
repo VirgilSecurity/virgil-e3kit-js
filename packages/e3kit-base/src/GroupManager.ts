@@ -218,8 +218,8 @@ export class GroupManager {
                 apiUrl,
                 undefined,
                 new VirgilAgent(
-                    process.env.__VIRGIL_PRODUCT_NAME__ ?? '',
-                    process.env.__VIRGIL_PRODUCT_VERSION__ ?? '',
+                    process.env.__VIRGIL_PRODUCT_NAME__!,
+                    process.env.__VIRGIL_PRODUCT_VERSION__!,
                 ),
             ),
         );

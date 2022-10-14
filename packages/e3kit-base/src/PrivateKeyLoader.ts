@@ -40,8 +40,8 @@ export class PrivateKeyLoader {
         this.options.apiUrl,
         undefined,
         new VirgilAgent(
-            process.env.__VIRGIL_PRODUCT_NAME__ ?? '',
-            process.env.__VIRGIL_PRODUCT_VERSION__ ?? '',
+            process.env.__VIRGIL_PRODUCT_NAME__!,
+            process.env.__VIRGIL_PRODUCT_VERSION__!,
         ),
     );
     private keyknoxCrypto = new KeyknoxCrypto(this.options.virgilCrypto);

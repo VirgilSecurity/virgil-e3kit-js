@@ -12,6 +12,7 @@
         "declarationDir": "./dist/types",
         "downlevelIteration": true,
         "experimentalDecorators": true,
+        "noImplicitAny": true,
         "moduleResolution": "node",
         "importHelpers": true,
         "esModuleInterop": true,

@@ -1,2 +1,2 @@
-import './common/EThree.test';
-import './common/Group.test';
+import './common/EThree.spec';
+import './common/Group.spec';

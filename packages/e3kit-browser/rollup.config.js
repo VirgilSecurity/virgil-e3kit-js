@@ -7,6 +7,7 @@ const license = require('rollup-plugin-license');
 const nodeBuiltins = require('rollup-plugin-node-builtins');
 const nodeGlobals = require('rollup-plugin-node-globals');
 const nodeResolve = require('rollup-plugin-node-resolve');
+const nodePolyfills = require('rollup-plugin-node-polyfills');
 const replace = require('rollup-plugin-re');
 const typescript = require('rollup-plugin-typescript2');
 const { generateCrossPlatformPath } = require('../../utils/build');
@@ -132,6 +133,7 @@ const createEntry = (target, cryptoType, format) => {
             json(),
             nodeGlobals(),
             nodeBuiltins(),
+            nodePolyfills(),
             license({
                 banner: {
                     content: {
@@ -142,11 +144,6 @@ const createEntry = (target, cryptoType, format) => {
             wasm({
                 sync: [foundationWasmPath, pythiaWasmPath],
             }),
-            // cryptoType === CRYPTO_TYPE.WASM &&
-            //     copy({
-            //         outputFolder: outputPath,
-            //         targets: [foundationWasmPath, pythiaWasmPath],
-            //     }),
         ],
     };
 };
