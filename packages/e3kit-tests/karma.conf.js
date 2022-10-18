@@ -6,13 +6,13 @@ dotenv.config();
 module.exports = (config) => {
     config.set({
         frameworks: ['mocha'],
-        autoWatch: false,
+        autoWatch: true,
         files: ['src/browser.test.ts'],
         browsers: ['ChromeHeadless'],
         colors: true,
         logLevel: config.LOG_INFO,
         browserNoActivityTimeout: 60 * 1000,
-        singleRun: true,
+        singleRun: false,
         mime: {
             'text/x-typescript': ['ts'],
             'application/wasm': ['wasm'],
@@ -27,7 +27,7 @@ module.exports = (config) => {
         },
         reporters: ['spec'],
         webpack: {
-            mode: 'production',
+            mode: process.env.NODE_ENV || JSON.stringify('production'),
             resolve: {
                 extensions: ['.js', '.ts'],
             },

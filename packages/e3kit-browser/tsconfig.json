@@ -1,7 +1,7 @@
 {
     "compileOnSave": false,
     "compilerOptions": {
-        "outDir": "./dist/types",
+        "outDir": "./dist",
         "forceConsistentCasingInFileNames": true,
         "strict": true,
         "noImplicitReturns": false,

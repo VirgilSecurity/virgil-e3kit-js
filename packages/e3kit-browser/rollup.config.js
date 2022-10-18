@@ -142,7 +142,20 @@ const createEntry = (target, cryptoType, format) => {
                 },
             }),
             wasm({
+                publicPath: outputPath,
                 sync: [foundationWasmPath, pythiaWasmPath],
+            }),
+            copy({
+                targets: [
+                    {
+                        src: foundationWasmPath,
+                        dest: outputPath,
+                    },
+                    {
+                        src: pythiaWasmPath,
+                        dest: outputPath,
+                    },
+                ],
             }),
         ],
     };
