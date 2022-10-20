@@ -32,6 +32,7 @@
         "@rollup/plugin-json": "5.0.0",
         "@rollup/plugin-wasm": "6.0.0",
         "cross-env": "7.0.3",
+        "readable-stream": "4.2.0",
         "rimraf": "3.0.2",
         "rollup": "3.1.0",
         "rollup-plugin-commonjs": "10.1.0",

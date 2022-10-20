@@ -120,7 +120,10 @@ const createEntry = (target, cryptoType, format) => {
                 ],
             }),
             nodeResolve({ browser: true, preferBuiltins: true }),
-            commonjs(),
+            commonjs({
+                ignoreDynamicRequires: true,
+                ignore: ['readable-stream'],
+            }),
             typescript({
                 useTsconfigDeclarationDir: true,
                 objectHashIgnoreUnknownHack: true,
