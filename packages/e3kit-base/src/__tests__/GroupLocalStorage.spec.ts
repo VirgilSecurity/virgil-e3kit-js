@@ -12,9 +12,7 @@ import { AbstractLevelDOWN } from 'abstract-leveldown';
 use(chaiAsPromised);
 
 const getRandomString = (prefix?: string) => {
-    return `${prefix ? prefix : ''}${Math.random()
-        .toString(36)
-        .substr(2)}`;
+    return `${prefix ? prefix : ''}${Math.random().toString(36).substr(2)}`;
 };
 
 const createGroupInfo = (initiator?: string): GroupInfo => {
@@ -436,12 +434,12 @@ describe('GroupLocalStorage', () => {
                 sessionIds.push(getRandomString('session'));
             }
 
-            const groups = sessionIds.map(sessionId => ({
+            const groups = sessionIds.map((sessionId) => ({
                 info: createGroupInfo(),
                 tickets: createTickets(sessionId, 10),
             }));
 
-            await Promise.all(groups.map(g => storage.store(g)));
+            await Promise.all(groups.map((g) => storage.store(g)));
 
             await storage.reset();
 
@@ -464,28 +462,28 @@ describe('GroupLocalStorage', () => {
                 sessionIds.push(getRandomString('session'));
             }
 
-            const groups = sessionIds.map(sessionId => ({
+            const groups = sessionIds.map((sessionId) => ({
                 info: createGroupInfo(),
                 tickets: createTickets(sessionId, 10),
             }));
 
             await Promise.all(
-                groups.map(g => storage1.store(g)).concat(groups.map(g => storage2.store(g))),
+                groups.map((g) => storage1.store(g)).concat(groups.map((g) => storage2.store(g))),
             );
 
             await storage1.reset();
 
             const storage1Groups = await Promise.all(
-                sessionIds.map(sessionId => storage1.retrieve(sessionId, { ticketCount: 100 })),
+                sessionIds.map((sessionId) => storage1.retrieve(sessionId, { ticketCount: 100 })),
             );
 
-            expect(storage1Groups.every(el => el == null)).to.be.true;
+            expect(storage1Groups.every((el) => el == null)).to.be.true;
 
             const storage2Groups = await Promise.all(
-                sessionIds.map(sessionId => storage2.retrieve(sessionId, { ticketCount: 100 })),
+                sessionIds.map((sessionId) => storage2.retrieve(sessionId, { ticketCount: 100 })),
             );
 
-            expect(storage2Groups.every(el => el != null)).to.be.true;
+            expect(storage2Groups.every((el) => el != null)).to.be.true;
         });
     });
 });

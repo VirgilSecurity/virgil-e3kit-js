@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import isBuffer from 'is-buffer';
-import uuid from 'uuid/v4';
+import { v4 as uuid } from 'uuid';
 
 import {
     IdentityAlreadyExistsError,
@@ -316,7 +316,7 @@ describe('EThree', () => {
             const identity2 = uuid();
             try {
                 await sdk.lookupPublicKeys([identity1, identity2]);
-            } catch (e) {
+            } catch (e: any) {
                 expect(e).to.be.instanceOf(LookupError);
                 expect(e.lookupResult[identity1]).to.be.instanceOf(LookupNotFoundError);
                 expect(e.lookupResult[identity2]).to.be.instanceOf(LookupNotFoundError);
@@ -343,7 +343,7 @@ describe('EThree', () => {
             const fetchToken = createFetchToken(identity);
             const sdk = await initializeEThree(fetchToken);
             try {
-                await sdk.lookupPublicKeys([identity, identity, 'random']);
+                await sdk.findUsers([identity, identity, 'random']);
             } catch (e) {
                 expect(e).to.be.instanceOf(Error);
                 return;
@@ -797,7 +797,7 @@ describe('EThree', () => {
             const recipient = virgilCrypto.generateKeys();
             const sdk = await initializeEThree(fetchToken);
             await sdk.register();
-            const publicKey = (await sdk.lookupPublicKeys([identity]))[0];
+            const publicKey = (await sdk.findUsers([identity]))[0];
             const encryptedMessage = await sdk.encrypt(buf, recipient.publicKey);
             expect(isBuffer(encryptedMessage)).to.be.true;
             const resp = await sdk.decrypt(encryptedMessage, publicKey);

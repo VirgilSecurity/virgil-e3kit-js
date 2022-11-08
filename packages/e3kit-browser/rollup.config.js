@@ -7,10 +7,13 @@ const license = require('rollup-plugin-license');
 const nodeBuiltins = require('rollup-plugin-node-builtins');
 const nodeGlobals = require('rollup-plugin-node-globals');
 const nodeResolve = require('rollup-plugin-node-resolve');
+const nodePolyfills = require('rollup-plugin-node-polyfills');
 const replace = require('rollup-plugin-re');
 const typescript = require('rollup-plugin-typescript2');
 const { generateCrossPlatformPath } = require('../../utils/build');
 const packageJson = require('./package.json');
+const json = require('@rollup/plugin-json');
+const wasm = require('@rollup/plugin-wasm');
 const PRODUCT_NAME = 'e3kit';
 
 const FORMAT = {
@@ -32,7 +35,7 @@ const TARGET = {
 const sourcePath = path.join(__dirname, 'src');
 const outputPath = path.join(__dirname, 'dist');
 
-const getModulePath = request => {
+const getModulePath = (request) => {
     const resolvePaths = require.resolve.paths(request);
     for (let resolvePath of resolvePaths) {
         const modulePath = path.join(resolvePath, request);
@@ -117,7 +120,10 @@ const createEntry = (target, cryptoType, format) => {
                 ],
             }),
             nodeResolve({ browser: true, preferBuiltins: true }),
-            commonjs(),
+            commonjs({
+                ignoreDynamicRequires: true,
+                ignore: ['readable-stream'],
+            }),
             typescript({
                 useTsconfigDeclarationDir: true,
                 objectHashIgnoreUnknownHack: true,
@@ -127,8 +133,10 @@ const createEntry = (target, cryptoType, format) => {
                     },
                 },
             }),
+            json(),
             nodeGlobals(),
             nodeBuiltins(),
+            nodePolyfills(),
             license({
                 banner: {
                     content: {
@@ -136,11 +144,22 @@ const createEntry = (target, cryptoType, format) => {
                     },
                 },
             }),
-            cryptoType === CRYPTO_TYPE.WASM &&
-                copy({
-                    outputFolder: outputPath,
-                    targets: [foundationWasmPath, pythiaWasmPath],
-                }),
+            wasm({
+                publicPath: outputPath,
+                sync: [foundationWasmPath, pythiaWasmPath],
+            }),
+            copy({
+                targets: [
+                    {
+                        src: foundationWasmPath,
+                        dest: outputPath,
+                    },
+                    {
+                        src: pythiaWasmPath,
+                        dest: outputPath,
+                    },
+                ],
+            }),
         ],
     };
 };

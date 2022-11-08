@@ -1,0 +1,36 @@
+{
+    "presets": [
+        [
+            "@babel/preset-env",
+            {
+                "modules": "commonjs",
+                "targets": {
+                    "node": "current"
+                }
+            }
+        ],
+        "@babel/preset-typescript"
+    ],
+    "plugins": [
+        "@babel/plugin-transform-async-to-generator",
+        "babel-plugin-transform-class-properties",
+        "babel-plugin-transform-decorators-legacy",
+        "babel-plugin-transform-es2015-modules-commonjs"
+    ],
+    "env": {
+        "test": {
+            "presets": ["@babel/preset-env"],
+            "plugins": [
+                "@babel/plugin-transform-async-to-generator",
+                "@babel/plugin-transform-modules-commonjs",
+                [
+                    "@babel/plugin-transform-runtime",
+                    {
+                        "regenerator": true
+                    }
+                ],
+                "transform-class-properties"
+            ]
+        }
+    }
+}

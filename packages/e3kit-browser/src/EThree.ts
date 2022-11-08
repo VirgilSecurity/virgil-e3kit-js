@@ -157,7 +157,6 @@ export class EThree extends AbstractEThree {
             const onFinishCallback = () =>
                 resolve(streamSigner.sign(privateKey as VirgilPrivateKey));
 
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const onErrorCallback = (err: any) => {
                 streamSigner.dispose();
                 reject(err);
@@ -702,13 +701,10 @@ export class EThree extends AbstractEThree {
             retryOnUnauthorized: true,
             apiUrl: opts.apiUrl,
             productInfo: {
-                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
                 product: process.env.__VIRGIL_PRODUCT_NAME__!,
-                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
                 version: process.env.__VIRGIL_PRODUCT_VERSION__!,
             },
         });
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         const groupStorageLeveldown = leveljs(opts.groupStorageName!);
 
         return {

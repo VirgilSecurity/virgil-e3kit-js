@@ -1,5 +1,6 @@
 /// <reference path="../declarations.d.ts" />
-import levelup, { LevelUp } from 'levelup';
+import levelup from 'levelup';
+import { LevelUp } from 'levelup';
 import sub from 'subleveldown';
 import { AbstractLevelDOWN, AbstractBatch } from 'abstract-leveldown';
 import { Ticket, RawGroup, GroupInfo, IKeyPair, ICrypto } from './types';
@@ -18,7 +19,7 @@ export interface GroupLocalStorageConstructorParams {
 
 export class GroupLocalStorage {
     private _db: LevelUp;
-    private _encryptionLevel: VirgilEncryptDown<string>;
+    private readonly _encryptionLevel: VirgilEncryptDown<string>;
 
     constructor({ identity, virgilCrypto, leveldown }: GroupLocalStorageConstructorParams) {
         this._encryptionLevel = new VirgilEncryptDown(leveldown, { virgilCrypto });
@@ -39,11 +40,13 @@ export class GroupLocalStorage {
             key: sessionId,
             value: rawGroup.info,
         };
-        const insertTickets: AbstractBatch<string, Ticket>[] = rawGroup.tickets.map(ticket => ({
-            type: 'put',
-            key: this.getTicketKey(sessionId, ticket.groupSessionMessage.epochNumber),
-            value: ticket,
-        }));
+        const insertTickets: AbstractBatch<string, Ticket>[] = rawGroup.tickets.map(
+            (ticket: Ticket) => ({
+                type: 'put',
+                key: this.getTicketKey(sessionId, ticket.groupSessionMessage.epochNumber),
+                value: ticket,
+            }),
+        );
 
         await this._db.batch([insertInfo, ...insertTickets]);
     }
@@ -56,12 +59,11 @@ export class GroupLocalStorage {
             throw new Error('Either "ticketCount" or "epochNumber" option must be provided');
         }
 
-        const [info, tickets] = await Promise.all<GroupInfo | null, Ticket[]>([
+        const [info, tickets]: [GroupInfo | null, Ticket[]] = await Promise.all([
             this.retrieveGroupInfo(sessionId),
             options.ticketCount
                 ? this.retrieveNLastTickets(sessionId, options.ticketCount)
-                : // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                  this.retrieveTicketByEpochNumber(sessionId, options.epochNumber!),
+                : this.retrieveTicketByEpochNumber(sessionId, options.epochNumber!),
         ]);
 
         if (!info || tickets.length === 0) return null;
@@ -100,7 +102,7 @@ export class GroupLocalStorage {
     private async retrieveGroupInfo(sessionId: string): Promise<GroupInfo | null> {
         try {
             return await this._db.get(sessionId);
-        } catch (err) {
+        } catch (err: any) {
             if (err.notFound) {
                 return null;
             }
@@ -121,8 +123,8 @@ export class GroupLocalStorage {
                     reverse: true,
                     limit: ticketCount,
                 })
-                .on('data', data => tickets.unshift(data.value))
-                .on('error', err => (error = err))
+                .on('data', (data) => tickets.unshift(data.value))
+                .on('error', (err) => (error = err))
                 .on('end', () => (error ? reject(error) : resolve(tickets)));
         });
     }
@@ -135,7 +137,7 @@ export class GroupLocalStorage {
         try {
             const ticket = await this._db.get(key);
             return [ticket];
-        } catch (err) {
+        } catch (err: any) {
             if (err.notFound) {
                 return [];
             }
