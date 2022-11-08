@@ -1,7 +1,7 @@
 {
     "compileOnSave": false,
     "compilerOptions": {
-        "outDir": "./dist",
+        "outDir": "./dist/types",
         "forceConsistentCasingInFileNames": true,
         "strict": true,
         "noImplicitReturns": false,
@@ -12,11 +12,12 @@
         "declarationDir": "./dist/types",
         "downlevelIteration": true,
         "experimentalDecorators": true,
+        "noImplicitAny": true,
         "moduleResolution": "node",
         "importHelpers": true,
         "esModuleInterop": true,
         "target": "es2020",
-        "module": "es2015",
+        "module": "commonjs",
         "lib": [
             "es2018",
             "dom"

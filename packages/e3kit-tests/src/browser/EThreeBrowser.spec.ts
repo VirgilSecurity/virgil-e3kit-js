@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import uuid from 'uuid/v4';
+import { v4 as uuid } from 'uuid';
 
 import {
     VIRGIL_STREAM_SIGNING_STATE,
@@ -51,7 +51,7 @@ describe('EThreeBrowser', () => {
 
     const readFile = (file: Blob) => {
         const reader = new FileReader();
-        const promise = new Promise(r =>
+        const promise = new Promise((r: any) =>
             reader.addEventListener('loadend', () => r(reader.result!)),
         );
         reader.readAsText(file);
@@ -344,7 +344,7 @@ describe('EThreeBrowser', () => {
             const encryptedFile = await sdk1.authEncryptFile(originFile, receiverPublicKey);
             try {
                 await sdk2.authDecryptFile(encryptedFile);
-            } catch (err) {
+            } catch (err: any) {
                 expect(err).to.be.instanceOf(VirgilCryptoError);
                 expect(err.status).to.be.equal(VirgilCryptoErrorStatus.SIGNER_NOT_FOUND);
                 return;
@@ -486,7 +486,7 @@ describe('EThreeBrowser', () => {
             const { encryptedSharedFile, fileKey } = await sdk1.encryptSharedFile(originFile);
             try {
                 await sdk2.decryptSharedFile(encryptedSharedFile, fileKey, wrongPublicKey);
-            } catch (err) {
+            } catch (err: any) {
                 expect(err).to.be.instanceOf(VirgilCryptoError);
                 expect(err.status).to.be.equal(VirgilCryptoErrorStatus.SIGNER_NOT_FOUND);
                 return;

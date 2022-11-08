@@ -1,11 +1,30 @@
 {
     "compilerOptions": {
-        "target": "ES2015",
-        "declaration": true,
-        "declarationDir": "./dist/types",
+        "outDir": "./dist",
+        "forceConsistentCasingInFileNames": true,
         "strict": true,
-        "esModuleInterop": true,
+        "noImplicitReturns": false,
+        "strictPropertyInitialization": false,
+        "noFallthroughCasesInSwitch": true,
+        "sourceMap": true,
+        "declaration": true,
+        "downlevelIteration": true,
+        "experimentalDecorators": true,
         "moduleResolution": "node",
-        "resolveJsonModule": true
-    }
+        "importHelpers": true,
+        "isolatedModules": true,
+        "esModuleInterop": true,
+        "resolveJsonModule": true,
+        "allowJs": false,
+        "target": "es2020",
+        "module": "es2015",
+        "types" : [
+            "mocha",
+            "expect.js"
+        ],
+        "lib": [
+            "es2018",
+            "dom"
+        ]
+    },
 }

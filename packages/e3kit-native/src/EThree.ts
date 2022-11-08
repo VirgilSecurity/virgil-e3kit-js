@@ -55,10 +55,8 @@ export class EThree extends AbstractEThree {
             retryOnUnauthorized: true,
             apiUrl: opts.apiUrl,
             productInfo: {
-                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                product: process.env.__VIRGIL_PRODUCT_NAME__!,
-                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                version: process.env.__VIRGIL_PRODUCT_VERSION__!,
+                product: process.env.__VIRGIL_PRODUCT_NAME__ ?? '',
+                version: process.env.__VIRGIL_PRODUCT_VERSION__ ?? '',
             },
         });
         const groupStorageLeveldown = asyncstorageDown(opts.groupStorageName!, {
@@ -115,7 +113,6 @@ export class EThree extends AbstractEThree {
      * @hidden
      */
     protected isPublicKey(publicKey: any) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         return publicKey != null && typeof (publicKey as any).value === 'string';
     }
 }

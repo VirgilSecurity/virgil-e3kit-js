@@ -4,6 +4,11 @@ node_js:
     - 11
     - 12
     - 13
+    - 14
+    - 15
+    - 16
+    - 17
+    - 18
 before_install:
     - yarn cache clean
 install:

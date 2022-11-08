@@ -1,11 +1,26 @@
 {
+    "compileOnSave": false,
     "compilerOptions": {
+        "outDir": "./dist",
         "resolveJsonModule": true,
-        "target": "ES2015",
+        "forceConsistentCasingInFileNames": true,
+        "strict": true,
+        "noImplicitReturns": false,
+        "strictPropertyInitialization": false,
+        "noFallthroughCasesInSwitch": true,
+        "sourceMap": true,
         "declaration": true,
         "declarationDir": "./dist/types",
-        "strict": true,
+        "downlevelIteration": true,
+        "experimentalDecorators": true,
+        "moduleResolution": "node",
+        "importHelpers": true,
         "esModuleInterop": true,
-        "moduleResolution": "node"
-    }
+        "target": "es2020",
+        "module": "es2015",
+        "lib": [
+            "es2018",
+            "dom"
+        ]
+    },
 }

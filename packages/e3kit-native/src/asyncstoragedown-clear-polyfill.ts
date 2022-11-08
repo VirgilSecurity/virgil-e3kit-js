@@ -1,7 +1,7 @@
 import asyncstorageDown from 'asyncstorage-down';
 
 if (typeof asyncstorageDown.prototype.clear === 'undefined') {
-    asyncstorageDown.prototype.clear = function(opts?: any, cb?: (err?: Error) => void) {
+    asyncstorageDown.prototype.clear = function (opts?: any, cb?: (err?: Error) => void) {
         let options;
         let callback: (err?: Error) => void;
         if (typeof opts === 'function') {
