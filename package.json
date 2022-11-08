@@ -33,5 +33,6 @@
             "**/webpack",
             "**/webpack-dev-server"
         ]
-    }
+    },
+    "version": "0.1.0"
 }
