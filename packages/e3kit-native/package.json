@@ -20,7 +20,7 @@
     "dependencies": {
         "@types/abstract-leveldown": "7.2.0",
         "@types/react-native": "0.70.4",
-        "@virgilsecurity/e3kit-base": "2.4.5",
+        "@virgilsecurity/e3kit-base": "2.5.0",
         "@virgilsecurity/sdk-crypto": "1.1.1",
         "asyncstorage-down": "4.2.0",
         "virgil-sdk": "6.1.2"
