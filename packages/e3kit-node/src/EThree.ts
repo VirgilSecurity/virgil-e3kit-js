@@ -63,9 +63,7 @@ export class EThree extends AbstractEThree {
             retryOnUnauthorized: true,
             apiUrl: opts.apiUrl,
             productInfo: {
-                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
                 product: process.env.__VIRGIL_PRODUCT_NAME__!,
-                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
                 version: process.env.__VIRGIL_PRODUCT_VERSION__!,
             },
         });
@@ -79,6 +77,7 @@ export class EThree extends AbstractEThree {
             accessTokenProvider,
             keyEntryStorage,
             keyLoader,
+            // @ts-ignore
             groupStorageLeveldown,
             keyPairType: options.keyPairType,
         });
