@@ -53,6 +53,7 @@ export class EThree extends AbstractEThree {
      * @param identity - Identity of the current user.
      */
     constructor(identity: string, options: EThreeCtorOptions) {
+        // @ts-ignore
         super(EThree.prepareConstructorParams(identity, options));
     }
 

@@ -53,6 +53,7 @@ beforeEach(() => {
     keyLoaderStub = sinon.createStubInstance(PrivateKeyLoader);
     accessTokenProviderStub = sinon.createStubInstance(CachingJwtProvider);
     keyEntryStorageStub = sinon.createStubInstance(KeyEntryStorage);
+    // @ts-ignore
     groupStorageLeveldownStub = memdown();
 });
 
@@ -139,7 +140,7 @@ describe('AbstractEthree', () => {
         it('throws if the Card is not found for an identity', () => {
             cardManagerStub.searchCards.resolves([{ identity: 'this_one_exists' } as ICard]);
             const ethree = new MyEThree('my_identity');
-            return expect(
+            expect(
                 ethree.findUsers(['this_one_exists', 'but_this_does_not']),
             ).eventually.rejectedWith(UsersNotFoundError);
         });
@@ -150,7 +151,7 @@ describe('AbstractEthree', () => {
                 { identity: 'with_many_cards' } as ICard,
             ]);
             const ethree = new MyEThree('my_identity');
-            return expect(ethree.findUsers('with_many_cards')).eventually.rejectedWith(
+            expect(ethree.findUsers('with_many_cards')).eventually.rejectedWith(
                 UsersFoundWithMultipleCardsError,
             );
         });

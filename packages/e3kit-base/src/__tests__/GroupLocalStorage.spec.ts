@@ -55,6 +55,7 @@ const createVirgilCryptoStub = () => {
 
 const createGroupLocalStorage = (
     identity: string,
+    // @ts-ignore
     leveldown: AbstractLevelDOWN = memdown(),
     virgilCrypto: ICrypto = createVirgilCryptoStub(),
     keyPair: IKeyPair = createKeyPairStub(),
@@ -98,6 +99,7 @@ describe('GroupLocalStorage', () => {
             const keyPairStub = createKeyPairStub();
             const storage = createGroupLocalStorage(
                 identity,
+                // @ts-ignore
                 memdown(),
                 virgilCryptoStub,
                 keyPairStub,
@@ -141,6 +143,7 @@ describe('GroupLocalStorage', () => {
 
             const storage = createGroupLocalStorage(
                 identity,
+                // @ts-ignore
                 memdown(),
                 virgilCryptoStub,
                 keyPairStub,
@@ -156,6 +159,7 @@ describe('GroupLocalStorage', () => {
         it('rejects if encryption key pair is not set', async () => {
             const storage = new GroupLocalStorage({
                 identity: 'test',
+                // @ts-ignore
                 leveldown: memdown(),
                 virgilCrypto: createVirgilCryptoStub(),
             });
@@ -262,7 +266,9 @@ describe('GroupLocalStorage', () => {
             const identity2 = getRandomString('identity');
 
             const commonStorageBackend = memdown();
+            // @ts-ignore
             const storage1 = createGroupLocalStorage(identity1, commonStorageBackend);
+            // @ts-ignore
             const storage2 = createGroupLocalStorage(identity2, commonStorageBackend);
 
             const sessionId = getRandomString('session');
@@ -287,6 +293,7 @@ describe('GroupLocalStorage', () => {
             const keyPairStub = createKeyPairStub();
             const storage = createGroupLocalStorage(
                 identity,
+                // @ts-ignore
                 memdown(),
                 virgilCryptoStub,
                 keyPairStub,
@@ -332,6 +339,7 @@ describe('GroupLocalStorage', () => {
 
             const storage = createGroupLocalStorage(
                 identity,
+                // @ts-ignore
                 memdown(),
                 virgilCryptoStub,
                 keyPairStub,
@@ -352,11 +360,13 @@ describe('GroupLocalStorage', () => {
             const commonStorageBackend = memdown();
             const validStorage = new GroupLocalStorage({
                 identity: 'test',
+                // @ts-ignore
                 leveldown: commonStorageBackend,
                 virgilCrypto: createVirgilCryptoStub(),
             });
             const invalidStorage = new GroupLocalStorage({
                 identity: 'test',
+                // @ts-ignore
                 leveldown: commonStorageBackend,
                 virgilCrypto: createVirgilCryptoStub(),
             });
@@ -402,7 +412,9 @@ describe('GroupLocalStorage', () => {
             const identity2 = getRandomString('identity');
 
             const commonStorageBackend = memdown();
+            // @ts-ignore
             const storage1 = createGroupLocalStorage(identity1, commonStorageBackend);
+            // @ts-ignore
             const storage2 = createGroupLocalStorage(identity2, commonStorageBackend);
 
             const sessionId = getRandomString('session');
@@ -454,7 +466,9 @@ describe('GroupLocalStorage', () => {
             const identity2 = getRandomString('identity');
 
             const commonStorageBackend = memdown();
+            // @ts-ignore
             const storage1 = createGroupLocalStorage(identity1, commonStorageBackend);
+            // @ts-ignore
             const storage2 = createGroupLocalStorage(identity2, commonStorageBackend);
 
             const sessionIds = [];
