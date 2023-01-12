@@ -85,6 +85,17 @@ const createEntry = (target, cryptoType, format) => {
             file: path.join(outputPath, getCryptoEntryPointName(target, cryptoType, format)),
             name: 'E3kit',
         },
+        onwarn: function (warning) {
+            // Skip certain warnings
+
+            // should intercept ... but doesn't in some rollup versions
+            if (warning.code === 'THIS_IS_UNDEFINED') {
+                return;
+            }
+
+            // console.warn everything else
+            console.warn(warning.message);
+        },
         plugins: [
             replace({
                 replaces: {
@@ -120,18 +131,9 @@ const createEntry = (target, cryptoType, format) => {
                 ],
             }),
             nodeResolve({ browser: true, preferBuiltins: true }),
-            commonjs({
-                ignoreDynamicRequires: true,
-                ignore: ['readable-stream'],
-            }),
+            commonjs(),
             typescript({
-                useTsconfigDeclarationDir: true,
-                objectHashIgnoreUnknownHack: true,
-                tsconfigOverride: {
-                    compilerOptions: {
-                        noImplicitAny: false,
-                    },
-                },
+                tsconfig: './tsconfig.json',
             }),
             json(),
             nodeGlobals(),
