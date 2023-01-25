@@ -6,11 +6,10 @@
     "author": "Virgil Security Inc. <support@virgilsecurity.com>",
     "license": "BSD-3-Clause",
     "private": true,
-    "type": "module",
     "scripts": {
         "test": "concurrently 'npm:test:*'",
-        "test:node": "mocha -t 0 -r dotenv/config -r ts-node/register -r setup-mocha src/node.test.ts",
-        "test:browser": "jest src/browser/*.spec.ts"
+        "test:node": "mocha -t 0 -r dotenv/config -r ts-node/register -r setup-mocha src/node.spec.ts",
+        "test:browser": "karma start"
     },
     "dependencies": {
         "@babel/plugin-transform-async-to-generator": "^7.18.6",

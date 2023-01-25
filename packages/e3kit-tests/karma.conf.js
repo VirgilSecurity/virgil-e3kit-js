@@ -5,11 +5,11 @@ dotenv.config();
 
 module.exports = (config) => {
     config.set({
-        frameworks: ['mocha', 'karma-typescript'],
+        frameworks: ['mocha', 'karma-typescript', 'webpack'],
         autoWatch: true,
         files: [
             {
-                pattern: 'src/browser/*.spec.ts',
+                pattern: 'src/**/browser.ts',
                 type: 'module',
             },
         ],
@@ -23,7 +23,7 @@ module.exports = (config) => {
             'application/wasm': ['wasm'],
         },
         preprocessors: {
-            'src/browser.test.ts': ['karma-typescript'],
+            'src/browser.ts': ['webpack'],
         },
         client: {
             mocha: {
@@ -31,45 +31,55 @@ module.exports = (config) => {
             },
         },
         reporters: ['spec', 'karma-typescript'],
-        karmaTypescriptConfig: {
-            bundlerOptions: {
-                entrypoints: '**.spec.ts',
-                transforms: [require('karma-typescript-es6-transform')()],
-                resolve: 'src',
-            },
-            tsconfig: 'tsconfig.json',
-        },
-        // webpack: {
-        //     mode: process.env.NODE_ENV || JSON.stringify('production'),
-        //     resolve: {
-        //         extensions: ['.js', '.ts'],
+        // karmaTypescriptConfig: {
+        //     bundlerOptions: {
+        //         entrypoints: '**.spec.ts',
+        //         transforms: [require('karma-typescript-es6-transform')()],
+        //         resolve: 'src',
         //     },
-        //     module: {
-        //         rules: [
-        //             {
-        //                 test: /\.ts$/,
-        //                 loader: 'ts-loader',
-        //             },
-        //             {
-        //                 test: /\.wasm$/,
-        //                 type: 'javascript/auto',
-        //                 loader: 'file-loader',
-        //             },
-        //         ],
-        //     },
-        //     plugins: [
-        //         new webpack.NormalModuleReplacementPlugin(
-        //             /@virgilsecurity\/e3kit-node/,
-        //             '@virgilsecurity/e3kit-browser',
-        //         ),
-        //         new webpack.EnvironmentPlugin({
-        //             APP_KEY_ID: JSON.stringify(process.env.APP_KEY_ID),
-        //             APP_KEY: JSON.stringify(process.env.APP_KEY),
-        //             APP_ID: JSON.stringify(process.env.APP_ID),
-        //             API_URL: JSON.stringify(process.env.API_URL),
-        //             NODE_ENV: process.env.NODE_ENV || JSON.stringify('production'),
-        //         }),
-        //     ],
+        //     tsconfig: 'tsconfig.json',
         // },
+        webpack: {
+            mode: 'production',
+            resolve: {
+                extensions: ['.js', '.ts'],
+            },
+            output: {
+                path: __dirname + '/build',
+            },
+            module: {
+                rules: [
+                    {
+                        test: /\.ts$/,
+                        loader: 'ts-loader',
+                    },
+                    {
+                        test: /\.wasm$/,
+                        type: 'javascript/auto',
+                        loader: 'file-loader',
+                    },
+                ],
+            },
+            experiments: {
+                asyncWebAssembly: false,
+                layers: true,
+                outputModule: true,
+                syncWebAssembly: true,
+                topLevelAwait: true,
+            },
+            plugins: [
+                new webpack.NormalModuleReplacementPlugin(
+                    /@virgilsecurity\/e3kit-node/,
+                    '@virgilsecurity/e3kit-browser',
+                ),
+                new webpack.EnvironmentPlugin({
+                    APP_KEY_ID: JSON.stringify(process.env.APP_KEY_ID),
+                    APP_KEY: JSON.stringify(process.env.APP_KEY),
+                    APP_ID: JSON.stringify(process.env.APP_ID),
+                    API_URL: JSON.stringify(process.env.API_URL),
+                    NODE_ENV: 'production',
+                }),
+            ],
+        },
     });
 };

@@ -101,6 +101,7 @@ const createEntry = (target, cryptoType, format) => {
                 replaces: {
                     'process.env.__VIRGIL_PRODUCT_NAME__': JSON.stringify(PRODUCT_NAME),
                     'process.env.__VIRGIL_PRODUCT_VERSION__': JSON.stringify(packageJson.version),
+                    'process.env.NODE_DEBUG': JSON.stringify(''),
                 },
                 patterns: [
                     {
