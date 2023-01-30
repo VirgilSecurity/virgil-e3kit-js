@@ -1,12 +1,12 @@
 const fs = require('fs');
 const path = require('path');
 
-const commonjs = require('rollup-plugin-commonjs');
+const commonjs = require('@rollup/plugin-commonjs');
 const copy = require('rollup-plugin-copy');
 const license = require('rollup-plugin-license');
 const nodeBuiltins = require('rollup-plugin-node-builtins');
 const nodeGlobals = require('rollup-plugin-node-globals');
-const nodeResolve = require('rollup-plugin-node-resolve');
+const nodeResolve = require('@rollup/plugin-node-resolve');
 const nodePolyfills = require('rollup-plugin-node-polyfills');
 const replace = require('rollup-plugin-re');
 const typescript = require('rollup-plugin-typescript2');
@@ -14,6 +14,7 @@ const { generateCrossPlatformPath } = require('../../utils/build');
 const packageJson = require('./package.json');
 const json = require('@rollup/plugin-json');
 const wasm = require('@rollup/plugin-wasm');
+const alias = require('@rollup/plugin-alias');
 const PRODUCT_NAME = 'e3kit';
 
 const FORMAT = {
@@ -101,6 +102,7 @@ const createEntry = (target, cryptoType, format) => {
                 replaces: {
                     'process.env.__VIRGIL_PRODUCT_NAME__': JSON.stringify(PRODUCT_NAME),
                     'process.env.__VIRGIL_PRODUCT_VERSION__': JSON.stringify(packageJson.version),
+                    'process.env.NODE_DEBUG': JSON.stringify(''),
                 },
                 patterns: [
                     {
@@ -130,15 +132,11 @@ const createEntry = (target, cryptoType, format) => {
                     },
                 ],
             }),
-            nodeResolve({ browser: true, preferBuiltins: true }),
+            nodePolyfills(),
+            nodeResolve({ browser: true, preferBuiltins: false }),
             commonjs(),
-            typescript({
-                tsconfig: './tsconfig.json',
-            }),
             json(),
             nodeGlobals(),
-            nodeBuiltins(),
-            nodePolyfills(),
             license({
                 banner: {
                     content: {
@@ -161,6 +159,9 @@ const createEntry = (target, cryptoType, format) => {
                         dest: outputPath,
                     },
                 ],
+            }),
+            typescript({
+                tsconfig: './tsconfig.json',
             }),
         ],
     };
