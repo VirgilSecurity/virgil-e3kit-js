@@ -1,12 +1,3 @@
-import {
-    DEFAULT_API_URL,
-    DEFAULT_STORAGE_NAME,
-    DEFAULT_GROUP_STORAGE_NAME,
-    AbstractEThree,
-    PrivateKeyLoader,
-    IntegrityCheckFailedError,
-    RegisterRequiredError,
-} from '@virgilsecurity/e3kit-base';
 import { initPythia, VirgilBrainKeyCrypto } from '@virgilsecurity/pythia-crypto';
 import leveljs from 'level-js';
 import {
@@ -46,6 +37,15 @@ import {
     EncryptSharedFileOptions,
     DecryptSharedFileOptions,
 } from './types';
+import {
+    AbstractEThree,
+    DEFAULT_API_URL,
+    DEFAULT_GROUP_STORAGE_NAME,
+    DEFAULT_STORAGE_NAME,
+    IntegrityCheckFailedError,
+    PrivateKeyLoader,
+    RegisterRequiredError,
+} from '@virgilsecurity/e3kit-base';
 
 export class EThree extends AbstractEThree {
     /**
