@@ -1,6 +1,6 @@
 {
     "compilerOptions": {
-        "outDir": "./dist",
+        "outDir": "./build",
         "forceConsistentCasingInFileNames": true,
         "strict": true,
         "noImplicitReturns": false,
@@ -20,7 +20,6 @@
         "module": "es2015",
         "types" : [
             "mocha",
-            "expect.js"
         ],
         "lib": [
             "es2018",
