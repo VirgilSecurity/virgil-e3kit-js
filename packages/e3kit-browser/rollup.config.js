@@ -4,7 +4,6 @@ const path = require('path');
 const commonjs = require('@rollup/plugin-commonjs');
 const copy = require('rollup-plugin-copy');
 const license = require('rollup-plugin-license');
-const nodeBuiltins = require('rollup-plugin-node-builtins');
 const nodeGlobals = require('rollup-plugin-node-globals');
 const nodeResolve = require('@rollup/plugin-node-resolve');
 const nodePolyfills = require('rollup-plugin-node-polyfills');
@@ -14,7 +13,6 @@ const { generateCrossPlatformPath } = require('../../utils/build');
 const packageJson = require('./package.json');
 const json = require('@rollup/plugin-json');
 const wasm = require('@rollup/plugin-wasm');
-const alias = require('@rollup/plugin-alias');
 const PRODUCT_NAME = 'e3kit';
 
 const FORMAT = {
