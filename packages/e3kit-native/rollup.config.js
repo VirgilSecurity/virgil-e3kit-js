@@ -1,8 +1,8 @@
 const path = require('path');
 
-const commonjs = require('rollup-plugin-commonjs');
+const commonjs = require('@rollup/plugin-commonjs');
 const license = require('rollup-plugin-license');
-const nodeResolve = require('rollup-plugin-node-resolve');
+const nodeResolve = require('@rollup/plugin-node-resolve');
 const typescript = require('rollup-plugin-typescript2');
 const builtins = require('rollup-plugin-node-builtins');
 const globals = require('rollup-plugin-node-globals');
