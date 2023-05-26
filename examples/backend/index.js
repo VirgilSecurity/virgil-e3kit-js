@@ -15,14 +15,14 @@ const app = express();
     const virgilCrypto = new VirgilCrypto();
     const accessTokenSigner = new VirgilAccessTokenSigner(virgilCrypto);
     const apiKey = virgilCrypto.importPrivateKey({
-        value: process.env.API_KEY,
+        value: process.env.APP_KEY,
         encoding: 'base64',
     });
     const jwtGenerator = new JwtGenerator({
         apiKey,
         accessTokenSigner,
         appId: process.env.APP_ID,
-        apiKeyId: process.env.API_KEY_ID,
+        apiKeyId: process.env.APP_KEY_ID,
         apiUrl: process.env.API_URL,
     });
 
