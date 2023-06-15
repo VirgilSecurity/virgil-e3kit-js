@@ -8,7 +8,7 @@ const nodeGlobals = require('rollup-plugin-node-globals');
 const nodeResolve = require('@rollup/plugin-node-resolve');
 const nodePolyfills = require('rollup-plugin-node-polyfills');
 const replace = require('rollup-plugin-re');
-const typescript = require('rollup-plugin-typescript2');
+const typescript = require('@rollup/plugin-typescript');
 const { generateCrossPlatformPath } = require('../../utils/build');
 const packageJson = require('./package.json');
 const json = require('@rollup/plugin-json');
@@ -75,7 +75,6 @@ const createEntry = (target, cryptoType, format) => {
         'dist',
         `libpythia.${target}.wasm`,
     );
-
     return {
         external: format !== FORMAT.UMD ? [foundationEntryPoint, pythiaEntryPoint] : [],
         input: path.join(sourcePath, 'index.ts'),
