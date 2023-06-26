@@ -26,7 +26,6 @@
 - Data signature and verification as part of the encrypt and decrypt functions
 - Recoverable private encryption keys
 - Access to encrypted data from multiple user devices
-- Post-quantum algorithms support: [Round5](https://round5.org/) (encryption), [Falcon](https://falcon-sign.info/) (signature)
 
 ## Installation
 
