@@ -59,7 +59,7 @@
         "virgil-crypto": "5.0.2",
         "virgil-pythia": "1.0.2",
         "virgil-sdk": "6.1.2",
-        "webpack": "5.74.0"
+        "webpack": "5.76.0"
     },
     "workspaces": {
         "nohoist": [
