@@ -40,6 +40,6 @@ export {
     GroupInfo,
     RawGroup,
 } from '@virgilsecurity/e3kit-base';
-export { KeyPairType } from 'virgil-crypto';
+export { KeyPairType } from 'virgil-crypto/dist/types';
 export { EThree } from './EThree';
 export { EThreeInitializeOptions, EThreeCtorOptions } from './types';
