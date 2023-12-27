@@ -21,7 +21,7 @@
         "@types/leveldown": "4.0.3",
         "@types/mkdirp": "1.0.2",
         "@virgilsecurity/e3kit-base": "2.5.1",
-        "@virgilsecurity/pythia-crypto": "1.1.3",
+        "@virgilsecurity/pythia-crypto": "2.0.0",
         "leveldown": "6.1.1",
         "mkdirp": "1.0.4",
         "virgil-crypto": "5.0.2",
