@@ -24,7 +24,7 @@
         "@virgilsecurity/pythia-crypto": "1.1.3",
         "leveldown": "6.1.1",
         "mkdirp": "1.0.4",
-        "virgil-crypto": "4.2.2",
+        "virgil-crypto": "5.0.2",
         "virgil-sdk": "6.1.2"
     },
     "devDependencies": {
