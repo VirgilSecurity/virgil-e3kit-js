@@ -1,6 +1,6 @@
 {
     "name": "@virgilsecurity/e3kit-native",
-    "version": "2.5.2",
+    "version": "3.0.0",
     "description": "End-to-end encryption with multiple device support powered by Virgil Security",
     "main": "./dist/e3kit-native.cjs.js",
     "module": "./dist/e3kit-native.es.js",
