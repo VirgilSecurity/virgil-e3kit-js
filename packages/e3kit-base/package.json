@@ -24,7 +24,7 @@
         "@types/levelup": "5.1.2",
         "@virgilsecurity/crypto-types": "1.1.1",
         "@virgilsecurity/keyknox": "1.0.3",
-        "@virgilsecurity/sdk-crypto": "1.1.1",
+        "@virgilsecurity/sdk-crypto": "2.0.0",
         "abstract-leveldown": "7.2.0",
         "levelup": "5.1.1",
         "subleveldown": "6.0.1",

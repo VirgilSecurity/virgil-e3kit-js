@@ -23,7 +23,7 @@
         "@typescript-eslint/eslint-plugin": "^5.40.0",
         "@typescript-eslint/parser": "^5.40.0",
         "@virgilsecurity/e3kit-base": "3.0.1",
-        "@virgilsecurity/sdk-crypto": "1.1.1",
+        "@virgilsecurity/sdk-crypto": "2.0.0",
         "asyncstorage-down": "4.2.0",
         "ejs": "^3.0.1",
         "eslint": "^8.25.0",
