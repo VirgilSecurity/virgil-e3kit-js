@@ -133,7 +133,6 @@ const createEntry = (target, cryptoType, format) => {
             nodeResolve({ browser: true, preferBuiltins: false }),
             commonjs(),
             json(),
-            nodeGlobals(),
             license({
                 banner: {
                     content: {
