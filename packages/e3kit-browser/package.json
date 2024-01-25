@@ -21,29 +21,29 @@
         "prepare": "npm run clean && npm run build"
     },
     "dependencies": {
-        "@types/level-js": "4.0.2",
+        "@types/level-js": "^4.0.2",
         "@virgilsecurity/e3kit-base": "^3.0.1",
         "@virgilsecurity/pythia-crypto": "^2.1.0",
         "level-js": "^5.0.1",
         "virgil-crypto": "^5.1.0",
-        "virgil-sdk": "6.1.2"
+        "virgil-sdk": "^6.1.2"
     },
     "devDependencies": {
-        "@rollup/plugin-commonjs": "^24.0.1",
-        "@rollup/plugin-json": "5.0.0",
+        "@rollup/plugin-commonjs": "^25.0.7",
+        "@rollup/plugin-json": "^5.0.0",
         "@rollup/plugin-node-resolve": "^15.0.1",
-        "@rollup/plugin-wasm": "6.0.0",
-        "cross-env": "7.0.3",
-        "rimraf": "3.0.2",
-        "rollup": "3.11.0",
-        "rollup-plugin-copy": "3.4.0",
-        "rollup-plugin-license": "2.8.1",
-        "rollup-plugin-node-builtins": "2.1.2",
-        "rollup-plugin-node-globals": "1.4.0",
-        "rollup-plugin-node-polyfills": "0.2.1",
-        "rollup-plugin-re": "1.0.7",
-        "@rollup/plugin-typescript": "11.1.1",
-        "typescript": "4.8.4"
+        "@rollup/plugin-wasm": "^6.0.0",
+        "cross-env": "^7.0.3",
+        "rimraf": "^3.0.2",
+        "rollup": "^3.11.0",
+        "rollup-plugin-copy": "^3.4.0",
+        "rollup-plugin-license": "^2.8.1",
+        "rollup-plugin-node-builtins": "^2.1.2",
+        "rollup-plugin-node-globals": "^1.4.0",
+        "rollup-plugin-node-polyfills": "^0.2.1",
+        "rollup-plugin-re": "^1.0.7",
+        "@rollup/plugin-typescript": "^11.1.1",
+        "typescript": "^4.8.4"
     },
     "publishConfig": {
         "access": "public"
