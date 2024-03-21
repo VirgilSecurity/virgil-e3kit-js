@@ -8,7 +8,7 @@ import {
     HashAlgorithm,
     VirgilPrivateKey,
 } from 'virgil-crypto';
-import { CachingJwtProvider, CardManager, KeyEntryStorage, VirgilCardVerifier } from 'virgil-sdk';
+import { CachingJwtProvider, CardManager, KeyEntryStorage, VirgilCardVerifier } from 'forge-virgil-sdk';
 
 import {
     VIRGIL_STREAM_SIGNING_STATE,
